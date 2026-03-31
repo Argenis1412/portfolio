@@ -1,0 +1,144 @@
+# ============================================
+# DOCKER COMPOSE - PORTFÓLIO FULL-STACK
+# ============================================
+#
+# Este arquivo é uma ESTRUTURA MÍNIMA para futuro desenvolvimento
+# Descomente e configure conforme necessário
+#
+# Uso:
+#   docker-compose up -d          # Inicia todos os serviços
+#   docker-compose down           # Para todos os serviços
+#   docker-compose logs -f api    # Visualiza logs do backend
+# ============================================
+
+version: '3.8'
+
+services:
+  # ===========================
+  # BACKEND API (FastAPI)
+  # ===========================
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: portafolio-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - AMBIENTE=producao
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      # Adicione outras variáveis do .env.example
+    volumes:
+      # - ./backend:/app  # Comentado para produção (segurança) - Descomente para desenvolvimento
+      # - /app/.venv  # Exclui virtualenv do volume
+    # depends_on:
+    #   - db
+    #   - redis
+    networks:
+      - portafolio-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/saude"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ===========================
+  # FRONTEND (React + Vite)
+  # ===========================
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   container_name: portafolio-frontend
+  #   restart: unless-stopped
+  #   ports:
+  #     - "5173:5173"
+  #   environment:
+  #     - VITE_API_URL=http://api:8000/api/v1
+  #   volumes:
+  #     - ./frontend:/app
+  #     - /app/node_modules
+  #   depends_on:
+  #     - api
+  #   networks:
+  #     - portafolio-network
+
+  # ===========================
+  # BANCO DE DADOS (PostgreSQL)
+  # ===========================
+  # db:
+  #   image: postgres:16-alpine
+  #   container_name: portafolio-db
+  #   restart: unless-stopped
+  #   environment:
+  #     - POSTGRES_USER=portafolio
+  #     - POSTGRES_PASSWORD=senha_segura_aqui
+  #     - POSTGRES_DB=portafolio_db
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - portafolio-network
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U portafolio"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+  # ===========================
+  # CACHE (Redis)
+  # ===========================
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: portafolio-redis
+  #   restart: unless-stopped
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   networks:
+  #     - portafolio-network
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+  # ===========================
+  # REVERSE PROXY (Nginx)
+  # ===========================
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: portafolio-nginx
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./nginx/ssl:/etc/nginx/ssl:ro
+  #   depends_on:
+  #     - api
+  #     - frontend
+  #   networks:
+  #     - portafolio-network
+
+# ===========================
+# VOLUMES PERSISTENTES
+# ===========================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# ===========================
+# REDES
+# ===========================
+networks:
+  portafolio-network:
+    driver: bridge

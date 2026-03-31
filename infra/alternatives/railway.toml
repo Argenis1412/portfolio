@@ -1,0 +1,32 @@
+# Railway Configuration
+# https://docs.railway.app/deploy/config-as-code
+
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "backend/Dockerfile"
+
+[deploy]
+numReplicas = 1
+healthcheckPath = "/saude"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[[deploy.environmentVariables]]
+name = "AMBIENTE"
+value = "producao"
+
+[[deploy.environmentVariables]]
+name = "VERSAO_API"
+value = "1.0.0"
+
+[[deploy.environmentVariables]]
+name = "PORT"
+value = "${{ PORT }}"
+
+# Variáveis secretas devem ser configuradas no dashboard da Railway:
+# - FORMSPREE_FORM_ID
+# - ORIGENS_PERMITIDAS
+
+[service]
+name = "portfolio-backend"

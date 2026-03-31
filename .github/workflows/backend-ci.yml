@@ -1,0 +1,91 @@
+name: 🧪 Backend CI
+
+on:
+  push:
+    branches: [main, develop, 'feature/**']
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    branches: [main, develop, 'feature/**']
+    paths:
+      - 'backend/**'
+
+jobs:
+  test:
+    name: 🐍 Testes Python
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.12']
+
+    steps:
+      - name: 📥 Checkout código
+        uses: actions/checkout@v4
+
+      - name: 🐍 Configurar Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: 📦 Instalar dependências
+        run: |
+          cd backend
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 🧪 Executar testes
+        run: |
+          cd backend
+          pytest --cov=app --cov-report=xml --cov-report=term
+
+      - name: 📊 Upload cobertura
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./backend/coverage.xml
+          flags: backend
+          name: backend-coverage
+
+      - name: ✅ Verificar cobertura mínima
+        run: |
+          cd backend
+          pytest --cov=app --cov-fail-under=85
+
+  lint:
+    name: 🧹 Linting
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout código
+        uses: actions/checkout@v4
+
+      - name: 🐍 Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 📦 Instalar ferramentas de lint
+        run: |
+          pip install ruff mypy
+
+      - name: 🔒 Verificar placeholders hardcodeados
+        run: |
+          if grep -qrn --exclude-dir=".github" "https://seudominio.com" .; then
+            echo "❌ ERROR: Placeholder 'https://seudominio.com' encontrado. Usa variables de entorno."
+            exit 1
+          fi
+
+  build:
+    name: 🏗️ Build Docker
+    runs-on: ubuntu-latest
+    needs: [test]
+
+    steps:
+      - name: 📥 Checkout código
+        uses: actions/checkout@v4
+
+      - name: 🐳 Build imagem Docker
+        run: |
+          cd backend
+          docker build -t portafolio-api:${{ github.sha }} .

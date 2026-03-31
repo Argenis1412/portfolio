@@ -1,0 +1,81 @@
+[
+  {
+    "id": "loja-app",
+    "nome": "Loja App",
+    "descricao_curta": {
+      "pt": "API REST com FastAPI para sistema de pagamentos com regras de negócio financeiras",
+      "en": "REST API with FastAPI for a payment system with financial business rules",
+      "es": "API REST con FastAPI para sistema de pagos con reglas de negocio financieras"
+    },
+    "descricao_completa": {
+      "pt": "API REST desenvolvida com FastAPI para sistema de pagamentos. Implementa regras de negócio financeiras como cálculo de juros, descontos e parcelamentos. Utiliza Arquitetura Hexagonal com separação clara entre domínio, casos de uso, adaptadores e infraestrutura. Inclui validação de dados com Pydantic, documentação automática com Swagger UI/OpenAPI, suite de testes unitários e de integração com pytest executados em CI, persistência com PostgreSQL + SQLAlchemy ORM + Alembic para versionamento de schema. Frontend consumidor desenvolvido em React + TypeScript com Tailwind CSS.",
+      "en": "REST API built with FastAPI for a payment processing system. Implements financial business rules such as interest calculation, discounts, and installments. Uses Hexagonal Architecture with a clear separation between domain, use cases, adapters, and infrastructure. Includes Pydantic data validation, automatic Swagger UI/OpenAPI documentation, unit and integration tests with pytest running in CI, persistence with PostgreSQL + SQLAlchemy ORM + Alembic for schema versioning. Consumer frontend built with React + TypeScript + Tailwind CSS.",
+      "es": "API REST desarrollada con FastAPI para un sistema de pagos. Implementa reglas de negocio financieras como cálculo de intereses, descuentos y cuotas. Utiliza Arquitectura Hexagonal con separación clara entre dominio, casos de uso, adaptadores e infraestructura. Incluye validación de datos con Pydantic, documentación automática con Swagger UI/OpenAPI, suite de pruebas unitarias y de integración con pytest ejecutadas en CI, persistencia con PostgreSQL + SQLAlchemy ORM + Alembic. Frontend en React + TypeScript + Tailwind CSS."
+    },
+    "tecnologias": ["Python", "FastAPI", "Pydantic", "PostgreSQL", "SQLAlchemy ORM", "Alembic", "Pytest", "React", "TypeScript", "Tailwind CSS", "GitHub Actions"],
+    "funcionalidades": [
+      "REST API for payment system",
+      "Interest, discount, and installment calculation",
+      "Hexagonal Architecture: domain, use cases, adapters",
+      "Data validation with Pydantic",
+      "Automatic documentation with Swagger UI/OpenAPI",
+      "Unit and integration tests with pytest",
+      "CI with GitHub Actions",
+      "Persistence with PostgreSQL + SQLAlchemy ORM",
+      "Schema migrations with Alembic",
+      "React + TypeScript + Tailwind CSS frontend"
+    ],
+    "aprendizados": [
+      "Hexagonal Architecture implementation in Python",
+      "Deterministic financial business rules",
+      "Precise monetary calculations",
+      "ORM with SQLAlchemy",
+      "Schema migrations with Alembic",
+      "Integration testing with pytest",
+      "CI with GitHub Actions",
+      "Typed frontend with React + TypeScript"
+    ],
+    "repositorio": "https://github.com/Argenis1412/Loja_app",
+    "demo": null,
+    "destaque": true,
+    "imagem": null
+  },
+  {
+    "id": "portfolio-api",
+    "nome": "Full-Stack Portfolio",
+    "descricao_curta": {
+      "pt": "Projeto de Portfolio Full-Stack com FastAPI e React 19, focado em Clean Architecture e UX premium",
+      "en": "Full-Stack Portfolio project with FastAPI and React 19, focused on Clean Architecture and premium UX",
+      "es": "Proyecto de Portafolio Full-Stack con FastAPI y React 19, enfocado en Clean Architecture y UX premium"
+    },
+    "descricao_completa": {
+      "pt": "Solução robusta Full-Stack demonstrando engenharia de software de alta qualidade. Backend em FastAPI com Clean Architecture, Pydantic V2 e segurança avançada (honeypots, rate limiting). Frontend em React 19 + TypeScript com Tailwind CSS v4, animações fluidas (Framer Motion) e gerenciamento de estado declarativo com TanStack Query. Suporte completo a internacionalização (i18n) em três idiomas.",
+      "en": "Robust Full-Stack solution demonstrating high-quality software engineering. FastAPI backend with Clean Architecture, Pydantic V2, and advanced security (honeypots, rate limiting). Frontend in React 19 + TypeScript with Tailwind CSS v4, fluid animations (Framer Motion), and declarative state management with TanStack Query. Full internationalization (i18n) support in three languages.",
+      "es": "Solución Full-Stack robusta que demuestra ingeniería de software de alta calidad. Backend en FastAPI con Clean Architecture, Pydantic V2 y seguridad avanzada (honeypots, limitación de tasa). Frontend en React 19 + TypeScript con Tailwind CSS v4, animaciones fluidas (Framer Motion) y gestión de estado declarativa con TanStack Query. Soporte completo de internacionalización (i18n) en tres idiomas."
+    },
+    "tecnologias": ["Python", "FastAPI", "Pydantic V2", "React 19", "TypeScript", "Tailwind CSS v4", "TanStack Query", "Framer Motion", "Pytest", "i18n (PT, EN, ES)", "GitHub Actions", "Docker"],
+    "funcionalidades": [
+      "Multilingual support (PT, EN, ES) with dynamic switching",
+      "Advanced Contact Form security (Honeypots, Rate Limiting, Idempotency)",
+      "High-Performance UX (Predictive Prefetching, Background Sync)",
+      "Clean Architecture implementation (Backend & Frontend approach)",
+      "Automatic OpenAPI/Swagger documentation",
+      "Interactive Project and Experience showcases",
+      "Responsive and Animated UI with Dark/Light modes",
+      "CI/CD with automated quality gates (Tests & Linting)"
+    ],
+    "aprendizados": [
+      "Full-Stack architecture and integration patterns",
+      "Scalable internationalization strategies",
+      "Advanced state management with TanStack Query",
+      "Multi-layered security for public forms",
+      "Modern CSS with Tailwind CSS v4 engine",
+      "Automated testing for complex business flows",
+      "CI/CD workflow orchestration"
+    ],
+    "repositorio": "https://github.com/Argenis1412/portfolio",
+    "demo": null,
+    "destaque": true,
+    "imagem": null
+  }
+]

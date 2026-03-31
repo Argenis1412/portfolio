@@ -1,0 +1,140 @@
+"""
+Adaptador para envio de emails.
+
+Interface abstrata + implementação com Formspree.
+"""
+
+from abc import ABC, abstractmethod
+import httpx
+import structlog
+
+from app.entidades.mensagem import Mensagem
+
+logger = structlog.get_logger(__name__)
+
+
+class EmailAdaptador(ABC):
+    """
+    Interface abstrata para envio de emails.
+
+    Permite trocar implementação facilmente (Formspree → SendGrid → SES).
+    """
+
+    @abstractmethod
+    async def enviar_mensagem(self, mensagem: Mensagem) -> bool:
+        """
+        Envia uma mensagem por email.
+
+        Args:
+            mensagem: Mensagem a ser enviada.
+
+        Returns:
+            bool: True se enviado com sucesso, False caso contrário.
+        """
+        pass
+
+
+class FormspreeEmailAdaptador(EmailAdaptador):
+    """
+    Implementação de EmailAdaptador usando Formspree.
+
+    Formspree é um serviço gratuito que aceita formulários via POST
+    e envia para um email configurado.
+
+    Attributes:
+        url_endpoint: URL completa do endpoint Formspree.
+    """
+
+    def __init__(self, formspree_url: str, form_id: str):
+        """
+        Inicializa o adaptador Formspree.
+
+        Args:
+            formspree_url: URL base do Formspree (ex: "https://formspree.io/f").
+            form_id: ID do formulário Formspree.
+        """
+        self._configurado = bool(form_id and form_id.strip())
+        self.url_endpoint = f"{formspree_url}/{form_id}"
+
+    async def enviar_mensagem(self, mensagem: Mensagem) -> bool:
+        """
+        Envia mensagem via Formspree.
+
+        Args:
+            mensagem: Mensagem a ser enviada.
+
+        Returns:
+            bool: True se status 200-299, False caso contrário.
+
+        Raises:
+            Não levanta exceções - captura erros e retorna False.
+        """
+        if not self._configurado:
+            logger.warning(
+                "formspree_nao_configurado",
+                motivo="FORMSPREE_FORM_ID vazio",
+            )
+            return False
+
+        try:
+            async with httpx.AsyncClient() as cliente:
+                resposta = await cliente.post(
+                    self.url_endpoint,
+                    data={
+                        "name": mensagem.nome,
+                        "email": mensagem.email,
+                        "subject": mensagem.assunto,
+                        "_subject": mensagem.assunto,
+                        "message": mensagem.mensagem,
+                    },
+                    headers={"Accept": "application/json"},
+                    timeout=10.0,
+                )
+                sucesso = resposta.status_code in range(200, 300)
+                if sucesso:
+                    logger.info(
+                        "formspree_envio_sucesso",
+                        status_code=resposta.status_code,
+                        response_body=resposta.text[:200],  # Ver se tem algo como "needs capture"
+                    )
+                else:
+                    logger.warning(
+                        "formspree_envio_falha_status",
+                        status_code=resposta.status_code,
+                        response_body=resposta.text[:200],
+                    )
+                return sucesso
+        except httpx.TimeoutException:
+            logger.error("formspree_timeout", exc_info=True)
+            return False
+        except httpx.HTTPError:
+            logger.error("formspree_http_error", exc_info=True)
+            return False
+
+
+class ConsoleEmailAdaptador(EmailAdaptador):
+    """
+    Adaptador de fallback que apenas loga a mensagem no console.
+
+    Útil para desenvolvimento local quando o Formspree não está configurado.
+    """
+
+    async def enviar_mensagem(self, mensagem: Mensagem) -> bool:
+        """
+        Loga a mensagem no console de forma estruturada.
+
+        Args:
+            mensagem: Mensagem a ser 'enviada'.
+
+        Returns:
+            bool: Sempre True.
+        """
+        logger.info(
+            "contato_recebido_console",
+            nome=mensagem.nome,
+            email=mensagem.email,
+            assunto=mensagem.assunto,
+            mensagem_resumo=mensagem.mensagem[:50] + "..." if len(mensagem.mensagem) > 50 else mensagem.mensagem,
+            status="interceptado_pelo_console",
+        )
+        return True

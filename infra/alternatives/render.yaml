@@ -1,0 +1,42 @@
+# Render Configuration
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: portfolio-backend
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    region: oregon
+    
+    # Health Check
+    healthCheckPath: /saude
+    
+    # Environment Variables
+    envVars:
+      - key: AMBIENTE
+        value: producao
+      
+      - key: VERSAO_API
+        value: 1.0.0
+      
+      - key: PORT
+        value: 10000
+      
+      # Secrets (configure no dashboard da Render)
+      - key: FORMSPREE_FORM_ID
+        sync: false
+      
+      - key: ORIGENS_PERMITIDAS
+        sync: false # Configurar en el dashboard de Render con el dominio del frontend
+    
+    # Auto-deploy
+    autoDeploy: true
+    branch: main
+    
+    # Build settings
+    buildCommand: echo "Building with Docker..."
+    
+    # Scaling
+    numInstances: 1

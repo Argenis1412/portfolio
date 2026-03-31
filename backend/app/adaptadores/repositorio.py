@@ -1,0 +1,245 @@
+"""
+Adaptador para repositório de dados do portfólio.
+
+Interface abstrata + implementação com arquivos JSON.
+"""
+
+from abc import ABC, abstractmethod
+import json
+from pathlib import Path
+from datetime import date
+from typing import Any
+
+import anyio
+
+from app.entidades.projeto import Projeto
+from app.entidades.experiencia import ExperienciaProfissional
+from app.entidades.formacao import FormacaoAcademica
+
+
+class RepositorioPortfolio(ABC):
+    """
+    Interface abstrata para acesso aos dados do portfólio.
+
+    Permite trocar implementação facilmente (JSON → Database → API).
+    """
+
+    @abstractmethod
+    async def obter_sobre(self) -> dict:
+        """Retorna informações da seção Sobre."""
+        pass
+
+    @abstractmethod
+    async def obter_projetos(self) -> list[Projeto]:
+        """Retorna lista de projetos."""
+        pass
+
+    @abstractmethod
+    async def obter_projeto_por_id(self, projeto_id: str) -> Projeto | None:
+        """Retorna um projeto específico ou None se não encontrado."""
+        pass
+
+    @abstractmethod
+    async def obter_stack(self) -> list[dict]:
+        """Retorna lista de tecnologias do stack."""
+        pass
+
+    @abstractmethod
+    async def obter_experiencias(self) -> list[ExperienciaProfissional]:
+        """Retorna lista de experiências profissionais."""
+        pass
+
+    @abstractmethod
+    async def obter_formacao(self) -> list[FormacaoAcademica]:
+        """Retorna lista de formações acadêmicas."""
+        pass
+
+    @abstractmethod
+    async def verificar_saude(self) -> dict:
+        """Verifica se o repositório está acessível."""
+        pass
+
+    @abstractmethod
+    async def verificar_duplicata_spam(self, content_hash: str, ttl_seconds: int) -> bool:
+        """Verifica se o hash já existe e não expirou."""
+        pass
+
+    @abstractmethod
+    async def registrar_spam(self, content_hash: str, timestamp: float) -> None:
+        """Registra um novo hash de mensagem."""
+        pass
+
+
+# Caminho relativo ao projeto para os dados JSON
+DEFAULT_DADOS_PATH = Path(__file__).parent.parent.parent / "dados"
+
+
+class RepositorioJSON(RepositorioPortfolio):
+    """
+    Implementação de RepositorioPortfolio usando arquivos JSON.
+
+    Lê dados de arquivos na pasta backend/dados/.
+
+    Attributes:
+        diretorio_dados: Caminho para pasta com arquivos JSON.
+    """
+
+    def __init__(self, diretorio_dados: str | Path = DEFAULT_DADOS_PATH):
+        """
+        Inicializa repositório JSON.
+
+        Args:
+            diretorio_dados: Caminho para pasta com dados JSON.
+        """
+        self.diretorio_dados = Path(diretorio_dados)
+
+    async def verificar_saude(self) -> dict:
+        """
+        Verifica se os arquivos JSON básicos existem e são legíveis.
+        """
+        arquivos = ["sobre.json", "projetos.json", "stack.json"]
+        detalhes = {}
+        tudo_ok = True
+
+        for arq in arquivos:
+            caminho = self.diretorio_dados / arq
+            existe = caminho.exists()
+            detalhes[arq] = "ok" if existe else "ausente"
+            if not existe:
+                tudo_ok = False
+        
+        return {
+            "status": "ok" if tudo_ok else "erro",
+            "detalhes": detalhes
+        }
+
+    async def _ler_json(self, nome_arquivo: str) -> Any:
+        """
+        Lê arquivo JSON do diretório de dados de forma assíncrona.
+
+        Args:
+            nome_arquivo: Nome do arquivo (ex: "sobre.json").
+
+        Returns:
+            Conteúdo do JSON parseado.
+        """
+        caminho = self.diretorio_dados / nome_arquivo
+
+        def _ler_arquivo():
+            with open(caminho, "r", encoding="utf-8") as arquivo:
+                return json.load(arquivo)
+
+        return await anyio.to_thread.run_sync(_ler_arquivo)
+
+    async def obter_sobre(self) -> dict:
+        """
+        Obtém informações da seção Sobre.
+
+        Returns:
+            dict: Dados do arquivo sobre.json.
+        """
+        return await self._ler_json("sobre.json")
+
+    async def obter_projetos(self) -> list[Projeto]:
+        """
+        Obtém lista de projetos.
+
+        Returns:
+            list[Projeto]: Lista de entidades Projeto.
+        """
+        dados = await self._ler_json("projetos.json")
+        return [
+            Projeto(
+                id=p["id"],
+                nome=p["nome"],
+                descricao_curta=p["descricao_curta"],
+                descricao_completa=p["descricao_completa"],
+                tecnologias=p["tecnologias"],
+                funcionalidades=p["funcionalidades"],
+                aprendizados=p["aprendizados"],
+                repositorio=p.get("repositorio"),
+                demo=p.get("demo"),
+                destaque=p.get("destaque", False),
+                imagem=p.get("imagem"),
+            )
+            for p in dados
+        ]
+
+    async def obter_projeto_por_id(self, projeto_id: str) -> Projeto | None:
+        """
+        Obtém projeto específico por ID.
+
+        Args:
+            projeto_id: ID do projeto a buscar.
+
+        Returns:
+            Projeto | None: Projeto encontrado ou None.
+        """
+        projetos = await self.obter_projetos()
+        for projeto in projetos:
+            if projeto.id == projeto_id:
+                return projeto
+        return None
+
+    async def obter_stack(self) -> list[dict]:
+        """
+        Obtém lista de tecnologias do stack.
+
+        Returns:
+            list[dict]: Lista de tecnologias.
+        """
+        return await self._ler_json("stack.json")
+
+    async def obter_experiencias(self) -> list[ExperienciaProfissional]:
+        """
+        Obtém lista de experiências profissionais.
+
+        Returns:
+            list[ExperienciaProfissional]: Lista de entidades ExperienciaProfissional.
+        """
+        dados = await self._ler_json("experiencias.json")
+        return [
+            ExperienciaProfissional(
+                id=e["id"],
+                cargo=e["cargo"],
+                empresa=e["empresa"],
+                localizacao=e["localizacao"],
+                data_inicio=date.fromisoformat(e["data_inicio"]),
+                data_fim=date.fromisoformat(e["data_fim"]) if e.get("data_fim") else None,
+                descricao=e["descricao"],
+                tecnologias=e["tecnologias"],
+                atual=e.get("atual", False),
+            )
+            for e in dados
+        ]
+
+    async def obter_formacao(self) -> list[FormacaoAcademica]:
+        """
+        Obtém lista de formações acadêmicas.
+
+        Returns:
+            list[FormacaoAcademica]: Lista de entidades FormacaoAcademica.
+        """
+        dados = await self._ler_json("formacao.json")
+        return [
+            FormacaoAcademica(
+                id=f["id"],
+                curso=f["curso"],
+                instituicao=f["instituicao"],
+                localizacao=f["localizacao"],
+                data_inicio=date.fromisoformat(f["data_inicio"]),
+                data_fim=date.fromisoformat(f["data_fim"]) if f.get("data_fim") else None,
+                descricao=f["descricao"],
+                atual=f.get("atual", False),
+            )
+            for f in dados
+        ]
+
+    async def verificar_duplicata_spam(self, content_hash: str, ttl_seconds: int) -> bool:
+        """Stub para interface abstrata. Implementado na versão SQL."""
+        return False
+
+    async def registrar_spam(self, content_hash: str, timestamp: float) -> None:
+        """Stub para interface abstrata. Implementado na versão SQL."""
+        pass
+

@@ -1,0 +1,130 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-app-bg: var(--theme-bg);
+  --color-app-text: var(--theme-text);
+  --color-app-surface: var(--theme-surface);
+  --color-app-surface-hover: var(--theme-surface-hover);
+  --color-app-muted: var(--theme-muted);
+  --color-app-border: var(--theme-border);
+  --color-app-primary: var(--theme-primary);
+  --color-app-primary-hover: var(--theme-primary-hover);
+  --color-app-secondary: var(--theme-secondary);
+  --color-app-section-alt: var(--theme-section-alt);
+}
+
+:root {
+  color-scheme: light;
+  /* Warmer cream base — subtle contrast from surface */
+  --theme-bg:             #EFE9E0;
+  --theme-text:           #1C1712;
+  /* Warm white surface — clearly distinct from bg */
+  --theme-surface:        #FAF6F0;
+  --theme-surface-hover:  #EDE4D8;
+  /* Visible warm border — not invisible gray */
+  --theme-border:         #D8CDBC;
+  /* Warmer mid-tone muted */
+  --theme-muted:          #6B6055;
+  /* Deeper bronze for better contrast on light */
+  --theme-primary:        #A8692E;
+  --theme-primary-hover:  #8F5620;
+  --theme-secondary:      #C07A3A;
+  /* Subtle warm tint for alternating sections */
+  --theme-section-alt:    #E6DDD1;
+}
+
+.dark {
+  color-scheme: dark;
+  /* Very dark warm brown/graphite base */
+  --theme-bg:             #161412;
+  --theme-text:           #EAE6E1;
+  /* Slightly lighter warm surface */
+  --theme-surface:        #221E1A;
+  --theme-surface-hover:  #2C2723;
+  /* Warmer muted text */
+  --theme-muted:          #A89F91;
+  /* Visible separating border */
+  --theme-border:         #36302A;
+  --theme-primary:        #D4A373;
+  --theme-primary-hover:  #E2B68A;
+  --theme-secondary:      #BC8E5B;
+  /* Section alternation */
+  --theme-section-alt:    #1A1815;
+}
+
+body {
+  @apply bg-app-bg text-app-text antialiased transition-colors duration-300 font-['Inter'] selection:bg-app-primary/30;
+}
+
+h1, h2, h3 {
+  @apply tracking-wider font-['Montserrat'] font-bold;
+}
+
+/* ─── Glass cards ──────────────────────────────────────────── */
+.glass {
+  @apply bg-app-surface border border-app-border backdrop-blur-md transition-all duration-300 ease-in-out;
+  box-shadow: 0 2px 20px -2px rgba(120, 85, 40, 0.10), 0 1px 4px rgba(0,0,0,0.04);
+  will-change: transform, opacity, background-color, border-color;
+}
+
+.dark .glass {
+  @apply bg-app-surface/60 border-app-border backdrop-blur-md;
+  box-shadow: none;
+}
+
+/* ─── Glowing Aura (Hover) ───────────────────────── */
+.glass:hover {
+  border-color: var(--theme-primary);
+  box-shadow: 0 0 30px -5px rgba(168, 105, 46, 0.25), inset 0 0 20px -5px rgba(168, 105, 46, 0.05); /* Using the new --theme-primary for light mode */
+  transition: all 0.4s ease;
+}
+
+.dark .glass:hover {
+  box-shadow: 0 0 30px -5px rgba(212, 163, 115, 0.25), inset 0 0 20px -5px rgba(212, 163, 115, 0.05);
+}
+
+/* ─── Shadows ──────────────────────────────────────────────── */
+.premium-shadow {
+  box-shadow: 0 4px 24px -4px rgba(140, 95, 40, 0.14), 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.dark .premium-shadow {
+  box-shadow: none;
+}
+
+/* ─── Gradient border (hover accent) ────────────────────────── */
+.gradient-border {
+  position: relative;
+  background-clip: padding-box;
+  border: 1px solid var(--theme-border);
+}
+
+.gradient-border:hover {
+  border-color: var(--theme-primary);
+  transition: border-color 0.4s ease;
+}
+
+/* ─── Section alternation ────────────────────────────────────── */
+.section-alt {
+  background-color: var(--theme-section-alt);
+}
+
+/* ─── Utilities ──────────────────────────────────────────────── */
+.transition-smooth {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+/* ─── Scroll reveal ──────────────────────────────────────────── */
+.reveal-hidden {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+  will-change: transform, opacity;
+}
+
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}

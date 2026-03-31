@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Prevent Flash of Light Mode (FOUC) -->
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('portfolio_theme');
+        var theme = 'dark';
+        if (saved === 'light' || saved === 'dark') {
+          theme = saved;
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+          theme = 'light';
+        }
+        if (theme === 'dark') document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
+      } catch (e) { }
+    })();
+  </script>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap"
+    rel="stylesheet">
+
+  <!-- SEO Meta Tags -->
+  <title>Argenis Lopez | Backend Developer Portfolio</title>
+  <meta name="description"
+    content="Professional portfolio of Argenis Lopez, a Backend Developer specializing in Python, FastAPI, and Clean Architecture." />
+  <meta property="og:title" content="Argenis Lopez | Backend Developer Portfolio" />
+  <meta property="og:description"
+    content="Professional portfolio showcasing high-performance backend systems and clean architectural patterns." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://portfolio-six-nu-bku9vbczby.vercel.app" />
+  <meta property="og:image" content="/og-image.jpg" />
+  <meta name="theme-color" content="#121212" />
+
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
+</html>

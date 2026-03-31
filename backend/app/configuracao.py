@@ -1,0 +1,82 @@
+"""
+Configurações da aplicação via variáveis de ambiente.
+
+Usa pydantic-settings para validação automática e valores padrão.
+Todas as configurações podem ser sobrescritas via .env ou variáveis de ambiente.
+"""
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field
+
+
+class Configuracoes(BaseSettings):
+    """
+    Configurações centralizadas da aplicação.
+
+    Attributes:
+        nome_app: Nome exibido na documentação OpenAPI.
+        ambiente: Ambiente de execução (local, staging, production).
+        origens_permitidas: Lista de origens CORS separadas por vírgula.
+        formspree_url: URL do endpoint Formspree para envio de emails.
+        formspree_form_id: ID do formulário Formspree.
+    """
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+
+    nome_app: str = Field(
+        default="Portfólio Backend API",
+        alias="NOME_APP",
+    )
+    ambiente: str = Field(
+        default="local",
+        alias="AMBIENTE",
+    )
+    origens_permitidas: str = Field(
+        default="http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174,http://localhost:5175,http://127.0.0.1:5175",
+        alias="ORIGENS_PERMITIDAS",
+    )
+    formspree_url: str = Field(
+        default="https://formspree.io/f",
+        alias="FORMSPREE_URL",
+    )
+    formspree_form_id: str = Field(
+        default="",
+        alias="FORMSPREE_FORM_ID",
+    )
+    database_url: str = Field(
+        default="sqlite+aiosqlite:///./portfolio.db",
+        alias="DATABASE_URL",
+    )
+
+    def lista_origens_permitidas(self) -> list[str]:
+        """
+        Converte string de origens em lista.
+
+        Returns:
+            Lista de URLs permitidas para CORS.
+
+        Example:
+            "http://localhost:5173,http://127.0.0.1:5173"
+            → ["http://localhost:5173", "http://127.0.0.1:5173"]
+        """
+        return [
+            origem.strip()
+            for origem in self.origens_permitidas.split(",")
+            if origem.strip()
+        ]
+
+    @property
+    def debug(self) -> bool:
+        """
+        Retorna True se o ambiente for de desenvolvimento ou local.
+        Isto evita vazar stack traces em produção.
+        """
+        return self.ambiente in ("desenvolvimento", "local")
+
+
+# Instância global de configurações
+configuracoes = Configuracoes()

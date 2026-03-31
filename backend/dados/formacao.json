@@ -1,0 +1,20 @@
+[
+  {
+    "id": "edu-001",
+    "curso": {
+      "pt": "Tecnologia em Análise e Desenvolvimento de Sistemas",
+      "en": "Associate's Degree in Systems Analysis and Development",
+      "es": "Tecnólogo en Análisis y Desarrollo de Sistemas"
+    },
+    "instituicao": "UFPR – Universidade Federal do Paraná",
+    "localizacao": "Curitiba, PR",
+    "data_inicio": "2026-02-01",
+    "data_fim": "2029-03-06",
+    "descricao": {
+      "pt": "Curso superior de Tecnologia em Análise e Desenvolvimento de Sistemas na Universidade Federal do Paraná (UFPR). Em curso.",
+      "en": "Associate's degree in Systems Analysis and Development at the Federal University of Paraná (UFPR). In progress.",
+      "es": "Tecnólogo en Análisis y Desarrollo de Sistemas en la Universidad Federal de Paraná (UFPR). En curso."
+    },
+    "atual": true
+  }
+]
