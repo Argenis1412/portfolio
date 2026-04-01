@@ -160,7 +160,7 @@ Instead of hardcoded strings, we use a **JSON-driven i18n strategy**. This allow
 
 ### 3. Automated Quality Gate
 - **Husky & lint-staged**: It's impossible to commit code that fails linting or tests. The project enforces quality at the source.
-- **CI/CD quality gate**: Every push to GitHub triggers a full suite of backend and frontend tests via GitHub Actions. **The pipeline enforces a 70% test coverage threshold** — any code that lowers this metric is automatically rejected.
+- **CI/CD quality gate**: Every push to GitHub triggers a full suite of backend and frontend tests via GitHub Actions. **The pipeline enforces a 80% test coverage threshold** — any code that lowers this metric is automatically rejected.
 - **Dockerized Builds**: The system is automatically built and verified into Docker images during the CI process, ensuring "it works on my machine" translates perfectly to production.
 - **Rate-Limiting & Anti-Spam**: Backend protection against brute-force and **30-minute message deduplication** (database-backed).
 

@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # -------------------------------------------------------
+  # Backend API (FastAPI rodando no Koyeb / localmente)
+  # Em desenvolvimento local: api:8000 (via docker-compose)
+  # Em produção: substitua pelo URL do Koyeb ou use Pushgateway
+  # -------------------------------------------------------
+  - job_name: 'portafolio-api'
+    static_configs:
+      - targets: ['api:8000']
+    metrics_path: /metrics
+    scrape_interval: 10s

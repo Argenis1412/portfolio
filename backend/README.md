@@ -16,7 +16,7 @@ Professional backend for a developer portfolio, implementing:
 - ✅ **Automatic validation** with Pydantic V2
 - ✅ **Interactive Documentation** with OpenAPI/Swagger
 - ✅ **Automated Tests** with pytest
-- ✅ **Quality Gate**: GitHub Actions enforces a **70% minimum coverage** threshold and verified Docker builds on every push.
+- ✅ **Quality Gate**: GitHub Actions enforces a **80% minimum coverage** threshold and verified Docker builds on every push.
 - ✅ **Layered contact protection**: Includes a honeypot, spam scoring, and a **30-minute persistent deduplication** (database-backed) to prevent duplicate submissions across server restarts.
 - ✅ **Rate Limiting**: 10 messages/day per email address via custom identity extraction middleware.
 
@@ -124,7 +124,7 @@ pytest
 pytest --cov=app --cov-report=html
 
 # CI/CD Quality Gate (Local simulation)
-pytest --cov=app --cov-fail-under=70
+pytest --cov=app --cov-fail-under=80
 ```
 
 ---

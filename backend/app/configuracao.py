@@ -52,6 +52,23 @@ class Configuracoes(BaseSettings):
         alias="DATABASE_URL",
     )
 
+    # --- Observabilidade ---
+    sentry_dsn: str = Field(
+        default="",
+        alias="SENTRY_DSN",
+        description="DSN do Sentry. Deixe vazio para desabilitar (desenvolvimento/testes).",
+    )
+    sentry_traces_sample_rate: float = Field(
+        default=0.2,
+        alias="SENTRY_TRACES_SAMPLE_RATE",
+        description="Percentual de transactions enviadas ao Sentry (0.0 a 1.0). 0.2 = 20%.",
+    )
+    otlp_endpoint: str = Field(
+        default="",
+        alias="OTLP_ENDPOINT",
+        description="Endpoint OTLP para exportar traces (ex: http://jaeger:4318). Vazio = ConsoleExporter.",
+    )
+
     def lista_origens_permitidas(self) -> list[str]:
         """
         Converte string de origens em lista.
