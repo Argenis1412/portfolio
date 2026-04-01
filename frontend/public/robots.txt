@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://portfolio-six-nu-bku9vbczby.vercel.app
+Sitemap: https://portfolio-argenis1412s-projects.vercel.app/sitemap.xml
