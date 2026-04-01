@@ -21,6 +21,7 @@ from app.controladores import roteador_saude
 from app.controladores.v1 import roteador_v1
 from app.core.middleware import MiddlewareRequisicao
 from app.core.handlers import registrar_handlers_excecao
+from app.core.observabilidade import configurar_observabilidade
 
 from app.core.limite import limiter
 from slowapi import _rate_limit_exceeded_handler
@@ -56,6 +57,10 @@ def criar_aplicacao() -> FastAPI:
         openapi_tags=_obter_tags_openapi(),
         debug=configuracoes.debug,
     )
+
+    # Observabilidade deve ser inicializada ANTES dos middlewares e rotas
+    # para garantir que Sentry e Prometheus estejam ativos desde o início.
+    configurar_observabilidade(aplicacao, configuracoes)
 
     _configurar_middleware(aplicacao)
     _configurar_cors(aplicacao)

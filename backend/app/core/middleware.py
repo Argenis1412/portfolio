@@ -24,6 +24,24 @@ configurar_structlog()
 logger = structlog.get_logger(__name__)
 
 
+def _obter_trace_id() -> str:
+    """
+    Extrai o trace_id do span ativo no OpenTelemetry.
+
+    Retorna string vazia se OTel não estiver configurado ou se não
+    houver span ativo (ex: durante testes unitários).
+    """
+    try:
+        from opentelemetry import trace
+        span = trace.get_current_span()
+        ctx = span.get_span_context()
+        if ctx and ctx.is_valid:
+            return format(ctx.trace_id, "032x")
+    except Exception:
+        pass
+    return ""
+
+
 class MiddlewareRequisicao(BaseHTTPMiddleware):
     """
     Middleware para processar todas as requisições HTTP.
@@ -106,19 +124,26 @@ class MiddlewareRequisicao(BaseHTTPMiddleware):
         
         # Calcular tempo de resposta
         duracao_ms = (time.time() - inicio) * 1000
-        
+
         # Adicionar headers customizados
         response.headers["X-Request-ID"] = request_id
         response.headers["X-Response-Time"] = f"{duracao_ms:.2f}ms"
-        
+
+        # Propagar trace_id do OpenTelemetry (link com Jaeger/Grafana Tempo)
+        trace_id = _obter_trace_id()
+        if trace_id:
+            response.headers["X-Trace-ID"] = trace_id
+            # Enriquecer o log com o trace_id para correlacionar logs + traces
+            structlog.contextvars.bind_contextvars(trace_id=trace_id)
+
         # Log da resposta enviada
         logger.info(
             "resposta_enviada",
             status_code=response.status_code,
             duracao_ms=round(duracao_ms, 2),
         )
-        
+
         # Limpar contexto
         structlog.contextvars.clear_contextvars()
-        
+
         return response

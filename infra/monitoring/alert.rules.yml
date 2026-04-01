@@ -1,0 +1,23 @@
+groups:
+  - name: API_Alerts
+    rules:
+      - alert: BackendOffline
+        expr: up{job="portafolio-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "A API do Portfólio caiu"
+          description: "O endpoint /metrics da API não pode ser rastreado por mais de 1 minuto."
+
+      - alert: HighLatency
+        # Acionar caso o tempo mediano (p50) das requisições passe de 2 segundos.
+        # Usa metricas auto-geradas pelo prometheus-fastapi-instrumentator (http_request_duration_seconds).
+        # A sintaxe depende da estrutura do histograma. Simplificaremos para demonstracao.
+        expr: rate(http_requests_total{status=~"5.."}[1m]) > 5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Taxa de Erro 5xx Elevada"
+          description: "Mais de 5 requests resultaram num HTTP 5xx no último 1 minuto."

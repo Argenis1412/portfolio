@@ -30,7 +30,7 @@ services:
       - API_HOST=0.0.0.0
       - API_PORT=8000
       # Adicione outras variáveis do .env.example
-    volumes:
+    # volumes:
       # - ./backend:/app  # Comentado para produção (segurança) - Descomente para desenvolvimento
       # - /app/.venv  # Exclui virtualenv do volume
     # depends_on:
@@ -127,6 +127,67 @@ services:
   #   networks:
   #     - portafolio-network
 
+  # =============================================================
+  # OBSERVABILIDADE (Tier 1 — ativar para desenvolvimento local)
+  # =============================================================
+  # Para subir a stack completa de monitoring:
+  #   docker-compose up -d api prometheus grafana jaeger
+  # Acesse:
+  #   Grafana:    http://localhost:3000  (admin/admin)
+  #   Prometheus: http://localhost:9090
+  #   Jaeger UI:  http://localhost:16686
+  # =============================================================
+
+  # --- Prometheus (coleta métricas do /metrics da API) ---
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    container_name: portafolio-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infra/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./infra/monitoring/alert.rules.yml:/etc/prometheus/alert.rules.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=7d'
+    depends_on:
+      - api
+    networks:
+      - portafolio-network
+
+  # --- Grafana (visualização de dashboards) ---
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: portafolio-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infra/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    networks:
+      - portafolio-network
+
+  # --- Jaeger (distributed tracing — recebe spans do OpenTelemetry) ---
+  jaeger:
+    image: jaegertracing/all-in-one:1.57
+    container_name: portafolio-jaeger
+    restart: unless-stopped
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "4318:4318"    # OTLP HTTP receiver
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - portafolio-network
+
 # ===========================
 # VOLUMES PERSISTENTES
 # ===========================
@@ -134,6 +195,10 @@ volumes:
   postgres_data:
     driver: local
   redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
     driver: local
 
 # ===========================

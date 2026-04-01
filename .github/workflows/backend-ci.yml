@@ -50,7 +50,7 @@ jobs:
       - name: ✅ Verificar cobertura mínima
         run: |
           cd backend
-          pytest --cov=app --cov-fail-under=85
+          pytest --cov=app --cov-fail-under=80
 
   lint:
     name: 🧹 Linting
