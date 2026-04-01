@@ -4,17 +4,19 @@ import { GraduationCap, MapPin, Briefcase } from 'lucide-react';
 import { useExperience, useFormacao } from '../hooks/useApi';
 import type { Experience as ExperienceType, Formacao, LocalizedString } from '../api';
 import { useLanguage } from '../context/LanguageContext';
+import { ServerWakeupError } from './ServerWakeupNotice';
 
 type TimelineEntry =
   | ({ kind: 'experience' } & ExperienceType)
   | ({ kind: 'education' } & Formacao);
 
 export default function Experience() {
-  const { data: experiences = [], isLoading: loadingExp } = useExperience();
-  const { data: formacoes = [], isLoading: loadingFmc } = useFormacao();
+  const { data: experiences = [], isLoading: loadingExp, isError: errorExp } = useExperience();
+  const { data: formacoes = [], isLoading: loadingFmc, isError: errorFmc } = useFormacao();
   const { language, t } = useLanguage();
 
   const loading = loadingExp || loadingFmc;
+  const isError = errorExp || errorFmc;
 
   const entries: TimelineEntry[] = [
     ...experiences.map(e => ({ kind: 'experience' as const, ...e })),
@@ -59,6 +61,14 @@ export default function Experience() {
             ))}
           </div>
         </div>
+      </section>
+    );
+  }
+
+  if (isError) {
+    return (
+      <section id="experience" className="py-16 section-alt">
+        <ServerWakeupError />
       </section>
     );
   }

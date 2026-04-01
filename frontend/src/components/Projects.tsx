@@ -3,9 +3,10 @@ import Skeleton from './ui/Skeleton';
 import { Github, ExternalLink } from 'lucide-react';
 import { useProjects } from '../hooks/useApi';
 import { useLanguage } from '../context/LanguageContext';
+import { ServerWakeupError } from './ServerWakeupNotice';
 
 export default function Projects() {
-  const { data: projects, isLoading, isError, error } = useProjects();
+  const { data: projects, isLoading, isError } = useProjects();
   const { language, t } = useLanguage();
 
   if (isLoading) {
@@ -36,9 +37,8 @@ export default function Projects() {
 
   if (isError) {
     return (
-      <section id="projects" className="py-24 max-w-6xl mx-auto px-4 text-center text-red-500">
-        <h2 className="text-2xl font-bold mb-4">{t('error.generic')}</h2>
-        <p>{(error as Error)?.message || 'Unknown error'}</p>
+      <section id="projects" className="py-24 max-w-6xl mx-auto px-4">
+        <ServerWakeupError />
       </section>
     );
   }

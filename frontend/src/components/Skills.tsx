@@ -1,12 +1,21 @@
 import { motion } from 'framer-motion';
 import { useSkills } from '../hooks/useApi';
 import { useLanguage } from '../context/LanguageContext';
+import { ServerWakeupError } from './ServerWakeupNotice';
 
 export default function Skills() {
-  const { data: skills = [], isLoading } = useSkills();
+  const { data: skills = [], isLoading, isError } = useSkills();
   const { t } = useLanguage();
 
   if (isLoading) return null; // Or a skeleton if we had one for skills
+
+  if (isError) {
+    return (
+      <section id="stack" className="py-16 bg-transparent section-alt">
+        <ServerWakeupError />
+      </section>
+    );
+  }
 
   const categories = Array.from(new Set(skills.map(s => s.categoria)));
 
