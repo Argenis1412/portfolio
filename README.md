@@ -64,18 +64,26 @@ The backend uses a SQLite database populated via Alembic migrations and SQLModel
 ```bash
 cd backend
 
-# Create and activate virtual environment
-py -3.12 -m venv .venv       # Windows (recommended)
-# or: python -m venv .venv
+# Create virtual environment
+# Windows:
+py -3.12 -m venv .venv
+# Linux/macOS:
+python -m venv .venv
 
-.venv\Scripts\activate        # Windows
-# or: source .venv/bin/activate  # Linux/Mac
+# Activate virtual environment
+# Windows:
+.venv\Scripts\activate
+# Linux/macOS:
+source .venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 
 # (Optional) Configure environment variables
-cp .env.exemplo .env
+# Windows:
+copy .env.example .env
+# Linux/macOS:
+cp .env.example .env
 # Edit .env to set FORMSPREE_FORM_ID for contact form
 
 # Start the server

@@ -72,8 +72,16 @@ git clone https://github.com/Argenis1412/portfolio.git
 cd portfolio/backend
 
 # Create virtual environment
+# Windows:
 py -3.12 -m venv .venv
+# Linux/macOS:
+python -m venv .venv
+
+# Activate virtual environment
+# Windows:
 .\.venv\Scripts\activate
+# Linux/macOS:
+source .venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
