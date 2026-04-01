@@ -11,7 +11,7 @@ Endpoints:
 """
 
 from typing import Annotated, Optional
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Response
 
 from app.esquemas.sobre import RespostaSobre
 from app.esquemas.projetos import ProjetoResumo, ProjetoDetalhado, RespostaProjetos
@@ -50,6 +50,7 @@ roteador = APIRouter(tags=["API"])
     },
 )
 async def obter_sobre(
+    response: Response,
     obter_sobre_uc: Annotated[
         ObterSobreUseCase,
         Depends(obter_obter_sobre_use_case),
@@ -61,6 +62,7 @@ async def obter_sobre(
     Returns:
         RespostaSobre: Dados pessoais validados.
     """
+    response.headers["Cache-Control"] = "public, max-age=300"  # 5 min
     dados = await obter_sobre_uc.executar()
     return RespostaSobre(**dados)
 
@@ -77,6 +79,7 @@ async def obter_sobre(
 @limiter.limit("20/minute")
 async def listar_projetos(
     request: Request,
+    response: Response,
     obter_projetos_uc: Annotated[
         ObterProjetosUseCase,
         Depends(obter_obter_projetos_use_case),
@@ -91,6 +94,7 @@ async def listar_projetos(
     Ordenação:
         Projetos em destaque aparecem primeiro, depois ordem alfabética.
     """
+    response.headers["Cache-Control"] = "public, max-age=300"  # 5 min
     projetos = await obter_projetos_uc.executar()
 
     projetos_resumo = [
@@ -157,6 +161,7 @@ async def listar_projetos(
 @limiter.limit("20/minute")
 async def obter_projeto(
     request: Request,
+    response: Response,
     projeto_id: str,
     obter_projeto_por_id_uc: Annotated[
         ObterProjetoPorIdUseCase,
@@ -175,6 +180,7 @@ async def obter_projeto(
     Raises:
         ErroRecursoNaoEncontrado: Se projeto não existe.
     """
+    response.headers["Cache-Control"] = "public, max-age=300"  # 5 min
     projeto = await obter_projeto_por_id_uc.executar(projeto_id)
 
     if not projeto:
@@ -208,6 +214,7 @@ async def obter_projeto(
     },
 )
 async def obter_stack(
+    response: Response,
     obter_stack_uc: Annotated[
         ObterStackUseCase,
         Depends(obter_obter_stack_use_case),
@@ -219,6 +226,7 @@ async def obter_stack(
     Returns:
         RespostaStack: Tecnologias agrupadas por categoria.
     """
+    response.headers["Cache-Control"] = "public, max-age=300"  # 5 min
     por_categoria = await obter_stack_uc.executar()
 
     # Converter para ItemStack
@@ -246,6 +254,7 @@ async def obter_stack(
     },
 )
 async def listar_experiencias(
+    response: Response,
     obter_experiencias_uc: Annotated[
         ObterExperienciasUseCase,
         Depends(obter_obter_experiencias_use_case),
@@ -260,6 +269,7 @@ async def listar_experiencias(
     Ordenação:
         Experiência atual primeiro, depois por data (mais recente primeiro).
     """
+    response.headers["Cache-Control"] = "public, max-age=300"  # 5 min
     experiencias = await obter_experiencias_uc.executar()
 
     experiencias_schema = [
@@ -293,6 +303,7 @@ async def listar_experiencias(
     },
 )
 async def listar_formacao(
+    response: Response,
     obter_formacao_uc: Annotated[
         ObterFormacaoUseCase,
         Depends(obter_obter_formacao_use_case),
@@ -307,6 +318,7 @@ async def listar_formacao(
     Ordenação:
         Formação em curso primeiro, depois por data (mais recente primeiro).
     """
+    response.headers["Cache-Control"] = "public, max-age=300"  # 5 min
     formacoes = await obter_formacao_uc.executar()
 
     formacoes_schema = [

@@ -90,8 +90,14 @@ class RepositorioJSON(RepositorioPortfolio):
 
         Args:
             diretorio_dados: Caminho para pasta com dados JSON.
+
+        Cache:
+            Os arquivos JSON são lidos uma única vez do disco e mantidos
+            em memória. Como os dados são estáticos (não mudam em runtime),
+            isso elimina I/O redundante em cada request.
         """
         self.diretorio_dados = Path(diretorio_dados)
+        self._cache: dict[str, Any] = {}
 
     async def verificar_saude(self) -> dict:
         """
@@ -117,19 +123,28 @@ class RepositorioJSON(RepositorioPortfolio):
         """
         Lê arquivo JSON do diretório de dados de forma assíncrona.
 
+        Utiliza cache em memória: o arquivo é lido do disco apenas na
+        primeira chamada. Chamadas subsequentes retornam o valor cacheado
+        sem nenhum I/O adicional.
+
         Args:
             nome_arquivo: Nome do arquivo (ex: "sobre.json").
 
         Returns:
             Conteúdo do JSON parseado.
         """
+        if nome_arquivo in self._cache:
+            return self._cache[nome_arquivo]
+
         caminho = self.diretorio_dados / nome_arquivo
 
         def _ler_arquivo():
             with open(caminho, "r", encoding="utf-8") as arquivo:
                 return json.load(arquivo)
 
-        return await anyio.to_thread.run_sync(_ler_arquivo)
+        dados = await anyio.to_thread.run_sync(_ler_arquivo)
+        self._cache[nome_arquivo] = dados
+        return dados
 
     async def obter_sobre(self) -> dict:
         """
@@ -169,17 +184,19 @@ class RepositorioJSON(RepositorioPortfolio):
         """
         Obtém projeto específico por ID.
 
+        Lookup O(1) via dicionário em vez de O(n) linear scan.
+        O dicionário é construído uma única vez e reutilizado via cache.
+
         Args:
             projeto_id: ID do projeto a buscar.
 
         Returns:
             Projeto | None: Projeto encontrado ou None.
         """
-        projetos = await self.obter_projetos()
-        for projeto in projetos:
-            if projeto.id == projeto_id:
-                return projeto
-        return None
+        if "_projetos_por_id" not in self._cache:
+            projetos = await self.obter_projetos()
+            self._cache["_projetos_por_id"] = {p.id: p for p in projetos}
+        return self._cache["_projetos_por_id"].get(projeto_id)
 
     async def obter_stack(self) -> list[dict]:
         """
