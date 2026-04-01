@@ -9,6 +9,8 @@
   "footer.rights": "© 2026 Portfolio. All rights reserved.",
   "loading": "Loading...",
   "error.generic": "An error occurred while loading data.",
+  "server.wakeup.loading": "Waking up the server (free tier). Please wait a few seconds... 🚀",
+  "server.wakeup.error": "The server took too long to respond. It may be starting up from a cold start. Please refresh the page in a few seconds.",
   "contact.title": "Get in Touch",
   "contact.name": "Name",
   "contact.email": "Email",

@@ -16,12 +16,15 @@ Sentry.init({
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
+      // Datos estáticos: 5 min stale, 30 min en cache (gcTime >> staleTime)
       staleTime: 5 * 60 * 1000,
-      gcTime: 10 * 60 * 1000,
-      refetchOnWindowFocus: true,
+      gcTime: 30 * 60 * 1000,
+      // Portfolio estático: no necesita refetch al cambiar de tab
+      refetchOnWindowFocus: false,
       refetchOnMount: true,
-      retry: 4,
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+      // 1 reintento máximo — con 4 el recruiter espera ~30s antes de ver error
+      retry: 1,
+      retryDelay: 1000,
     },
   },
 })

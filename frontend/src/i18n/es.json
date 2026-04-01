@@ -9,6 +9,8 @@
   "footer.rights": "© 2026 Portfolio. Todos los derechos reservados.",
   "loading": "Cargando...",
   "error.generic": "Ocurrió un error al cargar los datos.",
+  "server.wakeup.loading": "Despertando el servidor (plan gratuito). Por favor, espere unos segundos... 🚀",
+  "server.wakeup.error": "El servidor tardó demasiado en responder. Es posible que esté arrancando desde un cold start. Por favor, recarga la página en unos segundos.",
   "contact.title": "Contáctame",
   "contact.name": "Nombre",
   "contact.email": "Correo",
