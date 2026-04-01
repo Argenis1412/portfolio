@@ -2,6 +2,10 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
 
+rule_files:
+  - 'alert.rules.yml'
+
+
 scrape_configs:
   # -------------------------------------------------------
   # Backend API (FastAPI rodando no Koyeb / localmente)
