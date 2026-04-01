@@ -13,8 +13,8 @@ export default function ServerWakeupNotice() {
 
   useEffect(() => {
     if (isFetching === 0 && isMutating === 0) {
-      setShowLoading(false);
-      return;
+      const t = setTimeout(() => setShowLoading(false), 0);
+      return () => clearTimeout(t);
     }
 
     // Mostrar toast solo si tarda más de 2.5s
