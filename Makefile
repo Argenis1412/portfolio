@@ -1,7 +1,7 @@
 .PHONY: dev-back dev-front test-back test-front test
 
 dev-back:
-	cd backend && python -m uvicorn app.principal:app --reload
+	cd backend && python -m uvicorn app.principal:app --reload --port 8000
 
 dev-front:
 	cd frontend && npm run dev

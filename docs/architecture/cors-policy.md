@@ -13,7 +13,7 @@ Instead of a static list, we use a regular expression to validate origins.
 ### Configuration
 In `app/configuracao.py`:
 ```python
-regex_origens_permitidas: str | None = r"https://.*\.vercel\.app"
+regex_origens_permitidas: str | None = r"^https://portfolio.*-argenis1412s-projects\.vercel\.app$"
 ```
 
 ### Implementation
@@ -31,8 +31,13 @@ app.add_middleware(
 ## Security Considerations
 
 - **Why not `*`?**: Using `*` prevents sending credentials (cookies/auth headers). By using a regex, we can set `allow_credentials=True`.
-- **Regex Precision**: We use `\.vercel\.app` (with an escaped dot) to ensure we only allow subdomains of `vercel.app`, not domains like `somevercel.app`.
+- **Regex Precision**: We use `r"^https://portfolio.*-argenis1412s-projects\.vercel\.app$"` to ensure we only allow our own Vercel subdomains. Using `.*\.vercel\.app` without a prefix would allow anyone to create an `evil-site.vercel.app` and call the API with credentials.
 - **Environment Overrides**: The regex can be easily changed via the `REGEX_ORIGENS_PERMITIDAS` environment variable without code changes.
 
+## Metrics & Observability Privacy
+The `/metrics` endpoint is publicly accessible. This exposes request rates, latencies, and error rates. Given the nature of a personal portfolio site:
+- **Decision**: Left public intentionally to demonstrate observability instrumentation (Prometheus/Grafana) to reviewers and recruiters without managing credentials.
+- **Risk Acceptance**: No PII or sensitive business data is leaked via metrics. If this were a real application with competitors or sensitive load patterns, `/metrics` would be secured behind basic authentication or an internal network.
+
 ## Verification
-Any domain matching `https://*.vercel.app` is automatically granted access, ensuring smooth deployments and a premium developer experience.
+Any domain matching `^https://portfolio.*-argenis1412s-projects\.vercel\.app$` is automatically granted access, ensuring smooth deployments and a premium developer experience.

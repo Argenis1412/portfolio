@@ -39,6 +39,10 @@ class Configuracoes(BaseSettings):
         default="http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174,http://localhost:5175,http://127.0.0.1:5175",
         alias="ORIGENS_PERMITIDAS",
     )
+    regex_origens_permitidas: str | None = Field(
+        default=r"^https://portfolio.*-argenis1412s-projects\.vercel\.app$",
+        alias="REGEX_ORIGENS_PERMITIDAS",
+    )
     formspree_url: str = Field(
         default="https://formspree.io/f",
         alias="FORMSPREE_URL",

@@ -99,7 +99,10 @@ python ./scripts/migrar_dados.py
 ### 3. Execution
 ```bash
 # Start the server
-uvicorn app.principal:app --reload --port 8000
+python -m uvicorn app.principal:app --reload --port 8000
+
+- **Local Docs**: `http://localhost:8000/docs`
+- **Produção Docs**: `https://selected-fionna-argenis1412-58caae17.koyeb.app/docs`
 ```
 
 ---
@@ -108,6 +111,7 @@ uvicorn app.principal:app --reload --port 8000
 
 ### 🔍 Health Check & Observability
 `GET /saude`
+*(Note: Named `/saude` instead of `/health` to match the Portuguese base domain language of the original project structure, but standard `health` checks apply)*  
 Returns status for:
 - API connectivity
 - **Database connection**

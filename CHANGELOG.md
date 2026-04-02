@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/en/2.0.0/).
 
 ---
 
+## [1.2.0] - 2026-04-01
+
+### ✅ Added
+
+**Observability & Monitoring:**
+- ✅ **Sentry Integration**: Added Sentry DSN configuration for backend error tracking and transaction tracing.
+- ✅ **Prometheus Metrics**: Exposed `/metrics` endpoint for real-time observability of latencies and request rates.
+- ✅ **OpenTelemetry Tracing**: Configured `OTLP_ENDPOINT` for distributed tracing with Jaeger/Grafana.
+- ✅ **Observability ADR**: Documented metric public visibility decisions.
+
+---
+
 ## [1.1.0] - 2026-03-22
 
 ### ✅ Added
@@ -38,8 +50,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/en/2.0.0/).
 - ✅ Interactive OpenAPI/Swagger documentation
 - ✅ Contact system with email sending
 - ✅ 6 functional endpoints (about, projects, stack, experiences, contact, health)
-- ✅ Robust validation with Pydantic V2
-- ✅ 93%+ test coverage
+- ✅ Pydantic V2 robust validation
+- ✅ 80% minimum test coverage enforced by CI
 - ✅ 17 automated tests (pytest + asyncio)
 - ✅ JSON persistence (ready to migrate to DB)
 
@@ -50,7 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/en/2.0.0/).
 - ✅ Deployment guide
 - ✅ Testing guide
 - ✅ Complete API reference
-- ✅ CONTRIBUTING.md
+- ✅ ARCHITECTURE.md (decision log)
 - ✅ Production changelog
 
 **DevOps:**
@@ -79,7 +91,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/en/2.0.0/).
 
 ## 🔮 Next Versions
 
-### [1.1.0] - Planned
+### [1.3.0] - Planned
 
 **Backend:**
 - [ ] Migration to PostgreSQL
@@ -97,7 +109,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/en/2.0.0/).
 
 **DevOps:**
 - [ ] Automated deploy (Full CI/CD)
-- [ ] Monitoring with Sentry
 - [ ] Centralized logs
 - [ ] E2E tests with Playwright
 
@@ -122,5 +133,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/en/2.0.0/).
 
 ---
 
+[1.2.0]: https://github.com/Argenis1412/portfolio/releases/tag/v1.2.0
+[1.1.0]: https://github.com/Argenis1412/portfolio/releases/tag/v1.1.0
 [1.0.0]: https://github.com/Argenis1412/portfolio/releases/tag/v1.0.0
 [0.1.0]: https://github.com/Argenis1412/portfolio/releases/tag/v0.1.0

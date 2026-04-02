@@ -9,7 +9,7 @@ Scalable Python API hosting.
 2.  **Service Configuration**:
     *   **Root Directory**: `/backend`
     *   **Instance Type**: `Nano` (512MB RAM - Permanent Free Tier)
-    *   **Start Command**: `uvicorn app.principal:app --host 0.0.0.0 --port 8000`
+    *   **Start Command**: `alembic upgrade head && python scripts/migrar_dados.py && uvicorn app.principal:app --host 0.0.0.0 --port 8000`
     *   **Port Visibility**: Expose port `8000` (HTTP)
 3.  **Environment Variables**:
 
@@ -33,12 +33,13 @@ Global Edge UI deployment.
     *   **Build Command**: `npm run build`
     *   **Output Directory**: `dist`
 3.  **Environment Variables**:
-    *   `VITE_API_URL`: `https://your-api.koyeb.app/api/v1` (Map from Koyeb URL).
+    *   `VITE_API_URL`: `https://selected-fionna-argenis1412-58caae17.koyeb.app/api/v1`
+    *   **Swagger Prod**: `https://selected-fionna-argenis1412-58caae17.koyeb.app/docs` (Koyeb)
 
 ---
 
 ## 🛠️ Architecture Notes
-*   **Database (SQLite)**: The `portfolio.db` is an immutable asset in production. To update content (projects, experiences), modify the JSON/DB locally and perform a `git push`.
+*   **Database (SQLite)**: We do **not** commit `portfolio.db` to Git. Committing a binary database is an anti-pattern that bloats repository history and risks exposing sensitive data. Instead, the DB is built dynamically on startup by running `alembic upgrade head` (to create tables) followed by `python scripts/migrar_dados.py` (to seed the static portfolio data into SQL).
 *   **Active Security**: Built-in protection includes a 5-minute deduplication window, honeypot traps, and heuristic spam scoring.
 *   **Instant Availability**: Unlike Render's free tier, Koyeb Nano instances do not spin down, ensuring a 24/7 responsive experience for recruiters.
 

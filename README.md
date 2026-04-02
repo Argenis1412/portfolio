@@ -87,12 +87,13 @@ cp .env.example .env
 # Edit .env to set FORMSPREE_FORM_ID for contact form
 
 # Start the server
-uvicorn app.principal:app --reload
+python -m uvicorn app.principal:app --reload --port 8000
 ```
 - API: `http://localhost:8000`
 - Interactive Docs (Swagger): `http://localhost:8000/docs`
+- **Produção (Docs)**: `https://selected-fionna-argenis1412-58caae17.koyeb.app/docs`
 
-### 3. Configure the Frontend (React)
+### 4. Configure the Frontend (React)
 ```bash
 cd frontend
 npm install
@@ -163,10 +164,10 @@ We use **TanStack Query** not just for fetching, but for a "snappy" feels-like-n
 - **Background Synchronization**: Data is refetched silently when the window is focused, ensuring you always see the latest information without a loading spinner.
 - **Robust Mutations**: The contact form is managed via mutations, handling loading/success/error states declaratively.
 
-### 2. Scalable Internationalization (i18n)
+### 3. Scalable Internationalization (i18n)
 Instead of hardcoded strings, we use a **JSON-driven i18n strategy**. This allows non-developers to edit translations in `src/i18n/` without touching the component logic, following the same pattern used in large-scale enterprise apps.
 
-### 3. Automated Quality Gate
+### 4. Automated Quality Gate
 - **Husky & lint-staged**: It's impossible to commit code that fails linting or tests. The project enforces quality at the source.
 - **CI/CD quality gate**: Every push to GitHub triggers a full suite of backend and frontend tests via GitHub Actions. **The pipeline enforces a 80% test coverage threshold** — any code that lowers this metric is automatically rejected.
 - **Dockerized Builds**: The system is automatically built and verified into Docker images during the CI process, ensuring "it works on my machine" translates perfectly to production.
@@ -228,9 +229,11 @@ portfolio/
 ├── backend/          # FastAPI backend (Clean Architecture)
 ├── frontend/         # React 19 + TypeScript frontend
 ├── .github/          # GitHub Actions CI/CD workflows
-├── docker-compose.yml
-├── railway.toml      # Railway deployment config
-└── render.yaml       # Render deployment config
+├── infra/
+│   └── alternatives/ # Deployment configs for Railway/Render
+│       ├── railway.toml
+│       └── render.yaml
+└── docker-compose.yml
 ```
 
 For detailed information about each part, see:
