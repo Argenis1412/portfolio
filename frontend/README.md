@@ -1,11 +1,8 @@
 # 🎨 Portfolio Frontend
 
-![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
-![TanStack Query](https://img.shields.io/badge/-TanStack%20Query-FF4154?style=for-the-badge&logo=react-query&logoColor=white)
-![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
-![TailwindCSS](https://img.shields.io/badge/tailwindcss_v4-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
+> **Live Demo:** [portfolio-argenis1412.vercel.app →](https://portfolio-argenis1412s-projects.vercel.app)
 
-Frontend application for a professional portfolio. Engineered as a **strict consumer** of a versioned REST API, featuring declarative data management, predictive prefetching, and a highly maintainable i18n system.
+Frontend application built with **React 19** and **Vite**. Engineered as a **strict consumer** of a versioned REST API, featuring declarative data management with TanStack Query and a premium "Graphite & Bronze" aesthetic.
 
 ## ✨ Key Features
 

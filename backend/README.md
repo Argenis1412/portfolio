@@ -1,6 +1,8 @@
 # 🎯 Portfolio Backend API
 
-REST API developed with **FastAPI** following **Clean Architecture** to demonstrate backend development best practices in Python. Engineered with a **language-agnostic core**, ensuring the system is portable, scalable, and ready for future technological shifts.
+> **Live API Docs:** [Swagger UI →](https://selected-fionna-argenis1412-58caae17.koyeb.app/docs)
+
+REST API built with **FastAPI** and **Clean Architecture** — engineered with a **language-agnostic core** so that the system remains portable, testable, and framework-independent.
 
 ## 📝 Description
 
