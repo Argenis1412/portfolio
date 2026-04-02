@@ -7,7 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import * as Sentry from '@sentry/react'
 
 Sentry.init({
-  dsn: import.meta.env.VITE_SENTRY_DSN || "https://d44387753a6da14292cc706234b19158@o4511145790341120.ingest.us.sentry.io/4511145952018432",
+  dsn: import.meta.env.VITE_SENTRY_DSN || "",
   // Setting this option to true will send default PII data to Sentry.
   // For example, automatic IP address collection on events
   sendDefaultPii: true,
