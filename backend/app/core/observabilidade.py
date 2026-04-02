@@ -124,14 +124,19 @@ def _configurar_opentelemetry(
     Em produção (com OTLP_ENDPOINT): exporta spans via OTLP/HTTP para
     qualquer backend compatível (Jaeger, Grafana Tempo, Honeycomb, etc).
 
-    O trace_id fica disponível via opentelemetry.trace.get_current_span()
-    e é propagado no header X-Trace-ID pelo middleware.
+    IMPORTANTE: Não usar o endpoint OTLP do Sentry aqui!
+    O Sentry SDK (inicializado em _configurar_sentry) já captura tracing
+    automaticamente via traces_sample_rate. Usar o OTLP_ENDPOINT do Sentry
+    resulta em erros 401 pois requer autenticação especial não suportada
+    pelo exportador OTLP padrão. Use apenas para backends standalone:
+    Jaeger, Grafana Tempo, Honeycomb, etc.
 
     Args:
         nome_servico: Nome do serviço para identificação nos traces.
         versao: Versão da aplicação.
         ambiente: Ambiente de execução.
         otlp_endpoint: URL do coletor OTLP (ex: http://jaeger:4318).
+                       Deixe vazio se usar Sentry — o SDK já faz o tracing.
     """
     try:
         from opentelemetry import trace
@@ -162,46 +167,28 @@ def _configurar_opentelemetry(
         elif otlp_endpoint:
             from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
             from urllib.parse import urlparse
-            
+
             # Limpeza e normalização
             otlp_endpoint = otlp_endpoint.strip().rstrip("/")
-            sentry_dsn = sentry_dsn.strip()
-            
-            # Autenticação para o Sentry (via DSN)
-            headers = {}
-            sentry_key = None
-            
-            if sentry_dsn:
-                try:
-                    parsed_dsn = urlparse(sentry_dsn)
-                    sentry_key = parsed_dsn.username
-                    if sentry_key:
-                        headers = {
-                            "x-sentry-auth": f"Sentry sentry_key={sentry_key}, sentry_version=7",
-                            "Content-Type": "application/x-protobuf"
-                        }
-                except Exception as e:
-                    logger.error("sentry_dsn_parse_error", erro=str(e))
-            
-            # Se o endpoint do Sentry termina em /otlp, ele geralmente espera /v1/traces
-            # mas alguns endpoints de integração podem variar. 
-            # O padrão OTLP/HTTP requer o path completo.
-            final_endpoint = f"{otlp_endpoint}/v1/traces" if not otlp_endpoint.endswith("/v1/traces") else otlp_endpoint
-            
-            exporter = OTLPSpanExporter(
-                endpoint=final_endpoint,
-                headers=headers
-            )
-            provider.add_span_processor(BatchSpanProcessor(exporter))
-            
-            # Log de diagnóstico (sanitizado)
-            key_preview = f"{sentry_key[:6]}..." if sentry_key and len(sentry_key) > 6 else "None"
-            logger.info(
-                "otel_exporter_setup", 
-                endpoint=final_endpoint, 
-                auth_header="present" if headers else "absent",
-                key_prefix=key_preview
-            )
+
+            # Guarda: o endpoint OTLP do Sentry (ingest.us.sentry.io) requer autenticação
+            # especial não suportada pelo exportador OTLP padrão. O Sentry SDK já captura
+            # tracing via traces_sample_rate — não há necessidade de duplicar via OTLP.
+            if "sentry.io" in otlp_endpoint:
+                logger.warning(
+                    "otel_exporter_sentry_endpoint_ignorado",
+                    motivo="O Sentry SDK já faz o tracing nativamente. "
+                           "Use OTLP_ENDPOINT apenas para Jaeger/Grafana Tempo. "
+                           "Remova OTLP_ENDPOINT para eliminar este aviso.",
+                    endpoint=otlp_endpoint,
+                )
+            else:
+                final_endpoint = f"{otlp_endpoint}/v1/traces" if not otlp_endpoint.endswith("/v1/traces") else otlp_endpoint
+
+                exporter = OTLPSpanExporter(endpoint=final_endpoint)
+                provider.add_span_processor(BatchSpanProcessor(exporter))
+                logger.info("otel_exporter_otlp", endpoint=final_endpoint)
+
         else:
             from opentelemetry.sdk.trace.export import ConsoleSpanExporter
             exporter = ConsoleSpanExporter()
