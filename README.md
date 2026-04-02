@@ -20,8 +20,8 @@ The system is architected as a **decoupled client-server ecosystem**:
 
 | Layer | Technology |
 |---|---|
-| **Backend** | FastAPI · Pydantic V2 · structlog · slowapi |
-| **Frontend** | React 19 · TypeScript · Vite · TanStack Query · Tailwind CSS v4 · Framer Motion · Lucide |
+| **Backend** | FastAPI · Pydantic V2 · structlog · slowapi · **Sentry** |
+| **Frontend** | React 19 · TypeScript · Vite · TanStack Query · Tailwind CSS v4 · **Sentry** · Framer Motion |
 
 | **Testing** | Pytest (backend) · Vitest + Testing Library (frontend) |
 | **CI/CD** | GitHub Actions (Lint + Test + **Docker Build** on every push) |
@@ -29,6 +29,7 @@ The system is architected as a **decoupled client-server ecosystem**:
 | **Deployment** | Koyeb (Backend via Dockerfile) · Vercel (Frontend) |
 
 - **💎 Architecture**: Clean Architecture on backend; React Query for declarative data fetching and globally managed state on frontend.
+- **📊 Observability**: Full-stack monitoring with **Sentry** (errors & tracing), **Prometheus** (`/metrics`), and **OpenTelemetry** for distributed tracing.
 - **🌍 Scalable i18n**: Multilingual support (PT, EN, ES) with externalized JSON manifests for zero-recompile maintenance.
 - **⚡ High-Performance UX**:
     - **Predictive Prefetching**: Data is pre-loaded on link hover, making transitions instant.

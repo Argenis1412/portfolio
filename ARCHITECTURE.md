@@ -27,3 +27,7 @@ This document details the reasoning behind the architectural choices found in th
 ## 7. Frontend State Architecture
 **Decision**: React + TanStack Query instead of Redux/Zustand for most data mapping.
 **Why?** A portfolio is a read-heavy application. TanStack Query treats remote data precisely as it is — a cache of server state. Local state is kept minimal, leaving data fetching, prefetching on hover, and cache invalidation entirely to the asynchronous fetching layer.
+
+## 8. Full-Stack Error Tracking (Sentry)
+**Decision**: Using Sentry for both React and FastAPI.
+**Why?** Observability is more than just metrics; it's about context. Sentry provides the "why" behind failures, capturing breadcrumbs, request metadata, and stack traces that Prometheus metrics (`/metrics`) can't show. By using `VITE_SENTRY_DSN` on the frontend and `SENTRY_DSN` on the backend, we achieve unified error correlation across the entire user journey.
