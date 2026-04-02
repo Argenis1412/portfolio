@@ -161,23 +161,47 @@ def _configurar_opentelemetry(
             logger.info("otel_exporter_mock", motivo="Execução de testes detectada")
         elif otlp_endpoint:
             from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+            from urllib.parse import urlparse
+            
+            # Limpeza e normalização
+            otlp_endpoint = otlp_endpoint.strip().rstrip("/")
+            sentry_dsn = sentry_dsn.strip()
             
             # Autenticação para o Sentry (via DSN)
             headers = {}
+            sentry_key = None
+            
             if sentry_dsn:
-                import re
-                # Extrai a chave pública do DSN: https://<key>@<host>/<id>
-                match = re.match(r"https://(?P<key>.*)@.*", sentry_dsn)
-                if match:
-                    sentry_key = match.group("key")
-                    headers = {"x-sentry-auth": f"Sentry sentry_key={sentry_key}, sentry_version=7"}
+                try:
+                    parsed_dsn = urlparse(sentry_dsn)
+                    sentry_key = parsed_dsn.username
+                    if sentry_key:
+                        headers = {
+                            "x-sentry-auth": f"Sentry sentry_key={sentry_key}, sentry_version=7",
+                            "Content-Type": "application/x-protobuf"
+                        }
+                except Exception as e:
+                    logger.error("sentry_dsn_parse_error", erro=str(e))
+            
+            # Se o endpoint do Sentry termina em /otlp, ele geralmente espera /v1/traces
+            # mas alguns endpoints de integração podem variar. 
+            # O padrão OTLP/HTTP requer o path completo.
+            final_endpoint = f"{otlp_endpoint}/v1/traces" if not otlp_endpoint.endswith("/v1/traces") else otlp_endpoint
             
             exporter = OTLPSpanExporter(
-                endpoint=f"{otlp_endpoint}/v1/traces",
+                endpoint=final_endpoint,
                 headers=headers
             )
             provider.add_span_processor(BatchSpanProcessor(exporter))
-            logger.info("otel_exporter_otlp", endpoint=otlp_endpoint, auth="enabled" if headers else "disabled")
+            
+            # Log de diagnóstico (sanitizado)
+            key_preview = f"{sentry_key[:6]}..." if sentry_key and len(sentry_key) > 6 else "None"
+            logger.info(
+                "otel_exporter_setup", 
+                endpoint=final_endpoint, 
+                auth_header="present" if headers else "absent",
+                key_prefix=key_preview
+            )
         else:
             from opentelemetry.sdk.trace.export import ConsoleSpanExporter
             exporter = ConsoleSpanExporter()
