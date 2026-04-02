@@ -113,6 +113,7 @@ def _configurar_opentelemetry(
     versao: str,
     ambiente: str,
     otlp_endpoint: str,
+    sentry_dsn: str = "",
 ) -> None:
     """
     Configura o OpenTelemetry SDK para distributed tracing.
@@ -160,9 +161,23 @@ def _configurar_opentelemetry(
             logger.info("otel_exporter_mock", motivo="Execução de testes detectada")
         elif otlp_endpoint:
             from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-            exporter = OTLPSpanExporter(endpoint=f"{otlp_endpoint}/v1/traces")
+            
+            # Autenticação para o Sentry (via DSN)
+            headers = {}
+            if sentry_dsn:
+                import re
+                # Extrai a chave pública do DSN: https://<key>@<host>/<id>
+                match = re.match(r"https://(?P<key>.*)@.*", sentry_dsn)
+                if match:
+                    sentry_key = match.group("key")
+                    headers = {"x-sentry-auth": f"Sentry sentry_key={sentry_key}, sentry_version=7"}
+            
+            exporter = OTLPSpanExporter(
+                endpoint=f"{otlp_endpoint}/v1/traces",
+                headers=headers
+            )
             provider.add_span_processor(BatchSpanProcessor(exporter))
-            logger.info("otel_exporter_otlp", endpoint=otlp_endpoint)
+            logger.info("otel_exporter_otlp", endpoint=otlp_endpoint, auth="enabled" if headers else "disabled")
         else:
             from opentelemetry.sdk.trace.export import ConsoleSpanExporter
             exporter = ConsoleSpanExporter()
@@ -240,6 +255,7 @@ def configurar_observabilidade(app: FastAPI, configuracoes) -> None:
         versao="1.0.0",
         ambiente=configuracoes.ambiente,
         otlp_endpoint=configuracoes.otlp_endpoint,
+        sentry_dsn=configuracoes.sentry_dsn,
     )
 
     logger.info("observabilidade_pronta")
