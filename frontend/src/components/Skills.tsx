@@ -47,7 +47,7 @@ export default function Skills() {
                 className="glass rounded-xl p-6 border border-app-border hover:border-app-primary hover:shadow-[0_0_20px_rgba(212,163,115,0.2)] transition-all duration-300"
               >
                 <h3 className="text-xl font-bold text-app-primary mb-5 capitalize tracking-widest">
-                  {category.replace('_', ' ')}
+                  {t(`stack.category.${category}`)}
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {skills.filter(s => s.categoria === category).map(skill => (

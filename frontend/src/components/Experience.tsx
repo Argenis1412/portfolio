@@ -28,14 +28,9 @@ export default function Experience() {
 
 
   const formatDate = (date: string | null, isActual: boolean) => {
-    if (!date) return isActual ? (language === 'pt' ? 'Presente' : language === 'es' ? 'Presente' : 'Present') : '?';
+    if (!date) return isActual ? t('experience.label.present') : '?';
     const [year, month] = date.split('-');
-    const months: Record<string, Record<string, string>> = {
-      pt: { '01':'jan','02':'fev','03':'mar','04':'abr','05':'mai','06':'jun','07':'jul','08':'ago','09':'set','10':'out','11':'nov','12':'dez' },
-      en: { '01':'Jan','02':'Feb','03':'Mar','04':'Apr','05':'May','06':'Jun','07':'Jul','08':'Aug','09':'Sep','10':'Oct','11':'Nov','12':'Dec' },
-      es: { '01':'ene','02':'feb','03':'mar','04':'abr','05':'may','06':'jun','07':'jul','08':'ago','09':'sep','10':'oct','11':'nov','12':'dic' },
-    };
-    return `${months[language]?.[month] ?? month}/${year}`;
+    return `${t(`months.${month}`)}/${year}`;
   };
 
   if (loading) {
@@ -133,7 +128,7 @@ export default function Experience() {
                       {/* Education / Experience badge */}
                       {isEducation && (
                         <span className="inline-block text-xs font-semibold text-app-primary bg-app-primary/10 border border-app-primary/20 px-2 py-0.5 rounded-full mb-2 uppercase tracking-widest">
-                          {language === 'pt' ? 'Formação' : language === 'es' ? 'Formación' : 'Education'}
+                          {t('experience.label.education')}
                         </span>
                       )}
                       <h3 className="text-xl md:text-2xl font-bold text-app-text leading-snug">{title}</h3>
