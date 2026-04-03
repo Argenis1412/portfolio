@@ -40,7 +40,7 @@ class Configuracoes(BaseSettings):
         alias="ORIGENS_PERMITIDAS",
     )
     regex_origens_permitidas: str | None = Field(
-        default=r"^https://portfolio.*-argenis1412s-projects\.vercel\.app$",
+        default=r"^https://portfolio(?:-[a-zA-Z0-9\-]+)?-argenis1412s-projects\.vercel\.app$",
         alias="REGEX_ORIGENS_PERMITIDAS",
     )
     formspree_url: str = Field(

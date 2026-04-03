@@ -41,7 +41,7 @@ Global Edge UI deployment.
 ## 🛠️ Architecture Notes
 *   **Database (SQLite)**: We do **not** commit `portfolio.db` to Git. Committing a binary database is an anti-pattern that bloats repository history and risks exposing sensitive data. Instead, the DB is built dynamically on startup by running `alembic upgrade head` (to create tables) followed by `python scripts/migrar_dados.py` (to seed the static portfolio data into SQL).
 *   **Active Security**: Built-in protection includes a 5-minute deduplication window, honeypot traps, and heuristic spam scoring.
-*   **Instant Availability**: Unlike Render's free tier, Koyeb Nano instances do not spin down, ensuring a 24/7 responsive experience for recruiters.
+*   **Instant Availability**: We employ a GitHub Actions keep-alive CRON (`keep-alive.yml`) that pings the Koyeb Eco instance every 5 minutes to prevent it from spinning down dynamically, ensuring a responsive experience for recruiters without costs.
 
 ---
 
