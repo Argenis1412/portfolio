@@ -2,9 +2,9 @@ name: Keep Backend Alive
 
 on:
   schedule:
-    # Ejecuta cada 14 minutos para asegurar que el contenedor Eco de Koyeb no se duerma
-    - cron: "*/14 * * * *"
-  workflow_dispatch: # Permite ejecutarlo manualmente
+    # Executa a cada 5 minutos para garantir que o backend não durma
+    - cron: "*/5 * * * *"
+  workflow_dispatch: # Permite executar manualmente
 
 jobs:
   ping:
@@ -12,8 +12,8 @@ jobs:
     steps:
       - name: Ping Backend API
         run: |
-          # Hacemos una petición simple al endpoint /sobre para mantener viva la instancia.
-          # Usamos --max-time 30 porque si está dormido, tardará en responder al primer ping.
-          # -sSf suprime salida pero falla en caso de error HTTP (aunque si es 503, podríamos querer ignorarlo).
-          # Añadimos || true para que un eventual error (ej: si Koyeb está apagado) no haga fallar siempre la Action y nos llene de correos.
+          # Fazemos uma requisição simples ao endpoint /sobre para manter a instância viva.
+          # Usamos --max-time 30 porque se estiver dormindo, demorará para responder ao primeiro ping.
+          # -sSf suprime a saída, mas falha em caso de erro HTTP (embora se for 503, podemos querer ignorá-lo).
+          # Adicionamos || true para que um eventual erro (ex: se o Koyeb estiver desligado) não faça a Action falhar sempre e encha nossa caixa de e-mails.
           curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://reluctant-sharia-argenis1412-98799132.koyeb.app/api/v1/sobre || true
