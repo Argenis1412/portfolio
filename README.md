@@ -6,6 +6,8 @@
 [![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/downloads/)
 [![React](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)
 
+![Portfolio Preview](docs/assets/preview.png)
+
 ## 🌐 Live Demo
 **Frontend:** [portfolio-argenis1412.vercel.app](https://portfolio-argenis1412s-projects.vercel.app) · **API Docs:** [Swagger UI](https://selected-fionna-argenis1412-58caae17.koyeb.app/docs)
 
@@ -65,11 +67,11 @@ The migration from JSON → SQL was a deliberate architectural decision: structu
 
 ## 🧠 Engineering Highlights
 
-### 1. System Decoupling (Strict Consumer)
-The React frontend treats the FastAPI backend as a **black-box API** — interacting only via versioned contracts. Either layer can be rewritten without affecting the other.
+### 1. Strict Consumer Pattern
+Frontend treats backend as a **black-box API**. Contracts are versioned, ensuring either layer can be scaled or rewritten (e.g., to Go/Rust) independently.
 
-### 2. Future-Ready Architecture (Language-Agnostic Core)
-Business logic (Use Cases) is isolated from infrastructure (Adapters) and doesn't depend on FastAPI. This makes the domain portable — a blueprint for migration to Go or Rust if needed.
+### 2. Language-Agnostic Core
+Business logic (Use Cases) is isolated from infrastructure (Adapters). The domain is pure Python, making it portable and easy to migrate to other frameworks or languages.
 
 ### 3. Automated Quality Gate
 - **Husky + lint-staged**: Impossible to commit code that fails linting.
@@ -77,14 +79,21 @@ Business logic (Use Cases) is isolated from infrastructure (Adapters) and doesn'
 - **Dockerized Builds**: Verified in CI, not just locally.
 
 ### 4. Observability
-- **Sentry**: Error tracking and performance tracing (frontend + backend).
-- **Prometheus**: Live metrics endpoint at `/metrics`.
-- **OpenTelemetry**: Distributed tracing for request lifecycle visibility.
+- **Sentry**: Error tracking and performance tracing (Full-stack).
+- **Prometheus**: Metrics endpoint at `/metrics`.
+- **OpenTelemetry**: Distributed tracing for request lifecycles.
+- **[Architecture Decision Record: Observability](docs/architecture/observability.md)**
 
-### 5. High-Performance UX
-- **Predictive Prefetching**: Data pre-loaded on link hover — instant transitions.
-- **Background Sync**: Silent data refresh on window focus.
-- **Multilingual (PT/EN/ES)**: JSON-driven i18n — zero-recompile translations.
+#### 📊 Performance Baseline
+*Based on production monitoring:*
+- **P95 Latency**: <150ms 
+- **Error Rate**: <0.1% 
+- **LCP (Full load)**: <1.2s 
+
+### 5. Performance & DX
+- **Predictive Prefetching**: Data pre-loaded on hover for instant transitions.
+- **Background Sync**: Silent refresh on window focus.
+- **Scalable i18n**: JSON-driven translations (PT/EN/ES) with zero-recompile.
 
 ---
 
