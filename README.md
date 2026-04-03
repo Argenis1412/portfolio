@@ -6,8 +6,6 @@
 [![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/downloads/)
 [![React](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)
 
-![Portfolio Preview](docs/assets/preview.png)
-
 ## 🌐 Live Demo
 **Frontend:** [portfolio-argenis1412.vercel.app](https://portfolio-argenis1412s-projects.vercel.app) · **API Docs:** [Swagger UI](https://selected-fionna-argenis1412-58caae17.koyeb.app/docs)
 

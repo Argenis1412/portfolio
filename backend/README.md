@@ -21,6 +21,7 @@ Professional backend for a developer portfolio, implementing:
 - ✅ **Quality Gate**: GitHub Actions enforces a **80% minimum coverage** threshold and verified Docker builds on every push.
 - ✅ **Layered contact protection**: Includes a honeypot, spam scoring, and a **30-minute persistent deduplication** (database-backed) to prevent duplicate submissions across server restarts.
 - ✅ **Rate Limiting**: 10 messages/day per email address via custom identity extraction middleware.
+- ✅ **API Observability**: Full integration with OpenTelemetry and Prometheus (v1.2.0)
 
 ---
 
@@ -102,10 +103,9 @@ python ./scripts/migrar_dados.py
 ```bash
 # Start the server
 python -m uvicorn app.principal:app --reload --port 8000
-
-- **Local Docs**: `http://localhost:8000/docs`
-- **Produção Docs**: `https://selected-fionna-argenis1412-58caae17.koyeb.app/docs`
 ```
+- **Local Docs**: `http://localhost:8000/docs`
+- **Production Docs**: `https://selected-fionna-argenis1412-58caae17.koyeb.app/docs`
 
 ---
 
@@ -163,7 +163,6 @@ The **Domain Logic (Use Cases)** is strictly isolated from the framework (FastAP
 This backend is designed to evolve into a full-scale enterprise system:
 - **🚀 Transactional Ledger**: Robust financial logic with ACID compliance.
 - **🔐 Advanced Authentication**: Migration to OAuth2/OpenID Connect.
-- **📈 API Observability**: Full integration with OpenTelemetry and Prometheus.
 
 ### Why Manual JSON Serialization (SQLite Compatibility)?
 - SQLite doesn't always have native JSON support in all environments.
