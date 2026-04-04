@@ -32,7 +32,7 @@ Most portfolios show UI. This one demonstrates **production backend thinking**:
 | **Strict Consumer Pattern** | Frontend treats backend as a black-box API — real decoupling, not just a buzzword |
 | **Persistent Anti-Spam** | Deduplication survives server restarts — state-aware, not in-memory-fragile |
 | **80% Coverage Gate** | CI pipeline automatically rejects code that lowers coverage |
-| **Observability** | Sentry + Prometheus metrics + OpenTelemetry tracing — knows how to operate systems |
+| **Observability** | Sentry + Prometheus metrics + OpenTelemetry tracing |
 
 ---
 
@@ -59,7 +59,7 @@ The migration from JSON → SQLite → PostgreSQL was a deliberate engineering j
 | **Frontend** | React 19 · TypeScript · Vite · TanStack Query · Tailwind CSS v4 · **Sentry** · Framer Motion |
 | **Testing** | Pytest · Vitest + Testing Library |
 | **CI/CD** | GitHub Actions (Lint + Test + Docker Build on every push) |
-| **Data** | SQLite with **SQLModel** & **Alembic** migrations |
+| **Data** | **PostgreSQL** (Managed via SQLModel & Alembic) + **Redis** (Upstash) |
 | **Deployment** | Koyeb (Backend via Dockerfile) · Vercel (Frontend) |
 
 ---
@@ -86,6 +86,8 @@ Business logic (Use Cases) is isolated from infrastructure (Adapters). The domai
 ### 5. Observability
 - **Sentry**: Error tracking and performance tracing (Full-stack).
 - **Prometheus**: Metrics endpoint at `/metrics`.
+    - > [!NOTE]
+    - > **Security Disclaimer**: The `/metrics` endpoint is intentionally public to allow reviewers to verify the system's observability stack. In a production enterprise environment, this endpoint would be restricted via IP-whitelisting or internal authentication.
 - **OpenTelemetry**: Distributed tracing for request lifecycles.
 - **[Architecture Decision Record: Observability](docs/architecture/observability.md)**
 
@@ -141,18 +143,19 @@ cd backend && pytest --cov=app --cov-report=html
 cd frontend && npm run test
 ```
 
-Key tests that go beyond coverage numbers:
-- Duplicate messages are **blocked even after server restart** (persistent deduplication test)
-- Rate limiting correctly rejects after threshold
-- Honeypot inputs silently drop bot submissions
+Key tests that demonstrate production-level reliability:
+- ✅ **Persistent Anti-Spam**: Verification that duplicate messages are blocked even after a complete server restart (state stored in DB, not just in-memory).
+- ✅ **Distributed Rate Limiting**: Ensures the system correctly rejects requests after the threshold across multiple instances (Redis).
+- ✅ **Honeypot Resilience**: Silent drop of bot submissions without revealing protection mechanisms.
+- ✅ **Clean Architecture Boundary**: Automated checks to ensure domain logic has zero dependencies on infrastructure/frameworks.
 
 ---
 
 ## 🗺️ Roadmap: Next Big Step
 
-- **🚀 Transactional Core**: Financial ledger with payments, interest logic, ACID compliance
-- **🔐 Advanced Auth**: JWT/OAuth2 for user-specific protected dashboards
-- **📊 Real-time Analytics**: WebSocket-based live data endpoint (`/api/v1/analytics`)
+- **🚀 Advanced Simulation**: Transactional flow for a mock "Financial Ledger" (ACID compliance testing)
+- **🔐 Identity Research**: Role-Based Access Control (RBAC) for administrative panels
+- **📊 Real-time Monitoring**: WebSocket-based live dashboard for `/metrics`
 
 ---
 

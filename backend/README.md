@@ -47,7 +47,7 @@ graph TD
     
     subgraph External Layer
         A[Adapters / External Services]
-        A -.- note4[Email Formspree<br>SQL Database / SQLite<br>Logging]
+        A -.- note4[Email Formspree<br>PostgreSQL / Redis<br>Observability Stack]
     end
 
     C -->|Calls| UC
@@ -109,6 +109,20 @@ python -m uvicorn app.principal:app --reload --port 8000
 
 ---
 
+## 📊 Observability & Metrics
+
+The API exposes a Prometheus-compatible metrics endpoint at `/metrics`.
+
+> [!IMPORTANT]
+> **Security Note**: This endpoint is currently **public** to facilitate technical reviews and demonstrate the observability stack. In a production enterprise environment, this would be restricted via internal network policies or authentication.
+
+Supported metrics:
+- `http_requests_total`: Counter of all requests by status code.
+- `http_request_duration_seconds`: Response latency (P95/P99).
+- `process_cpu_seconds_total`: Resource utilization.
+
+---
+
 ## 📡 Endpoints
 
 ### 🔍 Health Check & Observability
@@ -161,8 +175,8 @@ The **Domain Logic (Use Cases)** is strictly isolated from the framework (FastAP
 ## 🗺️ Future Roadmap
 
 This backend is designed to evolve into a full-scale enterprise system:
-- **🚀 Transactional Ledger**: Robust financial logic with ACID compliance.
-- **🔐 Advanced Authentication**: Migration to OAuth2/OpenID Connect.
+- **🚀 Advanced Simulation**: Transactional logic for a mock "Financial Ledger" (ACID compliance testing).
+- **🔐 Identity Research**: Role-Based Access Control (RBAC) implementation.
 
 ### Why Manual JSON Serialization (SQLite Compatibility)?
 - SQLite doesn't always have native JSON support in all environments.

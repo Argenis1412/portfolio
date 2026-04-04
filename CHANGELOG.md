@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/en/2.0.0/).
 
 ---
 
+## [1.3.0] - 2026-04-04
+
+### ✅ Added
+
+**Backend & Data Layer:**
+- ✅ **Migration to PostgreSQL**: Implemented production-ready persistence using SQLModel and Alembic.
+- ✅ **Distributed Caching with Redis**: Configured Upstash Redis for high-performance state management.
+- ✅ **Smart Rate Limiting**: Added `slowapi` decorators with Redis storage for multi-instance anti-abuse protection.
+- ✅ **Persistent Spam Filtering**: Messages are now deduplicated via database hashes, ensuring state survives server restarts.
+
+**Security & Resilience:**
+- ✅ **Defense-in-Depth Middleware**: Custom implementation of HSTS, NoSniff, and X-Frame-Options.
+- ✅ **Response Compression**: GZip middleware for optimizing data transfer.
+
+---
+
 ## [1.2.0] - 2026-04-01
 
 ### ✅ Added
@@ -91,26 +107,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/en/2.0.0/).
 
 ## 🔮 Next Versions
 
-### [1.3.0] - Planned
+### [1.4.0] - Planned
 
 **Backend:**
-- [ ] Migration to PostgreSQL
-- [ ] Cache system with Redis
-- [ ] Rate limiting
-- [ ] JWT Authentication (if needed)
-- [ ] Image upload to S3/Cloudinary
+- [ ] **Advanced Simulation**: Transactional flow simulation for a mock "Financial Ledger" (ACID compliance testing).
+- [ ] **Identity Research**: Integration of RBAC (Role-Based Access Control) for protected administration panels.
+- [ ] **Performance Audit**: Automated P95 latency monitoring in CI.
 
 **Frontend:**
-- [ ] Complete landing page
-- [ ] Interactive projects section
-- [ ] Contact form
-- [ ] Dark/light theme
-- [ ] Animations with Framer Motion
-
-**DevOps:**
-- [ ] Automated deploy (Full CI/CD)
-- [ ] Centralized logs
-- [ ] E2E tests with Playwright
+- [ ] **Interactive Visualizations**: Real-time charts for the /metrics data.
+- [ ] **E2E Testing**: Full flow coverage with Playwright.
 
 ---
 
@@ -133,6 +139,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/en/2.0.0/).
 
 ---
 
+[1.3.0]: https://github.com/Argenis1412/portfolio/releases/tag/v1.3.0
 [1.2.0]: https://github.com/Argenis1412/portfolio/releases/tag/v1.2.0
 [1.1.0]: https://github.com/Argenis1412/portfolio/releases/tag/v1.1.0
 [1.0.0]: https://github.com/Argenis1412/portfolio/releases/tag/v1.0.0
