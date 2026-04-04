@@ -26,16 +26,17 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - AMBIENTE=producao
-      - API_HOST=0.0.0.0
-      - API_PORT=8000
-      # Adicione outras variáveis do .env.example
+      - AMBIENTE=desenvolvimento
+      - DATABASE_URL=postgresql+asyncpg://portafolio:senha_segura_aqui@db:5432/portafolio_db
+      - REDIS_URL=redis://redis:6379/0
     # volumes:
       # - ./backend:/app  # Comentado para produção (segurança) - Descomente para desenvolvimento
       # - /app/.venv  # Exclui virtualenv do volume
-    # depends_on:
-    #   - db
-    #   - redis
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - portafolio-network
     healthcheck:
@@ -69,44 +70,44 @@ services:
   # ===========================
   # BANCO DE DADOS (PostgreSQL)
   # ===========================
-  # db:
-  #   image: postgres:16-alpine
-  #   container_name: portafolio-db
-  #   restart: unless-stopped
-  #   environment:
-  #     - POSTGRES_USER=portafolio
-  #     - POSTGRES_PASSWORD=senha_segura_aqui
-  #     - POSTGRES_DB=portafolio_db
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-  #   networks:
-  #     - portafolio-network
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U portafolio"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
+  db:
+    image: postgres:16-alpine
+    container_name: portafolio-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=portafolio
+      - POSTGRES_PASSWORD=senha_segura_aqui
+      - POSTGRES_DB=portafolio_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - portafolio-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U portafolio -d portafolio_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # ===========================
   # CACHE (Redis)
   # ===========================
-  # redis:
-  #   image: redis:7-alpine
-  #   container_name: portafolio-redis
-  #   restart: unless-stopped
-  #   ports:
-  #     - "6379:6379"
-  #   volumes:
-  #     - redis_data:/data
-  #   networks:
-  #     - portafolio-network
-  #   healthcheck:
-  #     test: ["CMD", "redis-cli", "ping"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
+  redis:
+    image: redis:7-alpine
+    container_name: portafolio-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - portafolio-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # ===========================
   # REVERSE PROXY (Nginx)

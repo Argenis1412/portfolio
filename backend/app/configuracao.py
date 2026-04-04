@@ -55,6 +55,11 @@ class Configuracoes(BaseSettings):
         default="sqlite+aiosqlite:///./portfolio.db",
         alias="DATABASE_URL",
     )
+    redis_url: str | None = Field(
+        default=None,
+        alias="REDIS_URL",
+        description="URL do Redis para cache e rate limiting (ex: redis://localhost:6379/0).",
+    )
 
     # --- Observabilidade ---
     sentry_dsn: str = Field(

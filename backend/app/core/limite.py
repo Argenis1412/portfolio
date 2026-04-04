@@ -5,6 +5,7 @@ Configuração do Rate Limiter para a aplicação.
 from fastapi import Request
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+from app.configuracao import configuracoes
 
 
 def get_email_or_ip_key(request: Request) -> str:
@@ -23,7 +24,12 @@ def get_email_or_ip_key(request: Request) -> str:
 
 # Inicializar limiter baseado no IP do cliente por padrão
 # Usamos strategy='fixed-window' para simplicidade
-limiter = Limiter(key_func=get_remote_address, strategy="fixed-window")
+# Si hay REDIS_URL, usamos Redis como storage para soportar escalado horizontal
+limiter = Limiter(
+    key_func=get_remote_address, 
+    strategy="fixed-window",
+    storage_uri=configuracoes.redis_url or "memory://"
+)
 
 
 def check_rate_limit(request: Request, limit_string: str, key_func=get_email_or_ip_key):

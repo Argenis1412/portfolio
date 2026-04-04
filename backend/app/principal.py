@@ -15,11 +15,12 @@ Arquitetura: Clean Architecture simplificada
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 
 from app.configuracao import configuracoes
 from app.controladores import roteador_saude
 from app.controladores.v1 import roteador_v1
-from app.core.middleware import MiddlewareRequisicao
+from app.core.middleware import MiddlewareRequisicao, SegurancaHeadersMiddleware
 from app.core.handlers import registrar_handlers_excecao
 from app.core.observabilidade import configurar_observabilidade
 
@@ -174,7 +175,15 @@ def _configurar_middleware(aplicacao: FastAPI) -> None:
     Middleware aplicado:
         - MiddlewareRequisicao: request_id, logging, tempo de resposta
     """
+    # 1. Logging y Request ID
     aplicacao.add_middleware(MiddlewareRequisicao)
+    
+    # 2. Compresión GZip (Ahorro de ancho de banda)
+    # Solo comprime respuestas > 1KB
+    aplicacao.add_middleware(GZipMiddleware, minimum_size=1000)
+    
+    # 3. Headers de Seguridad (Protección contra Clickjacking, etc)
+    aplicacao.add_middleware(SegurancaHeadersMiddleware)
 
 
 def _registrar_handlers(aplicacao: FastAPI) -> None:

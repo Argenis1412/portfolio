@@ -149,4 +149,23 @@ class MiddlewareRequisicao(BaseHTTPMiddleware):
         # Limpar contexto
         structlog.contextvars.clear_contextvars()
 
+
+        return response
+
+
+class SegurancaHeadersMiddleware(BaseHTTPMiddleware):
+    """
+    Middleware para adicionar headers de segurança em todas as respostas.
+    Reflete as proteções configuradas no vercel.json para o backend.
+    """
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+        response = await call_next(request)
+        
+        # Security Headers
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        
         return response
