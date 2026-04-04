@@ -7,8 +7,9 @@ backend_path = str(Path(__file__).parent.parent.absolute())
 if backend_path not in sys.path:
     sys.path.append(backend_path)
 
-from sqlalchemy import engine_from_config
+import asyncio
 from sqlalchemy import pool
+from sqlalchemy.ext.asyncio import create_async_engine
 from alembic import context
 from sqlmodel import SQLModel
 
@@ -27,11 +28,8 @@ from app.configuracao import configuracoes
 # access to the values within the .ini file in use.
 config = context.config
 
-# Sobrescrever a URL do banco com a das configurações da aplicação
-# SQLModel use aiosqlite for async, but Alembic needs a synchronous driver for some operations
-# unless configured for async. For SQLite, we can just use the sync version for migrations.
-sync_url = configuracoes.database_url.replace("+aiosqlite", "")
-config.set_main_option("sqlalchemy.url", sync_url)
+# Sobrescrever a URL do banco com a das configurações da aplicación
+config.set_main_option("sqlalchemy.url", configuracoes.database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -72,6 +70,30 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
+def do_run_migrations(connection) -> None:
+    context.configure(connection=connection, target_metadata=target_metadata)
+
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+async def run_async_migrations() -> None:
+    """In this scenario we need to create an Engine
+    and associate a connection with the context.
+
+    """
+
+    connectable = create_async_engine(
+        config.get_main_option("sqlalchemy.url"),
+        poolclass=pool.NullPool,
+    )
+
+    async with connectable.connect() as connection:
+        await connection.run_sync(do_run_migrations)
+
+    await connectable.dispose()
+
+
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
 
@@ -79,19 +101,28 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    # Detectar si la URL es asíncrona (como en Koyeb o local SQLite)
+    url = config.get_main_option("sqlalchemy.url")
+    is_async = "+aiosqlite" in url or "+asyncpg" in url
 
-    with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
+    if is_async:
+        asyncio.run(run_async_migrations())
+    else:
+        # Modo síncrono tradicional
+        from sqlalchemy import engine_from_config
+        connectable = engine_from_config(
+            config.get_section(config.config_ini_section, {}),
+            prefix="sqlalchemy.",
+            poolclass=pool.NullPool,
         )
 
-        with context.begin_transaction():
-            context.run_migrations()
+        with connectable.connect() as connection:
+            context.configure(
+                connection=connection, target_metadata=target_metadata
+            )
+
+            with context.begin_transaction():
+                context.run_migrations()
 
 
 if context.is_offline_mode():
