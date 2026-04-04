@@ -31,3 +31,11 @@ This document details the reasoning behind the architectural choices found in th
 ## 8. Full-Stack Error Tracking (Sentry)
 **Decision**: Using Sentry for both React and FastAPI.
 **Why?** Observability is more than just metrics; it's about context. Sentry provides the "why" behind failures, capturing breadcrumbs, request metadata, and stack traces that Prometheus metrics (`/metrics`) can't show. By using `VITE_SENTRY_DSN` on the frontend and `SENTRY_DSN` on the backend, we achieve unified error correlation across the entire user journey.
+
+## 9. Security Hardening (Defense-in-Depth)
+**Decision**: Implementing `SegurancaHeadersMiddleware` and `GZipMiddleware`.
+**Why?** Browsers rely on specific headers (HSTS, NoSniff, X-Frame-Options) to enforce security policies. While the frontend had these in Vercel, the backend API was unprotected if accessed directly. Adding these headers at the middleware level ensures that every response is hardened by default. Additionally, GZip compression for payloads >1KB significantly improves UI performance on low-bandwidth networks.
+
+## 10. External Storage for Distributed State
+**Decision**: Migrating Rate Limiting and Persistence from local Memory/SQLite to Redis and PostgreSQL for production.
+**Why?** In "ephemeral" cloud environments like Koyeb, local file storage (SQLite) and in-memory caches (Rate limiting counters) are wiped on every container restart. By decoupling state into managed PostgreSQL (via `asyncpg`) and Redis (via `Upstash`), the application achieves true horizontal scalability and persistent antispam protection across multiple replicas.

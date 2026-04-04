@@ -4,8 +4,9 @@ This document outlines the strategies and mechanisms implemented to ensure the p
 
 ## 1. Infrastructure Context
 The portfolio is hosted on free-tier services which introduce specific challenges:
-- **Neon (Database)**: Sleeps after a period of inactivity. The first request triggers a "wake-up" process that can take 3-10 seconds.
-- **Koyeb (Backend)**: Similar to the database, instances may spin down or experience "cold starts" on the free tier.
+- **Koyeb (Managed PostgreSQL)**: Our primary persistent store. While highly reliable, it may experience brief "cold starts" on the free tier after long periods of inactivity.
+- **Upstash (Serverless Redis)**: Used for distributed rate limiting and state-aware anti-abuse. Designed for low latency and high availability.
+- **Koyeb (Backend API)**: Instances spin down on the free tier. The first request triggers a restart.
 
 ## 2. Failure Modes and Mitigation
 
@@ -21,10 +22,12 @@ The portfolio is hosted on free-tier services which introduce specific challenge
 - **React Query Retries**: Configured to retry failed fetches automatically (default: 3 times with exponential backoff).
 - **Graceful Error States**: Each section (`Skills`, `Experience`, `Projects`) implements a dedicated error view (`ServerWakeupError`) allowing the user to retry manually without losing page context.
 
-### C. Data Validation (Contract Safety)
-**Problem**: Unexpected API responses or schema changes could crash the frontend.
+- **Zod Schema Validation**: All API responses are validated at the edge (in `api.ts`) using Zod. If the contract is violated, a controlled error is thrown, preventing the "White Screen of Death".
+
+### D. Anti-Abuse Persistence
+**Problem**: In-memory rate limiting fails when the backend restarts (cold start), allowing bots to bypass limits during the "warm-up" phase.
 **Mitigation**:
-- **Zod Schema Validation**: All API responses are validated at the edge (in `api.ts`) using Zod. If the contract is violated, a controlled error is thrown, preventing the "White Screen of Death" and triggering the section's error boundary.
+- **Redis Storage**: Rate limit counters and deduplication state are stored in **Upstash Redis**. This ensures that antispam policies persist across backend restarts and are shared across all API replicas.
 
 ## 3. UI/UX Resilience Patterns
 

@@ -7,7 +7,7 @@
 [![React](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)
 
 ## 🌐 Live Demo
-**Frontend:** [portfolio-argenis1412.vercel.app](https://portfolio-argenis1412s-projects.vercel.app) · **API Docs:** [Swagger UI](https://selected-fionna-argenis1412-58caae17.koyeb.app/docs)
+**Frontend:** [portfolio-argenis1412.vercel.app](https://portfolio-argenis1412s-projects.vercel.app) · **API Status:** [Healthy (JSON)](https://selected-fionna-argenis1412-58caae17.koyeb.app/saude)
 
 ---
 
@@ -45,8 +45,9 @@ This project didn't start production-ready. It evolved:
 | **v0** | JSON file persistence | Simple, fast to build |
 | **v1** | Migrated to **SQLModel + Alembic** | Persistence, scalability, testability |
 | **v2** | Added persistent anti-spam + observability | Production-grade resilience |
+| **v3** | High-security (Middlewares) + Scalable Persistence | Redis (Upstash) and PostgreSQL (Koyeb DB) |
 
-The migration from JSON → SQL was a deliberate architectural decision: structured migrations, typed models, and a clear path to PostgreSQL with a single `DATABASE_URL` change.
+The migration from JSON → SQLite → PostgreSQL was a deliberate engineering journey: proving that a well-designed Clean Architecture can swap data adapters without affecting business logic.
 
 ---
 
@@ -76,7 +77,13 @@ Business logic (Use Cases) is isolated from infrastructure (Adapters). The domai
 - **CI/CD**: 80% coverage threshold enforced on every push — no exceptions.
 - **Dockerized Builds**: Verified in CI, not just locally.
 
-### 4. Observability
+### 4. Security & Performance (Hardening)
+- **Defense-in-Depth**: Custom middleware for HSTS, NoSniff, and X-Frame-Options.
+- **Bandwidth Optimization**: Automatic GZip compression for JSON payloads >1KB.
+- **Distributed State**: Redis-backed rate limiting for coordinate anti-abuse across instances.
+- **[Architecture Decision Record: Security Hardening](docs/architecture/security-hardening.md)**
+
+### 5. Observability
 - **Sentry**: Error tracking and performance tracing (Full-stack).
 - **Prometheus**: Metrics endpoint at `/metrics`.
 - **OpenTelemetry**: Distributed tracing for request lifecycles.
@@ -119,6 +126,8 @@ npm install && npm run dev
 ```
 
 > The database migrations run automatically on every Docker deployment via the `CMD` in `Dockerfile`.
+> 
+> **Note**: Interactive documentation (Swagger/ReDoc) is disabled in production for security. To view the API contract, run the project locally in `desenvolvimento` mode and access `localhost:8000/docs`.
 
 ---
 
