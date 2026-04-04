@@ -36,11 +36,11 @@ class Configuracoes(BaseSettings):
         alias="AMBIENTE",
     )
     origens_permitidas: str = Field(
-        default="http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174,http://localhost:5175,http://127.0.0.1:5175",
+        default="http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174,http://localhost:5175,http://127.0.0.1:5175,http://localhost:4173,http://127.0.0.1:4173",
         alias="ORIGENS_PERMITIDAS",
     )
     regex_origens_permitidas: str | None = Field(
-        default=r"^https://portfolio(?:-[a-zA-Z0-9\-]+)?-argenis1412s-projects\.vercel\.app$",
+        default=r"^(https://portfolio(?:-[a-zA-Z0-9\-]+)?-argenis1412s-projects\.vercel\.app|http://localhost:\d+|http://127\.0\.0\.1:\d+)$",
         alias="REGEX_ORIGENS_PERMITIDAS",
     )
     formspree_url: str = Field(
