@@ -89,7 +89,16 @@ export type About = z.infer<typeof AboutSchema>;
 // Cliente de API Centralizado con Validación Zod
 // ===================================================
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api/v1';
+const configuredApiBaseUrl = import.meta.env.VITE_API_URL?.trim();
+const API_BASE_URL = configuredApiBaseUrl || (import.meta.env.DEV ? 'http://127.0.0.1:8000/api/v1' : '');
+
+function buildApiUrl(path: string): string {
+  if (!API_BASE_URL) {
+    throw new Error('VITE_API_URL is not configured');
+  }
+
+  return `${API_BASE_URL}${path}`;
+}
 
 class ApiError extends Error {
   status: number;
@@ -101,7 +110,7 @@ class ApiError extends Error {
 }
 
 async function apiGet<T>(path: string, schema: z.ZodSchema<T>): Promise<T> {
-  const res = await fetch(`${API_BASE_URL}${path}`);
+  const res = await fetch(buildApiUrl(path));
   if (!res.ok) {
     throw new ApiError(res.status, `API request failed: ${res.status} ${res.statusText} (${path})`);
   }
@@ -176,11 +185,13 @@ export async function postContact(data: {
   website: string; // Honeypot
   fax: string;     // Honeypot
 }, idempotencyKey: string): Promise<void> {
-  const res = await fetch(`${API_BASE_URL}/contato`, {
+  const apiUrl = buildApiUrl('/contato');
+
+  const res = await fetch(apiUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'X-Idempotency-Key': idempotencyKey,
+      'Idempotency-Key': idempotencyKey,
     },
     body: JSON.stringify(data),
   });

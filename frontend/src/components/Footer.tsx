@@ -1,9 +1,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Github, Linkedin, Code2, Mail, Copy, Check } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { fetchAbout } from '../api';
-import type { About } from '../api';
+import { useAbout } from '../hooks/useApi';
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -13,19 +12,9 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 
 export default function Footer() {
   const { t } = useLanguage();
-  const [about, setAbout] = useState<About | null>(null);
+  const { data: about } = useAbout();
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedWhatsApp, setCopiedWhatsApp] = useState(false);
-
-  useEffect(() => {
-    fetchAbout()
-      .then(setAbout)
-      .catch(err => {
-        if (import.meta.env.DEV) {
-          console.error('Error fetching about data for footer:', err);
-        }
-      });
-  }, []);
 
   const handleCopyEmail = (e: React.MouseEvent) => {
     e.stopPropagation();
