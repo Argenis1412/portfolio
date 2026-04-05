@@ -40,7 +40,14 @@ class RepositorioSQL(RepositorioPortfolio):
         Args:
             database_url: URL de conexão com o banco de dados.
         """
-        self.engine = create_async_engine(database_url)
+        engine_kwargs = {}
+        if not database_url.startswith("sqlite"):
+            engine_kwargs.update(
+                pool_pre_ping=True,
+                pool_recycle=300,
+            )
+
+        self.engine = create_async_engine(database_url, **engine_kwargs)
         self.session_factory = sessionmaker(
             self.engine, class_=AsyncSession, expire_on_commit=False
         )

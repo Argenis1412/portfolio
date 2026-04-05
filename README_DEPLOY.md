@@ -9,7 +9,7 @@ Scalable Python API hosting.
 2.  **Service Configuration**:
     *   **Root Directory**: `/backend`
     *   **Instance Type**: `Nano` (512MB RAM - Permanent Free Tier)
-    *   **Start Command**: `alembic upgrade head && python scripts/migrar_dados.py && uvicorn app.principal:app --host 0.0.0.0 --port 8000`
+    *   **Start Command**: `uvicorn app.principal:app --host 0.0.0.0 --port 8000`
     *   **Port Visibility**: Expose port `8000` (HTTP)
 3.  **Environment Variables**:
 
@@ -41,9 +41,16 @@ Global Edge UI deployment.
 ---
 
 ## 🛠️ Architecture Notes
-*   **Database (PostgreSQL/SQLite)**: The system is designed for **Managed PostgreSQL** in production (e.g. Koyeb DB) to ensure data persistence across container restarts. It gracefully falls back to **SQLite** if no `DATABASE_URL` is provided. We do **not** commit the database file to Git. The schema is built dynamically on startup by running `alembic upgrade head`.
+*   **Database (PostgreSQL/SQLite)**: The system is designed for **Managed PostgreSQL** in production (e.g. Koyeb DB) to ensure data persistence across container restarts. It gracefully falls back to **SQLite** if no `DATABASE_URL` is provided. We do **not** commit the database file to Git. Run `alembic upgrade head` during deploy/release tasks, not on every container boot.
 *   **Active Security**: Built-in protection includes a 5-minute deduplication window, honeypot traps, and heuristic spam scoring.
-*   **Instant Availability**: We employ a GitHub Actions keep-alive CRON (`keep-alive.yml`) that pings the Koyeb Eco instance every 5 minutes to prevent it from spinning down dynamically, ensuring a responsive experience for recruiters without costs.
+*   **Instant Availability**: We employ a GitHub Actions keep-alive CRON (`keep-alive.yml`) that pings `GET /saude` every 5 minutes so both the Koyeb service and the PostgreSQL connection stay warm.
+
+### Recommended Koyeb Deploy Flow
+1. **Release task / pre-deploy**: `alembic upgrade head`
+2. **One-off seed (only when static SQL data must be refreshed)**: `python scripts/migrar_dados.py`
+3. **Runtime start command**: `uvicorn app.principal:app --host 0.0.0.0 --port 8000`
+
+This avoids running migrations and full reseeds on every cold start.
 
 ---
 

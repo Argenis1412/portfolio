@@ -19,6 +19,7 @@ from starlette.types import ASGIApp
 
 # Configurar structlog no módulo
 from app.adaptadores.logger_adaptador import configurar_structlog
+from app.core.limite import get_client_ip
 
 configurar_structlog()
 logger = structlog.get_logger(__name__)
@@ -101,14 +102,14 @@ class MiddlewareRequisicao(BaseHTTPMiddleware):
                     email = body.get("email")
                     if email and isinstance(email, str):
                         request.state.identidade = f"email:{email.lower().strip()}"
-                except:
+                except Exception:
                     pass
 
         # Log da requisição recebida
         logger.info(
             "requisicao_recebida",
             query=str(request.url.query) if request.url.query else None,
-            client_ip=request.client.host if request.client else None,
+            client_ip=get_client_ip(request),
             identidade=getattr(request.state, "identidade", "ip"),
         )
         

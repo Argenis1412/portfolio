@@ -8,9 +8,9 @@ This document details the reasoning behind the architectural choices found in th
 ## 2. Decoupled Frontend and Strict API Consumer
 **Why?** The React frontend never connects directly to a database, and the FastAPI backend does not serve HTML. Keeping these completely separate ensures proper CORS enforcement, prevents accidental tightly-coupled logic, and mirrors real-world enterprise architectures where mobile devices could consume the same backend.
 
-## 3. Dynamic Database Seeding
-**Decision**: In production, the SQLite database is NOT committed to Git.
-**Why?** Committing databases is an anti-pattern. Instead, static profile data is loaded dynamically on startup via Alembic (`upgrade head`) and a python seeder (`python scripts/migrar_dados.py`). This prevents git bloating and ensures schema migrations are handled correctly.
+## 3. Managed Database and One-Off Seeding
+**Decision**: In production, the managed PostgreSQL database is not committed to Git and is not reseeded on every boot.
+**Why?** Committing databases is an anti-pattern, and reseeding on every Koyeb cold start increases readiness time. Schema migrations should run during deploy/release steps, while `python scripts/migrar_dados.py` should be used as a one-off refresh task only when static SQL data needs to be rebuilt.
 
 ## 4. Observability and Public Metrics
 **Decision**: Exposing Prometheus metrics at `/metrics` publicly without authentication.
