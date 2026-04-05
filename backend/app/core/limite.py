@@ -8,6 +8,19 @@ from slowapi.util import get_remote_address
 from app.configuracao import configuracoes
 
 
+def get_client_ip(request: Request) -> str:
+    """Recupera o IP real priorizando headers de proxy confiáveis."""
+    forwarded_for = request.headers.get("x-forwarded-for")
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+
+    real_ip = request.headers.get("x-real-ip")
+    if real_ip:
+        return real_ip.strip()
+
+    return get_remote_address(request)
+
+
 def get_email_or_ip_key(request: Request) -> str:
     """
     Recupera a identidade (e-mail) já extraída pelo middleware no request.state.
@@ -18,15 +31,15 @@ def get_email_or_ip_key(request: Request) -> str:
     identidade = getattr(request.state, "identidade", None)
     if identidade:
         return identidade
-    
-    return get_remote_address(request)
+
+    return get_client_ip(request)
 
 
 # Inicializar limiter baseado no IP do cliente por padrão
 # Usamos strategy='fixed-window' para simplicidade
 # Si hay REDIS_URL, usamos Redis como storage para soportar escalado horizontal
 limiter = Limiter(
-    key_func=get_remote_address, 
+    key_func=get_client_ip,
     strategy="fixed-window",
     storage_uri=configuracoes.redis_url or "memory://"
 )

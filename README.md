@@ -127,7 +127,7 @@ cd frontend
 npm install && npm run dev
 ```
 
-> The database migrations run automatically on every Docker deployment via the `CMD` in `Dockerfile`.
+> Run database migrations as part of deploy/release automation, not on every Koyeb application boot.
 > 
 > **Note**: Interactive documentation (Swagger/ReDoc) is disabled in production for security. To view the API contract, run the project locally in `desenvolvimento` mode and access `localhost:8000/docs`.
 

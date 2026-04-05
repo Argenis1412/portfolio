@@ -98,7 +98,11 @@ export default function Contact() {
       : language === 'en'
       ? 'Hello Argenis! I saw your portfolio and would like to talk!'
       : 'Olá Argenis! Vi seu portfólio e gostaria de conversar!';
-    window.open(`https://wa.me/${finalNumber}?text=${encodeURIComponent(message)}`, '_blank');
+    window.open(
+      `https://wa.me/${finalNumber}?text=${encodeURIComponent(message)}`,
+      '_blank',
+      'noopener,noreferrer'
+    );
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
