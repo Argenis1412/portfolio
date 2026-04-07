@@ -160,7 +160,6 @@ def _configurar_opentelemetry(
             # Durante os testes, não usamos BatchSpanProcessor para evitar
             # o erro "ValueError: I/O operation on closed file." ao final.
             from opentelemetry.sdk.trace.export import SimpleSpanProcessor, ConsoleSpanExporter
-            # Direciona para devnull para não encher o console do pytest
             exporter = ConsoleSpanExporter(out=open(os.devnull, "w"))
             provider.add_span_processor(SimpleSpanProcessor(exporter))
             logger.info("otel_exporter_mock", motivo="Execução de testes detectada")
@@ -168,18 +167,13 @@ def _configurar_opentelemetry(
             from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
             from urllib.parse import urlparse
 
-            # Limpeza e normalização
             otlp_endpoint = otlp_endpoint.strip().rstrip("/")
 
-            # Guarda: o endpoint OTLP do Sentry (ingest.us.sentry.io) requer autenticação
-            # especial não suportada pelo exportador OTLP padrão. O Sentry SDK já captura
-            # tracing via traces_sample_rate — não há necessidade de duplicar via OTLP.
             if "sentry.io" in otlp_endpoint:
                 logger.warning(
                     "otel_exporter_sentry_endpoint_ignorado",
                     motivo="O Sentry SDK já faz o tracing nativamente. "
-                           "Use OTLP_ENDPOINT apenas para Jaeger/Grafana Tempo. "
-                           "Remova OTLP_ENDPOINT para eliminar este aviso.",
+                           "Use OTLP_ENDPOINT apenas para Jaeger/Grafana Tempo. ",
                     endpoint=otlp_endpoint,
                 )
             else:
@@ -190,6 +184,13 @@ def _configurar_opentelemetry(
                 logger.info("otel_exporter_otlp", endpoint=final_endpoint)
 
         else:
+            if ambiente == "producao":
+                logger.info(
+                    "otel_exporter_console_skip",
+                    motivo="OTLP_ENDPOINT vazio em producao; spans de tracing não serão exportados",
+                )
+                return
+
             from opentelemetry.sdk.trace.export import ConsoleSpanExporter
             exporter = ConsoleSpanExporter()
             provider.add_span_processor(BatchSpanProcessor(exporter))
