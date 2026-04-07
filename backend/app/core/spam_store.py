@@ -14,7 +14,17 @@ class SpamDedupStore:
     """Stores short-lived contact hashes outside PostgreSQL."""
 
     def __init__(self, redis_url: str | None):
-        self._redis_client: Redis | None = Redis.from_url(redis_url) if redis_url else None
+        self._redis_client: Redis | None = (
+            Redis.from_url(
+                redis_url,
+                decode_responses=True,
+                health_check_interval=30,
+                socket_timeout=configuracoes.redis_socket_timeout_seconds,
+                socket_connect_timeout=configuracoes.redis_connect_timeout_seconds,
+            )
+            if redis_url
+            else None
+        )
         self._memory_store: dict[str, float] = {}
         self._lock = asyncio.Lock()
 
@@ -43,6 +53,23 @@ class SpamDedupStore:
             for key in expired_keys:
                 self._memory_store.pop(key, None)
             return True
+
+    async def release(self, content_hash: str) -> None:
+        """Releases a previously reserved hash after a failed request."""
+        if self._redis_client is not None:
+            await self._redis_client.delete(self._key(content_hash))
+            return
+
+        async with self._lock:
+            self._memory_store.pop(content_hash, None)
+
+    async def clear(self) -> None:
+        """Clears the in-memory store for test isolation."""
+        if self._redis_client is not None:
+            return
+
+        async with self._lock:
+            self._memory_store.clear()
 
 
 spam_dedup_store = SpamDedupStore(configuracoes.redis_url)

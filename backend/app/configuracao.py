@@ -77,6 +77,34 @@ class Configuracoes(BaseSettings):
         alias="OTLP_ENDPOINT",
         description="Endpoint OTLP para exportar traces (ex: http://jaeger:4318). Vazio = ConsoleExporter.",
     )
+    formspree_timeout_seconds: float = Field(
+        default=10.0,
+        alias="FORMSPREE_TIMEOUT_SECONDS",
+    )
+    redis_socket_timeout_seconds: float = Field(
+        default=5.0,
+        alias="REDIS_SOCKET_TIMEOUT_SECONDS",
+    )
+    redis_connect_timeout_seconds: float = Field(
+        default=5.0,
+        alias="REDIS_CONNECT_TIMEOUT_SECONDS",
+    )
+    db_connect_timeout_seconds: float = Field(
+        default=5.0,
+        alias="DB_CONNECT_TIMEOUT_SECONDS",
+    )
+    db_command_timeout_seconds: float = Field(
+        default=10.0,
+        alias="DB_COMMAND_TIMEOUT_SECONDS",
+    )
+    metrics_basic_auth_username: str = Field(
+        default="",
+        alias="METRICS_BASIC_AUTH_USERNAME",
+    )
+    metrics_basic_auth_password: str = Field(
+        default="",
+        alias="METRICS_BASIC_AUTH_PASSWORD",
+    )
 
     def lista_origens_permitidas(self) -> list[str]:
         """
@@ -102,6 +130,47 @@ class Configuracoes(BaseSettings):
         Isto evita vazar stack traces em produção.
         """
         return self.ambiente in ("desenvolvimento", "local")
+
+    @property
+    def is_production(self) -> bool:
+        return self.ambiente == "producao"
+
+    @property
+    def metrics_basic_auth_enabled(self) -> bool:
+        return bool(
+            self.metrics_basic_auth_username.strip()
+            and self.metrics_basic_auth_password.strip()
+        )
+
+    def validar_producao(self) -> None:
+        """Garante requisitos mínimos de segurança e infraestrutura em produção."""
+        if not self.is_production:
+            return
+
+        erros: list[str] = []
+
+        if self.database_url.startswith("sqlite"):
+            erros.append("SQLite is not allowed in production")
+
+        if not self.database_url.startswith("postgresql+asyncpg://"):
+            erros.append("DATABASE_URL must use postgresql+asyncpg in production")
+
+        if not self.redis_url:
+            erros.append("REDIS_URL is required in production")
+
+        if not self.metrics_basic_auth_enabled:
+            erros.append(
+                "METRICS_BASIC_AUTH_USERNAME and METRICS_BASIC_AUTH_PASSWORD are required in production"
+            )
+
+        if "*" in self.origens_permitidas:
+            erros.append("ORIGENS_PERMITIDAS cannot contain wildcard '*' in production")
+
+        if self.regex_origens_permitidas and self.regex_origens_permitidas.strip() in {".*", "^.*$"}:
+            erros.append("REGEX_ORIGENS_PERMITIDAS is too permissive for production")
+
+        if erros:
+            raise RuntimeError("Invalid production configuration: " + "; ".join(erros))
 
 
 # Instância global de configurações

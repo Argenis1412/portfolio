@@ -18,12 +18,16 @@ from app.casos_uso import EnviarContatoUseCase
 from app.controladores.dependencias import obter_enviar_contato_use_case
 from app.core.excecoes import ErroInfraestrutura
 from app.core.idempotencia import store, verificar_idempotencia
-from app.core.limite import check_rate_limit
+from app.core.limite import check_rate_limit, get_client_ip, get_contact_fingerprint_key
 from app.core.spam_check import calculate_spam_score
 from app.core.spam_store import spam_dedup_store
 from app.esquemas.contato import RequisicaoContato, RespostaContato
 
 logger = structlog.get_logger(__name__)
+
+
+def _email_domain(email: str) -> str:
+    return email.split("@")[-1].lower() if "@" in email else "invalid-email"
 
 roteador = APIRouter(tags=["Contato"])
 
@@ -49,6 +53,8 @@ async def enviar_contato(
     idempotency_key: Annotated[Optional[str], Depends(verificar_idempotencia)] = None,
 ) -> RespostaContato:
     resposta_cacheavel: RespostaContato | None = None
+    content_hash: str | None = None
+    dedup_reserved = False
 
     try:
         if requisicao.website or requisicao.fax:
@@ -56,10 +62,12 @@ async def enviar_contato(
                 "contact_blocked",
                 classification="HONEYPOT",
                 action="silent_drop",
+                event_type="security_event",
                 honeypot_fields=[
                     field for field in ("website", "fax")
                     if getattr(requisicao, field, None)
                 ],
+                client_ip=get_client_ip(request),
             )
             resposta_cacheavel = RespostaContato(
                 sucesso=True,
@@ -74,8 +82,9 @@ async def enviar_contato(
                 "contact_classified",
                 classification="SILENT_SPAM",
                 action="silent_drop",
+                event_type="security_event",
                 spam_score=spam_score,
-                email_domain=requisicao.email.split("@")[-1].lower(),
+                email_domain=_email_domain(requisicao.email),
             )
             resposta_cacheavel = RespostaContato(
                 sucesso=True,
@@ -87,11 +96,13 @@ async def enviar_contato(
         content_str = f"{(requisicao.email or '').lower()}:{normalized_message}"
         content_hash = hashlib.sha256(content_str.encode()).hexdigest()
 
-        if not await spam_dedup_store.reserve(content_hash, ttl_seconds=1800):
+        dedup_reserved = await spam_dedup_store.reserve(content_hash, ttl_seconds=1800)
+        if not dedup_reserved:
             logger.info(
                 "duplicate_content_detected",
-                content_hash=content_hash,
-                email=requisicao.email,
+                event_type="security_event",
+                content_hash_prefix=content_hash[:12],
+                email_domain=_email_domain(requisicao.email),
                 context="shared_dedup_store",
             )
             return JSONResponse(
@@ -101,6 +112,8 @@ async def enviar_contato(
 
         check_rate_limit(request, "10/day")
         check_rate_limit(request, "20/minute")
+        check_rate_limit(request, "30/hour", key_func=get_client_ip)
+        check_rate_limit(request, "30/hour", key_func=get_contact_fingerprint_key)
 
         is_suspicious = spam_score > 30
         logger.info(
@@ -108,7 +121,7 @@ async def enviar_contato(
             classification="SUSPECT" if is_suspicious else "NORMAL",
             action="deliver_with_flag" if is_suspicious else "deliver",
             spam_score=spam_score,
-            email_domain=requisicao.email.split("@")[-1].lower(),
+            email_domain=_email_domain(requisicao.email),
         )
 
         try:
@@ -125,7 +138,8 @@ async def enviar_contato(
                 logger.info(
                     "Mensagem de contato processada",
                     is_suspicious=is_suspicious,
-                    email=requisicao.email,
+                    email_domain=_email_domain(requisicao.email),
+                    client_ip=get_client_ip(request),
                 )
             elif not is_suspicious:
                 raise ErroInfraestrutura(
@@ -136,7 +150,8 @@ async def enviar_contato(
             else:
                 logger.warning(
                     "suspect_delivery_failed_silently",
-                    email=requisicao.email,
+                    event_type="security_event",
+                    email_domain=_email_domain(requisicao.email),
                 )
         except Exception as e:
             if not is_suspicious:
@@ -151,7 +166,8 @@ async def enviar_contato(
             logger.error(
                 "suspect_delivery_crash_silently",
                 error=str(e),
-                email=requisicao.email,
+                event_type="security_event",
+                email_domain=_email_domain(requisicao.email),
             )
 
         resposta_cacheavel = RespostaContato(
@@ -160,6 +176,9 @@ async def enviar_contato(
         )
         return resposta_cacheavel
     finally:
+        if dedup_reserved and content_hash and resposta_cacheavel is None:
+            await spam_dedup_store.release(content_hash)
+
         if idempotency_key:
             if resposta_cacheavel is not None:
                 await store.set(idempotency_key, 200, resposta_cacheavel.model_dump())

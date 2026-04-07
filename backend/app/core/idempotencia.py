@@ -32,8 +32,8 @@ class IdempotencyStore:
                 configuracoes.redis_url,
                 decode_responses=True,
                 health_check_interval=30,
-                socket_timeout=5,
-                socket_connect_timeout=5,
+                socket_timeout=configuracoes.redis_socket_timeout_seconds,
+                socket_connect_timeout=configuracoes.redis_connect_timeout_seconds,
             )
 
     def _redis_key(self, key: str) -> str:

@@ -8,9 +8,19 @@ from abc import ABC, abstractmethod
 import httpx
 import structlog
 
+from app.configuracao import configuracoes
 from app.entidades.mensagem import Mensagem
 
 logger = structlog.get_logger(__name__)
+
+
+def _mascarar_email(valor: str) -> str:
+    if "@" not in valor:
+        return "invalid-email"
+
+    usuario, dominio = valor.split("@", 1)
+    prefixo = usuario[:2] if len(usuario) >= 2 else usuario[:1]
+    return f"{prefixo}***@{dominio.lower()}"
 
 
 class EmailAdaptador(ABC):
@@ -55,6 +65,7 @@ class FormspreeEmailAdaptador(EmailAdaptador):
         """
         self._configurado = bool(form_id and form_id.strip())
         self.url_endpoint = f"{formspree_url}/{form_id}"
+        self._timeout_seconds = configuracoes.formspree_timeout_seconds
 
     async def enviar_mensagem(self, mensagem: Mensagem) -> bool:
         """
@@ -77,7 +88,15 @@ class FormspreeEmailAdaptador(EmailAdaptador):
             return False
 
         try:
-            async with httpx.AsyncClient() as cliente:
+            timeout = httpx.Timeout(
+                timeout=self._timeout_seconds,
+                connect=min(self._timeout_seconds, 5.0),
+                read=self._timeout_seconds,
+                write=self._timeout_seconds,
+            )
+            limits = httpx.Limits(max_connections=10, max_keepalive_connections=5)
+
+            async with httpx.AsyncClient(timeout=timeout, limits=limits) as cliente:
                 resposta = await cliente.post(
                     self.url_endpoint,
                     data={
@@ -88,20 +107,17 @@ class FormspreeEmailAdaptador(EmailAdaptador):
                         "message": mensagem.mensagem,
                     },
                     headers={"Accept": "application/json"},
-                    timeout=10.0,
                 )
                 sucesso = resposta.status_code in range(200, 300)
                 if sucesso:
                     logger.info(
                         "formspree_envio_sucesso",
                         status_code=resposta.status_code,
-                        response_body=resposta.text[:200],  # Ver se tem algo como "needs capture"
                     )
                 else:
                     logger.warning(
                         "formspree_envio_falha_status",
                         status_code=resposta.status_code,
-                        response_body=resposta.text[:200],
                     )
                 return sucesso
         except httpx.TimeoutException:
@@ -132,9 +148,9 @@ class ConsoleEmailAdaptador(EmailAdaptador):
         logger.info(
             "contato_recebido_console",
             nome=mensagem.nome,
-            email=mensagem.email,
+            email=_mascarar_email(mensagem.email),
             assunto=mensagem.assunto,
-            mensagem_resumo=mensagem.mensagem[:50] + "..." if len(mensagem.mensagem) > 50 else mensagem.mensagem,
+            mensagem_tamanho=len(mensagem.mensagem),
             status="interceptado_pelo_console",
         )
         return True

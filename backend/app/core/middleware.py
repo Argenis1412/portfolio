@@ -10,6 +10,8 @@ Adiciona:
 
 import time
 import uuid
+import base64
+import hmac
 from typing import Callable
 
 import structlog
@@ -19,10 +21,48 @@ from starlette.types import ASGIApp
 
 # Configurar structlog no módulo
 from app.adaptadores.logger_adaptador import configurar_structlog
+from app.configuracao import configuracoes
 from app.core.limite import get_client_ip
 
 configurar_structlog()
 logger = structlog.get_logger(__name__)
+
+
+def _mascarar_email(valor: str) -> str:
+    if "@" not in valor:
+        return "invalid-email"
+
+    usuario, dominio = valor.split("@", 1)
+    prefixo = usuario[:2] if len(usuario) >= 2 else usuario[:1]
+    return f"{prefixo}***@{dominio.lower()}"
+
+
+def _identidade_logavel(request: Request) -> str:
+    identidade = getattr(request.state, "identidade", None)
+    if not identidade:
+        return "ip"
+
+    if identidade.startswith("email:"):
+        return f"email:{_mascarar_email(identidade.split(':', 1)[1])}"
+
+    return identidade
+
+
+def _credenciais_metrics_validas(authorization_header: str | None) -> bool:
+    if not authorization_header or not authorization_header.startswith("Basic "):
+        return False
+
+    try:
+        encoded_credentials = authorization_header.split(" ", 1)[1]
+        decoded = base64.b64decode(encoded_credentials).decode("utf-8")
+        username, password = decoded.split(":", 1)
+    except Exception:
+        return False
+
+    return hmac.compare_digest(username, configuracoes.metrics_basic_auth_username) and hmac.compare_digest(
+        password,
+        configuracoes.metrics_basic_auth_password,
+    )
 
 
 def _obter_trace_id() -> str:
@@ -110,7 +150,7 @@ class MiddlewareRequisicao(BaseHTTPMiddleware):
             "requisicao_recebida",
             query=str(request.url.query) if request.url.query else None,
             client_ip=get_client_ip(request),
-            identidade=getattr(request.state, "identidade", "ip"),
+            identidade=_identidade_logavel(request),
         )
         
         # Processar requisição
@@ -168,5 +208,27 @@ class SegurancaHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        response.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
         
         return response
+
+
+class MetricsAccessMiddleware(BaseHTTPMiddleware):
+    """Restricts /metrics in production using basic auth."""
+
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+        if request.url.path != "/metrics" or not configuracoes.is_production:
+            return await call_next(request)
+
+        if _credenciais_metrics_validas(request.headers.get("authorization")):
+            return await call_next(request)
+
+        logger.warning(
+            "metrics_access_denied",
+            client_ip=get_client_ip(request),
+        )
+        return Response(
+            status_code=401,
+            headers={"WWW-Authenticate": 'Basic realm="metrics"'},
+        )
