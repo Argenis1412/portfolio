@@ -20,7 +20,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 from app.configuracao import configuracoes
 from app.controladores import roteador_saude
 from app.controladores.v1 import roteador_v1
-from app.core.middleware import MiddlewareRequisicao, SegurancaHeadersMiddleware
+from app.core.middleware import MiddlewareRequisicao, MetricsAccessMiddleware, SegurancaHeadersMiddleware
 from app.core.handlers import registrar_handlers_excecao
 from app.core.observabilidade import configurar_observabilidade
 
@@ -47,6 +47,7 @@ def criar_aplicacao() -> FastAPI:
     """
     # Configurar logging antes de criar app
     # Logging estruturado configurado automaticamente via middleware
+    configuracoes.validar_producao()
     
     aplicacao = FastAPI(
         title=configuracoes.nome_app,
@@ -177,6 +178,9 @@ def _configurar_middleware(aplicacao: FastAPI) -> None:
     """
     # 1. Logging y Request ID
     aplicacao.add_middleware(MiddlewareRequisicao)
+
+    # 1.5. Proteção do endpoint de métricas em produção
+    aplicacao.add_middleware(MetricsAccessMiddleware)
     
     # 2. Compresión GZip (Ahorro de ancho de banda)
     # Solo comprime respuestas > 1KB

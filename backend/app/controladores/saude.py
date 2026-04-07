@@ -20,6 +20,16 @@ _INICIO_APLICACAO = time.time()
 
 
 @roteador.get(
+    "/live",
+    summary="API liveness check",
+    description="Returns OK when the API process is running without checking external dependencies.",
+)
+async def verificar_liveness() -> dict:
+    """Cheap liveness endpoint for keep-alive jobs and platform probes."""
+    return {"status": "ok", "mensagem": "API alive"}
+
+
+@roteador.get(
     "/saude",
     response_model=RespostaSaude,
     summary="API health check",

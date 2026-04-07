@@ -69,6 +69,7 @@ def test_spam_score_medium_suspect(mock_use_case):
     mock_use_case.executar.assert_called_once()
     args, kwargs = mock_use_case.executar.call_args
     assert kwargs["is_suspicious"] is True
+    assert kwargs["spam_score"] > 30
 
 def test_normal_message_not_suspect(mock_use_case):
     """Verifica se mensagem normal passa sem marcação."""

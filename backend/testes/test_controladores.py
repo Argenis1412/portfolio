@@ -29,6 +29,14 @@ def test_saude_retorna_ok(client):
     assert "mensagem" in data
 
 
+def test_live_retorna_ok_sem_dependencias(client):
+    """Testa endpoint GET /live retorna status ok sem consultar DB."""
+    response = client.get("/live")
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "ok"
+
+
 def test_obter_sobre_retorna_200(client):
     """Testa endpoint GET /api/v1/sobre retorna 200."""
     response = client.get("/api/v1/sobre")

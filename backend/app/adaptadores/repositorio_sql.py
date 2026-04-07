@@ -45,6 +45,12 @@ class RepositorioSQL(RepositorioPortfolio):
             engine_kwargs.update(
                 pool_pre_ping=True,
                 pool_recycle=300,
+                pool_timeout=5,
+                connect_args={
+                    "timeout": configuracoes.db_connect_timeout_seconds,
+                    "command_timeout": configuracoes.db_command_timeout_seconds,
+                    "server_settings": {"application_name": configuracoes.nome_app},
+                },
             )
 
         self.engine = create_async_engine(database_url, **engine_kwargs)

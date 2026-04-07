@@ -46,6 +46,7 @@ class EnviarContatoUseCase:
         assunto: str,
         mensagem: str,
         is_suspicious: bool = False,
+        spam_score: int | None = None,
     ) -> bool:
         """
         Executa caso de uso de envio de mensagem.
@@ -56,6 +57,7 @@ class EnviarContatoUseCase:
             assunto: Assunto da mensagem.
             mensagem: Conteúdo da mensagem.
             is_suspicious: Se a mensagem é suspeita de spam.
+            spam_score: Score heuristico usado na classificacao.
 
         Returns:
             bool: True se enviado com sucesso, False caso contrário.
@@ -75,10 +77,20 @@ class EnviarContatoUseCase:
         assunto_base = assunto.strip() if assunto and assunto.strip() else "Contacto vía Portafolio"
         
         # Marcar como suspeito no assunto se necessário
-        assunto_final = f"[CONTACTO SOSPECHOSO] {assunto_base}" if is_suspicious else assunto_base
+        assunto_final = f"[POSSIBLE SPAM] {assunto_base}" if is_suspicious else assunto_base
 
-        # Adicionar aviso visual no corpo se for suspeito
-        mensaje_conteudo = f"⚠️ ADVERTENCIA: CONTENIDO SOSPECHOSO ⚠️\n\n{mensagem}" if is_suspicious else mensagem
+        if is_suspicious:
+            warning_lines = [
+                "SECURITY ALERT: POSSIBLE SPAM",
+                f"Spam score: {spam_score if spam_score is not None else 'unknown'}/100",
+                f"Sender email: {email}",
+                "Review this message before replying.",
+                "",
+                mensagem,
+            ]
+            mensaje_conteudo = "\n".join(warning_lines)
+        else:
+            mensaje_conteudo = mensagem
 
         # Criar entidade de domínio
         mensagem_entidade = Mensagem(

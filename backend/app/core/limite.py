@@ -6,6 +6,7 @@ from fastapi import Request
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from app.configuracao import configuracoes
+import hashlib
 
 
 def get_client_ip(request: Request) -> str:
@@ -33,6 +34,14 @@ def get_email_or_ip_key(request: Request) -> str:
         return identidade
 
     return get_client_ip(request)
+
+
+def get_contact_fingerprint_key(request: Request) -> str:
+    """Combina IP e user-agent para limitar bursts não autenticados."""
+    client_ip = get_client_ip(request)
+    user_agent = request.headers.get("user-agent", "unknown")
+    fingerprint = hashlib.sha256(f"{client_ip}:{user_agent}".encode()).hexdigest()[:16]
+    return f"fingerprint:{fingerprint}"
 
 
 # Inicializar limiter baseado no IP do cliente por padrão

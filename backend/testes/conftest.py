@@ -256,6 +256,7 @@ def reset_global_state():
     """
     from app.core.idempotencia import store
     from app.core.limite import limiter
+    from app.core.spam_store import spam_dedup_store
     
     # Limpar caches de idempotência
     if hasattr(store, "_cache"):
@@ -272,6 +273,9 @@ def reset_global_state():
         except TypeError:
             # Se clear() pedir argumentos, ignoramos ou tentamos outra forma
             pass
+
+    if hasattr(spam_dedup_store, "_memory_store"):
+        spam_dedup_store._memory_store.clear()
 
 
 @pytest.fixture(autouse=True)

@@ -120,6 +120,27 @@ async def test_enviar_contato_sucesso(email_adaptador_mock, logger_mock):
     assert sucesso is True
     email_adaptador_mock.enviar_mensagem.assert_called_once()
     logger_mock.info.assert_called()
+
+
+@pytest.mark.asyncio
+async def test_enviar_contato_suspeito_recebe_marcacao_visivel(email_adaptador_mock, logger_mock):
+    """Testa se emails suspeitos recebem aviso forte no assunto e corpo."""
+    uc = EnviarContatoUseCase(email_adaptador_mock, logger_mock)
+    email_adaptador_mock.enviar_mensagem.return_value = True
+
+    await uc.executar(
+        nome="Maria",
+        email="maria@example.com",
+        assunto="Security review",
+        mensagem="Please click this urgent link.",
+        is_suspicious=True,
+        spam_score=45,
+    )
+
+    mensagem_enviada = email_adaptador_mock.enviar_mensagem.call_args.args[0]
+    assert mensagem_enviada.assunto.startswith("[POSSIBLE SPAM]")
+    assert "SECURITY ALERT: POSSIBLE SPAM" in mensagem_enviada.mensagem
+    assert "Spam score: 45/100" in mensagem_enviada.mensagem
     
 
 @pytest.mark.asyncio

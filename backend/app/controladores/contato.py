@@ -7,23 +7,27 @@ Endpoint:
 
 from typing import Annotated, Optional
 
+import hashlib
+import re
+
+import structlog
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 
-from app.esquemas.contato import RequisicaoContato, RespostaContato
 from app.casos_uso import EnviarContatoUseCase
-from app.controladores.dependencias import obter_enviar_contato_use_case, obter_repositorio
-from app.adaptadores.repositorio import RepositorioPortfolio
+from app.controladores.dependencias import obter_enviar_contato_use_case
 from app.core.excecoes import ErroInfraestrutura
-from app.core.limite import check_rate_limit
-from app.core.idempotencia import verificar_idempotencia, store
+from app.core.idempotencia import store, verificar_idempotencia
+from app.core.limite import check_rate_limit, get_client_ip, get_contact_fingerprint_key
 from app.core.spam_check import calculate_spam_score
-import structlog
-import hashlib
-import re
-import time
+from app.core.spam_store import spam_dedup_store
+from app.esquemas.contato import RequisicaoContato, RespostaContato
 
 logger = structlog.get_logger(__name__)
+
+
+def _email_domain(email: str) -> str:
+    return email.split("@")[-1].lower() if "@" in email else "invalid-email"
 
 roteador = APIRouter(tags=["Contato"])
 
@@ -46,26 +50,24 @@ async def enviar_contato(
         EnviarContatoUseCase,
         Depends(obter_enviar_contato_use_case),
     ],
-    repositorio: Annotated[
-        RepositorioPortfolio,
-        Depends(obter_repositorio),
-    ],
     idempotency_key: Annotated[Optional[str], Depends(verificar_idempotencia)] = None,
 ) -> RespostaContato:
     resposta_cacheavel: RespostaContato | None = None
+    content_hash: str | None = None
+    dedup_reserved = False
 
     try:
-        # 1. Honeypot Check (Direct Bot Trap)
-        # Bots often fill all available input fields automatically.
         if requisicao.website or requisicao.fax:
             logger.info(
                 "contact_blocked",
                 classification="HONEYPOT",
                 action="silent_drop",
+                event_type="security_event",
                 honeypot_fields=[
                     field for field in ("website", "fax")
                     if getattr(requisicao, field, None)
                 ],
+                client_ip=get_client_ip(request),
             )
             resposta_cacheavel = RespostaContato(
                 sucesso=True,
@@ -73,7 +75,6 @@ async def enviar_contato(
             )
             return resposta_cacheavel
 
-        # 2. Spam Scoring (Heuristic Filter)
         spam_score = calculate_spam_score(requisicao.mensagem, requisicao.email)
 
         if spam_score >= 70:
@@ -81,8 +82,9 @@ async def enviar_contato(
                 "contact_classified",
                 classification="SILENT_SPAM",
                 action="silent_drop",
+                event_type="security_event",
                 spam_score=spam_score,
-                email_domain=requisicao.email.split("@")[-1].lower(),
+                email_domain=_email_domain(requisicao.email),
             )
             resposta_cacheavel = RespostaContato(
                 sucesso=True,
@@ -90,36 +92,36 @@ async def enviar_contato(
             )
             return resposta_cacheavel
 
-        # 3. Verificação de conteúdo duplicado (Deduplicação Persistente de 30 minutos)
         normalized_message = re.sub(r"\s+", " ", requisicao.mensagem or "").strip().lower()
         content_str = f"{(requisicao.email or '').lower()}:{normalized_message}"
         content_hash = hashlib.sha256(content_str.encode()).hexdigest()
 
-        if await repositorio.verificar_duplicata_spam(content_hash, ttl_seconds=1800):
+        dedup_reserved = await spam_dedup_store.reserve(content_hash, ttl_seconds=1800)
+        if not dedup_reserved:
             logger.info(
                 "duplicate_content_detected",
-                content_hash=content_hash,
-                email=requisicao.email,
-                context="persistent_db_filter",
+                event_type="security_event",
+                content_hash_prefix=content_hash[:12],
+                email_domain=_email_domain(requisicao.email),
+                context="shared_dedup_store",
             )
             return JSONResponse(
                 status_code=400,
                 content={"erro": {"codigo": "CONTEUDO_DUPLICADO"}, "detail": "DUPLICATE_CONTENT"},
             )
 
-        # 4. Rate Limit (Manual)
-        # Só contamos requests que passaram pelos filtros silenciosos e não eram duplicadas.
         check_rate_limit(request, "10/day")
         check_rate_limit(request, "20/minute")
+        check_rate_limit(request, "30/hour", key_func=get_client_ip)
+        check_rate_limit(request, "30/hour", key_func=get_contact_fingerprint_key)
 
-        # 5. Classificação do envio
         is_suspicious = spam_score > 30
         logger.info(
             "contact_classified",
             classification="SUSPECT" if is_suspicious else "NORMAL",
             action="deliver_with_flag" if is_suspicious else "deliver",
             spam_score=spam_score,
-            email_domain=requisicao.email.split("@")[-1].lower(),
+            email_domain=_email_domain(requisicao.email),
         )
 
         try:
@@ -129,13 +131,15 @@ async def enviar_contato(
                 assunto=requisicao.assunto,
                 mensagem=requisicao.mensagem,
                 is_suspicious=is_suspicious,
+                spam_score=spam_score,
             )
 
             if sucesso:
                 logger.info(
                     "Mensagem de contato processada",
                     is_suspicious=is_suspicious,
-                    email=requisicao.email,
+                    email_domain=_email_domain(requisicao.email),
+                    client_ip=get_client_ip(request),
                 )
             elif not is_suspicious:
                 raise ErroInfraestrutura(
@@ -146,7 +150,8 @@ async def enviar_contato(
             else:
                 logger.warning(
                     "suspect_delivery_failed_silently",
-                    email=requisicao.email,
+                    event_type="security_event",
+                    email_domain=_email_domain(requisicao.email),
                 )
         except Exception as e:
             if not is_suspicious:
@@ -161,12 +166,9 @@ async def enviar_contato(
             logger.error(
                 "suspect_delivery_crash_silently",
                 error=str(e),
-                email=requisicao.email,
+                event_type="security_event",
+                email_domain=_email_domain(requisicao.email),
             )
-
-        # Registramos o hash apenas após um resultado final visível como sucesso.
-        # Isso evita envenenar a deduplicação quando há 429 ou falhas de entrega.
-        await repositorio.registrar_spam(content_hash, time.time())
 
         resposta_cacheavel = RespostaContato(
             sucesso=True,
@@ -174,6 +176,9 @@ async def enviar_contato(
         )
         return resposta_cacheavel
     finally:
+        if dedup_reserved and content_hash and resposta_cacheavel is None:
+            await spam_dedup_store.release(content_hash)
+
         if idempotency_key:
             if resposta_cacheavel is not None:
                 await store.set(idempotency_key, 200, resposta_cacheavel.model_dump())
