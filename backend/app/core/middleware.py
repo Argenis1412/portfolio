@@ -129,21 +129,6 @@ class MiddlewareRequisicao(BaseHTTPMiddleware):
         
         # Timestamp de início
         inicio = time.time()
-        
-        # Extrair identidade para rate limiting se for contato
-        if request.method == "POST" and "/v1/contato" in request.url.path:
-            content_length = request.headers.get("content-length")
-            # Mitigação de Memory DoS: Só carrega o JSON na memória se for <= 10KB
-            if content_length and content_length.isdigit() and int(content_length) <= 10240:
-                try:
-                    # Tentar ler o corpo sem consumir o stream de forma destrutiva
-                    # Em Starlette, se lermos .json(), ele fica em cache no objeto request
-                    body = await request.json()
-                    email = body.get("email")
-                    if email and isinstance(email, str):
-                        request.state.identidade = f"email:{email.lower().strip()}"
-                except Exception:
-                    pass
 
         # Log da requisição recebida
         logger.info(

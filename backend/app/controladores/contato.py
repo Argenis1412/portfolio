@@ -110,6 +110,9 @@ async def enviar_contato(
                 content={"erro": {"codigo": "CONTEUDO_DUPLICADO"}, "detail": "DUPLICATE_CONTENT"},
             )
 
+        # Extrair identidade para rate limiting baseada no email validado
+        request.state.identidade = f"email:{requisicao.email.lower().strip()}"
+        
         check_rate_limit(request, "10/day")
         check_rate_limit(request, "20/minute")
         check_rate_limit(request, "30/hour", key_func=get_client_ip)

@@ -116,6 +116,14 @@ h1, h2, h3 {
   @apply transition-all duration-300 ease-in-out;
 }
 
+/* ─── Scroll offset for fixed navbar (64 px = h-16) ─────────────
+   Without this, anchor targets appear hidden behind the navbar.
+   All direct section targets (hero, stack, projects, experience,
+   contact) benefit from this universal rule.                     */
+section[id] {
+  scroll-margin-top: 4.5rem; /* 72 px — slight extra breathing room */
+}
+
 /* ─── Scroll reveal ──────────────────────────────────────────── */
 .reveal-hidden {
   opacity: 0;

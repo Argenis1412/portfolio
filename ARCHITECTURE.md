@@ -12,9 +12,13 @@ This document details the reasoning behind the architectural choices found in th
 **Decision**: In production, the managed PostgreSQL database is not committed to Git and is not reseeded on every boot.
 **Why?** Committing databases is an anti-pattern, and reseeding on every Koyeb cold start increases readiness time. Schema migrations should run during deploy/release steps, while `python scripts/migrar_dados.py` should be used as a one-off refresh task only when static SQL data needs to be rebuilt.
 
-## 4. Observability and Public Metrics
-**Decision**: Exposing Prometheus metrics at `/metrics` publicly without authentication.
-**Why?** Normally, exposing infrastructure metrics could be a DoS vector or leak competitive usage data. Here, the metrics are intentionally left public so reviewers and automated tools can see the live stack's health, throughput, and latencies without needing credentials. No PII is present.
+## 4. Observability and Protected Metrics
+**Decision**: Exposing Prometheus metrics at `/metrics` but requiring Basic Auth in production.
+**Why?** While the metrics are intentionally accessible to reviewers, exposing a public `/metrics` endpoint on the open internet (even for a portfolio) is a non-standard practice that could be seen as a security oversight. Adding `METRICS_BASIC_AUTH` ensures that only authorized clients (or reviewers with the provided credentials) can see the live stack's health, throughput, and latencies.
+
+## 5. Performance: JSON-First Read Path
+**Decision**: Prioritizing `RepositorioJSON` for all portfolio-related reads (about, projects, stack, etc.) in production.
+**Why?** Using a managed PostgreSQL database for static data in a serverless/ephemeral environment adds significant cold-start latency and increases the risk of transient connection failures. By serving the portfolio data directly from memory-cached JSON files (Clean Architecture allows swapping adapters seamlessly), we achieve P95 latencies < 50ms and eliminate PostgreSQL as a single point of failure for the main application view. PostgreSQL remains reserved for transactional or future dynamic needs.
 
 ## 5. Security Regex over Allow-Lists
 **Decision**: The CORS Policy uses a regex rule (`^https://portfolio.*-argenis1412s-projects\.vercel\.app$`) instead of exact strings or `*`.

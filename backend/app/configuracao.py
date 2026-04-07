@@ -97,6 +97,29 @@ class Configuracoes(BaseSettings):
         default=10.0,
         alias="DB_COMMAND_TIMEOUT_SECONDS",
     )
+    db_pool_size: int = Field(
+        default=2,
+        alias="DB_POOL_SIZE",
+        description="SQLAlchemy pool size (default 2 for serverless/small instances).",
+    )
+    db_max_overflow: int = Field(
+        default=5,
+        alias="DB_MAX_OVERFLOW",
+        description="SQLAlchemy max overflow connections.",
+    )
+    db_pool_recycle_seconds: int = Field(
+        default=300,
+        alias="DB_POOL_RECYCLE_SECONDS",
+    )
+    db_pool_timeout_seconds: float = Field(
+        default=30.0,
+        alias="DB_POOL_TIMEOUT_SECONDS",
+    )
+    db_pool_use_lifo: bool = Field(
+        default=True,
+        alias="DB_POOL_USE_LIFO",
+        description="Use LIFO for pool connections (better for serverless).",
+    )
     metrics_basic_auth_username: str = Field(
         default="",
         alias="METRICS_BASIC_AUTH_USERNAME",

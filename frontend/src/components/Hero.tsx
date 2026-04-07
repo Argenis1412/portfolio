@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
+import { scrollToSection } from '../utils/scrollToSection';
 import profilePic from '../assets/profile/profile.jpg';
 
 export default function Hero() {
@@ -43,12 +44,19 @@ export default function Hero() {
             transition={{ duration: 0.8, delay: 0.6 }}
             className="flex flex-col sm:flex-row justify-center md:justify-start gap-4"
           >
-            <a href="#projects" className="bg-app-primary hover:bg-app-primary-hover text-white font-bold py-3 px-8 rounded-full transition-smooth premium-shadow">
+            <button
+              onClick={() => scrollToSection('projects')}
+              className="bg-app-primary hover:bg-app-primary-hover text-white font-bold py-3 px-8 rounded-full transition-smooth premium-shadow"
+            >
               {t('nav.projects')}
-            </a>
-            <a href="#contact" className="bg-transparent hover:bg-app-surface-hover text-app-text font-semibold py-3 px-8 rounded-full transition-smooth border border-app-border">
+            </button>
+            <button
+              data-testid="hero-contact-cta"
+              onClick={() => scrollToSection('contato')}
+              className="bg-transparent hover:bg-app-surface-hover text-app-text font-semibold py-3 px-8 rounded-full transition-smooth border border-app-border"
+            >
               {t('nav.contact')}
-            </a>
+            </button>
           </motion.div>
         </div>
 

@@ -43,9 +43,12 @@ class RepositorioSQL(RepositorioPortfolio):
         engine_kwargs = {}
         if not database_url.startswith("sqlite"):
             engine_kwargs.update(
+                pool_size=configuracoes.db_pool_size,
+                max_overflow=configuracoes.db_max_overflow,
+                pool_recycle=configuracoes.db_pool_recycle_seconds,
+                pool_timeout=configuracoes.db_pool_timeout_seconds,
+                pool_use_lifo=configuracoes.db_pool_use_lifo,
                 pool_pre_ping=True,
-                pool_recycle=300,
-                pool_timeout=5,
                 connect_args={
                     "timeout": configuracoes.db_connect_timeout_seconds,
                     "command_timeout": configuracoes.db_command_timeout_seconds,

@@ -65,9 +65,17 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: 📦 Instalar ferramentas de lint
+      - name: 🧹 Executar ruff (lint + format)
         run: |
-          pip install ruff mypy
+          cd backend
+          ruff check .
+          ruff format --check .
+
+      - name: 🛡️ Executar mypy (tipagem gradual)
+        run: |
+          cd backend
+          # Gradual: check core and use cases first
+          mypy app/core app/casos_uso --ignore-missing-imports
 
       - name: 🔒 Verificar placeholders hardcodeados
         run: |
