@@ -12,8 +12,7 @@ jobs:
     steps:
       - name: Ping Backend API
         run: |
-          # Fazemos uma requisição simples ao endpoint /sobre para manter a instância viva.
-          # Usamos --max-time 30 porque se estiver dormindo, demorará para responder ao primeiro ping.
-          # -sSf suprime a saída, mas falha em caso de erro HTTP (embora se for 503, podemos querer ignorá-lo).
-          # Adicionamos || true para que um eventual erro (ex: se o Koyeb estiver desligado) não faça a Action falhar sempre e encha nossa caixa de e-mails.
-          curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://reluctant-sharia-argenis1412-98799132.koyeb.app/live || true
+          # Aquecemos o endpoint /saude porque ele executa um SELECT 1 real no PostgreSQL.
+          # Isso mantém backend e banco vivos, evitando cold starts duplos no Koyeb.
+          # O primeiro ping do dia pode demorar mais se a instância estiver dormindo.
+          curl -sS -o /dev/null -w "%{http_code}" --retry 2 --retry-delay 5 --max-time 60 https://selected-fionna-argenis1412-58caae17.koyeb.app/saude || true

@@ -6,20 +6,22 @@ Endpoint:
 """
 
 from typing import Annotated, Optional
-from fastapi import APIRouter, Depends, Request
 
-from app.esquemas.contato import RequisicaoContato, RespostaContato
+import hashlib
+import re
+
+import structlog
+from fastapi import APIRouter, Depends, Request
+from fastapi.responses import JSONResponse
+
 from app.casos_uso import EnviarContatoUseCase
 from app.controladores.dependencias import obter_enviar_contato_use_case
 from app.core.excecoes import ErroInfraestrutura
-from app.core.limite import limiter, get_email_or_ip_key, check_rate_limit
-from app.core.idempotencia import verificar_idempotencia, store
-from app.core.honeypot import is_honeypot_triggered
+from app.core.idempotencia import store, verificar_idempotencia
+from app.core.limite import check_rate_limit
 from app.core.spam_check import calculate_spam_score
 from app.core.spam_store import spam_dedup_store
-import structlog
-import hashlib
-import re
+from app.esquemas.contato import RequisicaoContato, RespostaContato
 
 logger = structlog.get_logger(__name__)
 
@@ -46,133 +48,120 @@ async def enviar_contato(
     ],
     idempotency_key: Annotated[Optional[str], Depends(verificar_idempotencia)] = None,
 ) -> RespostaContato:
-    # 1. Honeypot Check (Direct Bot Trap)
-    # Bots often fill all available input fields automatically.
-    if requisicao.website or requisicao.fax:
-        logger.info(
-            "contact_blocked",
-            classification="HONEYPOT",
-            action="silent_drop",
-            honeypot_fields=[
-                field for field in ("website", "fax")
-                if getattr(requisicao, field, None)
-            ],
-        )
-        return RespostaContato(
-            sucesso=True,
-            mensagem="Mensagem enviada com sucesso! Retornarei em breve.",
-        )
-
-    # 2. Spam Scoring (Heuristic Filter)
-    spam_score = calculate_spam_score(requisicao.mensagem, requisicao.email)
-    
-    # SILENT_SPAM (>= 70)
-    if spam_score >= 70:
-        logger.info(
-            "contact_classified",
-            classification="SILENT_SPAM",
-            action="silent_drop",
-            spam_score=spam_score,
-            email_domain=requisicao.email.split("@")[-1].lower(),
-        )
-        return RespostaContato(
-            sucesso=True,
-            mensagem="Mensagem enviada com sucesso! Retornarei em breve.",
-        )
-
-    # 3. Verificação de conteúdo duplicado compartilhada em Redis (30 minutos)
-    # Normalizar mensagem: colapsar espaços, trim e lower para reduzir falsos negativos
-    normalized_message = re.sub(r"\s+", " ", requisicao.mensagem or "").strip().lower()
-    content_str = f"{(requisicao.email or '').lower()}:{normalized_message}"
-    content_hash = hashlib.sha256(content_str.encode()).hexdigest()
-
-    # TTL de 30 minutos (1800 segundos) para deduplicação compartilhada
-    if not await spam_dedup_store.reserve(content_hash, ttl_seconds=1800):
-        from fastapi.responses import JSONResponse
-        logger.info(
-            "duplicate_content_detected",
-            content_hash=content_hash,
-            email=requisicao.email,
-            context="shared_dedup_store",
-        )
-        return JSONResponse(
-            status_code=400,
-            content={"erro": {"codigo": "CONTEUDO_DUPLICADO"}, "detail": "DUPLICATE_CONTENT"},
-        )
-
-    # 5. Rate Limit (Manual)
-    # Solo contamos como "hit" si la mensaje llegó hasta aquí (no es bot, no es spam silencioso, no es duplicado)
-    # Esto evita que intentos repetidos de duplicados bloqueen al usuario por 429.
-    check_rate_limit(request, "10/day")
-    check_rate_limit(request, "20/minute")
-
-    # SUSPECT (> 30)
-    is_suspicious = spam_score > 30
-    if is_suspicious:
-        logger.info(
-            "contact_classified",
-            classification="SUSPECT",
-            action="deliver_with_flag",
-            spam_score=spam_score,
-            email_domain=requisicao.email.split("@")[-1].lower(),
-        )
-    else:
-        logger.info(
-            "contact_classified",
-            classification="NORMAL",
-            action="deliver",
-            spam_score=spam_score,
-            email_domain=requisicao.email.split("@")[-1].lower(),
-        )
+    resposta_cacheavel: RespostaContato | None = None
 
     try:
-        sucesso = await enviar_contato_uc.executar(
-            nome=requisicao.nome,
-            email=requisicao.email,
-            assunto=requisicao.assunto,
-            mensagem=requisicao.mensagem,
-            is_suspicious=is_suspicious,
-            spam_score=spam_score,
-        )
-        
-        # Registrar conteúdo para evitar duplicatas nos próximos 5 minutos
-        # Fazemos isso se teve sucesso REAL ou se é SUSPEITO (pois para o usuário foi "sucesso")
-        if sucesso:
+        if requisicao.website or requisicao.fax:
             logger.info(
-                "Mensagem de contato processada",
-                is_suspicious=is_suspicious,
-                email=requisicao.email
+                "contact_blocked",
+                classification="HONEYPOT",
+                action="silent_drop",
+                honeypot_fields=[
+                    field for field in ("website", "fax")
+                    if getattr(requisicao, field, None)
+                ],
             )
-        else:
-            # Falhou o envio interno
-            if not is_suspicious:
-                # Se falhar e NÃO for suspeito, lançamos erro real
+            resposta_cacheavel = RespostaContato(
+                sucesso=True,
+                mensagem="Mensagem enviada com sucesso! Retornarei em breve.",
+            )
+            return resposta_cacheavel
+
+        spam_score = calculate_spam_score(requisicao.mensagem, requisicao.email)
+
+        if spam_score >= 70:
+            logger.info(
+                "contact_classified",
+                classification="SILENT_SPAM",
+                action="silent_drop",
+                spam_score=spam_score,
+                email_domain=requisicao.email.split("@")[-1].lower(),
+            )
+            resposta_cacheavel = RespostaContato(
+                sucesso=True,
+                mensagem="Mensagem enviada com sucesso! Retornarei em breve.",
+            )
+            return resposta_cacheavel
+
+        normalized_message = re.sub(r"\s+", " ", requisicao.mensagem or "").strip().lower()
+        content_str = f"{(requisicao.email or '').lower()}:{normalized_message}"
+        content_hash = hashlib.sha256(content_str.encode()).hexdigest()
+
+        if not await spam_dedup_store.reserve(content_hash, ttl_seconds=1800):
+            logger.info(
+                "duplicate_content_detected",
+                content_hash=content_hash,
+                email=requisicao.email,
+                context="shared_dedup_store",
+            )
+            return JSONResponse(
+                status_code=400,
+                content={"erro": {"codigo": "CONTEUDO_DUPLICADO"}, "detail": "DUPLICATE_CONTENT"},
+            )
+
+        check_rate_limit(request, "10/day")
+        check_rate_limit(request, "20/minute")
+
+        is_suspicious = spam_score > 30
+        logger.info(
+            "contact_classified",
+            classification="SUSPECT" if is_suspicious else "NORMAL",
+            action="deliver_with_flag" if is_suspicious else "deliver",
+            spam_score=spam_score,
+            email_domain=requisicao.email.split("@")[-1].lower(),
+        )
+
+        try:
+            sucesso = await enviar_contato_uc.executar(
+                nome=requisicao.nome,
+                email=requisicao.email,
+                assunto=requisicao.assunto,
+                mensagem=requisicao.mensagem,
+                is_suspicious=is_suspicious,
+                spam_score=spam_score,
+            )
+
+            if sucesso:
+                logger.info(
+                    "Mensagem de contato processada",
+                    is_suspicious=is_suspicious,
+                    email=requisicao.email,
+                )
+            elif not is_suspicious:
                 raise ErroInfraestrutura(
                     mensagem="Falha ao enviar mensagem de contato",
                     codigo="ERRO_ENVIO_CONTATO",
                     origem="formspree",
                 )
             else:
-                # Se falhar mas FOR suspeito... logamos mas o fluxo continua para o 200 OK final
                 logger.warning(
                     "suspect_delivery_failed_silently",
-                    email=requisicao.email
+                    email=requisicao.email,
                 )
-    except Exception as e:
-        if not is_suspicious:
-            if isinstance(e, ErroInfraestrutura): raise e
-            raise ErroInfraestrutura(mensagem=str(e), codigo="ERRO_INTERNO_CONTATO", origem="controller")
-        else:
-            logger.error("suspect_delivery_crash_silently", error=str(e), email=requisicao.email)
-    
+        except Exception as e:
+            if not is_suspicious:
+                if isinstance(e, ErroInfraestrutura):
+                    raise e
+                raise ErroInfraestrutura(
+                    mensagem=str(e),
+                    codigo="ERRO_INTERNO_CONTATO",
+                    origem="controller",
+                )
 
-    resposta = RespostaContato(
-        sucesso=True,
-        mensagem="Mensagem enviada com sucesso! Retornarei em breve.",
-    )
+            logger.error(
+                "suspect_delivery_crash_silently",
+                error=str(e),
+                email=requisicao.email,
+            )
 
-    if idempotency_key:
-        # Cache da resposta de sucesso
-        store.set(idempotency_key, 200, resposta.model_dump())
-    
-    return resposta
+        resposta_cacheavel = RespostaContato(
+            sucesso=True,
+            mensagem="Mensagem enviada com sucesso! Retornarei em breve.",
+        )
+        return resposta_cacheavel
+    finally:
+        if idempotency_key:
+            if resposta_cacheavel is not None:
+                await store.set(idempotency_key, 200, resposta_cacheavel.model_dump())
+            else:
+                await store.release(idempotency_key)

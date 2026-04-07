@@ -48,6 +48,32 @@ def test_idempotencia_contato(client):
     finally:
         app.dependency_overrides.pop(obter_enviar_contato_use_case, None)
 
+
+def test_idempotencia_contato_aceita_header_legado(client):
+    """Mantém compatibilidade com clientes que ainda enviam X-Idempotency-Key."""
+    payload = {
+        "nome": "Test User",
+        "email": "legacy@example.com",
+        "assunto": "Re: Test",
+        "mensagem": "Hello world, this is a long enough message."
+    }
+    headers = {"X-Idempotency-Key": "legacy-key-123"}
+
+    mock_uc = AsyncMock()
+    mock_uc.executar.return_value = True
+    app.dependency_overrides[obter_enviar_contato_use_case] = lambda: mock_uc
+
+    try:
+        resp1 = client.post("/api/v1/contato", json=payload, headers=headers)
+        assert resp1.status_code == 200
+
+        resp2 = client.post("/api/v1/contato", json=payload, headers=headers)
+        assert resp2.status_code == 200
+        assert resp2.headers.get("X-Cache-Idempotency") == "HIT"
+        assert mock_uc.executar.call_count == 1
+    finally:
+        app.dependency_overrides.pop(obter_enviar_contato_use_case, None)
+
 def test_rate_limiting_projetos(client):
     """Testa se o limite de 20/minuto funciona para projetos."""
     # Fazer 20 requisições rápidas (limite é 20/min)
@@ -116,6 +142,55 @@ def test_idempotencia_em_progresso(client):
         assert "already in progress" in resp.json()["detail"].lower()
     finally:
         store._cache.pop("progress-key-456", None)
+
+
+def test_idempotencia_libera_chave_apos_falha(client):
+    """Uma falha não deve deixar a chave travada em progresso até o TTL."""
+    payload = {
+        "nome": "Test User",
+        "email": "retry@example.com",
+        "assunto": "Retry test",
+        "mensagem": "Hello world, this is a long enough message."
+    }
+    headers = {"Idempotency-Key": "retry-after-failure"}
+
+    mock_uc = AsyncMock()
+    mock_uc.executar.side_effect = [False, True]
+    app.dependency_overrides[obter_enviar_contato_use_case] = lambda: mock_uc
+
+    try:
+        resp1 = client.post("/api/v1/contato", json=payload, headers=headers)
+        assert resp1.status_code == 500
+
+        resp2 = client.post("/api/v1/contato", json=payload, headers=headers)
+        assert resp2.status_code == 200
+        assert mock_uc.executar.call_count == 2
+    finally:
+        app.dependency_overrides.pop(obter_enviar_contato_use_case, None)
+
+
+def test_deduplicacao_nao_envenena_retry_apos_falha(client):
+    """Uma falha de entrega não deve marcar o conteúdo como duplicado."""
+    payload = {
+        "nome": "Test User",
+        "email": "no-poison@example.com",
+        "assunto": "Retry test",
+        "mensagem": "Hello world, this is a long enough message."
+    }
+
+    mock_uc = AsyncMock()
+    mock_uc.executar.side_effect = [False, True]
+    app.dependency_overrides[obter_enviar_contato_use_case] = lambda: mock_uc
+
+    try:
+        resp1 = client.post("/api/v1/contato", json=payload)
+        assert resp1.status_code == 500
+
+        resp2 = client.post("/api/v1/contato", json=payload)
+        assert resp2.status_code == 200
+        assert mock_uc.executar.call_count == 2
+    finally:
+        app.dependency_overrides.pop(obter_enviar_contato_use_case, None)
 
 
 def test_rate_limiting_contato_por_email(client):
