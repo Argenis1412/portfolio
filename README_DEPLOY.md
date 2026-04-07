@@ -17,7 +17,7 @@ Scalable Python API hosting.
     |---|---|---|
     | `FORMSPREE_FORM_ID` | ✅ Yes | Formspree form ID (e.g. `xzdjqvok`) |
     | `AMBIENTE` | ✅ Yes | Set to `producao` |
-    | `DATABASE_URL` | ⭐ Recommended | PostgreSQL URL (e.g. `postgresql+asyncpg://...`). Falls back to SQLite if empty. |
+    | `DATABASE_URL` | ⭐ Recommended | PostgreSQL URL (e.g. Supabase pooled connection with `postgresql+asyncpg://...`). Falls back to SQLite if empty. |
     | `REDIS_URL` | ⭐ Recommended | Redis URL (e.g. `rediss://...`). Falls back to memory if empty. |
     | `SENTRY_DSN` | ⭐ Recommended | Sentry DSN for error tracking (see Sentry project settings) |
     | `SENTRY_TRACES_SAMPLE_RATE` | Optional | Transaction sample rate `0.0–1.0` (default: `0.2`) |
@@ -41,7 +41,7 @@ Global Edge UI deployment.
 ---
 
 ## 🛠️ Architecture Notes
-*   **Database (PostgreSQL/SQLite)**: The system is designed for **Managed PostgreSQL** in production (e.g. Koyeb DB) to ensure data persistence across container restarts. It gracefully falls back to **SQLite** if no `DATABASE_URL` is provided. We do **not** commit the database file to Git. The schema is built dynamically on startup by running `alembic upgrade head`.
+*   **Database (PostgreSQL/SQLite)**: The system is designed for **Managed PostgreSQL** in production (recommended: **Supabase Postgres**) to ensure data persistence across container restarts. It gracefully falls back to **SQLite** if no `DATABASE_URL` is provided. We do **not** commit the database file to Git. The schema is built dynamically on startup by running `alembic upgrade head`.
 *   **Active Security**: Built-in protection includes a 5-minute deduplication window, honeypot traps, and heuristic spam scoring.
 *   **Instant Availability**: We employ a GitHub Actions keep-alive CRON (`keep-alive.yml`) that pings the Koyeb Eco instance every 5 minutes to prevent it from spinning down dynamically, ensuring a responsive experience for recruiters without costs.
 

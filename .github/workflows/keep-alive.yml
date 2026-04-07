@@ -16,4 +16,4 @@ jobs:
           # Usamos --max-time 30 porque se estiver dormindo, demorará para responder ao primeiro ping.
           # -sSf suprime a saída, mas falha em caso de erro HTTP (embora se for 503, podemos querer ignorá-lo).
           # Adicionamos || true para que um eventual erro (ex: se o Koyeb estiver desligado) não faça a Action falhar sempre e encha nossa caixa de e-mails.
-          curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://reluctant-sharia-argenis1412-98799132.koyeb.app/api/v1/sobre || true
+          curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://reluctant-sharia-argenis1412-98799132.koyeb.app/live || true

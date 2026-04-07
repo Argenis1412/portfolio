@@ -1,0 +1,48 @@
+"""Redis-backed temporary storage for contact deduplication."""
+
+from __future__ import annotations
+
+import asyncio
+import time
+
+from redis.asyncio import Redis
+
+from app.configuracao import configuracoes
+
+
+class SpamDedupStore:
+    """Stores short-lived contact hashes outside PostgreSQL."""
+
+    def __init__(self, redis_url: str | None):
+        self._redis_client: Redis | None = Redis.from_url(redis_url) if redis_url else None
+        self._memory_store: dict[str, float] = {}
+        self._lock = asyncio.Lock()
+
+    def _key(self, content_hash: str) -> str:
+        return f"contact:dedupe:{content_hash}"
+
+    async def reserve(self, content_hash: str, ttl_seconds: int) -> bool:
+        """Returns True only when the hash did not exist yet."""
+        if self._redis_client is not None:
+            created = await self._redis_client.set(
+                self._key(content_hash),
+                "1",
+                ex=ttl_seconds,
+                nx=True,
+            )
+            return bool(created)
+
+        now = time.time()
+        async with self._lock:
+            expires_at = self._memory_store.get(content_hash)
+            if expires_at and expires_at > now:
+                return False
+
+            self._memory_store[content_hash] = now + ttl_seconds
+            expired_keys = [key for key, expiry in self._memory_store.items() if expiry <= now]
+            for key in expired_keys:
+                self._memory_store.pop(key, None)
+            return True
+
+
+spam_dedup_store = SpamDedupStore(configuracoes.redis_url)
