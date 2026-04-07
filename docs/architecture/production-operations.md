@@ -71,3 +71,9 @@ Suggested destinations:
 - `/saude`: readiness with real dependency checks
 
 Use `/live` for lightweight probes and `/saude` for production diagnostics.
+
+## 6. Tracing (Jaeger/OTLP) Roadmap
+
+- Sentry tracing já funciona via `SENTRY_DSN` (não use o OTLP de Sentry no `OTLP_ENDPOINT`).
+- Atualmente, se `OTLP_ENDPOINT` estiver vazio em produção, spans não serão exportados (Console exporter desativado) para evitar ruído.
+- Para usar Jaeger/Tempo públicos, configure `OTLP_ENDPOINT` com um endpoint HTTP acessível (ex.: `https://<host>:4318`). O Jaeger local em `localhost:4318` não é acessível a partir do Koyeb.
