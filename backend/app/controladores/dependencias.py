@@ -6,7 +6,12 @@ Centraliza a composicao de adaptadores e casos de uso para usar com FastAPI Depe
 
 from functools import lru_cache
 
-from app.adaptadores import FormspreeEmailAdaptador, LoggerEstruturado, RepositorioJSON, RepositorioSQL
+from app.adaptadores import (
+    FormspreeEmailAdaptador,
+    LoggerEstruturado,
+    RepositorioJSON,
+    RepositorioSQL,
+)
 from app.adaptadores.repositorio import RepositorioPortfolio
 from app.casos_uso import (
     EnviarContatoUseCase,
@@ -73,18 +78,19 @@ def obter_enviar_contato_use_case() -> EnviarContatoUseCase:
     """Retorna caso de uso para envio de contato."""
     # Fallback para console em ambiente local se Formspree não estiver configurado
     usar_console = (
-        configuracoes.ambiente == "local" and 
-        not configuracoes.formspree_form_id.strip()
+        configuracoes.ambiente == "local"
+        and not configuracoes.formspree_form_id.strip()
     )
-    
+
     if usar_console:
         from app.adaptadores.email_adaptador import ConsoleEmailAdaptador
+
         email_adaptador = ConsoleEmailAdaptador()
     else:
         email_adaptador = FormspreeEmailAdaptador(
             configuracoes.formspree_url,
             configuracoes.formspree_form_id,
         )
-        
+
     logger = LoggerEstruturado()
     return EnviarContatoUseCase(email_adaptador, logger)

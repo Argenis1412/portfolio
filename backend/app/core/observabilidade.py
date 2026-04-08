@@ -11,6 +11,7 @@ Deploy:
   - Vercel (frontend): não é afetado por este módulo
 """
 
+from typing import Any
 import structlog
 from fastapi import FastAPI
 
@@ -20,6 +21,7 @@ logger = structlog.get_logger(__name__)
 # ===========================================================================
 # 1. SENTRY — Error Tracking
 # ===========================================================================
+
 
 def _configurar_sentry(dsn: str, ambiente: str, traces_sample_rate: float) -> None:
     """
@@ -70,6 +72,7 @@ def _configurar_sentry(dsn: str, ambiente: str, traces_sample_rate: float) -> No
 # 2. PROMETHEUS — Métricas HTTP
 # ===========================================================================
 
+
 def _configurar_prometheus(app: FastAPI) -> None:
     """
     Instrumenta o FastAPI com métricas Prometheus automáticas.
@@ -87,14 +90,14 @@ def _configurar_prometheus(app: FastAPI) -> None:
         from prometheus_fastapi_instrumentator import Instrumentator
 
         Instrumentator(
-            should_group_status_codes=True,   # agrupa 2xx, 4xx, 5xx
-            should_ignore_untemplated=True,   # ignora rotas sem template (404s inválidos)
-            should_respect_env_var=False,     # sempre ativo
-            excluded_handlers=["/metrics"],   # não auto-instrumentar o próprio /metrics
+            should_group_status_codes=True,  # agrupa 2xx, 4xx, 5xx
+            should_ignore_untemplated=True,  # ignora rotas sem template (404s inválidos)
+            should_respect_env_var=False,  # sempre ativo
+            excluded_handlers=["/metrics"],  # não auto-instrumentar o próprio /metrics
         ).instrument(app).expose(
             app,
             endpoint="/metrics",
-            include_in_schema=False,          # não exibir no /docs
+            include_in_schema=False,  # não exibir no /docs
             tags=["Observabilidade"],
         )
 
@@ -106,6 +109,7 @@ def _configurar_prometheus(app: FastAPI) -> None:
 # ===========================================================================
 # 3. OPENTELEMETRY — Distributed Tracing
 # ===========================================================================
+
 
 def _configurar_opentelemetry(
     app: FastAPI,
@@ -146,26 +150,35 @@ def _configurar_opentelemetry(
         from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
         # Recurso com metadados do serviço
-        resource = Resource.create({
-            SERVICE_NAME: nome_servico,
-            SERVICE_VERSION: versao,
-            "deployment.environment": ambiente,
-        })
+        resource = Resource.create(
+            {
+                SERVICE_NAME: nome_servico,
+                SERVICE_VERSION: versao,
+                "deployment.environment": ambiente,
+            }
+        )
 
         provider = TracerProvider(resource=resource)
 
         # Exportador baseado no ambiente
         import os
         import sys
+
         if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
             # Durante os testes, não usamos BatchSpanProcessor para evitar
             # o erro "ValueError: I/O operation on closed file." ao final.
-            from opentelemetry.sdk.trace.export import SimpleSpanProcessor, ConsoleSpanExporter
-            exporter = ConsoleSpanExporter(out=open(os.devnull, "w"))
+            from opentelemetry.sdk.trace.export import (
+                SimpleSpanProcessor,
+                ConsoleSpanExporter,
+            )
+
+            exporter: Any = ConsoleSpanExporter(out=open(os.devnull, "w"))
             provider.add_span_processor(SimpleSpanProcessor(exporter))
             logger.info("otel_exporter_mock", motivo="Execução de testes detectada")
         elif otlp_endpoint:
-            from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+            from opentelemetry.exporter.otlp.proto.http.trace_exporter import (
+                OTLPSpanExporter,
+            )
 
             otlp_endpoint = otlp_endpoint.strip().rstrip("/")
 
@@ -173,11 +186,15 @@ def _configurar_opentelemetry(
                 logger.warning(
                     "otel_exporter_sentry_endpoint_ignorado",
                     motivo="O Sentry SDK já faz o tracing nativamente. "
-                           "Use OTLP_ENDPOINT apenas para Jaeger/Grafana Tempo. ",
+                    "Use OTLP_ENDPOINT apenas para Jaeger/Grafana Tempo. ",
                     endpoint=otlp_endpoint,
                 )
             else:
-                final_endpoint = f"{otlp_endpoint}/v1/traces" if not otlp_endpoint.endswith("/v1/traces") else otlp_endpoint
+                final_endpoint = (
+                    f"{otlp_endpoint}/v1/traces"
+                    if not otlp_endpoint.endswith("/v1/traces")
+                    else otlp_endpoint
+                )
 
                 exporter = OTLPSpanExporter(endpoint=final_endpoint)
                 provider.add_span_processor(BatchSpanProcessor(exporter))
@@ -192,6 +209,7 @@ def _configurar_opentelemetry(
                 return
 
             from opentelemetry.sdk.trace.export import ConsoleSpanExporter
+
             exporter = ConsoleSpanExporter()
             provider.add_span_processor(BatchSpanProcessor(exporter))
             logger.info("otel_exporter_console", motivo="OTLP_ENDPOINT não configurado")
@@ -237,6 +255,7 @@ def _request_hook(span, scope: dict) -> None:
 # ===========================================================================
 # ENTRY POINT — chamado no startup do principal.py
 # ===========================================================================
+
 
 def configurar_observabilidade(app: FastAPI, configuracoes) -> None:
     """

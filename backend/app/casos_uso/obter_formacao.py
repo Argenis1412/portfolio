@@ -43,6 +43,5 @@ class ObterFormacaoUseCase:
         """
         formacoes = await self.repositorio.obter_formacao()
         return sorted(
-            formacoes,
-            key=lambda f: (not f.atual, -f.data_inicio.toordinal())
+            formacoes, key=lambda f: (not f.atual, -f.data_inicio.toordinal())
         )

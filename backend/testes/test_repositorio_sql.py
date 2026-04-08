@@ -30,6 +30,7 @@ from app.adaptadores.repositorio_sql import RepositorioSQL
 
 # ─── Fixtures ─────────────────────────────────────────────────────────────────
 
+
 @pytest.fixture(scope="function")
 def repo_com_dados():
     """
@@ -67,61 +68,94 @@ def repo_com_dados():
 def _popular_banco(session: Session) -> None:
     """Popula o banco de teste com dados de exemplo."""
 
-    session.add(SobreModelo(
-        nome="Argenis Teste",
-        titulo="Backend Developer",
-        localizacao="Curitiba, PR",
-        email="teste@example.com",
-        telefone="(41) 99999-9999",
-        github="https://github.com/teste",
-        linkedin="https://linkedin.com/in/teste",
-        descricao=json.dumps({"pt": "Descrição PT", "en": "Description EN", "es": "Descripción ES"}),
-        disponibilidade=json.dumps({"pt": "Remoto", "en": "Remote", "es": "Remoto"}),
-    ))
+    session.add(
+        SobreModelo(
+            nome="Argenis Teste",
+            titulo="Backend Developer",
+            localizacao="Curitiba, PR",
+            email="teste@example.com",
+            telefone="(41) 99999-9999",
+            github="https://github.com/teste",
+            linkedin="https://linkedin.com/in/teste",
+            descricao=json.dumps(
+                {"pt": "Descrição PT", "en": "Description EN", "es": "Descripción ES"}
+            ),
+            disponibilidade=json.dumps(
+                {"pt": "Remoto", "en": "Remote", "es": "Remoto"}
+            ),
+        )
+    )
 
-    session.add(ProjetoModelo(
-        id="proj-test-1",
-        nome="Projeto Teste",
-        descricao_curta=json.dumps({"pt": "Curta PT", "en": "Short EN", "es": "Corta ES"}),
-        descricao_completa=json.dumps({"pt": "Completa PT", "en": "Full EN", "es": "Completa ES"}),
-        tecnologias=json.dumps(["Python", "FastAPI"]),
-        funcionalidades=json.dumps(["Feature A", "Feature B"]),
-        aprendizados=json.dumps(["Aprendizado A"]),
-        repositorio="https://github.com/teste/repo",
-        demo=None,
-        destaque=True,
-        imagem=None,
-    ))
+    session.add(
+        ProjetoModelo(
+            id="proj-test-1",
+            nome="Projeto Teste",
+            descricao_curta=json.dumps(
+                {"pt": "Curta PT", "en": "Short EN", "es": "Corta ES"}
+            ),
+            descricao_completa=json.dumps(
+                {"pt": "Completa PT", "en": "Full EN", "es": "Completa ES"}
+            ),
+            tecnologias=json.dumps(["Python", "FastAPI"]),
+            funcionalidades=json.dumps(["Feature A", "Feature B"]),
+            aprendizados=json.dumps(["Aprendizado A"]),
+            repositorio="https://github.com/teste/repo",
+            demo=None,
+            destaque=True,
+            imagem=None,
+        )
+    )
 
-    session.add(ExperienciaModelo(
-        id="exp-test-1",
-        cargo=json.dumps({"pt": "Dev Backend", "en": "Backend Dev", "es": "Dev Backend"}),
-        empresa="Empresa Teste",
-        localizacao="Remoto",
-        data_inicio=date(2024, 1, 1),
-        data_fim=None,
-        descricao=json.dumps({"pt": "Descrição PT", "en": "Description EN", "es": "Descripción ES"}),
-        tecnologias=json.dumps(["Python", "FastAPI"]),
-        atual=True,
-    ))
+    session.add(
+        ExperienciaModelo(
+            id="exp-test-1",
+            cargo=json.dumps(
+                {"pt": "Dev Backend", "en": "Backend Dev", "es": "Dev Backend"}
+            ),
+            empresa="Empresa Teste",
+            localizacao="Remoto",
+            data_inicio=date(2024, 1, 1),
+            data_fim=None,
+            descricao=json.dumps(
+                {"pt": "Descrição PT", "en": "Description EN", "es": "Descripción ES"}
+            ),
+            tecnologias=json.dumps(["Python", "FastAPI"]),
+            atual=True,
+        )
+    )
 
-    session.add(FormacaoModelo(
-        id="edu-test-1",
-        curso=json.dumps({"pt": "Análise de Sistemas", "en": "Systems Analysis", "es": "Análisis"}),
-        instituicao="UFPR Teste",
-        localizacao="Curitiba, PR",
-        data_inicio=date(2024, 2, 1),
-        data_fim=date(2026, 12, 1),
-        descricao=json.dumps({"pt": "Em andamento", "en": "In progress", "es": "En progreso"}),
-        atual=True,
-    ))
+    session.add(
+        FormacaoModelo(
+            id="edu-test-1",
+            curso=json.dumps(
+                {
+                    "pt": "Análise de Sistemas",
+                    "en": "Systems Analysis",
+                    "es": "Análisis",
+                }
+            ),
+            instituicao="UFPR Teste",
+            localizacao="Curitiba, PR",
+            data_inicio=date(2024, 2, 1),
+            data_fim=date(2026, 12, 1),
+            descricao=json.dumps(
+                {"pt": "Em andamento", "en": "In progress", "es": "En progreso"}
+            ),
+            atual=True,
+        )
+    )
 
-    session.add(StackModelo(nome="Python", categoria="backend", nivel=5, icone="python"))
-    session.add(StackModelo(nome="FastAPI", categoria="backend", nivel=4, icone="fastapi"))
+    session.add(
+        StackModelo(nome="Python", categoria="backend", nivel=5, icone="python")
+    )
+    session.add(
+        StackModelo(nome="FastAPI", categoria="backend", nivel=4, icone="fastapi")
+    )
     session.add(StackModelo(nome="React", categoria="frontend", nivel=3, icone="react"))
 
 
 # ─── Testes: verificar_saude ───────────────────────────────────────────────────
+
 
 async def test_verificar_saude_retorna_ok(repo_com_dados):
     """Health check deve retornar status 'ok' quando o banco está acessível."""
@@ -130,6 +164,7 @@ async def test_verificar_saude_retorna_ok(repo_com_dados):
 
 
 # ─── Testes: obter_sobre ───────────────────────────────────────────────────────
+
 
 async def test_obter_sobre_retorna_dados_basicos(repo_com_dados):
     """obter_sobre deve retornar um dict com os campos do modelo."""
@@ -160,6 +195,7 @@ async def test_obter_sobre_deserializa_disponibilidade(repo_com_dados):
 
 
 # ─── Testes: obter_projetos ────────────────────────────────────────────────────
+
 
 async def test_obter_projetos_retorna_lista(repo_com_dados):
     """obter_projetos deve retornar uma lista de Projeto."""
@@ -219,6 +255,7 @@ async def test_obter_projeto_por_id_inexistente(repo_com_dados):
 
 # ─── Testes: obter_stack ──────────────────────────────────────────────────────
 
+
 async def test_obter_stack_retorna_lista(repo_com_dados):
     """obter_stack deve retornar uma lista de dicts."""
     stack = await repo_com_dados.obter_stack()
@@ -249,6 +286,7 @@ async def test_obter_stack_valores_corretos(repo_com_dados):
 
 
 # ─── Testes: obter_experiencias ───────────────────────────────────────────────
+
 
 async def test_obter_experiencias_retorna_lista(repo_com_dados):
     """obter_experiencias deve retornar uma lista de ExperienciaProfissional."""
@@ -287,6 +325,7 @@ async def test_obter_experiencias_atual_true(repo_com_dados):
 
 
 # ─── Testes: obter_formacao ───────────────────────────────────────────────────
+
 
 async def test_obter_formacao_retorna_lista(repo_com_dados):
     """obter_formacao deve retornar uma lista de FormacaoAcademica."""

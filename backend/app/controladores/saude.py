@@ -47,27 +47,31 @@ async def verificar_saude(
     Verifica se a API e suas dependências estão saudáveis.
     """
     uptime = int(time.time() - _INICIO_APLICACAO)
-    
+
     # Verificar banco de dados
     saude_db = await repositorio.verificar_saude()
-    
+
     # Verificar configuração de email
-    email_configurado = bool(configuracoes.formspree_form_id and configuracoes.formspree_form_id.strip())
-    
+    email_configurado = bool(
+        configuracoes.formspree_form_id and configuracoes.formspree_form_id.strip()
+    )
+
     detalhes = {
         "banco_dados": saude_db["status"],
         "email": "configurado" if email_configurado else "pendente",
-        "detalhes_db": saude_db["detalhes"]
+        "detalhes_db": saude_db["detalhes"],
     }
-    
+
     esta_saudavel = saude_db["status"] == "ok"
-    
+
     if not esta_saudavel:
         resposta.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
-    
+
     return RespostaSaude(
         status="ok" if esta_saudavel else "erro",
-        mensagem="API funcionando normalmente" if esta_saudavel else "A API está com problemas de conexão",
+        mensagem="API funcionando normalmente"
+        if esta_saudavel
+        else "A API está com problemas de conexão",
         versao_api="1.0.0",
         ambiente=configuracoes.ambiente,
         uptime_segundos=uptime,

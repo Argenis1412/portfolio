@@ -47,7 +47,7 @@ class ObterStackUseCase:
             True
         """
         stack = await self.repositorio.obter_stack()
-        
+
         # Agrupar por categoria
         por_categoria: dict[str, list[dict]] = {}
         for item in stack:
@@ -55,5 +55,5 @@ class ObterStackUseCase:
             if categoria not in por_categoria:
                 por_categoria[categoria] = []
             por_categoria[categoria].append(item)
-        
+
         return por_categoria

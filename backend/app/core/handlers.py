@@ -48,10 +48,10 @@ def criar_resposta_erro(
             "mensagem": mensagem,
         }
     }
-    
+
     if detalhes:
         conteudo["erro"]["detalhes"] = detalhes
-    
+
     return JSONResponse(
         status_code=status_code,
         content=conteudo,
@@ -78,7 +78,7 @@ async def handler_erro_dominio(
         codigo=exc.codigo,
         path=request.url.path,
     )
-    
+
     return criar_resposta_erro(
         codigo=exc.codigo,
         mensagem=exc.mensagem,
@@ -106,7 +106,7 @@ async def handler_erro_validacao(
         codigo=exc.codigo,
         path=request.url.path,
     )
-    
+
     return criar_resposta_erro(
         codigo=exc.codigo,
         mensagem=exc.mensagem,
@@ -136,7 +136,7 @@ async def handler_erro_infraestrutura(
         path=request.url.path,
         exc_info=True,
     )
-    
+
     # Não expor detalhes internos em produção
     return criar_resposta_erro(
         codigo="ERRO_INTERNO",
@@ -165,7 +165,7 @@ async def handler_recurso_nao_encontrado(
         codigo=exc.codigo,
         path=request.url.path,
     )
-    
+
     return criar_resposta_erro(
         codigo=exc.codigo,
         mensagem=exc.mensagem,
@@ -188,22 +188,24 @@ async def handler_validacao_pydantic(
         JSONResponse: HTTP 422 com detalhes dos campos inválidos.
     """
     erros_formatados = []
-    
+
     for erro in exc.errors():
         campo = ".".join(str(loc) for loc in erro["loc"])
-        erros_formatados.append({
-            "campo": campo,
-            "mensagem": erro["msg"],
-            "tipo": erro["type"],
-        })
-    
+        erros_formatados.append(
+            {
+                "campo": campo,
+                "mensagem": erro["msg"],
+                "tipo": erro["type"],
+            }
+        )
+
     logger.warning(
         "erro_validacao_pydantic",
         total_campos_invalidos=len(erros_formatados),
         path=request.url.path,
         erros=erros_formatados,
     )
-    
+
     return criar_resposta_erro(
         codigo="ERRO_VALIDACAO_ENTRADA",
         mensagem="Dados de entrada inválidos",
@@ -233,7 +235,7 @@ async def handler_generico(
         path=request.url.path,
         exc_info=True,
     )
-    
+
     return criar_resposta_erro(
         codigo="ERRO_INESPERADO",
         mensagem="Erro inesperado. A equipe foi notificada.",
@@ -253,7 +255,7 @@ async def handler_rate_limit(
         path=request.url.path,
         detalhes=str(exc),
     )
-    
+
     return criar_resposta_erro(
         codigo="RATE_LIMIT_EXCEEDED",
         mensagem=f"Rate limit exceeded. {str(exc)}",
@@ -273,11 +275,11 @@ async def handler_idempotencia(
         path=request.url.path,
         status_code=exc.record.status_code,
     )
-    
+
     return JSONResponse(
         status_code=exc.record.status_code,
         content=exc.record.content,
-        headers={"X-Cache-Idempotency": "HIT"}
+        headers={"X-Cache-Idempotency": "HIT"},
     )
 
 
@@ -296,19 +298,13 @@ def registrar_handlers_excecao(app: FastAPI) -> None:
         - RequestValidationError → 422
         - Exception (fallback) → 500
     """
-    app.add_exception_handler(ErroDominio, handler_erro_dominio)
-    app.add_exception_handler(ErroValidacao, handler_erro_validacao)
-    app.add_exception_handler(ErroInfraestrutura, handler_erro_infraestrutura)
-    app.add_exception_handler(
-        ErroRecursoNaoEncontrado,
-        handler_recurso_nao_encontrado,
-    )
-    app.add_exception_handler(
-        RequestValidationError,
-        handler_validacao_pydantic,
-    )
-    app.add_exception_handler(IdempotencyException, handler_idempotencia)
-    app.add_exception_handler(RateLimitExceeded, handler_rate_limit)
-    app.add_exception_handler(Exception, handler_generico)
-    
+    app.add_exception_handler(ErroDominio, handler_erro_dominio)  # type: ignore
+    app.add_exception_handler(ErroValidacao, handler_erro_validacao)  # type: ignore
+    app.add_exception_handler(ErroInfraestrutura, handler_erro_infraestrutura)  # type: ignore
+    app.add_exception_handler(ErroRecursoNaoEncontrado, handler_recurso_nao_encontrado)  # type: ignore
+    app.add_exception_handler(RequestValidationError, handler_validacao_pydantic)  # type: ignore
+    app.add_exception_handler(IdempotencyException, handler_idempotencia)  # type: ignore
+    app.add_exception_handler(RateLimitExceeded, handler_rate_limit)  # type: ignore
+    app.add_exception_handler(Exception, handler_generico)  # type: ignore
+
     logger.info("Handlers de exceção registrados com sucesso")

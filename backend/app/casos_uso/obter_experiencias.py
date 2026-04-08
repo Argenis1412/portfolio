@@ -50,6 +50,5 @@ class ObterExperienciasUseCase:
         """
         experiencias = await self.repositorio.obter_experiencias()
         return sorted(
-            experiencias,
-            key=lambda e: (not e.atual, -e.data_inicio.toordinal())
+            experiencias, key=lambda e: (not e.atual, -e.data_inicio.toordinal())
         )

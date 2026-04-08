@@ -49,7 +49,9 @@ class SpamDedupStore:
                 return False
 
             self._memory_store[content_hash] = now + ttl_seconds
-            expired_keys = [key for key, expiry in self._memory_store.items() if expiry <= now]
+            expired_keys = [
+                key for key, expiry in self._memory_store.items() if expiry <= now
+            ]
             for key in expired_keys:
                 self._memory_store.pop(key, None)
             return True

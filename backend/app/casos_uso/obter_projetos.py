@@ -38,7 +38,6 @@ class ObterProjetosUseCase:
         return sorted(projetos, key=lambda p: (not p.destaque, p.nome))
 
 
-
 class ObterProjetoPorIdUseCase:
     """
     Caso de uso para obter detalhes de um projeto específico.

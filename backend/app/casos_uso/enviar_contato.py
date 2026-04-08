@@ -74,10 +74,16 @@ class EnviarContatoUseCase:
             ... )
         """
         # Garantir que o assunto não esteja vazio para o Formspree
-        assunto_base = assunto.strip() if assunto and assunto.strip() else "Contacto vía Portafolio"
-        
+        assunto_base = (
+            assunto.strip()
+            if assunto and assunto.strip()
+            else "Contacto vía Portafolio"
+        )
+
         # Marcar como suspeito no assunto se necessário
-        assunto_final = f"[POSSIBLE SPAM] {assunto_base}" if is_suspicious else assunto_base
+        assunto_final = (
+            f"[POSSIBLE SPAM] {assunto_base}" if is_suspicious else assunto_base
+        )
 
         if is_suspicious:
             warning_lines = [

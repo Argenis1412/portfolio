@@ -22,7 +22,7 @@ def client():
 def test_saude_retorna_ok(client):
     """Testa endpoint GET /saude retorna status ok."""
     response = client.get("/saude")
-    
+
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "ok"
@@ -40,7 +40,7 @@ def test_live_retorna_ok_sem_dependencias(client):
 def test_obter_sobre_retorna_200(client):
     """Testa endpoint GET /api/v1/sobre retorna 200."""
     response = client.get("/api/v1/sobre")
-    
+
     assert response.status_code == 200
     data = response.json()
     assert "nome" in data
@@ -52,7 +52,7 @@ def test_listar_projetos_retorna_200(client):
     """Testa endpoint GET /api/v1/projetos retorna lista."""
     # Como usamos mock no conftest, ele deve retornar os dados do mock
     response = client.get("/api/v1/projetos")
-    
+
     assert response.status_code == 200
     data = response.json()
     assert "projetos" in data
@@ -64,7 +64,7 @@ def test_obter_projeto_existente_retorna_200(client):
     """Testa GET /api/v1/projetos/{id} com projeto existente."""
     # O mock em conftest define 'projeto-1' como ID válido
     response = client.get("/api/v1/projetos/projeto-1")
-    
+
     assert response.status_code == 200
     data = response.json()
     assert data["id"] == "projeto-1"
@@ -75,7 +75,7 @@ def test_obter_projeto_existente_retorna_200(client):
 def test_obter_projeto_inexistente_retorna_404(client):
     """Testa GET /api/v1/projetos/{id} com projeto inexistente."""
     response = client.get("/api/v1/projetos/projeto-inexistente")
-    
+
     assert response.status_code == 404
     data = response.json()
     assert "erro" in data
@@ -86,7 +86,7 @@ def test_obter_projeto_inexistente_retorna_404(client):
 def test_obter_stack_retorna_200(client):
     """Testa endpoint GET /api/v1/stack retorna tecnologias."""
     response = client.get("/api/v1/stack")
-    
+
     assert response.status_code == 200
     data = response.json()
     assert "stack" in data
@@ -97,7 +97,7 @@ def test_obter_stack_retorna_200(client):
 def test_listar_experiencias_retorna_200(client):
     """Testa endpoint GET /api/v1/experiencias retorna lista."""
     response = client.get("/api/v1/experiencias")
-    
+
     assert response.status_code == 200
     data = response.json()
     assert "experiencias" in data
@@ -117,15 +117,14 @@ def test_listar_formacao_retorna_200(client):
 
 
 def test_enviar_contato_com_dados_validos_retorna_200(client):
-    """Testa POST /api/contato com dados válidos usando Mock secundário.
-    """
+    """Testa POST /api/contato com dados válidos usando Mock secundário."""
     payload = {
         "nome": "Maria Silva",
         "email": "maria@example.com",
         "assunto": "Teste",
         "mensagem": "Esta é uma mensagem de teste com mais de 10 caracteres.",
     }
-    
+
     mock_uc = AsyncMock()
     mock_uc.executar.return_value = True
 
@@ -134,7 +133,7 @@ def test_enviar_contato_com_dados_validos_retorna_200(client):
         response = client.post("/api/v1/contato", json=payload)
     finally:
         app.dependency_overrides.pop(obter_enviar_contato_use_case, None)
-    
+
     assert response.status_code == 200
     data = response.json()
     assert data["sucesso"] is True
@@ -150,9 +149,9 @@ def test_enviar_contato_com_dados_invalidos_retorna_422(client):
         "assunto": "Abc",  # Muito curto
         "mensagem": "123",  # Muito curta
     }
-    
+
     response = client.post("/api/v1/contato", json=payload)
-    
+
     assert response.status_code == 422
     data = response.json()
     assert "erro" in data

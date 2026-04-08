@@ -189,7 +189,10 @@ class Configuracoes(BaseSettings):
         if "*" in self.origens_permitidas:
             erros.append("ORIGENS_PERMITIDAS cannot contain wildcard '*' in production")
 
-        if self.regex_origens_permitidas and self.regex_origens_permitidas.strip() in {".*", "^.*$"}:
+        if self.regex_origens_permitidas and self.regex_origens_permitidas.strip() in {
+            ".*",
+            "^.*$",
+        }:
             erros.append("REGEX_ORIGENS_PERMITIDAS is too permissive for production")
 
         if erros:
