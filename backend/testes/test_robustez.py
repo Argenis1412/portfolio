@@ -81,9 +81,9 @@ def test_rate_limiting_projetos(client):
 
     # A 21ª deve falhar
     resp = client.get("/api/v1/projetos")
-    assert (
-        resp.status_code == 429
-    ), f"Expected 429, got {resp.status_code}. Body: {resp.text}"
+    assert resp.status_code == 429, (
+        f"Expected 429, got {resp.status_code}. Body: {resp.text}"
+    )
     data = resp.json()
     assert "erro" in data, f"Key 'erro' not in response: {data}"
     assert "rate limit exceeded" in data["erro"]["mensagem"].lower()
@@ -220,5 +220,34 @@ def test_rate_limiting_contato_por_email(client):
         assert resp.status_code == 429
         assert "rate limit exceeded" in resp.json()["erro"]["mensagem"].lower()
 
+    finally:
+        app.dependency_overrides.pop(obter_enviar_contato_use_case, None)
+
+
+def test_rate_limiter_redis_fallback(client, monkeypatch):
+    """Testa se uma falha no Redis faz o RateLimiter falhar estaticamente permitindo a request."""
+
+    # Fazer a hit connection lançar Exception genérica simulando `redis.exceptions.ConnectionError`.
+    def mock_hit(*args, **kwargs):
+        raise ConnectionError("Redis is down")
+
+    monkeypatch.setattr("app.core.limite.limiter.limiter.hit", mock_hit)
+
+    payload = {
+        "nome": "Test User",
+        "email": "limite_fallback@example.com",
+        "assunto": "Test",
+        "mensagem": "Some message that should pass despite redis dead.",
+    }
+
+    mock_uc = AsyncMock()
+    mock_uc.executar.return_value = True
+    app.dependency_overrides[obter_enviar_contato_use_case] = lambda: mock_uc
+
+    try:
+        resp = client.post("/api/v1/contato", json=payload)
+        # Ao invés de HTTP 500, o sistema retorna HTTP 200 graças ao fallback!
+        assert resp.status_code == 200
+        assert mock_uc.executar.call_count == 1
     finally:
         app.dependency_overrides.pop(obter_enviar_contato_use_case, None)

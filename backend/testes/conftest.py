@@ -365,28 +365,28 @@ async def override_dependencias(setup_database):
     # Sobrescrever providers individuais
     app.dependency_overrides[dependencias.obter_repositorio] = lambda: repo_real_test
 
-    app.dependency_overrides[dependencias.obter_obter_sobre_use_case] = (
-        lambda: ObterSobreUseCase(repo_real_test)
+    app.dependency_overrides[dependencias.obter_obter_sobre_use_case] = lambda: (
+        ObterSobreUseCase(repo_real_test)
     )
 
-    app.dependency_overrides[dependencias.obter_obter_projetos_use_case] = (
-        lambda: ObterProjetosUseCase(repo_real_test)
+    app.dependency_overrides[dependencias.obter_obter_projetos_use_case] = lambda: (
+        ObterProjetosUseCase(repo_real_test)
     )
 
     app.dependency_overrides[dependencias.obter_obter_projeto_por_id_use_case] = (
         lambda: ObterProjetoPorIdUseCase(repo_real_test)
     )
 
-    app.dependency_overrides[dependencias.obter_obter_stack_use_case] = (
-        lambda: ObterStackUseCase(repo_real_test)
+    app.dependency_overrides[dependencias.obter_obter_stack_use_case] = lambda: (
+        ObterStackUseCase(repo_real_test)
     )
 
-    app.dependency_overrides[dependencias.obter_obter_experiencias_use_case] = (
-        lambda: ObterExperienciasUseCase(repo_real_test)
+    app.dependency_overrides[dependencias.obter_obter_experiencias_use_case] = lambda: (
+        ObterExperienciasUseCase(repo_real_test)
     )
 
-    app.dependency_overrides[dependencias.obter_obter_formacao_use_case] = (
-        lambda: ObterFormacaoUseCase(repo_real_test)
+    app.dependency_overrides[dependencias.obter_obter_formacao_use_case] = lambda: (
+        ObterFormacaoUseCase(repo_real_test)
     )
 
     # Mock para envio de email para evitar chamadas reais (Formspree) nos testes
@@ -395,8 +395,8 @@ async def override_dependencias(setup_database):
     mock_email = AsyncMock(spec=EmailAdaptador)
     mock_email.enviar_mensagem.return_value = True
     mock_logger = MagicMock(spec=LoggerAdaptador)
-    app.dependency_overrides[dependencias.obter_enviar_contato_use_case] = (
-        lambda: EnviarContatoUseCase(mock_email, mock_logger)
+    app.dependency_overrides[dependencias.obter_enviar_contato_use_case] = lambda: (
+        EnviarContatoUseCase(mock_email, mock_logger)
     )
 
     # Limpar caches por segurança (embora overrides devam prevalecer no FastAPI)

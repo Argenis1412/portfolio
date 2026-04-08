@@ -1,4 +1,4 @@
-ruff==0.8.4
+ruff==0.15.9
 mypy==1.13.0
 types-python-dateutil
 types-redis

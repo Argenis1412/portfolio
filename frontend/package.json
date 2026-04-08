@@ -54,5 +54,10 @@
       "eslint --fix",
       "npm run test -- --run"
     ]
-  }
+  },
+  "description": "> **Live Demo:** [portfolio-argenis1412.vercel.app →](https://portfolio-argenis1412s-projects.vercel.app)",
+  "main": "eslint.config.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

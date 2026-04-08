@@ -70,5 +70,19 @@ def check_rate_limit(request: Request, limit_string: str, key_func=get_email_or_
     key = key_func(request)
     # Parseamos la string de límite (ej: "10/day" -> [Limit(...)])
     for limit in parse_many(limit_string):
-        if not limiter.limiter.hit(limit, key):
-            raise RateLimitExceeded(MockLimit(str(limit)))  # type: ignore
+        try:
+            if not limiter.limiter.hit(limit, key):
+                raise RateLimitExceeded(MockLimit(str(limit)))  # type: ignore
+        except RateLimitExceeded:
+            raise
+        except Exception as e:
+            # Fallback (Fail-open) in case of Redis connection drops/timeouts
+            import structlog
+            logger = structlog.get_logger(__name__)
+            logger.warning(
+                "rate_limiter_redis_fallback_open",
+                error=str(e),
+                limit=str(limit),
+            )
+            # Ao invés de retornar 500, falhamos 'aberto' permitindo a requisição
+            continue

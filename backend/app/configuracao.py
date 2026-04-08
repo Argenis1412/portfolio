@@ -103,7 +103,7 @@ class Configuracoes(BaseSettings):
         description="SQLAlchemy pool size (default 2 for serverless/small instances).",
     )
     db_max_overflow: int = Field(
-        default=5,
+        default=2,
         alias="DB_MAX_OVERFLOW",
         description="SQLAlchemy max overflow connections.",
     )
