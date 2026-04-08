@@ -14,13 +14,13 @@ backend_dir = current_dir.parent
 if str(backend_dir) not in sys.path:
     sys.path.append(str(backend_dir))
 
-from app.adaptadores.modelos_sql import (
+from app.adaptadores.modelos_sql import (  # noqa: E402
     SobreModelo,
     ProjetoModelo,
     ExperienciaModelo,
     FormacaoModelo,
     StackModelo,
-)  # noqa: E402
+)
 from app.configuracao import configuracoes  # noqa: E402
 
 # Usar engine síncrona
