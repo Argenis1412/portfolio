@@ -78,6 +78,7 @@ def check_rate_limit(request: Request, limit_string: str, key_func=get_email_or_
         except Exception as e:
             # Fallback (Fail-open) in case of Redis connection drops/timeouts
             import structlog
+
             logger = structlog.get_logger(__name__)
             logger.warning(
                 "rate_limiter_redis_fallback_open",

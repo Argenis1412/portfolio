@@ -44,8 +44,11 @@ class SpamDedupStore:
                 return bool(created)
             except Exception as e:
                 import structlog
+
                 logger = structlog.get_logger(__name__)
-                logger.warning("spam_store_redis_failure_falling_back_to_memory", error=str(e))
+                logger.warning(
+                    "spam_store_redis_failure_falling_back_to_memory", error=str(e)
+                )
                 # Proceed to memory fallback
 
         now = time.time()
