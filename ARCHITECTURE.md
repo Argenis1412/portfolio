@@ -12,30 +12,34 @@ This document details the reasoning behind the architectural choices found in th
 **Decision**: In production, the managed PostgreSQL database is not committed to Git and is not reseeded on every boot.
 **Why?** Committing databases is an anti-pattern, and reseeding on every Koyeb cold start increases readiness time. Schema migrations should run during deploy/release steps, while `python scripts/migrar_dados.py` should be used as a one-off refresh task only when static SQL data needs to be rebuilt.
 
-## 4. Observability and Public Metrics
-**Decision**: Exposing Prometheus metrics at `/metrics` publicly without authentication.
-**Why?** Normally, exposing infrastructure metrics could be a DoS vector or leak competitive usage data. Here, the metrics are intentionally left public so reviewers and automated tools can see the live stack's health, throughput, and latencies without needing credentials. No PII is present.
+## 4. Observability and Protected Metrics
+**Decision**: Exposing Prometheus metrics at `/metrics` but requiring Basic Auth in production.
+**Why?** While the metrics are intentionally accessible to reviewers, exposing a public `/metrics` endpoint on the open internet (even for a portfolio) is a non-standard practice that could be seen as a security oversight. Adding `METRICS_BASIC_AUTH` ensures that only authorized clients (or reviewers with the provided credentials) can see the live stack's health, throughput, and latencies.
 
-## 5. Security Regex over Allow-Lists
+## 5. Performance: JSON-First Read Path
+**Decision**: Prioritizing `RepositorioJSON` for all portfolio-related reads (about, projects, stack, etc.) in production.
+**Why?** Using a managed PostgreSQL database for static data in a serverless/ephemeral environment adds significant cold-start latency and increases the risk of transient connection failures. By serving the portfolio data directly from memory-cached JSON files (Clean Architecture allows swapping adapters seamlessly), we achieve P95 latencies < 50ms and eliminate PostgreSQL as a single point of failure for the main application view. PostgreSQL remains reserved for transactional or future dynamic needs.
+
+## 6. Security Regex over Allow-Lists
 **Decision**: The CORS Policy uses a regex rule (`^https://portfolio.*-argenis1412s-projects\.vercel\.app$`) instead of exact strings or `*`.
 **Why?** Vercel creates dynamic preview domains per PR. Doing hardcoded allowed lists blocks PR testing. Using a wide open `*` disables secure credential-passing. The precise regex allows only our generated subdomains to seamlessly interact with the API, blocking impersonation from other `*.vercel.app` sites.
 
-## 6. Language for Health Checks
+## 7. Language for Health Checks
 **Decision**: Keeping `/saude` as the endpoint instead of `/health`.
 **Why?** Although the architecture documentation has migrated to English to target a wider audience, the domain core model started in Portuguese. To avoid breaking monitoring probes and infrastructure expectations already tracking `/saude`, the endpoint name was consciously retained.
 
-## 7. Frontend State Architecture
+## 8. Frontend State Architecture
 **Decision**: React + TanStack Query instead of Redux/Zustand for most data mapping.
 **Why?** A portfolio is a read-heavy application. TanStack Query treats remote data precisely as it is — a cache of server state. Local state is kept minimal, leaving data fetching, prefetching on hover, and cache invalidation entirely to the asynchronous fetching layer.
 
-## 8. Full-Stack Error Tracking (Sentry)
+## 9. Full-Stack Error Tracking (Sentry)
 **Decision**: Using Sentry for both React and FastAPI.
 **Why?** Observability is more than just metrics; it's about context. Sentry provides the "why" behind failures, capturing breadcrumbs, request metadata, and stack traces that Prometheus metrics (`/metrics`) can't show. By using `VITE_SENTRY_DSN` on the frontend and `SENTRY_DSN` on the backend, we achieve unified error correlation across the entire user journey.
 
-## 9. Security Hardening (Defense-in-Depth)
+## 10. Security Hardening (Defense-in-Depth)
 **Decision**: Implementing `SegurancaHeadersMiddleware` and `GZipMiddleware`.
 **Why?** Browsers rely on specific headers (HSTS, NoSniff, X-Frame-Options) to enforce security policies. While the frontend had these in Vercel, the backend API was unprotected if accessed directly. Adding these headers at the middleware level ensures that every response is hardened by default. Additionally, GZip compression for payloads >1KB significantly improves UI performance on low-bandwidth networks.
 
-## 10. External Storage for Distributed State
+## 11. External Storage for Distributed State
 **Decision**: Migrating Rate Limiting and Persistence from local Memory/SQLite to Redis and PostgreSQL for production.
 **Why?** In "ephemeral" cloud environments like Koyeb, local file storage (SQLite) and in-memory caches (Rate limiting counters) are wiped on every container restart. By decoupling state into managed PostgreSQL (recommended: Supabase via `asyncpg`) and Redis (via `Upstash`), the application achieves true horizontal scalability and persistent antispam protection across multiple replicas.

@@ -29,6 +29,7 @@ logger = structlog.get_logger(__name__)
 def _email_domain(email: str) -> str:
     return email.split("@")[-1].lower() if "@" in email else "invalid-email"
 
+
 roteador = APIRouter(tags=["Contato"])
 
 
@@ -64,7 +65,8 @@ async def enviar_contato(
                 action="silent_drop",
                 event_type="security_event",
                 honeypot_fields=[
-                    field for field in ("website", "fax")
+                    field
+                    for field in ("website", "fax")
                     if getattr(requisicao, field, None)
                 ],
                 client_ip=get_client_ip(request),
@@ -92,7 +94,9 @@ async def enviar_contato(
             )
             return resposta_cacheavel
 
-        normalized_message = re.sub(r"\s+", " ", requisicao.mensagem or "").strip().lower()
+        normalized_message = (
+            re.sub(r"\s+", " ", requisicao.mensagem or "").strip().lower()
+        )
         content_str = f"{(requisicao.email or '').lower()}:{normalized_message}"
         content_hash = hashlib.sha256(content_str.encode()).hexdigest()
 
@@ -107,8 +111,14 @@ async def enviar_contato(
             )
             return JSONResponse(
                 status_code=400,
-                content={"erro": {"codigo": "CONTEUDO_DUPLICADO"}, "detail": "DUPLICATE_CONTENT"},
+                content={
+                    "erro": {"codigo": "CONTEUDO_DUPLICADO"},
+                    "detail": "DUPLICATE_CONTENT",
+                },
             )
+
+        # Extrair identidade para rate limiting baseada no email validado
+        request.state.identidade = f"email:{requisicao.email.lower().strip()}"
 
         check_rate_limit(request, "10/day")
         check_rate_limit(request, "20/minute")

@@ -10,30 +10,35 @@ Endpoints:
 - GET /api/formacao
 """
 
-from typing import Annotated, Optional
-from fastapi import APIRouter, Depends, Request, Response
+from typing import Annotated
+from fastapi import APIRouter
+from fastapi import Depends
+from fastapi import Request
+from fastapi import Response
 
 from app.esquemas.sobre import RespostaSobre
-from app.esquemas.projetos import ProjetoResumo, ProjetoDetalhado, RespostaProjetos
-from app.esquemas.stack import ItemStack, RespostaStack
-from app.esquemas.experiencias import Experiencia, RespostaExperiencias
-from app.esquemas.formacao import ItemFormacao, RespostaFormacao
-from app.casos_uso import (
-    ObterExperienciasUseCase,
-    ObterFormacaoUseCase,
-    ObterProjetoPorIdUseCase,
-    ObterProjetosUseCase,
-    ObterSobreUseCase,
-    ObterStackUseCase,
-)
-from app.controladores.dependencias import (
-    obter_obter_experiencias_use_case,
-    obter_obter_formacao_use_case,
-    obter_obter_projeto_por_id_use_case,
-    obter_obter_projetos_use_case,
-    obter_obter_sobre_use_case,
-    obter_obter_stack_use_case,
-)
+from app.esquemas.projetos import ProjetoResumo
+from app.esquemas.projetos import ProjetoDetalhado
+from app.esquemas.projetos import RespostaProjetos
+from app.esquemas.stack import ItemStack
+from app.esquemas.stack import RespostaStack
+from app.esquemas.experiencias import Experiencia
+from app.esquemas.experiencias import RespostaExperiencias
+from app.esquemas.formacao import ItemFormacao
+from app.esquemas.formacao import RespostaFormacao
+from app.casos_uso import ObterExperienciasUseCase
+from app.casos_uso import ObterFormacaoUseCase
+from app.casos_uso import ObterProjetoPorIdUseCase
+from app.casos_uso import ObterProjetosUseCase
+from app.casos_uso import ObterSobreUseCase
+from app.casos_uso import ObterStackUseCase
+from app.controladores.dependencias import obter_obter_experiencias_use_case
+from app.controladores.dependencias import obter_obter_formacao_use_case
+from app.controladores.dependencias import obter_obter_projeto_por_id_use_case
+from app.controladores.dependencias import obter_obter_projetos_use_case
+from app.controladores.dependencias import obter_obter_sobre_use_case
+from app.controladores.dependencias import obter_obter_stack_use_case
+from app.core.cache_http import resposta_cacheavel
 from app.core.excecoes import ErroRecursoNaoEncontrado
 from app.core.limite import limiter
 
@@ -50,6 +55,7 @@ roteador = APIRouter(tags=["API"])
     },
 )
 async def obter_sobre(
+    request: Request,
     response: Response,
     obter_sobre_uc: Annotated[
         ObterSobreUseCase,
@@ -62,9 +68,8 @@ async def obter_sobre(
     Returns:
         RespostaSobre: Dados pessoais validados.
     """
-    response.headers["Cache-Control"] = "public, max-age=300"  # 5 min
     dados = await obter_sobre_uc.executar()
-    return RespostaSobre(**dados)
+    return resposta_cacheavel(request, response, RespostaSobre(**dados))
 
 
 @roteador.get(
@@ -94,7 +99,6 @@ async def listar_projetos(
     Ordenação:
         Projetos em destaque aparecem primeiro, depois ordem alfabética.
     """
-    response.headers["Cache-Control"] = "public, max-age=300"  # 5 min
     projetos = await obter_projetos_uc.executar()
 
     projetos_resumo = [
@@ -111,10 +115,12 @@ async def listar_projetos(
         for p in projetos
     ]
 
-    return RespostaProjetos(
+    resultado = RespostaProjetos(
         projetos=projetos_resumo,
         total=len(projetos_resumo),
     )
+
+    return resposta_cacheavel(request, response, resultado)
 
 
 @roteador.get(
@@ -180,7 +186,6 @@ async def obter_projeto(
     Raises:
         ErroRecursoNaoEncontrado: Se projeto não existe.
     """
-    response.headers["Cache-Control"] = "public, max-age=300"  # 5 min
     projeto = await obter_projeto_por_id_uc.executar(projeto_id)
 
     if not projeto:
@@ -189,7 +194,7 @@ async def obter_projeto(
             codigo="PROJETO_NAO_ENCONTRADO",
         )
 
-    return ProjetoDetalhado(
+    resultado = ProjetoDetalhado(
         id=projeto.id,
         nome=projeto.nome,
         descricao_curta=projeto.descricao_curta,
@@ -203,6 +208,8 @@ async def obter_projeto(
         imagem=projeto.imagem,
     )
 
+    return resposta_cacheavel(request, response, resultado)
+
 
 @roteador.get(
     "/stack",
@@ -214,6 +221,7 @@ async def obter_projeto(
     },
 )
 async def obter_stack(
+    request: Request,
     response: Response,
     obter_stack_uc: Annotated[
         ObterStackUseCase,
@@ -226,7 +234,6 @@ async def obter_stack(
     Returns:
         RespostaStack: Tecnologias agrupadas por categoria.
     """
-    response.headers["Cache-Control"] = "public, max-age=300"  # 5 min
     por_categoria = await obter_stack_uc.executar()
 
     # Converter para ItemStack
@@ -238,10 +245,12 @@ async def obter_stack(
         por_categoria_validado[categoria] = itens_validados
         stack_completo.extend(itens_validados)
 
-    return RespostaStack(
+    resultado = RespostaStack(
         stack=stack_completo,
         por_categoria=por_categoria_validado,
     )
+
+    return resposta_cacheavel(request, response, resultado)
 
 
 @roteador.get(
@@ -254,6 +263,7 @@ async def obter_stack(
     },
 )
 async def listar_experiencias(
+    request: Request,
     response: Response,
     obter_experiencias_uc: Annotated[
         ObterExperienciasUseCase,
@@ -269,7 +279,6 @@ async def listar_experiencias(
     Ordenação:
         Experiência atual primeiro, depois por data (mais recente primeiro).
     """
-    response.headers["Cache-Control"] = "public, max-age=300"  # 5 min
     experiencias = await obter_experiencias_uc.executar()
 
     experiencias_schema = [
@@ -287,10 +296,12 @@ async def listar_experiencias(
         for e in experiencias
     ]
 
-    return RespostaExperiencias(
+    resultado = RespostaExperiencias(
         experiencias=experiencias_schema,
         total=len(experiencias_schema),
     )
+
+    return resposta_cacheavel(request, response, resultado)
 
 
 @roteador.get(
@@ -303,6 +314,7 @@ async def listar_experiencias(
     },
 )
 async def listar_formacao(
+    request: Request,
     response: Response,
     obter_formacao_uc: Annotated[
         ObterFormacaoUseCase,
@@ -318,7 +330,6 @@ async def listar_formacao(
     Ordenação:
         Formação em curso primeiro, depois por data (mais recente primeiro).
     """
-    response.headers["Cache-Control"] = "public, max-age=300"  # 5 min
     formacoes = await obter_formacao_uc.executar()
 
     formacoes_schema = [
@@ -335,7 +346,9 @@ async def listar_formacao(
         for f in formacoes
     ]
 
-    return RespostaFormacao(
+    resultado = RespostaFormacao(
         formacoes=formacoes_schema,
         total=len(formacoes_schema),
     )
+
+    return resposta_cacheavel(request, response, resultado)

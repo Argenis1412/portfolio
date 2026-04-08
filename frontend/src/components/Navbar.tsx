@@ -3,7 +3,8 @@ import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../hooks/useApi';
-import { fetchProjects, fetchSkills, fetchExperience } from '../api';
+import { fetchAbout, fetchProjects, fetchSkills, fetchExperience } from '../api';
+import { scrollToSection } from '../utils/scrollToSection';
 
 export default function Navbar() {
   const { language, setLanguage, t } = useLanguage();
@@ -14,10 +15,9 @@ export default function Navbar() {
     queryClient.prefetchQuery({
       queryKey: key,
       queryFn: fn,
-      staleTime: 5 * 60 * 1000,
+      staleTime: 20 * 60 * 1000,
     });
   };
-
 
   return (
     <nav className="fixed top-0 w-full z-50 glass">
@@ -28,38 +28,45 @@ export default function Navbar() {
           </div>
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-6">
-              <a href="#hero" className="hover:text-app-primary px-3 py-2 rounded-md text-xs font-semibold uppercase tracking-widest transition-colors text-app-text">
+              <button
+                onClick={() => scrollToSection('hero')}
+                onMouseEnter={() => prefetch(queryKeys.about, fetchAbout)}
+                onFocus={() => prefetch(queryKeys.about, fetchAbout)}
+                className="hover:text-app-primary px-3 py-2 rounded-md text-xs font-semibold uppercase tracking-widest transition-colors text-app-text"
+              >
                 {t('nav.about')}
-              </a>
-              <a 
-                href="#stack" 
-                onMouseEnter={() => prefetch(queryKeys.skills, fetchSkills)} 
+              </button>
+              <button
+                onClick={() => scrollToSection('stack')}
+                onMouseEnter={() => prefetch(queryKeys.skills, fetchSkills)}
                 onFocus={() => prefetch(queryKeys.skills, fetchSkills)}
                 className="hover:text-app-primary px-3 py-2 rounded-md text-xs font-semibold uppercase tracking-widest transition-colors text-app-text"
               >
                 {t('nav.stack')}
-              </a>
-              <a 
-                href="#projects" 
+              </button>
+              <button
+                onClick={() => scrollToSection('projects')}
                 onMouseEnter={() => prefetch(queryKeys.projects, fetchProjects)}
                 onFocus={() => prefetch(queryKeys.projects, fetchProjects)}
                 className="hover:text-app-primary px-3 py-2 rounded-md text-xs font-semibold uppercase tracking-widest transition-colors text-app-text"
               >
                 {t('nav.projects')}
-              </a>
-              <a 
-                href="#experience" 
-                onMouseEnter={() => {
-                   prefetch(queryKeys.experience, fetchExperience);
-                }}
+              </button>
+              <button
+                onClick={() => scrollToSection('experience')}
+                onMouseEnter={() => prefetch(queryKeys.experience, fetchExperience)}
                 onFocus={() => prefetch(queryKeys.experience, fetchExperience)}
                 className="hover:text-app-primary px-3 py-2 rounded-md text-xs font-semibold uppercase tracking-widest transition-colors text-app-text"
               >
                 {t('nav.journey')}
-              </a>
-              <a href="#contact" className="hover:text-app-primary px-3 py-2 rounded-md text-xs font-semibold uppercase tracking-widest transition-colors text-app-text">
+              </button>
+              <button
+                data-testid="nav-contact"
+                onClick={() => scrollToSection('contato')}
+                className="hover:text-app-primary px-3 py-2 rounded-md text-xs font-semibold uppercase tracking-widest transition-colors text-app-text"
+              >
                 {t('nav.contact')}
-              </a>
+              </button>
             </div>
           </div>
           <div className="flex items-center gap-4">

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
-import profilePic from '../assets/profile/profile.jpg';
+import { scrollToSection } from '../utils/scrollToSection';
 
 export default function Hero() {
   const { t } = useLanguage();
@@ -43,12 +43,19 @@ export default function Hero() {
             transition={{ duration: 0.8, delay: 0.6 }}
             className="flex flex-col sm:flex-row justify-center md:justify-start gap-4"
           >
-            <a href="#projects" className="bg-app-primary hover:bg-app-primary-hover text-white font-bold py-3 px-8 rounded-full transition-smooth premium-shadow">
+            <button
+              onClick={() => scrollToSection('projects')}
+              className="bg-app-primary hover:bg-app-primary-hover text-white font-bold py-3 px-8 rounded-full transition-smooth premium-shadow"
+            >
               {t('nav.projects')}
-            </a>
-            <a href="#contact" className="bg-transparent hover:bg-app-surface-hover text-app-text font-semibold py-3 px-8 rounded-full transition-smooth border border-app-border">
+            </button>
+            <button
+              data-testid="hero-contact-cta"
+              onClick={() => scrollToSection('contato')}
+              className="bg-transparent hover:bg-app-surface-hover text-app-text font-semibold py-3 px-8 rounded-full transition-smooth border border-app-border"
+            >
               {t('nav.contact')}
-            </a>
+            </button>
           </motion.div>
         </div>
 
@@ -65,13 +72,11 @@ export default function Hero() {
           <div className="relative w-[276px] h-[276px] md:w-[368px] md:h-[368px] rounded-full p-1.5 bg-gradient-to-tr from-app-primary to-transparent shadow-[0_0_30px_rgba(212,163,115,0.3)]">
             <div className="w-full h-full rounded-full overflow-hidden bg-app-surface-hover flex items-center justify-center relative">
                <img 
-                 src={profilePic} 
+                 src="/profile.jpg" 
                  alt="Profile" 
                  fetchPriority="high"
-
                  className="w-full h-full object-cover rounded-full filter grayscale-[10%] brightness-110" 
                />
-
             </div>
           </div>
         </motion.div>

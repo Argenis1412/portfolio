@@ -59,7 +59,9 @@ def _credenciais_metrics_validas(authorization_header: str | None) -> bool:
     except Exception:
         return False
 
-    return hmac.compare_digest(username, configuracoes.metrics_basic_auth_username) and hmac.compare_digest(
+    return hmac.compare_digest(
+        username, configuracoes.metrics_basic_auth_username
+    ) and hmac.compare_digest(
         password,
         configuracoes.metrics_basic_auth_password,
     )
@@ -74,6 +76,7 @@ def _obter_trace_id() -> str:
     """
     try:
         from opentelemetry import trace
+
         span = trace.get_current_span()
         ctx = span.get_span_context()
         if ctx and ctx.is_valid:
@@ -115,10 +118,10 @@ class MiddlewareRequisicao(BaseHTTPMiddleware):
         """
         # Gerar ID único para rastreamento
         request_id = str(uuid.uuid4())
-        
+
         # Adicionar request_id no state do request
         request.state.request_id = request_id
-        
+
         # Adicionar request_id ao contexto do structlog
         structlog.contextvars.clear_contextvars()
         structlog.contextvars.bind_contextvars(
@@ -126,24 +129,9 @@ class MiddlewareRequisicao(BaseHTTPMiddleware):
             metodo=request.method,
             path=request.url.path,
         )
-        
+
         # Timestamp de início
         inicio = time.time()
-        
-        # Extrair identidade para rate limiting se for contato
-        if request.method == "POST" and "/v1/contato" in request.url.path:
-            content_length = request.headers.get("content-length")
-            # Mitigação de Memory DoS: Só carrega o JSON na memória se for <= 10KB
-            if content_length and content_length.isdigit() and int(content_length) <= 10240:
-                try:
-                    # Tentar ler o corpo sem consumir o stream de forma destrutiva
-                    # Em Starlette, se lermos .json(), ele fica em cache no objeto request
-                    body = await request.json()
-                    email = body.get("email")
-                    if email and isinstance(email, str):
-                        request.state.identidade = f"email:{email.lower().strip()}"
-                except Exception:
-                    pass
 
         # Log da requisição recebida
         logger.info(
@@ -152,7 +140,7 @@ class MiddlewareRequisicao(BaseHTTPMiddleware):
             client_ip=get_client_ip(request),
             identidade=_identidade_logavel(request),
         )
-        
+
         # Processar requisição
         try:
             response = await call_next(request)
@@ -165,7 +153,7 @@ class MiddlewareRequisicao(BaseHTTPMiddleware):
                 exc_info=True,
             )
             raise
-        
+
         # Calcular tempo de resposta
         duracao_ms = (time.time() - inicio) * 1000
 
@@ -190,7 +178,6 @@ class MiddlewareRequisicao(BaseHTTPMiddleware):
         # Limpar contexto
         structlog.contextvars.clear_contextvars()
 
-
         return response
 
 
@@ -199,18 +186,25 @@ class SegurancaHeadersMiddleware(BaseHTTPMiddleware):
     Middleware para adicionar headers de segurança em todas as respostas.
     Reflete as proteções configuradas no vercel.json para o backend.
     """
+
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
         response = await call_next(request)
-        
+
         # Security Headers
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
-        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=31536000; includeSubDomains; preload"
+        )
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
-        response.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
-        
+        response.headers["Permissions-Policy"] = (
+            "camera=(), microphone=(), geolocation=()"
+        )
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
+        )
+
         return response
 
 

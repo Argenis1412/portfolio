@@ -12,7 +12,7 @@ class ErroDominio(Exception):
 
     Mapeia para HTTP 400 Bad Request.
     Usado quando a requisição viola regras de domínio.
-    
+
     Attributes:
         mensagem: Descrição do erro em português.
         codigo: Código interno para tracking (opcional).
@@ -30,7 +30,7 @@ class ErroValidacao(ErroDominio):
 
     Mapeia para HTTP 422 Unprocessable Entity.
     Usado quando dados não passam em validações de negócio.
-    
+
     Example:
         raise ErroValidacao("Email inválido", codigo="EMAIL_INVALIDO")
     """
@@ -46,7 +46,7 @@ class ErroInfraestrutura(Exception):
     Mapeia para HTTP 500 Internal Server Error.
     Usado quando falha comunicação com sistemas externos
     (arquivos, APIs, banco de dados, etc).
-    
+
     Attributes:
         mensagem: Descrição do erro.
         codigo: Código interno.
@@ -71,7 +71,7 @@ class ErroRecursoNaoEncontrado(ErroDominio):
 
     Mapeia para HTTP 404 Not Found.
     Usado quando recurso solicitado não existe.
-    
+
     Example:
         raise ErroRecursoNaoEncontrado(
             "Projeto não encontrado",
@@ -87,5 +87,7 @@ class ErroChaveIdempotenciaAusente(ErroDominio):
     Mapeia para HTTP 400 Bad Request.
     """
 
-    def __init__(self, mensagem: str = "Header 'Idempotency-Key' é obrigatório") -> None:
+    def __init__(
+        self, mensagem: str = "Header 'Idempotency-Key' é obrigatório"
+    ) -> None:
         super().__init__(mensagem, codigo="CHAVE_IDEMPOTENCIA_AUSENTE")

@@ -7,22 +7,22 @@ backend_path = str(Path(__file__).parent.parent.absolute())
 if backend_path not in sys.path:
     sys.path.append(backend_path)
 
-import asyncio
-from sqlalchemy import pool
-from sqlalchemy.ext.asyncio import create_async_engine
-from alembic import context
-from sqlmodel import SQLModel
+import asyncio  # noqa: E402
+from sqlalchemy import pool  # noqa: E402
+from sqlalchemy.ext.asyncio import create_async_engine  # noqa: E402
+from alembic import context  # noqa: E402
+from sqlmodel import SQLModel  # noqa: E402
 
 # Importar modelos para que sejam registrados no SQLModel.metadata
-from app.adaptadores.modelos_sql import (
-    SobreModelo,
-    ProjetoModelo,
-    ExperienciaModelo,
-    FormacaoModelo,
-    StackModelo,
-    SpamFilterModelo,
+from app.adaptadores.modelos_sql import (  # noqa: E402
+    SobreModelo,  # noqa: F401
+    ProjetoModelo,  # noqa: F401
+    ExperienciaModelo,  # noqa: F401
+    FormacaoModelo,  # noqa: F401
+    StackModelo,  # noqa: F401
+    SpamFilterModelo,  # noqa: F401
 )
-from app.configuracao import configuracoes
+from app.configuracao import configuracoes  # noqa: E402
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -110,6 +110,7 @@ def run_migrations_online() -> None:
     else:
         # Modo síncrono tradicional
         from sqlalchemy import engine_from_config
+
         connectable = engine_from_config(
             config.get_section(config.config_ini_section, {}),
             prefix="sqlalchemy.",
@@ -117,9 +118,7 @@ def run_migrations_online() -> None:
         )
 
         with connectable.connect() as connection:
-            context.configure(
-                connection=connection, target_metadata=target_metadata
-            )
+            context.configure(connection=connection, target_metadata=target_metadata)
 
             with context.begin_transaction():
                 context.run_migrations()

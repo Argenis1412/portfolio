@@ -1,0 +1,79 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-8.3.4, pluggy-1.6.0 -- C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend
+configfile: pytest.ini
+plugins: anyio-4.8.0, asyncio-0.24.0, cov-6.0.0
+asyncio: mode=Mode.AUTO, default_loop_scope=function
+collecting ... collected 12 items
+
+test_performance.py::test_etag_and_304_not_modified PASSED               [  8%]
+test_performance.py::test_etag_changes_when_content_changes PASSED       [ 16%]
+test_resiliencia.py::test_idempotency_store_redis_failure PASSED         [ 25%]
+test_resiliencia.py::test_formspree_timeout_fallback PASSED              [ 33%]
+test_robustez.py::test_idempotencia_contato PASSED                       [ 41%]
+test_robustez.py::test_idempotencia_contato_aceita_header_legado PASSED  [ 50%]
+test_robustez.py::test_rate_limiting_projetos PASSED                     [ 58%]
+test_robustez.py::test_idempotencia_sem_chave_funciona_normalmente PASSED [ 66%]
+test_robustez.py::test_idempotencia_em_progresso PASSED                  [ 75%]
+test_robustez.py::test_idempotencia_libera_chave_apos_falha PASSED       [ 83%]
+test_robustez.py::test_deduplicacao_nao_envenena_retry_apos_falha PASSED [ 91%]
+test_robustez.py::test_rate_limiting_contato_por_email PASSED            [100%]
+ERROR: Coverage failure: total of 71 is less than fail-under=80
+
+
+---------- coverage: platform win32, python 3.12.10-final-0 ----------
+Name                                                                                                   Stmts   Miss  Cover   Missing
+------------------------------------------------------------------------------------------------------------------------------------
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\adaptadores\__init__.py               5      0   100%
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\adaptadores\email_adaptador.py       45     30    33%   18-23, 44, 66-68, 83-128, 148-156
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\adaptadores\logger_adaptador.py      31     10    68%   55, 60, 65, 70, 88-89, 99, 109, 119, 129
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\adaptadores\modelos_sql.py           78     11    86%   25-29, 32-37
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\adaptadores\repositorio.py           85     44    48%   30, 35, 40, 45, 50, 55, 60, 65, 70, 99-100, 106-117, 136-147, 156, 165-166, 196-199, 208, 217-218, 240-241, 257, 261
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\adaptadores\repositorio_sql.py       93     58    38%   45, 68-73, 82-90, 99-100, 121-127, 145-149, 163-167, 186-190, 208-224, 230-237
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\casos_uso\__init__.py                 7      0   100%
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\casos_uso\enviar_contato.py          21     13    38%   77-123
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\casos_uso\obter_experiencias.py       8      3    62%   31, 51-52
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\casos_uso\obter_formacao.py           8      3    62%   31, 44-45
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\casos_uso\obter_projetos.py          13      2    85%   61, 80
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\casos_uso\obter_sobre.py              6      0   100%
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\casos_uso\obter_stack.py             13      9    31%   30, 49-59
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\configuracao.py                      57     16    72%   163, 173-196
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\controladores\__init__.py             4      0   100%
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\controladores\api.py                 55     22    60%   185-207, 233-249, 278-300, 329-350
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\controladores\contato.py             68     10    85%   61-76, 81-93, 101-108, 154, 169
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\controladores\dependencias.py        38     15    61%   26, 32, 38, 44, 50, 56, 62, 68, 75-90
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\controladores\saude.py               21      9    57%   29, 49-68
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\controladores\v1.py                   6      0   100%
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\core\__init__.py                      3      0   100%
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\core\cache_http.py                   20      0   100%
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\core\excecoes.py                     18      5    72%   22-24, 39, 91
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\core\handlers.py                     52     15    71%   53, 75-82, 103-110, 162-169, 190-207, 229-237
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\core\idempotencia.py                112     28    75%   51-58, 69-70, 77, 97-98, 104-106, 110-111, 137, 147-151, 174, 193-196
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\core\limite.py                       34      3    91%   16, 20, 36
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\core\middleware.py                   91     29    68%   32-37, 45-48, 52-62, 80-82, 144-152, 164-166, 209-216
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\core\observabilidade.py              71     30    58%   40-66, 102-103, 166-197, 214-215, 234
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\core\spam_check.py                   27      8    70%   35, 40, 42, 48, 51, 53, 58, 62
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\core\spam_store.py                   38     11    71%   32, 37-43, 49, 54, 60-61, 68-72
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\entidades\__init__.py                 5      0   100%
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\entidades\experiencia.py             19      3    84%   64-66
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\entidades\formacao.py                18      3    83%   47-49
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\entidades\mensagem.py                 9      1    89%   51
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\entidades\projeto.py                 14      0   100%
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\esquemas\__init__.py                  8      0   100%
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\esquemas\contato.py                  38      4    89%   61, 68, 71, 79
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\esquemas\experiencias.py             16      0   100%
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\esquemas\formacao.py                 15      0   100%
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\esquemas\projetos.py                 26      0   100%
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\esquemas\saude.py                     9      0   100%
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\esquemas\sobre.py                    12      0   100%
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\esquemas\stack.py                    16      0   100%
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\esquemas\tipos_base.py                5      0   100%
+C:\Users\Visitante\Desktop\Projectos de Github\Portf-lio\backend\app\principal.py                         41      0   100%
+------------------------------------------------------------------------------------------------------------------------------------
+TOTAL                                                                                                   1379    395    71%
+Coverage HTML written to dir htmlcov
+
+FAIL Required test coverage of 80% not reached. Total coverage: 71.36%
+
+============================= 12 passed in 1.02s ==============================

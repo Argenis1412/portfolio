@@ -50,7 +50,7 @@ def get_contact_fingerprint_key(request: Request) -> str:
 limiter = Limiter(
     key_func=get_client_ip,
     strategy="fixed-window",
-    storage_uri=configuracoes.redis_url or "memory://"
+    storage_uri=configuracoes.redis_url or "memory://",
 )
 
 
@@ -60,7 +60,7 @@ def check_rate_limit(request: Request, limit_string: str, key_func=get_email_or_
     """
     from slowapi.errors import RateLimitExceeded
     from limits import parse_many
-    
+
     # Mock para satisfazer o construtor do RateLimitExceeded do slowapi
     # que espera um objeto com o atributo 'error_message'
     class MockLimit:
@@ -70,5 +70,20 @@ def check_rate_limit(request: Request, limit_string: str, key_func=get_email_or_
     key = key_func(request)
     # Parseamos la string de límite (ej: "10/day" -> [Limit(...)])
     for limit in parse_many(limit_string):
-        if not limiter.limiter.hit(limit, key):
-            raise RateLimitExceeded(MockLimit(str(limit)))
+        try:
+            if not limiter.limiter.hit(limit, key):
+                raise RateLimitExceeded(MockLimit(str(limit)))  # type: ignore
+        except RateLimitExceeded:
+            raise
+        except Exception as e:
+            # Fallback (Fail-open) in case of Redis connection drops/timeouts
+            import structlog
+
+            logger = structlog.get_logger(__name__)
+            logger.warning(
+                "rate_limiter_redis_fallback_open",
+                error=str(e),
+                limit=str(limit),
+            )
+            # Ao invés de retornar 500, falhamos 'aberto' permitindo a requisição
+            continue

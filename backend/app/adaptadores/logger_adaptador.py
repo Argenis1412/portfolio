@@ -13,7 +13,7 @@ import structlog
 def configurar_structlog() -> None:
     """
     Configura structlog com processadores adequados para produção.
-    
+
     Processadores:
         - add_log_level: Adiciona nível do log
         - add_logger_name: Adiciona nome do logger

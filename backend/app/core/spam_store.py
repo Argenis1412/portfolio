@@ -32,15 +32,24 @@ class SpamDedupStore:
         return f"contact:dedupe:{content_hash}"
 
     async def reserve(self, content_hash: str, ttl_seconds: int) -> bool:
-        """Returns True only when the hash did not exist yet."""
+        """Returns True only when the hash did not exist yet. Fails open to memory if Redis is down."""
         if self._redis_client is not None:
-            created = await self._redis_client.set(
-                self._key(content_hash),
-                "1",
-                ex=ttl_seconds,
-                nx=True,
-            )
-            return bool(created)
+            try:
+                created = await self._redis_client.set(
+                    self._key(content_hash),
+                    "1",
+                    ex=ttl_seconds,
+                    nx=True,
+                )
+                return bool(created)
+            except Exception as e:
+                import structlog
+
+                logger = structlog.get_logger(__name__)
+                logger.warning(
+                    "spam_store_redis_failure_falling_back_to_memory", error=str(e)
+                )
+                # Proceed to memory fallback
 
         now = time.time()
         async with self._lock:
@@ -49,7 +58,9 @@ class SpamDedupStore:
                 return False
 
             self._memory_store[content_hash] = now + ttl_seconds
-            expired_keys = [key for key, expiry in self._memory_store.items() if expiry <= now]
+            expired_keys = [
+                key for key, expiry in self._memory_store.items() if expiry <= now
+            ]
             for key in expired_keys:
                 self._memory_store.pop(key, None)
             return True
@@ -57,8 +68,11 @@ class SpamDedupStore:
     async def release(self, content_hash: str) -> None:
         """Releases a previously reserved hash after a failed request."""
         if self._redis_client is not None:
-            await self._redis_client.delete(self._key(content_hash))
-            return
+            try:
+                await self._redis_client.delete(self._key(content_hash))
+                return
+            except Exception:
+                pass
 
         async with self._lock:
             self._memory_store.pop(content_hash, None)

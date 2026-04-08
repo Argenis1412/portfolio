@@ -120,7 +120,7 @@ export default function Contact() {
   const status = isMutating ? 'loading' : (mutationSuccess ? 'success' : (mutationError || errors.submit ? 'error' : 'idle'));
 
   return (
-    <section id="contact" className="py-16 max-w-4xl mx-auto px-4 relative group overflow-hidden">
+    <section id="contato" className="py-16 max-w-4xl mx-auto px-4 relative group overflow-hidden">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-app-primary/5 dark:bg-app-primary/10 rounded-full blur-[120px] -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
       <motion.div 
         initial={{ opacity: 0, y: 20 }}

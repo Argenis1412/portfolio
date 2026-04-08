@@ -8,18 +8,22 @@ from redis import asyncio as redis
 
 from app.configuracao import configuracoes
 
+
 class IdempotencyRecord(BaseModel):
     """Registro de uma resposta cacheada."""
+
     status_code: int
     content: Any
     timestamp: float
     in_progress: bool = False
+
 
 class IdempotencyStore:
     """
     Armazenamento em memória para chaves de idempotência.
     Simplificado para este portfólio. Em produzir, usar Redis.
     """
+
     def __init__(self, max_size: int = 100, ttl_seconds: int = 3600):
         self._cache: Dict[str, IdempotencyRecord] = {}
         self.max_size = max_size
@@ -63,12 +67,12 @@ class IdempotencyStore:
             record = self._cache.get(key)
             if not record:
                 return None
-            
+
             # Verificar expiração
             if time.time() - record.timestamp > self.ttl_seconds:
                 self._cache.pop(key, None)
                 return None
-                
+
             return record
 
     async def get(self, key: str) -> Optional[IdempotencyRecord]:
@@ -105,16 +109,13 @@ class IdempotencyStore:
                 if time.time() - record.timestamp <= self.ttl_seconds:
                     return False
                 # Se expirou, sobrescreve
-            
+
             if len(self._cache) >= self.max_size:
                 primeira = next(iter(self._cache))
                 self._cache.pop(primeira, None)
 
             self._cache[key] = IdempotencyRecord(
-                status_code=0,
-                content={},
-                timestamp=time.time(),
-                in_progress=True
+                status_code=0, content={}, timestamp=time.time(), in_progress=True
             )
             return True
 
@@ -153,14 +154,18 @@ class IdempotencyStore:
         with self._lock:
             self._cache.pop(key, None)
 
+
 # Instância global simplificada
 store = IdempotencyStore()
 
+
 class IdempotencyException(Exception):
     """Exceção interna para sinalizar que resposta cacheada deve ser retornada."""
+
     def __init__(self, record: IdempotencyRecord):
         self.record = record
         super().__init__("Idempotency HIT")
+
 
 async def verificar_idempotencia(
     request: Request,
@@ -183,7 +188,7 @@ async def verificar_idempotencia(
         if record.in_progress:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="Request already in progress"
+                detail="Request already in progress",
             )
         raise IdempotencyException(record)
 
@@ -194,8 +199,7 @@ async def verificar_idempotencia(
         if record and not record.in_progress:
             raise IdempotencyException(record)
         raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Request already in progress"
+            status_code=status.HTTP_409_CONFLICT, detail="Request already in progress"
         )
 
     return effective_key

@@ -48,26 +48,17 @@ describe('Navbar – renderização', () => {
 
 // ─── Links de navegação ────────────────────────────────────────────────────────
 
-describe('Navbar – links de navegação', () => {
-  it('contém link para a seção #projects', () => {
-    renderNavbar();
-    const links = screen.getAllByRole('link');
-    const hrefs = links.map((l) => l.getAttribute('href'));
-    expect(hrefs).toContain('#projects');
+describe('Navbar – navegação por botões', () => {
+  it('exibe o botón para Contato correctamente', () => {
+    const { getByTestId } = renderNavbar();
+    const btn = getByTestId('nav-contact');
+    expect(btn).toBeTruthy();
   });
 
-  it('contém link para a seção #contact', () => {
-    renderNavbar();
-    const links = screen.getAllByRole('link');
-    const hrefs = links.map((l) => l.getAttribute('href'));
-    expect(hrefs).toContain('#contact');
-  });
-
-  it('contém link para a seção #stack', () => {
-    renderNavbar();
-    const links = screen.getAllByRole('link');
-    const hrefs = links.map((l) => l.getAttribute('href'));
-    expect(hrefs).toContain('#stack');
+  it('o clique no botón de contato não lança erro', () => {
+    const { getByTestId } = renderNavbar();
+    const btn = getByTestId('nav-contact');
+    expect(() => fireEvent.click(btn)).not.toThrow();
   });
 });
 

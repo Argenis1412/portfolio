@@ -2,12 +2,10 @@
 Implementação do repositório usando SQLModel (SQL).
 """
 
-from typing import List, Optional
-from datetime import date
-from sqlmodel import select
+from typing import List, Optional, Any
+from sqlmodel import select, col
 from sqlmodel.ext.asyncio.session import AsyncSession
-from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy import text
 import json
 
@@ -29,23 +27,26 @@ from app.configuracao import configuracoes
 class RepositorioSQL(RepositorioPortfolio):
     """
     Implementação de RepositorioPortfolio usando SQLModel.
-    
+
     Conecta a um banco de dados SQL (ex: SQLite, PostgreSQL).
     """
 
     def __init__(self, database_url: str = configuracoes.database_url):
         """
         Inicializa o repositório SQL.
-        
+
         Args:
             database_url: URL de conexão com o banco de dados.
         """
-        engine_kwargs = {}
+        engine_kwargs: dict[str, Any] = {}
         if not database_url.startswith("sqlite"):
             engine_kwargs.update(
+                pool_size=configuracoes.db_pool_size,
+                max_overflow=configuracoes.db_max_overflow,
+                pool_recycle=configuracoes.db_pool_recycle_seconds,
+                pool_timeout=configuracoes.db_pool_timeout_seconds,
+                pool_use_lifo=configuracoes.db_pool_use_lifo,
                 pool_pre_ping=True,
-                pool_recycle=300,
-                pool_timeout=5,
                 connect_args={
                     "timeout": configuracoes.db_connect_timeout_seconds,
                     "command_timeout": configuracoes.db_command_timeout_seconds,
@@ -54,7 +55,7 @@ class RepositorioSQL(RepositorioPortfolio):
             )
 
         self.engine = create_async_engine(database_url, **engine_kwargs)
-        self.session_factory = sessionmaker(
+        self.session_factory = async_sessionmaker(
             self.engine, class_=AsyncSession, expire_on_commit=False
         )
 
@@ -64,7 +65,7 @@ class RepositorioSQL(RepositorioPortfolio):
         """
         try:
             async with self.session_factory() as session:
-                await session.exec(text("SELECT 1"))
+                await session.execute(text("SELECT 1"))
             return {"status": "ok", "detalhes": "Banco de dados SQL conectado"}
         except Exception as e:
             return {"status": "erro", "detalhes": f"Falha na conexão SQL: {str(e)}"}
@@ -158,7 +159,9 @@ class RepositorioSQL(RepositorioPortfolio):
         Obtém experiências profissionais do banco de dados.
         """
         async with self.session_factory() as session:
-            statement = select(ExperienciaModelo).order_by(ExperienciaModelo.data_inicio.desc())
+            statement = select(ExperienciaModelo).order_by(
+                col(ExperienciaModelo.data_inicio).desc()
+            )
             resultado = await session.exec(statement)
             modelos = resultado.all()
             return [
@@ -181,7 +184,9 @@ class RepositorioSQL(RepositorioPortfolio):
         Obtém formações acadêmicas do banco de dados.
         """
         async with self.session_factory() as session:
-            statement = select(FormacaoModelo).order_by(FormacaoModelo.data_inicio.desc())
+            statement = select(FormacaoModelo).order_by(
+                col(FormacaoModelo.data_inicio).desc()
+            )
             resultado = await session.exec(statement)
             modelos = resultado.all()
             return [
@@ -198,26 +203,31 @@ class RepositorioSQL(RepositorioPortfolio):
                 for m in modelos
             ]
 
-    async def verificar_duplicata_spam(self, content_hash: str, ttl_seconds: int) -> bool:
+    async def verificar_duplicata_spam(
+        self, content_hash: str, ttl_seconds: int
+    ) -> bool:
         """
         Verifica se o hash de conteúdo já existe no banco e não expirou.
         """
         import time
+
         async with self.session_factory() as session:
-            statement = select(SpamFilterModelo).where(SpamFilterModelo.content_hash == content_hash)
+            statement = select(SpamFilterModelo).where(
+                SpamFilterModelo.content_hash == content_hash
+            )
             resultado = await session.exec(statement)
             m = resultado.first()
-            
+
             if not m:
                 return False
-            
+
             # Verificar expiração
             if time.time() - m.timestamp > ttl_seconds:
                 # Remove expirado (limpeza lazy)
                 await session.delete(m)
                 await session.commit()
                 return False
-                
+
             return True
 
     async def registrar_spam(self, content_hash: str, timestamp: float) -> None:
@@ -230,5 +240,5 @@ class RepositorioSQL(RepositorioPortfolio):
             session.add(novo)
             try:
                 await session.commit()
-            except:
+            except Exception:
                 await session.rollback()

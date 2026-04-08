@@ -99,6 +99,8 @@ out/
 .parcel-cache/
 
 # Vite
+.vite/
+lh-report.json
 *.local
 
 # Testing

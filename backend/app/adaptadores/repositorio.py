@@ -60,7 +60,9 @@ class RepositorioPortfolio(ABC):
         pass
 
     @abstractmethod
-    async def verificar_duplicata_spam(self, content_hash: str, ttl_seconds: int) -> bool:
+    async def verificar_duplicata_spam(
+        self, content_hash: str, ttl_seconds: int
+    ) -> bool:
         """Verifica se o hash já existe e não expirou."""
         pass
 
@@ -113,11 +115,8 @@ class RepositorioJSON(RepositorioPortfolio):
             detalhes[arq] = "ok" if existe else "ausente"
             if not existe:
                 tudo_ok = False
-        
-        return {
-            "status": "ok" if tudo_ok else "erro",
-            "detalhes": detalhes
-        }
+
+        return {"status": "ok" if tudo_ok else "erro", "detalhes": detalhes}
 
     async def _ler_json(self, nome_arquivo: str) -> Any:
         """
@@ -222,7 +221,9 @@ class RepositorioJSON(RepositorioPortfolio):
                 empresa=e["empresa"],
                 localizacao=e["localizacao"],
                 data_inicio=date.fromisoformat(e["data_inicio"]),
-                data_fim=date.fromisoformat(e["data_fim"]) if e.get("data_fim") else None,
+                data_fim=date.fromisoformat(e["data_fim"])
+                if e.get("data_fim")
+                else None,
                 descricao=e["descricao"],
                 tecnologias=e["tecnologias"],
                 atual=e.get("atual", False),
@@ -245,18 +246,21 @@ class RepositorioJSON(RepositorioPortfolio):
                 instituicao=f["instituicao"],
                 localizacao=f["localizacao"],
                 data_inicio=date.fromisoformat(f["data_inicio"]),
-                data_fim=date.fromisoformat(f["data_fim"]) if f.get("data_fim") else None,
+                data_fim=date.fromisoformat(f["data_fim"])
+                if f.get("data_fim")
+                else None,
                 descricao=f["descricao"],
                 atual=f.get("atual", False),
             )
             for f in dados
         ]
 
-    async def verificar_duplicata_spam(self, content_hash: str, ttl_seconds: int) -> bool:
+    async def verificar_duplicata_spam(
+        self, content_hash: str, ttl_seconds: int
+    ) -> bool:
         """Stub para interface abstrata. Implementado na versão SQL."""
         return False
 
     async def registrar_spam(self, content_hash: str, timestamp: float) -> None:
         """Stub para interface abstrata. Implementado na versão SQL."""
         pass
-
