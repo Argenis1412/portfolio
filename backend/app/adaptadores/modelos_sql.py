@@ -38,7 +38,7 @@ class JSONEncoded(TypeDecorator):
             return value
 
 
-class SobreModelo(SQLModel, table=True):
+class SobreModelo(SQLModel, table=True):  # type: ignore[call-arg]
     """Modelo para a seção 'Sobre'."""
 
     __tablename__ = "sobre"
@@ -56,7 +56,7 @@ class SobreModelo(SQLModel, table=True):
     disponibilidade: str
 
 
-class ProjetoModelo(SQLModel, table=True):
+class ProjetoModelo(SQLModel, table=True):  # type: ignore[call-arg]
     """Modelo para projetos do portfólio."""
 
     __tablename__ = "projetos"
@@ -76,7 +76,7 @@ class ProjetoModelo(SQLModel, table=True):
     imagem: Optional[str] = None
 
 
-class ExperienciaModelo(SQLModel, table=True):
+class ExperienciaModelo(SQLModel, table=True):  # type: ignore[call-arg]
     """Modelo para experiências profissionais."""
 
     __tablename__ = "experiencias"
@@ -93,7 +93,7 @@ class ExperienciaModelo(SQLModel, table=True):
     atual: bool = False
 
 
-class FormacaoModelo(SQLModel, table=True):
+class FormacaoModelo(SQLModel, table=True):  # type: ignore[call-arg]
     """Modelo para formação acadêmica."""
 
     __tablename__ = "formacoes"
@@ -109,7 +109,7 @@ class FormacaoModelo(SQLModel, table=True):
     atual: bool = False
 
 
-class StackModelo(SQLModel, table=True):
+class StackModelo(SQLModel, table=True):  # type: ignore[call-arg]
     """Modelo para tecnologias do stack."""
 
     __tablename__ = "stack"
@@ -121,7 +121,7 @@ class StackModelo(SQLModel, table=True):
     icone: Optional[str] = None
 
 
-class SpamFilterModelo(SQLModel, table=True):
+class SpamFilterModelo(SQLModel, table=True):  # type: ignore[call-arg]
     """Modelo para persistência de hashes de mensagens (deduplicação)."""
 
     __tablename__ = "spam_filter"
