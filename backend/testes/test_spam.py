@@ -4,6 +4,7 @@ Tests for Honeypot and Spam Scoring defense layers.
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import AsyncMock
+from app.core.honeypot import is_honeypot_triggered
 
 from app.principal import app
 from app.controladores.dependencias import obter_enviar_contato_use_case
@@ -87,7 +88,7 @@ def test_normal_message_not_suspect(mock_use_case):
     args, kwargs = mock_use_case.executar.call_args
     assert kwargs["is_suspicious"] is False
 
-from app.core.honeypot import is_honeypot_triggered
+
 
 def test_honeypot_is_triggered_with_empty_data():
     """Verifica retorno False cuando los datos no tienen spam fields."""

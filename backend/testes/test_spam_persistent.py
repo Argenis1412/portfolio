@@ -1,7 +1,6 @@
 import pytest
 import time
 from app.adaptadores.repositorio_sql import RepositorioSQL
-from app.adaptadores.modelos_sql import SpamFilterModelo
 
 @pytest.mark.asyncio
 async def test_persistent_spam_filter(setup_database):

@@ -1,5 +1,4 @@
 import pytest
-from fastapi.testclient import TestClient
 from app.principal import app
 
 def test_etag_and_304_not_modified(client):

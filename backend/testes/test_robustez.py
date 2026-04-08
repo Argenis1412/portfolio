@@ -3,9 +3,7 @@ Testes de robustez: Idempotência e Rate Limiting.
 """
 
 import pytest
-import time
 from unittest.mock import AsyncMock
-from fastapi.testclient import TestClient
 
 from app.principal import app
 from app.controladores.dependencias import obter_enviar_contato_use_case
