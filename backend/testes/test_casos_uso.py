@@ -5,7 +5,6 @@ Testa lógica de negócio isoladamente, sem dependências de HTTP.
 """
 
 import pytest
-from unittest.mock import AsyncMock
 
 from app.casos_uso import (
     ObterSobreUseCase,

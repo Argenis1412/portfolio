@@ -3,7 +3,6 @@ Script para migrar dados de arquivos JSON para o banco de dados SQL.
 """
 
 import sys
-import os
 import json
 from pathlib import Path
 from datetime import date
@@ -21,8 +20,8 @@ from app.adaptadores.modelos_sql import (
     ExperienciaModelo,
     FormacaoModelo,
     StackModelo,
-)
-from app.configuracao import configuracoes
+)  # noqa: E402
+from app.configuracao import configuracoes  # noqa: E402
 
 # Usar engine síncrona
 DATABASE_URL_SYNC = configuracoes.database_url.replace("+aiosqlite", "")

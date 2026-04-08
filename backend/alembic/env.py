@@ -15,12 +15,12 @@ from sqlmodel import SQLModel  # noqa: E402
 
 # Importar modelos para que sejam registrados no SQLModel.metadata
 from app.adaptadores.modelos_sql import (  # noqa: E402
-    SobreModelo,
-    ProjetoModelo,
-    ExperienciaModelo,
-    FormacaoModelo,
-    StackModelo,
-    SpamFilterModelo,
+    SobreModelo,  # noqa: F401
+    ProjetoModelo,  # noqa: F401
+    ExperienciaModelo,  # noqa: F401
+    FormacaoModelo,  # noqa: F401
+    StackModelo,  # noqa: F401
+    SpamFilterModelo,  # noqa: F401
 )
 from app.configuracao import configuracoes  # noqa: E402
 

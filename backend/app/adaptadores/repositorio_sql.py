@@ -3,7 +3,6 @@ Implementação do repositório usando SQLModel (SQL).
 """
 
 from typing import List, Optional
-from datetime import date
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -233,5 +232,5 @@ class RepositorioSQL(RepositorioPortfolio):
             session.add(novo)
             try:
                 await session.commit()
-            except:
+            except Exception:
                 await session.rollback()

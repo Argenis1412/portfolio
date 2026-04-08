@@ -2,7 +2,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 import redis
 from app.principal import app
-from app.core.idempotencia import IdempotencyStore, IdempotencyRecord
+from app.core.idempotencia import IdempotencyStore
 
 @pytest.mark.async_with_redis
 async def test_idempotency_store_redis_failure():

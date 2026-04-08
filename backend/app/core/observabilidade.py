@@ -155,7 +155,8 @@ def _configurar_opentelemetry(
         provider = TracerProvider(resource=resource)
 
         # Exportador baseado no ambiente
-        import sys, os
+        import os
+        import sys
         if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
             # Durante os testes, não usamos BatchSpanProcessor para evitar
             # o erro "ValueError: I/O operation on closed file." ao final.
@@ -165,7 +166,6 @@ def _configurar_opentelemetry(
             logger.info("otel_exporter_mock", motivo="Execução de testes detectada")
         elif otlp_endpoint:
             from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-            from urllib.parse import urlparse
 
             otlp_endpoint = otlp_endpoint.strip().rstrip("/")
 

@@ -10,30 +10,34 @@ Endpoints:
 - GET /api/formacao
 """
 
-from typing import Annotated, Optional
-from fastapi import APIRouter, Depends, Request, Response
+from typing import Annotated
+from fastapi import APIRouter
+from fastapi import Depends
+from fastapi import Request
+from fastapi import Response
 
 from app.esquemas.sobre import RespostaSobre
-from app.esquemas.projetos import ProjetoResumo, ProjetoDetalhado, RespostaProjetos
-from app.esquemas.stack import ItemStack, RespostaStack
-from app.esquemas.experiencias import Experiencia, RespostaExperiencias
-from app.esquemas.formacao import ItemFormacao, RespostaFormacao
-from app.casos_uso import (
-    ObterExperienciasUseCase,
-    ObterFormacaoUseCase,
-    ObterProjetoPorIdUseCase,
-    ObterProjetosUseCase,
-    ObterSobreUseCase,
-    ObterStackUseCase,
-)
-from app.controladores.dependencias import (
-    obter_obter_experiencias_use_case,
-    obter_obter_formacao_use_case,
-    obter_obter_projeto_por_id_use_case,
-    obter_obter_projetos_use_case,
-    obter_obter_sobre_use_case,
-    obter_obter_stack_use_case,
-)
+from app.esquemas.projetos import ProjetoResumo
+from app.esquemas.projetos import ProjetoDetalhado
+from app.esquemas.projetos import RespostaProjetos
+from app.esquemas.stack import ItemStack
+from app.esquemas.stack import RespostaStack
+from app.esquemas.experiencias import Experiencia
+from app.esquemas.experiencias import RespostaExperiencias
+from app.esquemas.formacao import ItemFormacao
+from app.esquemas.formacao import RespostaFormacao
+from app.casos_uso import ObterExperienciasUseCase
+from app.casos_uso import ObterFormacaoUseCase
+from app.casos_uso import ObterProjetoPorIdUseCase
+from app.casos_uso import ObterProjetosUseCase
+from app.casos_uso import ObterSobreUseCase
+from app.casos_uso import ObterStackUseCase
+from app.controladores.dependencias import obter_obter_experiencias_use_case
+from app.controladores.dependencias import obter_obter_formacao_use_case
+from app.controladores.dependencias import obter_obter_projeto_por_id_use_case
+from app.controladores.dependencias import obter_obter_projetos_use_case
+from app.controladores.dependencias import obter_obter_sobre_use_case
+from app.controladores.dependencias import obter_obter_stack_use_case
 from app.core.cache_http import resposta_cacheavel
 from app.core.excecoes import ErroRecursoNaoEncontrado
 from app.core.limite import limiter

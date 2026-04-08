@@ -15,7 +15,6 @@ from app.adaptadores.repositorio import RepositorioPortfolio
 from app.adaptadores.email_adaptador import EmailAdaptador
 from app.adaptadores.logger_adaptador import LoggerAdaptador
 from app.principal import app
-from app.controladores.dependencias import obter_repositorio
 from fastapi.testclient import TestClient
 
 @pytest.fixture
@@ -148,7 +147,7 @@ def setup_database():
     import tempfile
     import os
     from sqlmodel import SQLModel, create_engine, Session
-    from app.adaptadores.modelos_sql import SobreModelo, ProjetoModelo, ExperienciaModelo, FormacaoModelo, StackModelo, SpamFilterModelo
+    from app.adaptadores.modelos_sql import SobreModelo, ProjetoModelo, ExperienciaModelo, FormacaoModelo, StackModelo
     import json
 
     fd, db_path = tempfile.mkstemp(suffix=".db")

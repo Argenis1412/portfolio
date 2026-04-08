@@ -2,7 +2,6 @@
 Testes de robustez: Idempotência e Rate Limiting.
 """
 
-import pytest
 from unittest.mock import AsyncMock
 
 from app.principal import app

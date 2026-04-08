@@ -26,7 +26,6 @@ import json
 from typing import Any
 
 from fastapi import Request, Response
-from fastapi.responses import JSONResponse
 
 _MAX_AGE_DEFAULT = 300  # 5 min
 _SWR_DEFAULT = 60       # stale-while-revalidate

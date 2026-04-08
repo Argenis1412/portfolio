@@ -6,7 +6,7 @@ Devido a limitações de alguns drivers SQLite com o tipo JSON,
 os campos complexos são armazenados como TEXT e convertidos manualmente no repositório.
 """
 
-from typing import Optional, List, Dict, Any
+from typing import Optional
 from datetime import date
 import json
 from sqlmodel import SQLModel, Field

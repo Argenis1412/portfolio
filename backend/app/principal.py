@@ -25,8 +25,6 @@ from app.core.handlers import registrar_handlers_excecao
 from app.core.observabilidade import configurar_observabilidade
 
 from app.core.limite import limiter
-from slowapi import _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
 
 
 def criar_aplicacao() -> FastAPI:

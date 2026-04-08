@@ -1,4 +1,3 @@
-import pytest
 from app.principal import app
 
 def test_etag_and_304_not_modified(client):
