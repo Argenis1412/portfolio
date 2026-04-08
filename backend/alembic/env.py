@@ -7,14 +7,14 @@ backend_path = str(Path(__file__).parent.parent.absolute())
 if backend_path not in sys.path:
     sys.path.append(backend_path)
 
-import asyncio
-from sqlalchemy import pool
-from sqlalchemy.ext.asyncio import create_async_engine
-from alembic import context
-from sqlmodel import SQLModel
+import asyncio  # noqa: E402
+from sqlalchemy import pool  # noqa: E402
+from sqlalchemy.ext.asyncio import create_async_engine  # noqa: E402
+from alembic import context  # noqa: E402
+from sqlmodel import SQLModel  # noqa: E402
 
 # Importar modelos para que sejam registrados no SQLModel.metadata
-from app.adaptadores.modelos_sql import (
+from app.adaptadores.modelos_sql import (  # noqa: E402
     SobreModelo,
     ProjetoModelo,
     ExperienciaModelo,
@@ -22,7 +22,7 @@ from app.adaptadores.modelos_sql import (
     StackModelo,
     SpamFilterModelo,
 )
-from app.configuracao import configuracoes
+from app.configuracao import configuracoes  # noqa: E402
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
