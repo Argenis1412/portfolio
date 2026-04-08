@@ -84,7 +84,7 @@ jobs:
         run: |
           cd backend
           # Gradual: check core and use cases first
-          mypy app/core app/casos_uso --ignore-missing-imports
+          mypy app/core app/casos_uso --ignore-missing-imports --explicit-package-bases
 
       - name: 🔒 Verificar placeholders hardcodeados
         run: |
