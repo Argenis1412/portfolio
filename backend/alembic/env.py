@@ -20,7 +20,6 @@ from app.adaptadores.modelos_sql import (  # noqa: E402
     ExperienciaModelo,  # noqa: F401
     FormacaoModelo,  # noqa: F401
     StackModelo,  # noqa: F401
-    SpamFilterModelo,  # noqa: F401
 )
 from app.configuracao import configuracoes  # noqa: E402
 
