@@ -144,9 +144,6 @@ def test_idempotencia_em_progresso(client):
         store._cache.pop("progress-key-456", None)
 
 
-
-
-
 def test_rate_limiting_contato_por_email(client):
     """Testa se o limite de 10/dia por e-mail funciona."""
     payload = {

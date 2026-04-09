@@ -353,7 +353,6 @@ async def override_dependencias(setup_database):
         ObterExperienciasUseCase,
         ObterFormacaoUseCase,
     )
-    from sqlalchemy import text
 
     repo_real_test = RepositorioSQL(database_url=setup_database)
 

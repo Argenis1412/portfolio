@@ -1,12 +1,3 @@
-import pytest
-import hashlib
-import time
-from app.adaptadores.repositorio_sql import RepositorioSQL
-
-
-
-
-
 def test_endpoint_duplicate_repro(client):
     """
     Simula o comportamento do endpoint para múltiplas chamadas com mesmo conteúdo.
