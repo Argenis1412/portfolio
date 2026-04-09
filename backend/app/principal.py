@@ -175,20 +175,19 @@ def _configurar_middleware(aplicacao: FastAPI) -> None:
     Args:
         aplicacao: Instância FastAPI.
 
-    Middleware aplicado:
-        - MiddlewareRequisicao: request_id, logging, tempo de resposta
+    Middleware applied:
+        - MiddlewareRequisicao: request_id, logging, response time
     """
-    # 1. Logging y Request ID
+    # 1. Request ID injection and structured logging
     aplicacao.add_middleware(MiddlewareRequisicao)
 
-    # 1.5. Proteção do endpoint de métricas em produção
+    # 1.5. Protect the /metrics endpoint in production
     aplicacao.add_middleware(MetricsAccessMiddleware)
 
-    # 2. Compresión GZip (Ahorro de ancho de banda)
-    # Solo comprime respuestas > 1KB
+    # 2. GZip compression (saves bandwidth, only for responses > 1KB)
     aplicacao.add_middleware(GZipMiddleware, minimum_size=1000)
 
-    # 3. Headers de Seguridad (Protección contra Clickjacking, etc)
+    # 3. Security headers (Clickjacking protection, etc.)
     aplicacao.add_middleware(SegurancaHeadersMiddleware)
 
 

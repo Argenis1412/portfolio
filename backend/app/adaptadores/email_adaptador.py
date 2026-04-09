@@ -146,11 +146,11 @@ class ConsoleEmailAdaptador(EmailAdaptador):
             bool: Sempre True.
         """
         logger.info(
-            "contato_recebido_console",
-            nome=mensagem.nome,
+            "contact_received_console",
+            name=mensagem.nome,
             email=_mascarar_email(mensagem.email),
-            assunto=mensagem.assunto,
-            mensagem_tamanho=len(mensagem.mensagem),
-            status="interceptado_pelo_console",
+            subject=mensagem.assunto,
+            message_length=len(mensagem.mensagem),
+            status="intercepted_by_console",
         )
         return True

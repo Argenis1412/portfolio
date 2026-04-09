@@ -19,7 +19,7 @@ A **production-grade backend system** disguised as a portfolio. Not a CRUD demo 
 - ✅ **HTTP Caching (ETags)** — 304 Not Modified support for zero-bandwidth revalidation
 - ✅ **Observability stack** — Sentry + Prometheus + OpenTelemetry
 - ✅ **CI/CD with quality gates** — 80% coverage threshold, ruff/mypy checks
-- ✅ **Multi-layer anti-abuse** — Honeypot + Rate Limiting + Redis deduplication
+- ✅ **Multi-layer anti-abuse** — Honeypot + Spam Scoring + Redis-backed deduplication + Rate Limiting (10/day per email, 30/hour per IP)
 
 ---
 
@@ -81,7 +81,11 @@ The system implements a manual ETag generation strategy. Every GET response incl
 ### 4. Security & Performance (Hardening)
 - **Protected Metrics**: The `/metrics` endpoint is protected via Basic Auth in production.
 - **Middleware Optimization**: Minimal body parsing in global middleware to reduce overhead.
-- **Distributed State**: Redis-backed rate limiting and idempotency for cross-instance coordination.
+- **Distributed State**: Redis-backed rate limiting, idempotency, and contact deduplication for cross-instance coordination.
+  - Rate limiting: 10/day per email, 20/min per email, 30/hour per IP + fingerprint
+  - Idempotency: `Idempotency-Key` header prevents duplicate submissions
+  - Dedup: 30-minute content-hash window via `SpamDedupStore` (Redis → in-memory fallback)
+- **ContactGuard**: Dedicated orchestration service isolating all validation rules from the HTTP controller.
 - **[Architecture Decision Record: Security Hardening](docs/architecture/security-hardening.md)**
 
 ### 5. Observability
@@ -136,17 +140,19 @@ npm install && npm run dev
 
 ```bash
 # Backend — with coverage
-cd backend && pytest --cov=app --cov-report=html
+cd backend && pytest --cov=app --cov-config=.coveragerc --cov-report=html
 
 # Frontend
 cd frontend && npm run test
 ```
 
 Key tests that demonstrate production-level reliability:
-- ✅ **Persistent Anti-Spam**: Verification that duplicate messages are blocked even after a complete server restart (state stored in DB, not just in-memory).
-- ✅ **Distributed Rate Limiting**: Ensures the system correctly rejects requests after the threshold across multiple instances (Redis).
+- ✅ **Persistent Anti-Spam**: Duplicate messages are blocked even after server restart (Redis → in-memory fallback).
+- ✅ **Distributed Rate Limiting**: Limits enforced per email, per IP, and per browser fingerprint.
 - ✅ **Honeypot Resilience**: Silent drop of bot submissions without revealing protection mechanisms.
-- ✅ **Clean Architecture Boundary**: Automated checks to ensure domain logic has zero dependencies on infrastructure/frameworks.
+- ✅ **Clean Architecture Boundary**: Automated checks — domain logic has zero dependencies on infrastructure.
+- ✅ **Redis Failure Fallback**: `IdempotencyStore` and `SpamDedupStore` both fall back to memory if Redis is unreachable.
+- ✅ **Concurrent Idempotency**: A second in-flight request with the same key receives HTTP 409 Conflict.
 
 ---
 

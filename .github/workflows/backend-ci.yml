@@ -39,7 +39,7 @@ jobs:
       - name: 🧪 Executar testes
         run: |
           cd backend
-          pytest --cov=app --cov-report=xml --cov-report=term
+          pytest --cov=app --cov-config=.coveragerc --cov-report=xml --cov-report=term
 
       - name: 📊 Upload cobertura
         uses: codecov/codecov-action@v4
@@ -51,7 +51,7 @@ jobs:
       - name: ✅ Verificar cobertura mínima
         run: |
           cd backend
-          pytest --cov=app --cov-fail-under=80
+          pytest --cov=app --cov-config=.coveragerc --cov-fail-under=80
 
   lint:
     name: 🧹 Linting
@@ -83,8 +83,9 @@ jobs:
       - name: 🛡️ Executar mypy (tipagem gradual)
         run: |
           cd backend
-          # Gradual: check core and use cases first
-          mypy app/core app/casos_uso --ignore-missing-imports --explicit-package-bases
+          # Gradual: core + use cases + controllers + adapters
+          mypy app/core app/casos_uso app/controladores app/adaptadores \
+            --ignore-missing-imports --explicit-package-bases
 
       - name: 🔒 Verificar placeholders hardcodeados
         run: |

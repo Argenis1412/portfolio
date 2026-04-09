@@ -19,9 +19,9 @@ Professional backend for a developer portfolio, implementing:
 - ✅ **Interactive Documentation** with OpenAPI/Swagger
 - ✅ **Automated Tests** with pytest
 - ✅ **Quality Gate**: GitHub Actions enforces a **80% minimum coverage** threshold and verified Docker builds on every push.
-- ✅ **Layered contact protection**: Includes a honeypot, spam scoring, and a **30-minute persistent deduplication** (database-backed) to prevent duplicate submissions across server restarts.
-- ✅ **Rate Limiting**: 10 messages/day per email address via custom identity extraction middleware.
-- ✅ **API Observability**: Full integration with OpenTelemetry and Prometheus (v1.2.0)
+- ✅ **Layered contact protection**: `ContactGuard` service orchestrating honeypot, spam scoring, content dedup (Redis → in-memory fallback, 30-min window), and multi-tier rate limiting (10/day email, 20/min email, 30/hour IP, 30/hour fingerprint).
+- ✅ **Rate Limiting**: Enforced via slowapi with Redis backend (fails open on Redis outage).
+- ✅ **API Observability**: Full integration with OpenTelemetry, Prometheus, and Sentry.
 
 ---
 
@@ -114,7 +114,9 @@ python -m uvicorn app.principal:app --reload --port 8000
 The API exposes a Prometheus-compatible metrics endpoint at `/metrics`.
 
 > [!IMPORTANT]
-> **Security Note**: This endpoint is currently **public** to facilitate technical reviews and demonstrate the observability stack. In a production enterprise environment, this would be restricted via internal network policies or authentication.
+> **Security Note**: `/metrics` is **protected by HTTP Basic Auth in production**
+> (`METRICS_BASIC_AUTH_USERNAME` / `METRICS_BASIC_AUTH_PASSWORD` env vars).
+> It is accessible without authentication only in local / development environments.
 
 Supported metrics:
 - `http_requests_total`: Counter of all requests by status code.
@@ -148,11 +150,11 @@ Returns status for:
 # Run all tests
 pytest
 
-# With coverage
-pytest --cov=app --cov-report=html
+# With coverage report (HTML)
+pytest --cov=app --cov-config=.coveragerc --cov-report=html
 
-# CI/CD Quality Gate (Local simulation)
-pytest --cov=app --cov-fail-under=80
+# CI/CD Quality Gate (local simulation — must reach 80%)
+pytest --cov=app --cov-config=.coveragerc --cov-fail-under=80
 ```
 
 ---

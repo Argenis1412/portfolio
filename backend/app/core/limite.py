@@ -10,7 +10,7 @@ import hashlib
 
 
 def get_client_ip(request: Request) -> str:
-    """Recupera o IP real priorizando headers de proxy confiáveis."""
+    """Returns the real client IP, preferring trusted proxy headers."""
     forwarded_for = request.headers.get("x-forwarded-for")
     if forwarded_for:
         return forwarded_for.split(",")[0].strip()
@@ -24,11 +24,10 @@ def get_client_ip(request: Request) -> str:
 
 def get_email_or_ip_key(request: Request) -> str:
     """
-    Recupera a identidade (e-mail) já extraída pelo middleware no request.state.
-    Caso não exista, retorna o IP remoto.
-    Esta função é síncrona para compatibilidade total com o Limiter.
+    Returns the request identity (email) previously set by middleware, or falls
+    back to client IP. Synchronous for full compatibility with the Limiter.
     """
-    # A identidade é populada pelo MiddlewareRequisicao para POST /api/v1/contato
+    # Identity is populated by MiddlewareRequisicao for POST /api/v1/contato
     identidade = getattr(request.state, "identidade", None)
     if identidade:
         return identidade
@@ -44,9 +43,8 @@ def get_contact_fingerprint_key(request: Request) -> str:
     return f"fingerprint:{fingerprint}"
 
 
-# Inicializar limiter baseado no IP do cliente por padrão
-# Usamos strategy='fixed-window' para simplicidade
-# Si hay REDIS_URL, usamos Redis como storage para soportar escalado horizontal
+# Initialize limiter using client IP as the default key.
+# When REDIS_URL is set, uses Redis as the backend storage for horizontal scaling.
 limiter = Limiter(
     key_func=get_client_ip,
     strategy="fixed-window",
@@ -56,19 +54,18 @@ limiter = Limiter(
 
 def check_rate_limit(request: Request, limit_string: str, key_func=get_email_or_ip_key):
     """
-    Realiza o hit no limiter de forma manual e levanta RateLimitExceeded se necessário.
+    Manually applies a rate limit hit and raises RateLimitExceeded if the limit is reached.
     """
     from slowapi.errors import RateLimitExceeded
     from limits import parse_many
 
-    # Mock para satisfazer o construtor do RateLimitExceeded do slowapi
-    # que espera um objeto com o atributo 'error_message'
+    # Mock to satisfy RateLimitExceeded constructor (expects an object with `error_message`)
     class MockLimit:
         def __init__(self, msg):
             self.error_message = msg
 
     key = key_func(request)
-    # Parseamos la string de límite (ej: "10/day" -> [Limit(...)])
+    # Parse the limit string (e.g. "10/day" -> [Limit(...)])
     for limit in parse_many(limit_string):
         try:
             if not limiter.limiter.hit(limit, key):

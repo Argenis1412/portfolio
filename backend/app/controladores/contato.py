@@ -1,14 +1,11 @@
 """
-Controlador de contato.
+Contact controller.
 
 Endpoint:
-- POST /api/contato
+  POST /api/contato
 """
 
 from typing import Annotated, Optional
-
-import hashlib
-import re
 
 import structlog
 from fastapi import APIRouter, Depends, Request
@@ -16,19 +13,14 @@ from fastapi.responses import JSONResponse
 
 from app.casos_uso import EnviarContatoUseCase
 from app.controladores.dependencias import obter_enviar_contato_use_case
+from app.core.contact_guard import ContactGuard, _email_domain
 from app.core.excecoes import ErroInfraestrutura
 from app.core.idempotencia import store, verificar_idempotencia
-from app.core.limite import check_rate_limit, get_client_ip, get_contact_fingerprint_key
-from app.core.spam_check import calculate_spam_score
-from app.core.spam_store import spam_dedup_store
 from app.esquemas.contato import RequisicaoContato, RespostaContato
 
 logger = structlog.get_logger(__name__)
 
-
-def _email_domain(email: str) -> str:
-    return email.split("@")[-1].lower() if "@" in email else "invalid-email"
-
+_guard = ContactGuard()
 
 roteador = APIRouter(tags=["Contato"])
 
@@ -58,18 +50,13 @@ async def enviar_contato(
     dedup_reserved = False
 
     try:
-        if requisicao.website or requisicao.fax:
+        # ── 1. Honeypot check ───────────────────────────────────────────────
+        if _guard.check_honeypot(requisicao):
             logger.info(
                 "contact_blocked",
                 classification="HONEYPOT",
                 action="silent_drop",
                 event_type="security_event",
-                honeypot_fields=[
-                    field
-                    for field in ("website", "fax")
-                    if getattr(requisicao, field, None)
-                ],
-                client_ip=get_client_ip(request),
             )
             resposta_cacheavel = RespostaContato(
                 sucesso=True,
@@ -77,9 +64,10 @@ async def enviar_contato(
             )
             return resposta_cacheavel
 
-        spam_score = calculate_spam_score(requisicao.mensagem, requisicao.email)
+        # ── 2. Spam score ───────────────────────────────────────────────────
+        spam_score = _guard.get_spam_score(requisicao.mensagem, requisicao.email)
 
-        if spam_score >= 70:
+        if spam_score >= ContactGuard.SCORE_SILENT_DROP:
             logger.info(
                 "contact_classified",
                 classification="SILENT_SPAM",
@@ -94,13 +82,10 @@ async def enviar_contato(
             )
             return resposta_cacheavel
 
-        normalized_message = (
-            re.sub(r"\s+", " ", requisicao.mensagem or "").strip().lower()
-        )
-        content_str = f"{(requisicao.email or '').lower()}:{normalized_message}"
-        content_hash = hashlib.sha256(content_str.encode()).hexdigest()
+        # ── 3. Content deduplication ────────────────────────────────────────
+        content_hash = _guard.build_content_hash(requisicao.email, requisicao.mensagem)
+        dedup_reserved = await _guard.reserve_dedup(content_hash)
 
-        dedup_reserved = await spam_dedup_store.reserve(content_hash, ttl_seconds=1800)
         if not dedup_reserved:
             logger.info(
                 "duplicate_content_detected",
@@ -109,7 +94,7 @@ async def enviar_contato(
                 email_domain=_email_domain(requisicao.email),
                 context="shared_dedup_store",
             )
-            return JSONResponse(
+            return JSONResponse(  # type: ignore[return-value]
                 status_code=400,
                 content={
                     "erro": {"codigo": "CONTEUDO_DUPLICADO"},
@@ -117,15 +102,13 @@ async def enviar_contato(
                 },
             )
 
-        # Extrair identidade para rate limiting baseada no email validado
+        # ── 4. Rate limiting ────────────────────────────────────────────────
+        # Set identity on request state so the limiter uses email as the key
         request.state.identidade = f"email:{requisicao.email.lower().strip()}"
+        _guard.apply_rate_limits(request)
 
-        check_rate_limit(request, "10/day")
-        check_rate_limit(request, "20/minute")
-        check_rate_limit(request, "30/hour", key_func=get_client_ip)
-        check_rate_limit(request, "30/hour", key_func=get_contact_fingerprint_key)
-
-        is_suspicious = spam_score > 30
+        # ── 5. Classification logging ───────────────────────────────────────
+        is_suspicious = spam_score > ContactGuard.SCORE_SUSPICIOUS
         logger.info(
             "contact_classified",
             classification="SUSPECT" if is_suspicious else "NORMAL",
@@ -134,11 +117,12 @@ async def enviar_contato(
             email_domain=_email_domain(requisicao.email),
         )
 
+        # ── 6. Delivery ─────────────────────────────────────────────────────
         try:
             sucesso = await enviar_contato_uc.executar(
                 nome=requisicao.nome,
                 email=requisicao.email,
-                assunto=requisicao.assunto,
+                assunto=requisicao.assunto or "",
                 mensagem=requisicao.mensagem,
                 is_suspicious=is_suspicious,
                 spam_score=spam_score,
@@ -146,14 +130,13 @@ async def enviar_contato(
 
             if sucesso:
                 logger.info(
-                    "Mensagem de contato processada",
+                    "contact_delivered",
                     is_suspicious=is_suspicious,
                     email_domain=_email_domain(requisicao.email),
-                    client_ip=get_client_ip(request),
                 )
             elif not is_suspicious:
                 raise ErroInfraestrutura(
-                    mensagem="Falha ao enviar mensagem de contato",
+                    mensagem="Failed to send contact message",
                     codigo="ERRO_ENVIO_CONTATO",
                     origem="formspree",
                 )
@@ -185,10 +168,13 @@ async def enviar_contato(
             mensagem="Mensagem enviada com sucesso! Retornarei em breve.",
         )
         return resposta_cacheavel
-    finally:
-        if dedup_reserved and content_hash and resposta_cacheavel is None:
-            await spam_dedup_store.release(content_hash)
 
+    finally:
+        # Release dedup lock if the request ultimately failed (allow retries)
+        if dedup_reserved and content_hash and resposta_cacheavel is None:
+            await _guard.release_dedup(content_hash)
+
+        # Persist idempotency result
         if idempotency_key:
             if resposta_cacheavel is not None:
                 await store.set(idempotency_key, 200, resposta_cacheavel.model_dump())

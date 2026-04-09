@@ -20,8 +20,9 @@ class IdempotencyRecord(BaseModel):
 
 class IdempotencyStore:
     """
-    Armazenamento em memória para chaves de idempotência.
-    Simplificado para este portfólio. Em produzir, usar Redis.
+    In-memory store for idempotency keys with Redis-backed persistence.
+    Falls back to memory if Redis is unavailable (fail-open strategy).
+    In production, use Redis to share state across multiple instances.
     """
 
     def __init__(self, max_size: int = 100, ttl_seconds: int = 3600):
@@ -62,13 +63,13 @@ class IdempotencyStore:
             return None
 
     def _memory_get(self, key: str) -> Optional[IdempotencyRecord]:
-        """Recupera registro se não expirado."""
+        """Retrieves a record from in-memory cache if not expired."""
         with self._lock:
             record = self._cache.get(key)
             if not record:
                 return None
 
-            # Verificar expiração
+            # Evict expired entries
             if time.time() - record.timestamp > self.ttl_seconds:
                 self._cache.pop(key, None)
                 return None
@@ -83,7 +84,7 @@ class IdempotencyStore:
         return self._memory_get(key)
 
     async def set_in_progress(self, key: str) -> bool:
-        """Marca chave como em progresso. Retorna True se conseguiu."""
+        """Marks a key as in-progress (locked). Returns True if successfully acquired."""
         if self._redis:
             record = IdempotencyRecord(
                 status_code=0,
@@ -120,7 +121,7 @@ class IdempotencyStore:
             return True
 
     async def set(self, key: str, status_code: int, content: Any):
-        """Armazena novo registro finalizado."""
+        """Stores a finalized idempotency record with the given status code and content."""
         record = IdempotencyRecord(
             status_code=status_code,
             content=content,
@@ -143,7 +144,7 @@ class IdempotencyStore:
             self._cache[key] = record
 
     async def release(self, key: str) -> None:
-        """Libera uma chave em progresso para permitir retries seguros."""
+        """Releases an in-progress key to allow safe retries after a failure."""
         if self._redis:
             try:
                 await self._redis.delete(self._redis_key(key))
@@ -155,12 +156,12 @@ class IdempotencyStore:
             self._cache.pop(key, None)
 
 
-# Instância global simplificada
+# Global singleton — shared across all requests in the same process
 store = IdempotencyStore()
 
 
 class IdempotencyException(Exception):
-    """Exceção interna para sinalizar que resposta cacheada deve ser retornada."""
+    """Internal exception raised to short-circuit request processing and return a cached response."""
 
     def __init__(self, record: IdempotencyRecord):
         self.record = record
@@ -173,7 +174,12 @@ async def verificar_idempotencia(
     legacy_idempotency_key: Optional[str] = Header(None, alias="X-Idempotency-Key"),
 ):
     """
-    Dependency para verificar chave de idempotência.
+    FastAPI dependency to enforce idempotency on POST requests.
+
+    Accepts the standard `Idempotency-Key` header or the legacy `X-Idempotency-Key`.
+    - If the key has a finalized record: raises `IdempotencyException` with cached response.
+    - If the key is already in-progress: raises HTTP 409 Conflict.
+    - Otherwise: locks the key and returns it for the controller to finalize.
     """
     if request.method != "POST":
         return None
