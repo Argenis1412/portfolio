@@ -357,11 +357,6 @@ async def override_dependencias(setup_database):
 
     repo_real_test = RepositorioSQL(database_url=setup_database)
 
-    # Limpar tabela de spam para cada teste para garantir isolamento
-    async with repo_real_test.session_factory() as session:
-        await session.exec(text("DELETE FROM spam_filter"))
-        await session.commit()
-
     # Sobrescrever providers individuais
     app.dependency_overrides[dependencias.obter_repositorio] = lambda: repo_real_test
 

@@ -4,24 +4,7 @@ import time
 from app.adaptadores.repositorio_sql import RepositorioSQL
 
 
-@pytest.mark.asyncio
-async def test_persistent_spam_detection(setup_database):
-    """Valida que o RepositorioSQL detecta duplicados persistentes."""
-    repo = RepositorioSQL(database_url=setup_database)
-    msg_hash = hashlib.sha256(b"user@example.com:hello").hexdigest()
 
-    # 1. Não deve ser duplicado na primeira vez
-    assert await repo.verificar_duplicata_spam(msg_hash, ttl_seconds=1800) is False
-
-    # 2. Adicionar hash
-    await repo.registrar_spam(msg_hash, time.time())
-
-    # 3. Agora deve ser duplicado
-    assert await repo.verificar_duplicata_spam(msg_hash, ttl_seconds=1800) is True
-
-    # 4. Outro hash não deve ser duplicado
-    other_hash = hashlib.sha256(b"user@example.com:other").hexdigest()
-    assert await repo.verificar_duplicata_spam(other_hash, ttl_seconds=1800) is False
 
 
 def test_endpoint_duplicate_repro(client):

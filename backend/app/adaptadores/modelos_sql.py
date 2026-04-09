@@ -119,12 +119,3 @@ class StackModelo(SQLModel, table=True):  # type: ignore[call-arg]
     categoria: str
     nivel: int
     icone: Optional[str] = None
-
-
-class SpamFilterModelo(SQLModel, table=True):  # type: ignore[call-arg]
-    """Modelo para persistência de hashes de mensagens (deduplicação)."""
-
-    __tablename__ = "spam_filter"
-
-    content_hash: str = Field(primary_key=True)
-    timestamp: float = Field(index=True)

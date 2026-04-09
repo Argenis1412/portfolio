@@ -16,7 +16,6 @@ from app.adaptadores.modelos_sql import (
     ExperienciaModelo,
     FormacaoModelo,
     StackModelo,
-    SpamFilterModelo,
 )
 from app.entidades.projeto import Projeto
 from app.entidades.experiencia import ExperienciaProfissional
@@ -202,43 +201,3 @@ class RepositorioSQL(RepositorioPortfolio):
                 )
                 for m in modelos
             ]
-
-    async def verificar_duplicata_spam(
-        self, content_hash: str, ttl_seconds: int
-    ) -> bool:
-        """
-        Verifica se o hash de conteúdo já existe no banco e não expirou.
-        """
-        import time
-
-        async with self.session_factory() as session:
-            statement = select(SpamFilterModelo).where(
-                SpamFilterModelo.content_hash == content_hash
-            )
-            resultado = await session.exec(statement)
-            m = resultado.first()
-
-            if not m:
-                return False
-
-            # Verificar expiração
-            if time.time() - m.timestamp > ttl_seconds:
-                # Remove expirado (limpeza lazy)
-                await session.delete(m)
-                await session.commit()
-                return False
-
-            return True
-
-    async def registrar_spam(self, content_hash: str, timestamp: float) -> None:
-        """
-        Registra o hash de uma mensagem enviada.
-        """
-        async with self.session_factory() as session:
-            # Usar upsert manual ou apenas ignorar se já existe (embora o fluxo garanta unicidade)
-            novo = SpamFilterModelo(content_hash=content_hash, timestamp=timestamp)
-            session.add(novo)
-            try:
-                await session.commit()
-            except Exception:
-                await session.rollback()

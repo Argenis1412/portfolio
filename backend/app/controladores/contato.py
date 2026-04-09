@@ -8,13 +8,12 @@ Endpoint:
 from typing import Annotated, Optional
 
 import structlog
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, BackgroundTasks
 from fastapi.responses import JSONResponse
 
 from app.casos_uso import EnviarContatoUseCase
 from app.controladores.dependencias import obter_enviar_contato_use_case
 from app.core.contact_guard import ContactGuard, _email_domain
-from app.core.excecoes import ErroInfraestrutura
 from app.core.idempotencia import store, verificar_idempotencia
 from app.esquemas.contato import RequisicaoContato, RespostaContato
 
@@ -25,20 +24,63 @@ _guard = ContactGuard()
 roteador = APIRouter(tags=["Contato"])
 
 
+async def _processar_envio_background(
+    enviar_contato_uc: EnviarContatoUseCase,
+    requisicao: RequisicaoContato,
+    is_suspicious: bool,
+    spam_score: int,
+) -> None:
+    """Executa o envio do contato em background, registrando logs estruturados."""
+    try:
+        sucesso = await enviar_contato_uc.executar(
+            nome=requisicao.nome,
+            email=requisicao.email,
+            assunto=requisicao.assunto or "",
+            mensagem=requisicao.mensagem,
+            is_suspicious=is_suspicious,
+            spam_score=spam_score,
+        )
+
+        if sucesso:
+            logger.info(
+                "contact_delivered",
+                is_suspicious=is_suspicious,
+                email_domain=_email_domain(requisicao.email),
+                delivery_mode="background",
+            )
+        else:
+            logger.error(
+                "contact_delivery_failed",
+                is_suspicious=is_suspicious,
+                event_type="delivery_error",
+                email_domain=_email_domain(requisicao.email),
+                delivery_mode="background",
+            )
+    except Exception as e:
+        logger.error(
+            "contact_delivery_crash",
+            error=str(e),
+            event_type="system_error",
+            email_domain=_email_domain(requisicao.email),
+            delivery_mode="background",
+        )
+
+
 @roteador.post(
     "/contato",
     response_model=RespostaContato,
     summary="Send contact message",
-    description="Submits a contact form message via Formspree. Rate limited to 10 messages/day per email.",
+    description="Submits a contact form message via Formspree in background. Rate limited to 10 messages/day per email.",
     responses={
-        200: {"description": "Message sent successfully"},
+        200: {"description": "Message queued successfully"},
         429: {"description": "Too many requests - rate limit exceeded"},
-        500: {"description": "Failed to deliver message via external service"},
+        400: {"description": "Duplicate content"},
     },
 )
 async def enviar_contato(
     request: Request,
     requisicao: RequisicaoContato,
+    background_tasks: BackgroundTasks,
     enviar_contato_uc: Annotated[
         EnviarContatoUseCase,
         Depends(obter_enviar_contato_use_case),
@@ -117,51 +159,20 @@ async def enviar_contato(
             email_domain=_email_domain(requisicao.email),
         )
 
-        # ── 6. Delivery ─────────────────────────────────────────────────────
-        try:
-            sucesso = await enviar_contato_uc.executar(
-                nome=requisicao.nome,
-                email=requisicao.email,
-                assunto=requisicao.assunto or "",
-                mensagem=requisicao.mensagem,
-                is_suspicious=is_suspicious,
-                spam_score=spam_score,
-            )
+        # ── 6. Delivery (Background Tasks) ──────────────────────────────────
+        background_tasks.add_task(
+            _processar_envio_background,
+            enviar_contato_uc,
+            requisicao,
+            is_suspicious,
+            spam_score,
+        )
 
-            if sucesso:
-                logger.info(
-                    "contact_delivered",
-                    is_suspicious=is_suspicious,
-                    email_domain=_email_domain(requisicao.email),
-                )
-            elif not is_suspicious:
-                raise ErroInfraestrutura(
-                    mensagem="Failed to send contact message",
-                    codigo="ERRO_ENVIO_CONTATO",
-                    origem="formspree",
-                )
-            else:
-                logger.warning(
-                    "suspect_delivery_failed_silently",
-                    event_type="security_event",
-                    email_domain=_email_domain(requisicao.email),
-                )
-        except Exception as e:
-            if not is_suspicious:
-                if isinstance(e, ErroInfraestrutura):
-                    raise e
-                raise ErroInfraestrutura(
-                    mensagem=str(e),
-                    codigo="ERRO_INTERNO_CONTATO",
-                    origem="controller",
-                )
-
-            logger.error(
-                "suspect_delivery_crash_silently",
-                error=str(e),
-                event_type="security_event",
-                email_domain=_email_domain(requisicao.email),
-            )
+        logger.info(
+            "contact_queued",
+            is_suspicious=is_suspicious,
+            email_domain=_email_domain(requisicao.email),
+        )
 
         resposta_cacheavel = RespostaContato(
             sucesso=True,
@@ -170,7 +181,9 @@ async def enviar_contato(
         return resposta_cacheavel
 
     finally:
-        # Release dedup lock if the request ultimately failed (allow retries)
+        # Since it's background processed and always success to user,
+        # we don't release dedup_reserved (unless it crashed before enqueueing
+        # and resposta_cacheavel is None).
         if dedup_reserved and content_hash and resposta_cacheavel is None:
             await _guard.release_dedup(content_hash)
 

@@ -59,18 +59,6 @@ class RepositorioPortfolio(ABC):
         """Verifica se o repositório está acessível."""
         pass
 
-    @abstractmethod
-    async def verificar_duplicata_spam(
-        self, content_hash: str, ttl_seconds: int
-    ) -> bool:
-        """Verifica se o hash já existe e não expirou."""
-        pass
-
-    @abstractmethod
-    async def registrar_spam(self, content_hash: str, timestamp: float) -> None:
-        """Registra um novo hash de mensagem."""
-        pass
-
 
 # Caminho relativo ao projeto para os dados JSON
 DEFAULT_DADOS_PATH = Path(__file__).parent.parent.parent / "dados"
@@ -254,13 +242,3 @@ class RepositorioJSON(RepositorioPortfolio):
             )
             for f in dados
         ]
-
-    async def verificar_duplicata_spam(
-        self, content_hash: str, ttl_seconds: int
-    ) -> bool:
-        """Stub para interface abstrata. Implementado na versão SQL."""
-        return False
-
-    async def registrar_spam(self, content_hash: str, timestamp: float) -> None:
-        """Stub para interface abstrata. Implementado na versão SQL."""
-        pass

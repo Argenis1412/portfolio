@@ -121,10 +121,10 @@ async def test_supabase_transient_failure_health_check(client):
 # ──────────────────────────────────────────────────────────────────────────────
 
 
-async def test_formspree_timeout_returns_500(client):
+async def test_formspree_timeout_returns_200_backgrounded(client):
     """
-    A ConnectTimeout from Formspree must produce HTTP 500 with a recognisable
-    error code — never a raw traceback or an unhandled exception.
+    A ConnectTimeout from Formspree must produce HTTP 200 because the delivery
+    happens in the background. The error is only logged.
     """
     from app.casos_uso import EnviarContatoUseCase
     from app.controladores.dependencias import obter_enviar_contato_use_case
@@ -140,20 +140,14 @@ async def test_formspree_timeout_returns_500(client):
             "nome": "Argenis",
             "email": "timeout@test.com",
             "assunto": "Timeout test",
-            "mensagem": "This should result in a 500 error due to external timeout.",
+            "mensagem": "This should result in a 200 due to background execution.",
         }
         resp = client.post("/api/v1/contato", json=payload)
 
-        assert resp.status_code == 500
+        # The endpoint returns 200 before the background task fails
+        assert resp.status_code == 200
         body = resp.json()
-        assert "erro" in body
-        assert "codigo" in body["erro"]
-        # Must contain a recognisable error code, not a raw traceback
-        assert body["erro"]["codigo"] in (
-            "ERRO_INTERNO",
-            "ERRO_INTERNO_CONTATO",
-            "ERRO_INESPERADO",
-        )
+        assert body["sucesso"] is True
     finally:
         app.dependency_overrides.pop(obter_enviar_contato_use_case, None)
 
