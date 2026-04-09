@@ -71,12 +71,15 @@ export default function Hero() {
           
           <div className="relative w-[276px] h-[276px] md:w-[368px] md:h-[368px] rounded-full p-1.5 bg-gradient-to-tr from-app-primary to-transparent shadow-[0_0_30px_rgba(212,163,115,0.3)]">
             <div className="w-full h-full rounded-full overflow-hidden bg-app-surface-hover flex items-center justify-center relative">
-               <img 
-                 src="/profile.jpg" 
-                 alt="Profile" 
-                 fetchPriority="high"
-                 className="w-full h-full object-cover rounded-full filter grayscale-[10%] brightness-110" 
-               />
+               <picture>
+                 <source srcSet="/profile.webp" type="image/webp" />
+                 <img 
+                   src="/profile.jpg" 
+                   alt="Profile" 
+                   fetchPriority="high"
+                   className="w-full h-full object-cover rounded-full filter grayscale-[10%] brightness-110" 
+                 />
+               </picture>
             </div>
           </div>
         </motion.div>
