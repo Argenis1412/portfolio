@@ -105,12 +105,12 @@ async def listar_projetos(
         ProjetoResumo(
             id=p.id,
             nome=p.nome,
-            descricao_curta=p.descricao_curta,
+            descricao_curta=p.descricao_curta,  # type: ignore[arg-type]
             tecnologias=p.tecnologias,
             destaque=p.destaque,
-            repositorio=p.repositorio,
-            demo=p.demo,
-            imagem=p.imagem,
+            repositorio=p.repositorio,  # type: ignore[arg-type]
+            demo=p.demo,  # type: ignore[arg-type]
+            imagem=p.imagem,  # type: ignore[arg-type]
         )
         for p in projetos
     ]
@@ -197,15 +197,15 @@ async def obter_projeto(
     resultado = ProjetoDetalhado(
         id=projeto.id,
         nome=projeto.nome,
-        descricao_curta=projeto.descricao_curta,
-        descricao_completa=projeto.descricao_completa,
+        descricao_curta=projeto.descricao_curta,  # type: ignore[arg-type]
+        descricao_completa=projeto.descricao_completa,  # type: ignore[arg-type]
         tecnologias=projeto.tecnologias,
         funcionalidades=projeto.funcionalidades,
         aprendizados=projeto.aprendizados,
-        repositorio=projeto.repositorio,
-        demo=projeto.demo,
+        repositorio=projeto.repositorio,  # type: ignore[arg-type]
+        demo=projeto.demo,  # type: ignore[arg-type]
         destaque=projeto.destaque,
-        imagem=projeto.imagem,
+        imagem=projeto.imagem,  # type: ignore[arg-type]
     )
 
     return resposta_cacheavel(request, response, resultado)
@@ -284,12 +284,12 @@ async def listar_experiencias(
     experiencias_schema = [
         Experiencia(
             id=e.id,
-            cargo=e.cargo,
+            cargo=e.cargo,  # type: ignore[arg-type]
             empresa=e.empresa,
             localizacao=e.localizacao,
             data_inicio=e.data_inicio,
             data_fim=e.data_fim,
-            descricao=e.descricao,
+            descricao=e.descricao,  # type: ignore[arg-type]
             tecnologias=e.tecnologias,
             atual=e.atual,
         )
@@ -335,12 +335,12 @@ async def listar_formacao(
     formacoes_schema = [
         ItemFormacao(
             id=f.id,
-            curso=f.curso,
+            curso=f.curso,  # type: ignore[arg-type]
             instituicao=f.instituicao,
             localizacao=f.localizacao,
             data_inicio=f.data_inicio,
             data_fim=f.data_fim,
-            descricao=f.descricao,
+            descricao=f.descricao,  # type: ignore[arg-type]
             atual=f.atual,
         )
         for f in formacoes

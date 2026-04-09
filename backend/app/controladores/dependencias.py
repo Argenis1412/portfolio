@@ -7,6 +7,7 @@ Centraliza a composicao de adaptadores e casos de uso para usar com FastAPI Depe
 from functools import lru_cache
 
 from app.adaptadores import (
+    EmailAdaptador,
     FormspreeEmailAdaptador,
     LoggerEstruturado,
     RepositorioJSON,
@@ -82,6 +83,7 @@ def obter_enviar_contato_use_case() -> EnviarContatoUseCase:
         and not configuracoes.formspree_form_id.strip()
     )
 
+    email_adaptador: EmailAdaptador
     if usar_console:
         from app.adaptadores.email_adaptador import ConsoleEmailAdaptador
 
