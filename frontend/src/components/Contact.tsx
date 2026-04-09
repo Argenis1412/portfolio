@@ -219,7 +219,7 @@ export default function Contact() {
               <motion.button 
                 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                 type="submit" disabled={status === 'loading'}
-                className="bg-app-primary hover:bg-app-primary-hover text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 shadow-lg shadow-app-primary/20 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-xs flex items-center justify-center gap-3"
+                className="bg-app-primary hover:bg-app-primary-hover text-white font-bold py-[18px] px-8 rounded-xl transition-all duration-300 shadow-lg shadow-app-primary/20 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-xs flex items-center justify-center gap-3"
               >
                 {status === 'loading' ? <Loader2 className="animate-spin h-4 w-4 text-white" /> : <Mail className="w-4 h-4" />}
                 {status === 'loading' ? t('contact.sending') : t('contact.send')}
@@ -227,7 +227,7 @@ export default function Contact() {
               <motion.button 
                 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                 type="button" onClick={handleWhatsApp}
-                className="bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 shadow-lg shadow-green-500/20 flex items-center justify-center gap-3 uppercase tracking-widest text-xs"
+                className="bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-[18px] px-8 rounded-xl transition-all duration-300 shadow-lg shadow-green-500/20 flex items-center justify-center gap-3 uppercase tracking-widest text-xs"
               >
                 <WhatsAppIcon className="w-5 h-5 flex-shrink-0" />
                 {t('contact.whatsapp')}
