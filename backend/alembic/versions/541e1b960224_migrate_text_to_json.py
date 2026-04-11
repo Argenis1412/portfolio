@@ -28,6 +28,7 @@ def upgrade() -> None:
         existing_type=sa.VARCHAR(),
         type_=sa.JSON(),
         nullable=True,
+        postgresql_using="descricao::json",
     )
     op.alter_column(
         "experiencias",
@@ -35,9 +36,15 @@ def upgrade() -> None:
         existing_type=sa.VARCHAR(),
         type_=sa.JSON(),
         nullable=True,
+        postgresql_using="tecnologias::json",
     )
     op.alter_column(
-        "formacoes", "curso", existing_type=sa.VARCHAR(), type_=sa.JSON(), nullable=True
+        "formacoes",
+        "curso",
+        existing_type=sa.VARCHAR(),
+        type_=sa.JSON(),
+        nullable=True,
+        postgresql_using="curso::json",
     )
     op.alter_column(
         "formacoes",
@@ -45,6 +52,7 @@ def upgrade() -> None:
         existing_type=sa.VARCHAR(),
         type_=sa.JSON(),
         nullable=True,
+        postgresql_using="descricao::json",
     )
     op.alter_column(
         "projetos",
@@ -52,6 +60,7 @@ def upgrade() -> None:
         existing_type=sa.VARCHAR(),
         type_=sa.JSON(),
         nullable=True,
+        postgresql_using="descricao_curta::json",
     )
     op.alter_column(
         "projetos",
@@ -59,6 +68,7 @@ def upgrade() -> None:
         existing_type=sa.VARCHAR(),
         type_=sa.JSON(),
         nullable=True,
+        postgresql_using="descricao_completa::json",
     )
     op.alter_column(
         "projetos",
@@ -66,6 +76,7 @@ def upgrade() -> None:
         existing_type=sa.VARCHAR(),
         type_=sa.JSON(),
         nullable=True,
+        postgresql_using="tecnologias::json",
     )
     op.alter_column(
         "projetos",
@@ -73,6 +84,7 @@ def upgrade() -> None:
         existing_type=sa.VARCHAR(),
         type_=sa.JSON(),
         nullable=True,
+        postgresql_using="funcionalidades::json",
     )
     op.alter_column(
         "projetos",
@@ -80,9 +92,15 @@ def upgrade() -> None:
         existing_type=sa.VARCHAR(),
         type_=sa.JSON(),
         nullable=True,
+        postgresql_using="aprendizados::json",
     )
     op.alter_column(
-        "sobre", "descricao", existing_type=sa.VARCHAR(), type_=sa.JSON(), nullable=True
+        "sobre",
+        "descricao",
+        existing_type=sa.VARCHAR(),
+        type_=sa.JSON(),
+        nullable=True,
+        postgresql_using="descricao::json",
     )
     op.alter_column(
         "sobre",
@@ -90,6 +108,7 @@ def upgrade() -> None:
         existing_type=sa.VARCHAR(),
         type_=sa.JSON(),
         nullable=True,
+        postgresql_using="disponibilidade::json",
     )
     # ### end Alembic commands ###
 
