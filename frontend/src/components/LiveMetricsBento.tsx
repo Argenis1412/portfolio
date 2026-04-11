@@ -6,7 +6,7 @@
  * Tile 3: Uptime       — backend-calculated string, refreshes on poll
  * Tile 4: System Status — derived from useLiveMetrics, pulse animation
  */
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { useLiveMetrics, type SystemStatus } from '../hooks/useLiveMetrics';
