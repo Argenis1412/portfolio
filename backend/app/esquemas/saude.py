@@ -57,13 +57,9 @@ class ResumoMetricas(BaseModel):
     Schema simplificado para dashboard de evidência no frontend.
     """
 
-    p95_ms: float = Field(..., examples=[42.5], description="Latência P95 observada")
-    requisicoes_24h: int = Field(
-        ..., examples=[1250], description="Total de requisições nas últimas 24h"
-    )
-    taxa_erro: float = Field(
-        ..., examples=[0.01], description="Taxa de erro (0.0 a 1.0)"
-    )
-    uptime_segundos: int = Field(
-        ..., examples=[86400], description="Uptime do servidor"
-    )
+    p95_ms: float = Field(..., examples=[43.0], description="Latência P95 observada")
+    requests_24h: int = Field(..., examples=[987], description="Solicitações totais (24h)")
+    error_rate: float = Field(..., examples=[0.0131], description="Taxa de erro decimal")
+    error_rate_pct: str = Field(..., examples=["1.31%"], description="Taxa de erro formatada")
+    uptime: str = Field(..., examples=["2h 14m"], description="Tempo de atividade formatado")
+    timestamp: str = Field(..., description="ISO 8601 timestamp da leitura")

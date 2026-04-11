@@ -38,9 +38,13 @@ async def test_metrics_summary():
         assert response.status_code == 200
         data = response.json()
         assert "p95_ms" in data
-        assert "requisicoes_24h" in data
-        assert "taxa_erro" in data
-        assert "uptime_segundos" in data
+        assert "requests_24h" in data
+        assert "error_rate" in data
+        assert "error_rate_pct" in data
+        assert "uptime" in data
+        assert "timestamp" in data
+        assert "%" in data["error_rate_pct"]
+        assert "Cache-Control" in response.headers
 
 
 @pytest.mark.anyio
