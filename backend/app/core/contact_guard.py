@@ -14,7 +14,7 @@ import re
 import structlog
 from fastapi import Request
 
-from app.core.honeypot import is_honeypot_triggered
+from app.core.honeypot import is_honeypot_triggered, HONEYPOT_FIELDS
 from app.core.limite import check_rate_limit, get_client_ip, get_contact_fingerprint_key
 from app.core.spam_check import calculate_spam_score
 from app.core.spam_store import spam_dedup_store
@@ -22,7 +22,7 @@ from app.core.spam_store import spam_dedup_store
 logger = structlog.get_logger(__name__)
 
 
-def _email_domain(email: str) -> str:
+def email_domain(email: str) -> str:
     """Extracts the domain part of an email address for safe logging."""
     return email.split("@")[-1].lower() if "@" in email else "invalid-email"
 
@@ -58,7 +58,7 @@ class ContactGuard:
         """
         data = {
             field: getattr(form_data, field, None)
-            for field in ("website", "fax", "company", "middle_name")
+            for field in HONEYPOT_FIELDS
         }
         return is_honeypot_triggered(data)
 

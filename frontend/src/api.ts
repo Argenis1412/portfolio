@@ -100,7 +100,7 @@ function buildApiUrl(path: string): string {
   return `${API_BASE_URL}${path}`;
 }
 
-class ApiError extends Error {
+export class ApiError extends Error {
   status: number;
   constructor(status: number, message: string) {
     super(message);

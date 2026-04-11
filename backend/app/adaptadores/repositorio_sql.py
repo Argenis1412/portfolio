@@ -7,7 +7,6 @@ from sqlmodel import select, col
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
 from sqlalchemy import text
-import json
 
 from app.adaptadores.repositorio import RepositorioPortfolio
 from app.adaptadores.modelos_sql import (
@@ -82,8 +81,8 @@ class RepositorioSQL(RepositorioPortfolio):
             # Retorna como dict para manter compatibilidade com o caso de uso
             dados = modelo.model_dump()
             dados.pop("id", None)
-            dados["descricao"] = json.loads(dados["descricao"])
-            dados["disponibilidade"] = json.loads(dados["disponibilidade"])
+            dados["descricao"] = dados["descricao"]
+            dados["disponibilidade"] = dados["disponibilidade"]
             return dados
 
     async def obter_projetos(self) -> List[Projeto]:
@@ -98,11 +97,11 @@ class RepositorioSQL(RepositorioPortfolio):
                 Projeto(
                     id=m.id,
                     nome=m.nome,
-                    descricao_curta=json.loads(m.descricao_curta),
-                    descricao_completa=json.loads(m.descricao_completa),
-                    tecnologias=json.loads(m.tecnologias),
-                    funcionalidades=json.loads(m.funcionalidades),
-                    aprendizados=json.loads(m.aprendizados),
+                    descricao_curta=m.descricao_curta,
+                    descricao_completa=m.descricao_completa,
+                    tecnologias=m.tecnologias,
+                    funcionalidades=m.funcionalidades,
+                    aprendizados=m.aprendizados,
                     repositorio=m.repositorio,
                     demo=m.demo,
                     destaque=m.destaque,
@@ -124,11 +123,11 @@ class RepositorioSQL(RepositorioPortfolio):
             return Projeto(
                 id=m.id,
                 nome=m.nome,
-                descricao_curta=json.loads(m.descricao_curta),
-                descricao_completa=json.loads(m.descricao_completa),
-                tecnologias=json.loads(m.tecnologias),
-                funcionalidades=json.loads(m.funcionalidades),
-                aprendizados=json.loads(m.aprendizados),
+                descricao_curta=m.descricao_curta,
+                descricao_completa=m.descricao_completa,
+                tecnologias=m.tecnologias,
+                funcionalidades=m.funcionalidades,
+                aprendizados=m.aprendizados,
                 repositorio=m.repositorio,
                 demo=m.demo,
                 destaque=m.destaque,
@@ -166,13 +165,13 @@ class RepositorioSQL(RepositorioPortfolio):
             return [
                 ExperienciaProfissional(
                     id=m.id,
-                    cargo=json.loads(m.cargo),
+                    cargo=m.cargo,
                     empresa=m.empresa,
                     localizacao=m.localizacao,
                     data_inicio=m.data_inicio,
                     data_fim=m.data_fim,
-                    descricao=json.loads(m.descricao),
-                    tecnologias=json.loads(m.tecnologias),
+                    descricao=m.descricao,
+                    tecnologias=m.tecnologias,
                     atual=m.atual,
                 )
                 for m in modelos
@@ -191,12 +190,12 @@ class RepositorioSQL(RepositorioPortfolio):
             return [
                 FormacaoAcademica(
                     id=m.id,
-                    curso=json.loads(m.curso),
+                    curso=m.curso,
                     instituicao=m.instituicao,
                     localizacao=m.localizacao,
                     data_inicio=m.data_inicio,
                     data_fim=m.data_fim,
-                    descricao=json.loads(m.descricao),
+                    descricao=m.descricao,
                     atual=m.atual,
                 )
                 for m in modelos

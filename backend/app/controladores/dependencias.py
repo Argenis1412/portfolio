@@ -39,37 +39,37 @@ def obter_repositorio() -> RepositorioPortfolio:
 
 
 @lru_cache
-def obter_obter_sobre_use_case() -> ObterSobreUseCase:
+def dep_sobre() -> ObterSobreUseCase:
     """Retorna caso de uso para secao sobre."""
     return ObterSobreUseCase(obter_repositorio_estatico())
 
 
 @lru_cache
-def obter_obter_projetos_use_case() -> ObterProjetosUseCase:
+def dep_projetos() -> ObterProjetosUseCase:
     """Retorna caso de uso para listagem de projetos."""
     return ObterProjetosUseCase(obter_repositorio_estatico())
 
 
 @lru_cache
-def obter_obter_projeto_por_id_use_case() -> ObterProjetoPorIdUseCase:
+def dep_projeto_por_id() -> ObterProjetoPorIdUseCase:
     """Retorna caso de uso para detalhes de projeto."""
     return ObterProjetoPorIdUseCase(obter_repositorio_estatico())
 
 
 @lru_cache
-def obter_obter_stack_use_case() -> ObterStackUseCase:
+def dep_stack() -> ObterStackUseCase:
     """Retorna caso de uso para stack tecnico."""
     return ObterStackUseCase(obter_repositorio_estatico())
 
 
 @lru_cache
-def obter_obter_experiencias_use_case() -> ObterExperienciasUseCase:
+def dep_experiencias() -> ObterExperienciasUseCase:
     """Retorna caso de uso para experiencias profissionais."""
     return ObterExperienciasUseCase(obter_repositorio_estatico())
 
 
 @lru_cache
-def obter_obter_formacao_use_case() -> ObterFormacaoUseCase:
+def dep_formacao() -> ObterFormacaoUseCase:
     """Retorna caso de uso para formações acadêmicas."""
     return ObterFormacaoUseCase(obter_repositorio_estatico())
 

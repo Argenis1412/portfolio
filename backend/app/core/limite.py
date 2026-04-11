@@ -13,7 +13,7 @@ def get_client_ip(request: Request) -> str:
     """Returns the real client IP, preferring trusted proxy headers."""
     forwarded_for = request.headers.get("x-forwarded-for")
     if forwarded_for:
-        return forwarded_for.split(",")[0].strip()
+        return forwarded_for.split(",")[-1].strip()
 
     real_ip = request.headers.get("x-real-ip")
     if real_ip:

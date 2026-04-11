@@ -3,6 +3,7 @@ import { Mail, Loader2, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAbout, useContactMutation } from '../hooks/useApi';
+import { ApiError } from '../api';
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -75,11 +76,14 @@ export default function Contact() {
           setTimeout(() => reset(), 2500);
         },
         onError: (error: unknown) => {
-          const err = error as { status?: number; message?: string };
-          if (err.status === 429) {
-            setErrors({ submit: 'contact.error.rate_limit' });
-          } else if (err.message?.includes('DUPLICATE') || err.status === 409 || err.status === 400) {
-            setErrors({ submit: 'contact.error.duplicate' });
+          if (error instanceof ApiError) {
+            if (error.status === 429) {
+              setErrors({ submit: 'contact.error.rate_limit' });
+            } else if (error.message.includes('DUPLICATE') || error.status === 409 || error.status === 400) {
+              setErrors({ submit: 'contact.error.duplicate' });
+            } else {
+              setErrors({ submit: 'contact.error.generic' });
+            }
           } else {
             setErrors({ submit: 'contact.error.generic' });
           }

@@ -29,6 +29,7 @@ from app.core.handlers import registrar_handlers_excecao
 from app.core.observabilidade import configurar_observabilidade
 
 from app.core.limite import limiter
+from app import __version__
 
 
 def criar_aplicacao() -> FastAPI:
@@ -54,7 +55,7 @@ def criar_aplicacao() -> FastAPI:
     aplicacao = FastAPI(
         title=configuracoes.nome_app,
         description=_obter_descricao_api(),
-        version="1.0.0",
+        version=__version__,
         docs_url="/docs" if configuracoes.debug else None,
         redoc_url="/redoc" if configuracoes.debug else None,
         openapi_url="/openapi.json" if configuracoes.debug else None,
@@ -163,7 +164,7 @@ def _configurar_cors(aplicacao: FastAPI) -> None:
         allow_origins=configuracoes.lista_origens_permitidas(),
         allow_origin_regex=configuracoes.regex_origens_permitidas,
         allow_credentials=True,
-        allow_methods=["*"],
+        allow_methods=["GET", "POST"],
         allow_headers=["*"],
     )
 

@@ -13,7 +13,7 @@ from fastapi.responses import JSONResponse
 
 from app.casos_uso import EnviarContatoUseCase
 from app.controladores.dependencias import obter_enviar_contato_use_case
-from app.core.contact_guard import ContactGuard, _email_domain
+from app.core.contact_guard import ContactGuard, email_domain
 from app.core.idempotencia import store, verificar_idempotencia
 from app.esquemas.contato import RequisicaoContato, RespostaContato
 
@@ -45,7 +45,7 @@ async def _processar_envio_background(
             logger.info(
                 "contact_delivered",
                 is_suspicious=is_suspicious,
-                email_domain=_email_domain(requisicao.email),
+                email_domain=email_domain(requisicao.email),
                 delivery_mode="background",
             )
         else:
@@ -53,7 +53,7 @@ async def _processar_envio_background(
                 "contact_delivery_failed",
                 is_suspicious=is_suspicious,
                 event_type="delivery_error",
-                email_domain=_email_domain(requisicao.email),
+                email_domain=email_domain(requisicao.email),
                 delivery_mode="background",
             )
     except Exception as e:
@@ -61,7 +61,7 @@ async def _processar_envio_background(
             "contact_delivery_crash",
             error=str(e),
             event_type="system_error",
-            email_domain=_email_domain(requisicao.email),
+            email_domain=email_domain(requisicao.email),
             delivery_mode="background",
         )
 
@@ -116,7 +116,7 @@ async def enviar_contato(
                 action="silent_drop",
                 event_type="security_event",
                 spam_score=spam_score,
-                email_domain=_email_domain(requisicao.email),
+                email_domain=email_domain(requisicao.email),
             )
             resposta_cacheavel = RespostaContato(
                 sucesso=True,
@@ -133,7 +133,7 @@ async def enviar_contato(
                 "duplicate_content_detected",
                 event_type="security_event",
                 content_hash_prefix=content_hash[:12],
-                email_domain=_email_domain(requisicao.email),
+                email_domain=email_domain(requisicao.email),
                 context="shared_dedup_store",
             )
             return JSONResponse(  # type: ignore[return-value]
@@ -156,7 +156,7 @@ async def enviar_contato(
             classification="SUSPECT" if is_suspicious else "NORMAL",
             action="deliver_with_flag" if is_suspicious else "deliver",
             spam_score=spam_score,
-            email_domain=_email_domain(requisicao.email),
+            email_domain=email_domain(requisicao.email),
         )
 
         # ── 6. Delivery (Background Tasks) ──────────────────────────────────
@@ -171,7 +171,7 @@ async def enviar_contato(
         logger.info(
             "contact_queued",
             is_suspicious=is_suspicious,
-            email_domain=_email_domain(requisicao.email),
+            email_domain=email_domain(requisicao.email),
         )
 
         resposta_cacheavel = RespostaContato(

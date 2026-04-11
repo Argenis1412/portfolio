@@ -10,7 +10,7 @@ from typing import Optional
 from datetime import date
 import json
 from sqlmodel import SQLModel, Field
-from sqlalchemy import TypeDecorator, Text
+from sqlalchemy import TypeDecorator, Text, Column, JSON
 
 
 class JSONEncoded(TypeDecorator):
@@ -51,9 +51,8 @@ class SobreModelo(SQLModel, table=True):  # type: ignore[call-arg]
     telefone: str
     github: str
     linkedin: str
-    # Armazenados como string JSON
-    descricao: str
-    disponibilidade: str
+    descricao: dict = Field(sa_column=Column(JSON))
+    disponibilidade: dict = Field(sa_column=Column(JSON))
 
 
 class ProjetoModelo(SQLModel, table=True):  # type: ignore[call-arg]
@@ -63,12 +62,11 @@ class ProjetoModelo(SQLModel, table=True):  # type: ignore[call-arg]
 
     id: str = Field(primary_key=True)
     nome: str
-    # Armazenados como string JSON
-    descricao_curta: str
-    descricao_completa: str
-    tecnologias: str
-    funcionalidades: str
-    aprendizados: str
+    descricao_curta: dict = Field(sa_column=Column(JSON))
+    descricao_completa: dict = Field(sa_column=Column(JSON))
+    tecnologias: list = Field(sa_column=Column(JSON))
+    funcionalidades: list = Field(sa_column=Column(JSON))
+    aprendizados: list = Field(sa_column=Column(JSON))
 
     repositorio: Optional[str] = None
     demo: Optional[str] = None
@@ -82,14 +80,13 @@ class ExperienciaModelo(SQLModel, table=True):  # type: ignore[call-arg]
     __tablename__ = "experiencias"
 
     id: str = Field(primary_key=True)
-    cargo: str
+    cargo: dict = Field(sa_column=Column(JSON))
     empresa: str
     localizacao: str
     data_inicio: date
     data_fim: Optional[date] = None
-    # Armazenados como string JSON
-    descricao: str
-    tecnologias: str
+    descricao: dict = Field(sa_column=Column(JSON))
+    tecnologias: list = Field(sa_column=Column(JSON))
     atual: bool = False
 
 
@@ -99,13 +96,12 @@ class FormacaoModelo(SQLModel, table=True):  # type: ignore[call-arg]
     __tablename__ = "formacoes"
 
     id: str = Field(primary_key=True)
-    # Armazenados como string JSON
-    curso: str
+    curso: dict = Field(sa_column=Column(JSON))
     instituicao: str
     localizacao: str
     data_inicio: date
     data_fim: Optional[date] = None
-    descricao: str
+    descricao: dict = Field(sa_column=Column(JSON))
     atual: bool = False
 
 

@@ -163,6 +163,7 @@ def _configurar_opentelemetry(
         # Exportador baseado no ambiente
         import os
         import sys
+        import io
 
         if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
             # Durante os testes, não usamos BatchSpanProcessor para evitar
@@ -172,7 +173,7 @@ def _configurar_opentelemetry(
                 ConsoleSpanExporter,
             )
 
-            exporter: Any = ConsoleSpanExporter(out=open(os.devnull, "w"))
+            exporter: Any = ConsoleSpanExporter(out=io.StringIO())
             provider.add_span_processor(SimpleSpanProcessor(exporter))
             logger.info("otel_exporter_mock", motivo="Execução de testes detectada")
         elif otlp_endpoint:
@@ -263,13 +264,8 @@ def configurar_observabilidade(app: FastAPI, configuracoes) -> None:
 
     Ordem deliberada:
       1. Sentry primeiro — captura erros que possam ocorrer durante a inicialização
-      2. Prometheus segundo — registra o endpoint /metrics antes das rotas da app
-      3. OpenTelemetry por último — instrumenta após o app estar configurado
-
-    Args:
-        app: Instância FastAPI já criada.
-        configuracoes: Objeto de configurações da aplicação (Configuracoes).
-    """
+      """
+    from app import __version__
     logger.info("observabilidade_inicializando", ambiente=configuracoes.ambiente)
 
     _configurar_sentry(
@@ -283,7 +279,7 @@ def configurar_observabilidade(app: FastAPI, configuracoes) -> None:
     _configurar_opentelemetry(
         app=app,
         nome_servico=configuracoes.nome_app,
-        versao="1.0.0",
+        versao=__version__,
         ambiente=configuracoes.ambiente,
         otlp_endpoint=configuracoes.otlp_endpoint,
         sentry_dsn=configuracoes.sentry_dsn,

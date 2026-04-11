@@ -26,6 +26,10 @@ class IdempotencyStore:
     """
 
     def __init__(self, max_size: int = 100, ttl_seconds: int = 3600):
+        """
+        WARNING: The fallback in-memory cache is only safe when running with a single worker.
+        In multi-worker environments this will lead to race conditions unless Redis is configured.
+        """
         self._cache: Dict[str, IdempotencyRecord] = {}
         self.max_size = max_size
         self.ttl_seconds = ttl_seconds

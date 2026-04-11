@@ -45,9 +45,9 @@ def test_etag_changes_when_content_changes(client):
         "disponibilidade": {"pt": "Sim", "en": "Yes", "es": "Sí"},
     }
 
-    from app.controladores.dependencias import obter_obter_sobre_use_case
+    from app.controladores.dependencias import dep_sobre
 
-    app.dependency_overrides[obter_obter_sobre_use_case] = lambda: mock_uc
+    app.dependency_overrides[dep_sobre] = lambda: mock_uc
 
     try:
         resp1 = client.get("/api/v1/sobre")
@@ -70,4 +70,4 @@ def test_etag_changes_when_content_changes(client):
 
         assert etag1 != etag2
     finally:
-        app.dependency_overrides.pop(obter_obter_sobre_use_case, None)
+        app.dependency_overrides.pop(dep_sobre, None)

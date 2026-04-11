@@ -77,12 +77,8 @@ def _popular_banco(session: Session) -> None:
             telefone="(41) 99999-9999",
             github="https://github.com/teste",
             linkedin="https://linkedin.com/in/teste",
-            descricao=json.dumps(
-                {"pt": "Descrição PT", "en": "Description EN", "es": "Descripción ES"}
-            ),
-            disponibilidade=json.dumps(
-                {"pt": "Remoto", "en": "Remote", "es": "Remoto"}
-            ),
+            descricao={"pt": "Descrição PT", "en": "Description EN", "es": "Descripción ES"},
+            disponibilidade={"pt": "Remoto", "en": "Remote", "es": "Remoto"},
         )
     )
 
@@ -90,15 +86,11 @@ def _popular_banco(session: Session) -> None:
         ProjetoModelo(
             id="proj-test-1",
             nome="Projeto Teste",
-            descricao_curta=json.dumps(
-                {"pt": "Curta PT", "en": "Short EN", "es": "Corta ES"}
-            ),
-            descricao_completa=json.dumps(
-                {"pt": "Completa PT", "en": "Full EN", "es": "Completa ES"}
-            ),
-            tecnologias=json.dumps(["Python", "FastAPI"]),
-            funcionalidades=json.dumps(["Feature A", "Feature B"]),
-            aprendizados=json.dumps(["Aprendizado A"]),
+            descricao_curta={"pt": "Curta PT", "en": "Short EN", "es": "Corta ES"},
+            descricao_completa={"pt": "Completa PT", "en": "Full EN", "es": "Completa ES"},
+            tecnologias=["Python", "FastAPI"],
+            funcionalidades=["Feature A", "Feature B"],
+            aprendizados=["Aprendizado A"],
             repositorio="https://github.com/teste/repo",
             demo=None,
             destaque=True,
@@ -109,17 +101,13 @@ def _popular_banco(session: Session) -> None:
     session.add(
         ExperienciaModelo(
             id="exp-test-1",
-            cargo=json.dumps(
-                {"pt": "Dev Backend", "en": "Backend Dev", "es": "Dev Backend"}
-            ),
+            cargo={"pt": "Dev Backend", "en": "Backend Dev", "es": "Dev Backend"},
             empresa="Empresa Teste",
             localizacao="Remoto",
             data_inicio=date(2024, 1, 1),
             data_fim=None,
-            descricao=json.dumps(
-                {"pt": "Descrição PT", "en": "Description EN", "es": "Descripción ES"}
-            ),
-            tecnologias=json.dumps(["Python", "FastAPI"]),
+            descricao={"pt": "Descrição PT", "en": "Description EN", "es": "Descripción ES"},
+            tecnologias=["Python", "FastAPI"],
             atual=True,
         )
     )
@@ -127,20 +115,16 @@ def _popular_banco(session: Session) -> None:
     session.add(
         FormacaoModelo(
             id="edu-test-1",
-            curso=json.dumps(
-                {
-                    "pt": "Análise de Sistemas",
-                    "en": "Systems Analysis",
-                    "es": "Análisis",
-                }
-            ),
+            curso={
+                "pt": "Análise de Sistemas",
+                "en": "Systems Analysis",
+                "es": "Análisis",
+            },
             instituicao="UFPR Teste",
             localizacao="Curitiba, PR",
             data_inicio=date(2024, 2, 1),
             data_fim=date(2026, 12, 1),
-            descricao=json.dumps(
-                {"pt": "Em andamento", "en": "In progress", "es": "En progreso"}
-            ),
+            descricao={"pt": "Em andamento", "en": "In progress", "es": "En progreso"},
             atual=True,
         )
     )

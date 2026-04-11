@@ -32,12 +32,12 @@ from app.casos_uso import ObterProjetoPorIdUseCase
 from app.casos_uso import ObterProjetosUseCase
 from app.casos_uso import ObterSobreUseCase
 from app.casos_uso import ObterStackUseCase
-from app.controladores.dependencias import obter_obter_experiencias_use_case
-from app.controladores.dependencias import obter_obter_formacao_use_case
-from app.controladores.dependencias import obter_obter_projeto_por_id_use_case
-from app.controladores.dependencias import obter_obter_projetos_use_case
-from app.controladores.dependencias import obter_obter_sobre_use_case
-from app.controladores.dependencias import obter_obter_stack_use_case
+from app.controladores.dependencias import dep_experiencias
+from app.controladores.dependencias import dep_formacao
+from app.controladores.dependencias import dep_projeto_por_id
+from app.controladores.dependencias import dep_projetos
+from app.controladores.dependencias import dep_sobre
+from app.controladores.dependencias import dep_stack
 from app.core.cache_http import resposta_cacheavel
 from app.core.excecoes import ErroRecursoNaoEncontrado
 from app.core.limite import limiter
@@ -59,7 +59,7 @@ async def obter_sobre(
     response: Response,
     obter_sobre_uc: Annotated[
         ObterSobreUseCase,
-        Depends(obter_obter_sobre_use_case),
+        Depends(dep_sobre),
     ],
 ) -> RespostaSobre:
     """
@@ -87,7 +87,7 @@ async def listar_projetos(
     response: Response,
     obter_projetos_uc: Annotated[
         ObterProjetosUseCase,
-        Depends(obter_obter_projetos_use_case),
+        Depends(dep_projetos),
     ],
 ) -> RespostaProjetos:
     """
@@ -171,7 +171,7 @@ async def obter_projeto(
     projeto_id: str,
     obter_projeto_por_id_uc: Annotated[
         ObterProjetoPorIdUseCase,
-        Depends(obter_obter_projeto_por_id_use_case),
+        Depends(dep_projeto_por_id),
     ],
 ) -> ProjetoDetalhado:
     """
@@ -225,7 +225,7 @@ async def obter_stack(
     response: Response,
     obter_stack_uc: Annotated[
         ObterStackUseCase,
-        Depends(obter_obter_stack_use_case),
+        Depends(dep_stack),
     ],
 ) -> RespostaStack:
     """
@@ -267,7 +267,7 @@ async def listar_experiencias(
     response: Response,
     obter_experiencias_uc: Annotated[
         ObterExperienciasUseCase,
-        Depends(obter_obter_experiencias_use_case),
+        Depends(dep_experiencias),
     ],
 ) -> RespostaExperiencias:
     """
@@ -318,7 +318,7 @@ async def listar_formacao(
     response: Response,
     obter_formacao_uc: Annotated[
         ObterFormacaoUseCase,
-        Depends(obter_obter_formacao_use_case),
+        Depends(dep_formacao),
     ],
 ) -> RespostaFormacao:
     """

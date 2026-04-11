@@ -212,12 +212,8 @@ def setup_database():
                 telefone="(11) 99999-9999",
                 github="https://github.com/teste",
                 linkedin="https://linkedin.com/in/teste",
-                descricao=json.dumps(
-                    {"pt": "Descrição", "en": "Description", "es": "Descripción"}
-                ),
-                disponibilidade=json.dumps(
-                    {"pt": "Remoto", "en": "Remote", "es": "Remoto"}
-                ),
+                descricao={"pt": "Descrição", "en": "Description", "es": "Descripción"},
+                disponibilidade={"pt": "Remoto", "en": "Remote", "es": "Remoto"},
             )
         )
 
@@ -225,15 +221,11 @@ def setup_database():
             ProjetoModelo(
                 id="projeto-1",
                 nome="Projeto A",
-                descricao_curta=json.dumps(
-                    {"pt": "Curta", "en": "Short", "es": "Corta"}
-                ),
-                descricao_completa=json.dumps(
-                    {"pt": "Longa", "en": "Long", "es": "Larga"}
-                ),
-                tecnologias=json.dumps(["Python"]),
-                funcionalidades=json.dumps([]),
-                aprendizados=json.dumps([]),
+                descricao_curta={"pt": "Curta", "en": "Short", "es": "Corta"},
+                descricao_completa={"pt": "Longa", "en": "Long", "es": "Larga"},
+                tecnologias=["Python"],
+                funcionalidades=[],
+                aprendizados=[],
                 repositorio="https://github.com/teste/a",
                 demo=None,
                 destaque=True,
@@ -248,13 +240,13 @@ def setup_database():
         session.add(
             ExperienciaModelo(
                 id="exp-1",
-                cargo=json.dumps({"pt": "Dev", "en": "Dev", "es": "Dev"}),
+                cargo={"pt": "Dev", "en": "Dev", "es": "Dev"},
                 empresa="Empresa",
                 localizacao="Remoto",
                 data_inicio=date(2023, 1, 1),
                 data_fim=None,
-                descricao=json.dumps({"pt": "Desc", "en": "Desc", "es": "Desc"}),
-                tecnologias=json.dumps(["Python"]),
+                descricao={"pt": "Desc", "en": "Desc", "es": "Desc"},
+                tecnologias=["Python"],
                 atual=True,
             )
         )
@@ -262,12 +254,12 @@ def setup_database():
         session.add(
             FormacaoModelo(
                 id="edu-1",
-                curso=json.dumps({"pt": "Curso", "en": "Course", "es": "Curso"}),
+                curso={"pt": "Curso", "en": "Course", "es": "Curso"},
                 instituicao="Uni",
                 localizacao="SP",
                 data_inicio=date(2020, 1, 1),
                 data_fim=date(2023, 1, 1),
-                descricao=json.dumps({"pt": "Fim", "en": "End", "es": "Fin"}),
+                descricao={"pt": "Fim", "en": "End", "es": "Fin"},
                 atual=False,
             )
         )
@@ -359,27 +351,27 @@ async def override_dependencias(setup_database):
     # Sobrescrever providers individuais
     app.dependency_overrides[dependencias.obter_repositorio] = lambda: repo_real_test
 
-    app.dependency_overrides[dependencias.obter_obter_sobre_use_case] = lambda: (
+    app.dependency_overrides[dependencias.dep_sobre] = lambda: (
         ObterSobreUseCase(repo_real_test)
     )
 
-    app.dependency_overrides[dependencias.obter_obter_projetos_use_case] = lambda: (
+    app.dependency_overrides[dependencias.dep_projetos] = lambda: (
         ObterProjetosUseCase(repo_real_test)
     )
 
-    app.dependency_overrides[dependencias.obter_obter_projeto_por_id_use_case] = (
+    app.dependency_overrides[dependencias.dep_projeto_por_id] = (
         lambda: ObterProjetoPorIdUseCase(repo_real_test)
     )
 
-    app.dependency_overrides[dependencias.obter_obter_stack_use_case] = lambda: (
+    app.dependency_overrides[dependencias.dep_stack] = lambda: (
         ObterStackUseCase(repo_real_test)
     )
 
-    app.dependency_overrides[dependencias.obter_obter_experiencias_use_case] = lambda: (
+    app.dependency_overrides[dependencias.dep_experiencias] = lambda: (
         ObterExperienciasUseCase(repo_real_test)
     )
 
-    app.dependency_overrides[dependencias.obter_obter_formacao_use_case] = lambda: (
+    app.dependency_overrides[dependencias.dep_formacao] = lambda: (
         ObterFormacaoUseCase(repo_real_test)
     )
 
@@ -395,12 +387,12 @@ async def override_dependencias(setup_database):
 
     # Limpar caches por segurança (embora overrides devam prevalecer no FastAPI)
     dependencias.obter_repositorio.cache_clear()
-    dependencias.obter_obter_sobre_use_case.cache_clear()
-    dependencias.obter_obter_projetos_use_case.cache_clear()
-    dependencias.obter_obter_projeto_por_id_use_case.cache_clear()
-    dependencias.obter_obter_stack_use_case.cache_clear()
-    dependencias.obter_obter_experiencias_use_case.cache_clear()
-    dependencias.obter_obter_formacao_use_case.cache_clear()
+    dependencias.dep_sobre.cache_clear()
+    dependencias.dep_projetos.cache_clear()
+    dependencias.dep_projeto_por_id.cache_clear()
+    dependencias.dep_stack.cache_clear()
+    dependencias.dep_experiencias.cache_clear()
+    dependencias.dep_formacao.cache_clear()
 
     yield
     app.dependency_overrides.clear()

@@ -2,16 +2,14 @@
 Honeypot detection logic.
 """
 
+HONEYPOT_FIELDS = ["website", "fax", "company", "middle_name"]
 
 def is_honeypot_triggered(form_data: dict) -> bool:
     """
     Checks if any hidden honeypot fields were filled by a bot.
     Bots often fill all available input fields automatically.
     """
-    # Common fields used as honeypots
-    honeypot_fields = ["website", "fax", "company", "middle_name"]
-
-    for field in honeypot_fields:
+    for field in HONEYPOT_FIELDS:
         if form_data.get(field):
             return True
 

@@ -10,17 +10,12 @@ import structlog
 
 from app.configuracao import configuracoes
 from app.entidades.mensagem import Mensagem
+from app.utils.email import mascarar_email
 
 logger = structlog.get_logger(__name__)
 
 
-def _mascarar_email(valor: str) -> str:
-    if "@" not in valor:
-        return "invalid-email"
 
-    usuario, dominio = valor.split("@", 1)
-    prefixo = usuario[:2] if len(usuario) >= 2 else usuario[:1]
-    return f"{prefixo}***@{dominio.lower()}"
 
 
 class EmailAdaptador(ABC):
@@ -148,7 +143,7 @@ class ConsoleEmailAdaptador(EmailAdaptador):
         logger.info(
             "contact_received_console",
             name=mensagem.nome,
-            email=_mascarar_email(mensagem.email),
+            email=mascarar_email(mensagem.email),
             subject=mensagem.assunto,
             message_length=len(mensagem.mensagem),
             status="intercepted_by_console",

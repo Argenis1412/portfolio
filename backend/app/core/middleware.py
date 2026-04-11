@@ -28,13 +28,7 @@ configurar_structlog()
 logger = structlog.get_logger(__name__)
 
 
-def _mascarar_email(valor: str) -> str:
-    if "@" not in valor:
-        return "invalid-email"
-
-    usuario, dominio = valor.split("@", 1)
-    prefixo = usuario[:2] if len(usuario) >= 2 else usuario[:1]
-    return f"{prefixo}***@{dominio.lower()}"
+from app.utils.email import mascarar_email
 
 
 def _identidade_logavel(request: Request) -> str:
@@ -43,7 +37,7 @@ def _identidade_logavel(request: Request) -> str:
         return "ip"
 
     if identidade.startswith("email:"):
-        return f"email:{_mascarar_email(identidade.split(':', 1)[1])}"
+        return f"email:{mascarar_email(identidade.split(':', 1)[1])}"
 
     return identidade
 
@@ -193,7 +187,6 @@ class SegurancaHeadersMiddleware(BaseHTTPMiddleware):
         # Security Headers
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
-        response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Strict-Transport-Security"] = (
             "max-age=31536000; includeSubDomains; preload"
         )
@@ -201,9 +194,11 @@ class SegurancaHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Permissions-Policy"] = (
             "camera=(), microphone=(), geolocation=()"
         )
-        response.headers["Content-Security-Policy"] = (
-            "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
-        )
+        
+        if not (request.url.path.startswith("/docs") or request.url.path.startswith("/redoc")):
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
+            )
 
         return response
 

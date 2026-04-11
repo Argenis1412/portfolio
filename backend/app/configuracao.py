@@ -198,6 +198,12 @@ class Configuracoes(BaseSettings):
         if erros:
             raise RuntimeError("Invalid production configuration: " + "; ".join(erros))
 
+    def validar_staging(self) -> None:
+        if self.ambiente == "staging" and not self.redis_url:
+            import warnings
+            warnings.warn("Staging sem REDIS_URL: in-memory idempotency resultará em race conditions com múltiplos workers")
+
 
 # Instância global de configurações
 configuracoes = Configuracoes()
+configuracoes.validar_staging()

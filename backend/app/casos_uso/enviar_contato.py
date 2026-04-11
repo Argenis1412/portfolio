@@ -92,23 +92,23 @@ class EnviarContatoUseCase:
                 "",
                 mensagem,
             ]
-            mensaje_conteudo = "\n".join(warning_lines)
+            conteudo_mensagem = "\n".join(warning_lines)
         else:
-            mensaje_conteudo = mensagem
+            conteudo_mensagem = mensagem
 
         # Build the domain entity
         mensagem_entidade = Mensagem(
             nome=nome,
             email=email,
             assunto=assunto_final,
-            mensagem=mensaje_conteudo,
+            mensagem=conteudo_mensagem,
         )
 
-        # Attempt delivery
+        email_domain = email.split("@")[-1].lower() if "@" in email else "invalid-email"
         self.logger.info(
             "contact_delivery_attempt",
             remetente=nome,
-            email=email,
+            email_domain=email_domain,
         )
 
         sucesso = await self.email_adaptador.enviar_mensagem(mensagem_entidade)

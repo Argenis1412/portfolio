@@ -10,7 +10,13 @@ from typing import Any
 import structlog
 
 
+_structlog_configured = False
+
 def configurar_structlog() -> None:
+    global _structlog_configured
+    if _structlog_configured:
+        return
+    _structlog_configured = True
     """
     Configura structlog com processadores adequados para produção.
 
