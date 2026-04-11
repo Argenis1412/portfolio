@@ -190,7 +190,6 @@ def setup_database():
         FormacaoModelo,
         StackModelo,
     )
-    import json
 
     fd, db_path = tempfile.mkstemp(suffix=".db")
     os.close(fd)

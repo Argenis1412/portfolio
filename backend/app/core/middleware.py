@@ -9,9 +9,9 @@ Adiciona:
 """
 
 import time
-import uuid
 import base64
 import hmac
+import uuid
 from typing import Callable
 
 import structlog
@@ -19,16 +19,15 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
-# Configurar structlog no módulo
 from app.adaptadores.logger_adaptador import configurar_structlog
 from app.configuracao import configuracoes
 from app.core.limite import get_client_ip
+from app.utils.email import mascarar_email
 
+
+# Configurar structlog no módulo
 configurar_structlog()
 logger = structlog.get_logger(__name__)
-
-
-from app.utils.email import mascarar_email
 
 
 def _identidade_logavel(request: Request) -> str:

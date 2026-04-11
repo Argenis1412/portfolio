@@ -11,7 +11,6 @@ Por que arquivo temporário e não :memory:?
   por isso usamos um arquivo temporário que ambos os engines conseguem ler.
 """
 
-import json
 import pytest
 import tempfile
 import os
