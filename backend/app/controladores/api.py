@@ -75,7 +75,8 @@ async def obter_resumo_metricas() -> ResumoMetricas:
             "http_request_duration_seconds_sum", labels={"handler": "/api/v1/projetos"}
         )
         count = REGISTRY.get_sample_value(
-            "http_request_duration_seconds_count", labels={"handler": "/api/v1/projetos"}
+            "http_request_duration_seconds_count",
+            labels={"handler": "/api/v1/projetos"},
         )
         if latency and count:
             p95 = (latency / count) * 1000  # Converter para ms

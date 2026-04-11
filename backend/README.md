@@ -22,6 +22,7 @@ Professional backend for a developer portfolio, implementing:
 - ✅ **Layered contact protection**: `ContactGuard` service orchestrating honeypot, spam scoring, content dedup (Redis → in-memory fallback, 30-min window), and multi-tier rate limiting (10/day email, 20/min email, 30/hour IP, 30/hour fingerprint).
 - ✅ **Rate Limiting**: Enforced via slowapi with Redis backend (fails open on Redis outage).
 - ✅ **API Observability**: Full integration with OpenTelemetry, Prometheus, and Sentry.
+- ✅ **Live Evidence Support**: Built-in Chaos Monkey simulations and real-time metrics for interactive frontend dashboards.
 
 ---
 
@@ -109,6 +110,18 @@ python -m uvicorn app.principal:app --reload --port 8000
 
 ---
 
+## 🐒 Living Dashboard (Live Evidence)
+
+This backend is designed to feed an interactive "Living Dashboard" frontend. It includes specific instrumentation for demonstrating backend health under load:
+
+- **Chaos Monkey Simulation**: Triggered via `X-Debug-Mode` header.
+  - `simulate-429`: Simulates rate limit threshold hit (returns 429 with `Retry-After`).
+  - `simulate-500`: Simulates unexpected internal server error.
+- **Real-time API Metrics**: Dedicated endpoint providing a "pulse" of the API (latency P95, requests/24h, errors).
+- **Trace Accountability**: Every error response includes a `trace_id` for immediate debugging transparency.
+
+---
+
 ## 📊 Observability & Metrics
 
 The API exposes a Prometheus-compatible metrics endpoint at `/metrics`.
@@ -142,6 +155,10 @@ Returns status for:
 - `GET /api/v1/stack`: Tech stack by categories.
 - `GET /api/v1/experiencias`: Professional timeline.
 - `GET /api/v1/formacao`: Education history.
+
+### 🧪 Live Refactoring Features
+- `GET /api/v1/metrics/summary`: Consolidated real-time telemetry for frontend evidence dashboard.
+- `ANY /any-endpoint` + `X-Debug-Mode: simulate-429`: Force immediate 429 response.
 
 ---
 
