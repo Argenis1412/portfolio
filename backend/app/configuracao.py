@@ -128,6 +128,11 @@ class Configuracoes(BaseSettings):
         default="",
         alias="METRICS_BASIC_AUTH_PASSWORD",
     )
+    trusted_proxy_depth: int = Field(
+        default=1,
+        alias="TRUSTED_PROXY_DEPTH",
+        description="Número de proxies de confianza (Edge/Load Balancer) antes de la aplicación.",
+    )
 
     def lista_origens_permitidas(self) -> list[str]:
         """
