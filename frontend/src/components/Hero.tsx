@@ -61,7 +61,7 @@ export default function Hero() {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="text-4xl md:text-6xl font-extrabold tracking-tight mb-3 text-app-text"
           >
-            Backend Developer
+            {t('hero.title')}
           </motion.h1>
           <motion.div
             initial={{ opacity: 0, x: -20 }}

@@ -1,7 +1,8 @@
 {
   "nav.about": "Sobre",
+  "hero.title": "Desenvolvedor Backend",
   "nav.projects": "Projetos",
-  "nav.stack": "Stack",
+  "nav.stack": "Tecnologias",
   "nav.experience": "Experiência",
   "nav.journey": "Trajetória",
   "nav.contact": "Contato",
@@ -61,7 +62,7 @@
   "metrics.health.healthy": "saudável",
   "metrics.health.stable": "estável",
   "metrics.health.warning": "aviso",
-  "metrics.api_live": "API Live",
+  "metrics.api_live": "API Online",
   "metrics.view_raw": "GET /metrics/summary",
   "metrics.source_tooltip": "Ver JSON real que alimenta estes dados",
   "metrics.latency_tooltip": "Latência real do backend de produção",

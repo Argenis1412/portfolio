@@ -6,7 +6,7 @@
  * Tile 3: Uptime       — backend-calculated string, refreshes on poll
  * Tile 4: System Status — derived from useLiveMetrics, pulse animation
  */
-import { useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { useLiveMetrics, type SystemStatus } from '../hooks/useLiveMetrics';
@@ -132,18 +132,18 @@ export default function LiveMetricsBento() {
 
   // Rolling window of P95 samples for the sparkline.
   // Cold start: pre-fill all slots with the first value → no empty/jagged start.
-  const sparkPoints = useRef<number[]>([]);
+  const [sparkPoints, setSparkPoints] = useState<number[]>([]);
 
   useEffect(() => {
     if (data?.p95_ms === undefined) return;
     const v = data.p95_ms;
 
-    if (sparkPoints.current.length === 0) {
-      // Pre-fill all slots with the first received value (clean cold start)
-      sparkPoints.current = Array(SPARKLINE_POINTS).fill(v);
-    } else {
-      sparkPoints.current = [...sparkPoints.current.slice(-(SPARKLINE_POINTS - 1)), v];
-    }
+    setSparkPoints(prev => {
+      if (prev.length === 0) {
+        return Array(SPARKLINE_POINTS).fill(v);
+      }
+      return [...prev.slice(-(SPARKLINE_POINTS - 1)), v];
+    });
   }, [data?.p95_ms]);
 
   const statusCfg = STATUS_CONFIG[status];
@@ -180,7 +180,7 @@ export default function LiveMetricsBento() {
               {data.p95_ms}
               <span className="text-sm font-normal text-app-muted ml-0.5">ms</span>
             </span>
-            <Sparkline points={sparkPoints.current} color={sparkColor} />
+            <Sparkline points={sparkPoints} color={sparkColor} />
           </div>
           <span
             className={`text-xs font-mono px-2 py-0.5 rounded-full w-fit ${

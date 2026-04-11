@@ -19,11 +19,13 @@ export default function ServerWakeupNotice() {
   // Only show spinner if initial load takes more than 2.5s
   useEffect(() => {
     if (!isLoading) {
-      setShowSpinner(false);
       return;
     }
     const timer = setTimeout(() => setShowSpinner(true), 2500);
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      setShowSpinner(false);
+    };
   }, [isLoading]);
 
   // Extract traceId from the error if it's an ApiError instance

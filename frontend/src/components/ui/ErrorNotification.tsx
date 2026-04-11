@@ -17,7 +17,7 @@ interface ErrorNotificationProps {
   visible: boolean;
 }
 
-function formatTimeAgo(ts: number | null, t: (key: string, params?: any) => string): string {
+function formatTimeAgo(ts: number | null, t: (key: string, params?: Record<string, string | number>) => string): string {
   if (ts === null) return t('metrics.error.time_ago.unknown');
   const diff = Math.floor((Date.now() - ts) / 1000);
   if (diff < 60) return t('metrics.error.time_ago.s', { diff });
