@@ -12,6 +12,7 @@ import structlog
 
 _structlog_configured = False
 
+
 def configurar_structlog() -> None:
     global _structlog_configured
     if _structlog_configured:

@@ -56,10 +56,7 @@ class ContactGuard:
         Args:
             form_data: Pydantic request model with optional `website` / `fax` fields.
         """
-        data = {
-            field: getattr(form_data, field, None)
-            for field in HONEYPOT_FIELDS
-        }
+        data = {field: getattr(form_data, field, None) for field in HONEYPOT_FIELDS}
         return is_honeypot_triggered(data)
 
     @staticmethod

@@ -350,28 +350,28 @@ async def override_dependencias(setup_database):
     # Sobrescrever providers individuais
     app.dependency_overrides[dependencias.obter_repositorio] = lambda: repo_real_test
 
-    app.dependency_overrides[dependencias.dep_sobre] = lambda: (
-        ObterSobreUseCase(repo_real_test)
+    app.dependency_overrides[dependencias.dep_sobre] = lambda: ObterSobreUseCase(
+        repo_real_test
     )
 
-    app.dependency_overrides[dependencias.dep_projetos] = lambda: (
-        ObterProjetosUseCase(repo_real_test)
+    app.dependency_overrides[dependencias.dep_projetos] = lambda: ObterProjetosUseCase(
+        repo_real_test
     )
 
-    app.dependency_overrides[dependencias.dep_projeto_por_id] = (
-        lambda: ObterProjetoPorIdUseCase(repo_real_test)
+    app.dependency_overrides[dependencias.dep_projeto_por_id] = lambda: (
+        ObterProjetoPorIdUseCase(repo_real_test)
     )
 
-    app.dependency_overrides[dependencias.dep_stack] = lambda: (
-        ObterStackUseCase(repo_real_test)
+    app.dependency_overrides[dependencias.dep_stack] = lambda: ObterStackUseCase(
+        repo_real_test
     )
 
     app.dependency_overrides[dependencias.dep_experiencias] = lambda: (
         ObterExperienciasUseCase(repo_real_test)
     )
 
-    app.dependency_overrides[dependencias.dep_formacao] = lambda: (
-        ObterFormacaoUseCase(repo_real_test)
+    app.dependency_overrides[dependencias.dep_formacao] = lambda: ObterFormacaoUseCase(
+        repo_real_test
     )
 
     # Mock para envio de email para evitar chamadas reais (Formspree) nos testes

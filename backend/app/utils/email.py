@@ -2,6 +2,7 @@
 Utilitários para manipulação de emails.
 """
 
+
 def mascarar_email(valor: str) -> str:
     """Masca o email (ex: jo***@example.com) para logging seguro."""
     if "@" not in valor:

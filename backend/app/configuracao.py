@@ -206,7 +206,10 @@ class Configuracoes(BaseSettings):
     def validar_staging(self) -> None:
         if self.ambiente == "staging" and not self.redis_url:
             import warnings
-            warnings.warn("Staging sem REDIS_URL: in-memory idempotency resultará em race conditions com múltiplos workers")
+
+            warnings.warn(
+                "Staging sem REDIS_URL: in-memory idempotency resultará em race conditions com múltiplos workers"
+            )
 
 
 # Instância global de configurações

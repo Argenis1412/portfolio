@@ -15,9 +15,6 @@ from app.utils.email import mascarar_email
 logger = structlog.get_logger(__name__)
 
 
-
-
-
 class EmailAdaptador(ABC):
     """
     Interface abstrata para envio de emails.

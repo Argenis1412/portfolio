@@ -193,8 +193,11 @@ class SegurancaHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Permissions-Policy"] = (
             "camera=(), microphone=(), geolocation=()"
         )
-        
-        if not (request.url.path.startswith("/docs") or request.url.path.startswith("/redoc")):
+
+        if not (
+            request.url.path.startswith("/docs")
+            or request.url.path.startswith("/redoc")
+        ):
             response.headers["Content-Security-Policy"] = (
                 "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
             )

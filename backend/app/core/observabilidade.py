@@ -264,8 +264,9 @@ def configurar_observabilidade(app: FastAPI, configuracoes) -> None:
 
     Ordem deliberada:
       1. Sentry primeiro — captura erros que possam ocorrer durante a inicialização
-      """
+    """
     from app import __version__
+
     logger.info("observabilidade_inicializando", ambiente=configuracoes.ambiente)
 
     _configurar_sentry(

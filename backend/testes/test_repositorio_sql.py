@@ -76,7 +76,11 @@ def _popular_banco(session: Session) -> None:
             telefone="(41) 99999-9999",
             github="https://github.com/teste",
             linkedin="https://linkedin.com/in/teste",
-            descricao={"pt": "Descrição PT", "en": "Description EN", "es": "Descripción ES"},
+            descricao={
+                "pt": "Descrição PT",
+                "en": "Description EN",
+                "es": "Descripción ES",
+            },
             disponibilidade={"pt": "Remoto", "en": "Remote", "es": "Remoto"},
         )
     )
@@ -86,7 +90,11 @@ def _popular_banco(session: Session) -> None:
             id="proj-test-1",
             nome="Projeto Teste",
             descricao_curta={"pt": "Curta PT", "en": "Short EN", "es": "Corta ES"},
-            descricao_completa={"pt": "Completa PT", "en": "Full EN", "es": "Completa ES"},
+            descricao_completa={
+                "pt": "Completa PT",
+                "en": "Full EN",
+                "es": "Completa ES",
+            },
             tecnologias=["Python", "FastAPI"],
             funcionalidades=["Feature A", "Feature B"],
             aprendizados=["Aprendizado A"],
@@ -105,7 +113,11 @@ def _popular_banco(session: Session) -> None:
             localizacao="Remoto",
             data_inicio=date(2024, 1, 1),
             data_fim=None,
-            descricao={"pt": "Descrição PT", "en": "Description EN", "es": "Descripción ES"},
+            descricao={
+                "pt": "Descrição PT",
+                "en": "Description EN",
+                "es": "Descripción ES",
+            },
             tecnologias=["Python", "FastAPI"],
             atual=True,
         )
