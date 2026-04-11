@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/en/2.0.0/).
 
 ---
 
+## [1.3.1] - 2026-04-11
+
+### 🔒 Security
+
+- ✅ **Anti-Spoofing Hardening**: Implemented `TRUSTED_PROXY_DEPTH` validation for `X-Forwarded-For` headers, preventing IP spoofing in rate-limiting bypass attempts.
+- ✅ **PII Leak Protection**: Automated masking of sender email addresses in structured logs to ensure GDPR/LGPD compliance.
+- ✅ **Infrastructure Hardening**: 
+    - Moved hardcoded credentials in `docker-compose.yml` (PostgreSQL/Grafana) to mandatory environment variables.
+    - Restricted CORS allowed methods to `GET` and `POST` only.
+    - Fixed Swagger UI loading by exempting documentation paths from strict Content-Security-Policy.
+    - Removed deprecated and potentially insecure `X-XSS-Protection` header.
+
+### 🔄 Modified
+
+- ✅ **Architectural Clean-up**: 
+    - Refactored redundant dependency names (`obter_obter_*` -> `dep_*`) for better readability.
+    - Centralized application versioning and unified codebase language (removed Spanish/Portuguese inconsistencies).
+    - Optimized SQL repository by removing redundant `json.loads` calls on every request.
+- ✅ **Observability**: Fixed a resource leak in OpenTelemetry exporters that occurred during test execution.
+
+### 🐛 Fixed
+
+- ✅ **Frontend Resilience**: Added explicit handling for 429 (Rate Limit) and 400 (Duplicate) status codes in the contact form, providing clearer user feedback.
+- ✅ **Race Condition Guard**: Added explicit warnings for in-memory idempotency when running multi-worker environments without Redis.
+
+---
+
 ## [1.3.0] - 2026-04-04
 
 ### ✅ Added
@@ -139,6 +166,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/en/2.0.0/).
 
 ---
 
+[1.3.1]: https://github.com/Argenis1412/portfolio/releases/tag/v1.3.1
 [1.3.0]: https://github.com/Argenis1412/portfolio/releases/tag/v1.3.0
 [1.2.0]: https://github.com/Argenis1412/portfolio/releases/tag/v1.2.0
 [1.1.0]: https://github.com/Argenis1412/portfolio/releases/tag/v1.1.0

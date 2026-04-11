@@ -9,11 +9,15 @@ from app.configuracao import configuracoes
 import hashlib
 
 
+TRUSTED_PROXY_DEPTH = 1
+
 def get_client_ip(request: Request) -> str:
-    """Returns the real client IP, preferring trusted proxy headers."""
+    """Returns the real client IP, only trusting the N-th hop from the right."""
     forwarded_for = request.headers.get("x-forwarded-for")
     if forwarded_for:
-        return forwarded_for.split(",")[-1].strip()
+        ips = [ip.strip() for ip in forwarded_for.split(",")]
+        trusted_index = max(0, len(ips) - TRUSTED_PROXY_DEPTH - 1)
+        return ips[trusted_index]
 
     real_ip = request.headers.get("x-real-ip")
     if real_ip:

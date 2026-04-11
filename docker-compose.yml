@@ -27,7 +27,7 @@ services:
       - "8000:8000"
     environment:
       - AMBIENTE=desenvolvimento
-      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-portafolio}:${POSTGRES_PASSWORD:-senha_segura_aqui}@db:5432/${POSTGRES_DB:-portafolio_db}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-portafolio}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:-portafolio_db}
       - REDIS_URL=redis://redis:6379/0
     # volumes:
       # - ./backend:/app  # Comentado para produção (segurança) - Descomente para desenvolvimento
@@ -76,7 +76,7 @@ services:
     restart: unless-stopped
     environment:
       - POSTGRES_USER=${POSTGRES_USER:-portafolio}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-senha_segura_aqui}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       - POSTGRES_DB=${POSTGRES_DB:-portafolio_db}
     ports:
       - "5432:5432"
