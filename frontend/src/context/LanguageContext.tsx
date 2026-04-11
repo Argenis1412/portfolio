@@ -7,7 +7,7 @@ export type Language = 'pt' | 'en' | 'es';
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: string) => string;
+  t: (key: string, params?: Record<string, any>) => string;
 }
 
 // --- Carga de traducciones desde archivos JSON ---
@@ -48,7 +48,15 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     document.documentElement.lang = language;
   }, [language]);
 
-  const t = (key: string): string => translations[language][key] ?? key;
+  const t = (key: string, params?: Record<string, any>): string => {
+    let text = translations[language][key] ?? key;
+    if (params) {
+      Object.entries(params).forEach(([k, v]) => {
+        text = text.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));
+      });
+    }
+    return text;
+  };
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>

@@ -52,6 +52,21 @@ vi.stubGlobal(
       return mockJsonResponse({ formacoes: [], total: 0 });
     }
 
+    if (url.includes('/api/v1/metrics/summary')) {
+      return mockJsonResponse({
+        p95_ms: 44,
+        p95_status: 'healthy',
+        requests_24h: 1024,
+        error_rate: 0.013,
+        error_rate_pct: '1.30%',
+        error_rate_status: 'stable',
+        system_status: 'operational',
+        uptime: '2h 14m',
+        window: 'last_24h',
+        timestamp: new Date().toISOString(),
+      });
+    }
+
     // Default: explicit failure (helps detect unexpected network calls)
     return mockJsonResponse({ message: `Unhandled fetch: ${url}` }, 500);
   })

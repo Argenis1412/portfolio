@@ -47,7 +47,7 @@ export default function Projects() {
     return (
       <section id="projects" className="py-24 max-w-6xl mx-auto px-4 text-center">
         <h2 className="text-3xl font-bold mb-8 text-app-text">{t('nav.projects')}</h2>
-        <p className="text-app-muted">No projects found.</p>
+        <p className="text-app-muted">{t('projects.empty')}</p>
       </section>
     );
   }
@@ -111,13 +111,13 @@ export default function Projects() {
                 {project.repositorio && (
                   <a href={project.repositorio} target="_blank" rel="noopener noreferrer" className="flex-1 bg-app-surface border border-app-border text-slate-700 dark:text-slate-200 hover:border-app-primary hover:text-app-primary transition-colors flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold shadow-sm">
                     <Github className="w-5 h-5" />
-                    Source Code
+                    {t('projects.source_code')}
                   </a>
                 )}
                 {project.demo && (
                   <a href={project.demo} target="_blank" rel="noopener noreferrer" className="flex-1 bg-app-primary hover:bg-app-primary-hover text-white transition-colors flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold premium-shadow">
                     <ExternalLink className="w-5 h-5" />
-                    Live Demo
+                    {t('projects.live_demo')}
                   </a>
                 )}
               </div>

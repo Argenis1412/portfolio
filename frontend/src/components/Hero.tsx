@@ -1,9 +1,45 @@
 import { motion } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { scrollToSection } from '../utils/scrollToSection';
+import { useLiveMetrics, type SystemStatus } from '../hooks/useLiveMetrics';
+
+// ─── LiveStatusBadge ────────────────────────────────────────────────────────
+
+const BADGE_CONFIG: Record<
+  SystemStatus,
+  { dot: string; text: string; i18nKey: string }
+> = {
+  loading:     { dot: 'bg-app-muted animate-pulse',   text: 'text-app-muted',   i18nKey: 'metrics.status.loading' },
+  operational: { dot: 'bg-emerald-500 animate-pulse', text: 'text-emerald-500', i18nKey: 'metrics.api_live' },
+  degraded:    { dot: 'bg-amber-400',                 text: 'text-amber-400',   i18nKey: 'metrics.status.degraded' },
+  down:        { dot: 'bg-red-500',                   text: 'text-red-500',     i18nKey: 'metrics.status.down' },
+};
+
+function LiveStatusBadge({ status, latencyMs }: { status: SystemStatus; latencyMs?: number }) {
+  const { t } = useLanguage();
+  const cfg = BADGE_CONFIG[status];
+  return (
+    <span
+      title={t('metrics.latency_tooltip')}
+      className="inline-flex items-center gap-1.5 text-xs font-mono px-2.5 py-1 rounded-full border border-app-border bg-app-surface/60 backdrop-blur-sm select-none"
+    >
+      <span className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
+      <span className={cfg.text}>
+        {t(cfg.i18nKey)}
+        {status === 'operational' && latencyMs !== undefined && (
+          <span className="text-app-muted ml-1">· {latencyMs}ms</span>
+        )}
+        {status === 'degraded' && latencyMs !== undefined && (
+          <span className="text-app-muted ml-1">· {latencyMs}ms</span>
+        )}
+      </span>
+    </span>
+  );
+}
 
 export default function Hero() {
   const { t } = useLanguage();
+  const { status, data } = useLiveMetrics();
 
   return (
     <section id="hero" className="pt-20 pb-12 md:pt-28 md:pb-20 px-4 max-w-6xl mx-auto relative overflow-hidden min-h-screen flex items-center">
@@ -23,10 +59,19 @@ export default function Hero() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, amount: 0.1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6 text-app-text"
+            className="text-4xl md:text-6xl font-extrabold tracking-tight mb-3 text-app-text"
           >
             Backend Developer
           </motion.h1>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="mb-5"
+          >
+            <LiveStatusBadge status={status} latencyMs={data?.p95_ms} />
+          </motion.div>
           <motion.p 
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}

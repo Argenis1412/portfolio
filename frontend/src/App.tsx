@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
+import LiveMetricsBento from './components/LiveMetricsBento';
 import { ThemeProvider } from './context/ThemeContext';
 import ServerWakeupNotice from './components/ServerWakeupNotice';
 
@@ -18,6 +19,7 @@ function App() {
         <Navbar />
         <main className="flex-grow">
           <Hero />
+          <LiveMetricsBento />
           
           <Suspense fallback={<div className="h-24 w-full flex items-center justify-center text-app-muted text-sm opacity-50 tracking-widest mt-12 animate-pulse">CARGANDO...</div>}>
             <Skills />

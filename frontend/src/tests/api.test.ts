@@ -74,8 +74,10 @@ describe('fetchAbout', () => {
   });
 
   it('lança erro quando a resposta não é OK', async () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockFetchError(404);
     await expect(fetchAbout()).rejects.toThrow(/API request failed: 404/);
+    spy.mockRestore();
   });
 
   it('chama a URL correta (/sobre)', async () => {
@@ -107,8 +109,10 @@ describe('fetchProjects', () => {
   });
 
   it('lança erro quando a resposta não é OK', async () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockFetchError(500);
     await expect(fetchProjects()).rejects.toThrow(/API request failed: 500/);
+    spy.mockRestore();
   });
 });
 
@@ -132,8 +136,10 @@ describe('fetchSkills', () => {
   });
 
   it('lança erro quando o servidor retorna erro', async () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockFetchError(503);
     await expect(fetchSkills()).rejects.toThrow(/API request failed: 503/);
+    spy.mockRestore();
   });
 });
 
@@ -167,8 +173,10 @@ describe('fetchExperience', () => {
   });
 
   it('lança erro quando a resposta não é OK', async () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockFetchError(500);
     await expect(fetchExperience()).rejects.toThrow(/API request failed: 500/);
+    spy.mockRestore();
   });
 });
 
@@ -200,7 +208,9 @@ describe('fetchFormacao', () => {
   });
 
   it('lança erro quando a resposta não é OK', async () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockFetchError(500);
     await expect(fetchFormacao()).rejects.toThrow(/API request failed: 500/);
+    spy.mockRestore();
   });
 });

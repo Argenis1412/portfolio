@@ -1,49 +1,69 @@
 import { useState, useEffect } from 'react';
-import { useIsFetching, useIsMutating } from '@tanstack/react-query';
 import { useLanguage } from '../context/LanguageContext';
-import { RefreshCw } from 'lucide-react';
+import { useLiveMetrics } from '../hooks/useLiveMetrics';
+import ErrorNotification from './ui/ErrorNotification';
+import { ApiError } from '../api';
 
-
-
+/**
+ * ServerWakeupNotice — driven by useLiveMetrics as the single source of truth.
+ *
+ * - 'loading': shows a spinner toast after 2.5s (cold-start UX)
+ * - 'down' / 'degraded': shows ErrorNotification with traceId + lastSuccessAt
+ * - 'operational': both notices disappear automatically
+ */
 export default function ServerWakeupNotice() {
-  const isFetching = useIsFetching();
-  const isMutating = useIsMutating();
-  const [showLoading, setShowLoading] = useState(false);
+  const { status, isLoading, isError, error, lastSuccessAt } = useLiveMetrics();
+  const [showSpinner, setShowSpinner] = useState(false);
   const { t } = useLanguage();
 
+  // Only show spinner if initial load takes more than 2.5s
   useEffect(() => {
-    if (isFetching === 0 && isMutating === 0) {
-      const t = setTimeout(() => setShowLoading(false), 0);
-      return () => clearTimeout(t);
+    if (!isLoading) {
+      setShowSpinner(false);
+      return;
     }
+    const timer = setTimeout(() => setShowSpinner(true), 2500);
+    return () => clearTimeout(timer);
+  }, [isLoading]);
 
-    // Mostrar toast solo si tarda más de 2.5s
-    const timeout = setTimeout(() => setShowLoading(true), 2500);
-    return () => {
-      clearTimeout(timeout);
-    };
-  }, [isFetching, isMutating]);
+  // Extract traceId from the error if it's an ApiError instance
+  const traceId =
+    isError && error instanceof ApiError ? error.traceId : undefined;
 
-  if (!showLoading) return null;
+  const errorVisible = status === 'down';
 
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      className="fixed bottom-6 right-6 bg-app-surface/95 backdrop-blur-md border border-app-primary/50 text-app-text p-4 rounded-xl shadow-[0_0_20px_rgba(212,163,115,0.2)] z-50 flex items-start gap-4 max-w-sm animate-in fade-in slide-in-from-bottom-5 duration-500"
-    >
-      <div className="w-5 h-5 border-2 border-app-primary border-t-transparent rounded-full animate-spin shrink-0 mt-0.5" />
-      <p className="text-sm font-medium leading-relaxed">
-        {t('server.wakeup.loading')}
-      </p>
-    </div>
+    <>
+      {/* Spinner toast — only during initial cold start > 2.5s */}
+      {showSpinner && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-6 right-6 bg-app-surface/95 backdrop-blur-md border border-app-primary/50 text-app-text p-4 rounded-xl shadow-[0_0_20px_rgba(212,163,115,0.2)] z-50 flex items-start gap-4 max-w-sm animate-in fade-in slide-in-from-bottom-5 duration-500"
+        >
+          <div className="w-5 h-5 border-2 border-app-primary border-t-transparent rounded-full animate-spin shrink-0 mt-0.5" />
+          <p className="text-sm font-medium leading-relaxed">
+            {t('server.wakeup.loading')}
+          </p>
+        </div>
+      )}
+
+      {/* Error notification — shown when status is 'down' */}
+      <ErrorNotification
+        visible={errorVisible}
+        traceId={traceId}
+        lastSuccessAt={lastSuccessAt}
+      />
+    </>
   );
 }
 
 /**
- * Componente separado para el estado de error de cold start.
- * Se usa en cada sección que tenga isError de React Query.
+ * Standalone error state for individual sections (isError from React Query).
+ * Unchanged — used by Skills, Projects etc. independently.
  */
+import { RefreshCw } from 'lucide-react';
+
 export function ServerWakeupError({ onRetry }: { onRetry?: () => void }) {
   const { t } = useLanguage();
 

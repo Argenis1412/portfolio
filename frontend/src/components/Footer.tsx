@@ -132,7 +132,7 @@ export default function Footer() {
           </a>
           <a href="https://github.com/Argenis1412/portfolio" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-app-muted hover:text-app-primary transition-colors px-4 py-1.5 bg-app-surface-hover rounded-full text-[10px] font-bold uppercase tracking-widest border border-app-border">
             <Code2 className="w-3 h-3" />
-            <span>Source Code</span>
+            <span>{t('projects.source_code')}</span>
           </a>
         </div>
         

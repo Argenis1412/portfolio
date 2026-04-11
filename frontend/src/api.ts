@@ -71,6 +71,21 @@ export const FormacaoSchema = z.object({
 
 export type Formacao = z.infer<typeof FormacaoSchema>;
 
+export const MetricsSummarySchema = z.object({
+  p95_ms: z.number().int(),
+  p95_status: z.enum(['healthy', 'degraded']),
+  requests_24h: z.number().int(),
+  error_rate: z.number(),
+  error_rate_pct: z.string(),
+  error_rate_status: z.enum(['stable', 'warning', 'investigating']),
+  system_status: z.enum(['operational', 'degraded', 'down']),
+  uptime: z.string(),
+  window: z.string(),
+  timestamp: z.string(),
+});
+
+export type MetricsSummary = z.infer<typeof MetricsSummarySchema>;
+
 export const AboutSchema = z.object({
   nome: z.string(),
   titulo: z.string(),
@@ -102,38 +117,53 @@ function buildApiUrl(path: string): string {
 
 export class ApiError extends Error {
   status: number;
-  constructor(status: number, message: string) {
+  traceId?: string;
+  constructor(status: number, message: string, traceId?: string) {
     super(message);
     this.status = status;
+    this.traceId = traceId;
     this.name = 'ApiError';
   }
 }
 
 async function apiGet<T>(path: string, schema: z.ZodSchema<T>): Promise<T> {
   const res = await fetch(buildApiUrl(path));
+
+  // Parse body first so we can extract trace_id from it on error
+  const rawData = await res.json().catch(() => null);
+
+  // Fallback chain: response header → body field → undefined
+  const traceId: string | undefined =
+    res.headers.get('x-trace-id') ??
+    (rawData as Record<string, unknown>)?.trace_id as string | undefined ??
+    undefined;
+
   if (!res.ok) {
-    throw new ApiError(res.status, `API request failed: ${res.status} ${res.statusText} (${path})`);
+    console.error('[API ERROR]', { traceId, status: res.status, endpoint: path });
+    throw new ApiError(
+      res.status,
+      `API request failed: ${res.status} ${res.statusText} (${path})`,
+      traceId,
+    );
   }
-  const rawData = await res.json();
-  
+
   // Validación con Zod
   const result = schema.safeParse(rawData);
-  
+
   if (!result.success) {
     console.error(`[Zod Error] Critical contract violation in ${path}:`, result.error.format());
     throw new Error(`Schema validation failed for ${path}`);
   }
 
-  // Si hubo un error pero Zod lo capturó (vía .catch()), result.success es true.
-  // Podríamos registrar un aviso aquí si quisiéramos ser ultra-estrictos en logs, 
-  // pero por ahora el .catch() silencia el error y devuelve el default.
-  
   return result.data;
 }
 
 // ===================================================
 // Funciones de Fetch (Consumidor Estricto y Resiliente)
 // ===================================================
+
+export const fetchMetricsSummary = (): Promise<MetricsSummary> =>
+  apiGet('/metrics/summary', MetricsSummarySchema);
 
 export const fetchAbout = (): Promise<About> =>
   apiGet<About>('/sobre', AboutSchema);
