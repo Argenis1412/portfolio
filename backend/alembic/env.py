@@ -27,7 +27,7 @@ from app.configuracao import configuracoes  # noqa: E402
 # access to the values within the .ini file in use.
 config = context.config
 
-# Sobrescrever a URL do banco com a das configurações da aplicación
+# Sobrescrever a URL do banco com a das configurações da aplicação
 config.set_main_option("sqlalchemy.url", configuracoes.database_url)
 
 # Interpret the config file for Python logging.
@@ -100,7 +100,7 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    # Detectar si la URL es asíncrona (como en Koyeb o local SQLite)
+    # Detectar se a URL é assíncrona (como no Koyeb ou local SQLite)
     url = config.get_main_option("sqlalchemy.url")
     is_async = "+aiosqlite" in url or "+asyncpg" in url
 
