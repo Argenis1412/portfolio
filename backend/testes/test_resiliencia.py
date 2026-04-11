@@ -187,6 +187,6 @@ def test_concurrent_idempotency_conflict(client):
             headers={"Idempotency-Key": key},
         )
         assert resp.status_code == 409
-        assert "already in progress" in resp.json()["detail"].lower()
+        assert "already in progress" in resp.json()["erro"]["mensagem"].lower()
     finally:
         store._cache.pop(key, None)

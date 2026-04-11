@@ -11,6 +11,7 @@ from typing import Any
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.excecoes import (
     ErroDominio,
@@ -29,6 +30,7 @@ def criar_resposta_erro(
     mensagem: str,
     status_code: int,
     detalhes: Any = None,
+    trace_id: str | None = None,
 ) -> JSONResponse:
     """
     Cria resposta JSON padronizada para erros.
@@ -51,6 +53,9 @@ def criar_resposta_erro(
 
     if detalhes:
         conteudo["erro"]["detalhes"] = detalhes
+
+    if trace_id:
+        conteudo["erro"]["trace_id"] = trace_id
 
     return JSONResponse(
         status_code=status_code,
@@ -83,6 +88,7 @@ async def handler_erro_dominio(
         codigo=exc.codigo,
         mensagem=exc.mensagem,
         status_code=status.HTTP_400_BAD_REQUEST,
+        trace_id=getattr(request.state, "request_id", None),
     )
 
 
@@ -111,6 +117,7 @@ async def handler_erro_validacao(
         codigo=exc.codigo,
         mensagem=exc.mensagem,
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        trace_id=getattr(request.state, "request_id", None),
     )
 
 
@@ -142,6 +149,7 @@ async def handler_erro_infraestrutura(
         codigo="ERRO_INTERNO",
         mensagem="Erro interno do servidor. Tente novamente mais tarde.",
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        trace_id=getattr(request.state, "request_id", None),
     )
 
 
@@ -170,6 +178,7 @@ async def handler_recurso_nao_encontrado(
         codigo=exc.codigo,
         mensagem=exc.mensagem,
         status_code=status.HTTP_404_NOT_FOUND,
+        trace_id=getattr(request.state, "request_id", None),
     )
 
 
@@ -211,6 +220,7 @@ async def handler_validacao_pydantic(
         mensagem="Dados de entrada inválidos",
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         detalhes=erros_formatados,
+        trace_id=getattr(request.state, "request_id", None),
     )
 
 
@@ -240,6 +250,7 @@ async def handler_generico(
         codigo="ERRO_INESPERADO",
         mensagem="Erro inesperado. A equipe foi notificada.",
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        trace_id=getattr(request.state, "request_id", None),
     )
 
 
@@ -260,6 +271,7 @@ async def handler_rate_limit(
         codigo="RATE_LIMIT_EXCEEDED",
         mensagem=f"Rate limit exceeded. {str(exc)}",
         status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+        trace_id=getattr(request.state, "request_id", None),
     )
 
 
@@ -280,6 +292,21 @@ async def handler_idempotencia(
         status_code=exc.record.status_code,
         content=exc.record.content,
         headers={"X-Cache-Idempotency": "HIT"},
+    )
+
+
+async def handler_http_starlette(
+    request: Request,
+    exc: StarletteHTTPException,
+) -> JSONResponse:
+    """
+    Trata exceções HTTP do Starlette (ex: 404 rota não encontrada).
+    """
+    return criar_resposta_erro(
+        codigo="ERRO_HTTP",
+        mensagem=str(exc.detail),
+        status_code=exc.status_code,
+        trace_id=getattr(request.state, "request_id", None),
     )
 
 
@@ -305,6 +332,7 @@ def registrar_handlers_excecao(app: FastAPI) -> None:
     app.add_exception_handler(RequestValidationError, handler_validacao_pydantic)  # type: ignore
     app.add_exception_handler(IdempotencyException, handler_idempotencia)  # type: ignore
     app.add_exception_handler(RateLimitExceeded, handler_rate_limit)  # type: ignore
+    app.add_exception_handler(StarletteHTTPException, handler_http_starlette)  # type: ignore
     app.add_exception_handler(Exception, handler_generico)  # type: ignore
 
     logger.info("Handlers de exceção registrados com sucesso")

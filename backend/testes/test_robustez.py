@@ -139,7 +139,7 @@ def test_idempotencia_em_progresso(client):
     try:
         resp = client.post("/api/v1/contato", json=payload, headers=headers)
         assert resp.status_code == 409
-        assert "already in progress" in resp.json()["detail"].lower()
+        assert "already in progress" in resp.json()["erro"]["mensagem"].lower()
     finally:
         store._cache.pop("progress-key-456", None)
 

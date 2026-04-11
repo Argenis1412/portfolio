@@ -50,3 +50,14 @@ class RespostaSaude(BaseModel):
         default=None,
         description="Detalhes sobre o status dos componentes",
     )
+
+
+class ResumoMetricas(BaseModel):
+    """
+    Schema simplificado para dashboard de evidência no frontend.
+    """
+
+    p95_ms: float = Field(..., examples=[42.5], description="Latência P95 observada")
+    requisicoes_24h: int = Field(..., examples=[1250], description="Total de requisições nas últimas 24h")
+    taxa_erro: float = Field(..., examples=[0.01], description="Taxa de erro (0.0 a 1.0)")
+    uptime_segundos: int = Field(..., examples=[86400], description="Uptime do servidor")

@@ -8,10 +8,11 @@ Adiciona:
 - Headers customizados de resposta
 """
 
-import time
-import base64
-import hmac
+import json
 import uuid
+import hmac
+import base64
+import time
 from typing import Callable
 
 import structlog
@@ -223,3 +224,55 @@ class MetricsAccessMiddleware(BaseHTTPMiddleware):
             status_code=401,
             headers={"WWW-Authenticate": 'Basic realm="metrics"'},
         )
+
+
+class ChaosMonkeyMiddleware(BaseHTTPMiddleware):
+    """
+    Middleware para simular cenários de erro e resiliência.
+    Ativado via header 'X-Debug-Mode'.
+    """
+
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
+        # Simular Rate Limit (429)
+        if request.headers.get("X-Debug-Mode") == "simulate-429":
+            logger.warning(
+                "chaos_monkey_triggered",
+                simulation="rate_limit_429",
+                path=request.url.path,
+            )
+            return Response(
+                status_code=429,
+                content=json.dumps(
+                    {
+                        "erro": {
+                            "codigo": "RATE_LIMIT_EXCEEDED",
+                            "mensagem": "Chaos Monkey: Simulated rate limit exceeded",
+                            "detalhes": {"retry_after": 30},
+                        }
+                    }
+                ),
+                media_type="application/json",
+                headers={"Retry-After": "30"},
+            )
+
+        # Simular Erro Interno (500)
+        if request.headers.get("X-Debug-Mode") == "simulate-500":
+            logger.error(
+                "chaos_monkey_triggered",
+                simulation="internal_error_500",
+                path=request.url.path,
+            )
+            return Response(
+                status_code=500,
+                content=json.dumps(
+                    {
+                        "erro": {
+                            "codigo": "ERRO_INESPERADO",
+                            "mensagem": "Chaos Monkey: Simulated internal server error",
+                        }
+                    }
+                ),
+                media_type="application/json",
+            )
+
+        return await call_next(request)

@@ -22,6 +22,7 @@ from app.controladores import roteador_saude
 from app.controladores.v1 import roteador_v1
 from app.core.middleware import (
     MiddlewareRequisicao,
+    ChaosMonkeyMiddleware,
     MetricsAccessMiddleware,
     SegurancaHeadersMiddleware,
 )
@@ -183,6 +184,7 @@ def _configurar_middleware(aplicacao: FastAPI) -> None:
     aplicacao.add_middleware(MiddlewareRequisicao)
 
     # 1.5. Protect the /metrics endpoint in production
+    aplicacao.add_middleware(ChaosMonkeyMiddleware)
     aplicacao.add_middleware(MetricsAccessMiddleware)
 
     # 2. GZip compression (saves bandwidth, only for responses > 1KB)
