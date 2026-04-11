@@ -14,7 +14,6 @@ from typing import Annotated
 from fastapi import Response, Request, Depends, APIRouter
 import time
 import random
-import os
 from pathlib import Path
 from datetime import datetime, UTC
 from prometheus_client import REGISTRY

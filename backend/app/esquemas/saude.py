@@ -58,11 +58,25 @@ class ResumoMetricas(BaseModel):
     """
 
     p95_ms: float = Field(..., examples=[43.0], description="Latência P95 observada")
-    p95_status: str = Field(..., examples=["healthy"], description="Status semântico da latência")
-    requests_24h: int = Field(..., examples=[987], description="Solicitações totais (24h)")
-    error_rate: float = Field(..., examples=[0.0131], description="Taxa de erro decimal")
-    error_rate_pct: str = Field(..., examples=["1.31%"], description="Taxa de erro formatada")
-    error_rate_status: str = Field(..., examples=["stable"], description="Status semântico da taxa de erro")
-    system_status: str = Field(..., examples=["operational"], description="Estado geral do sistema")
-    uptime: str = Field(..., examples=["2h 14m"], description="Tempo de atividade formatado")
+    p95_status: str = Field(
+        ..., examples=["healthy"], description="Status semântico da latência"
+    )
+    requests_24h: int = Field(
+        ..., examples=[987], description="Solicitações totais (24h)"
+    )
+    error_rate: float = Field(
+        ..., examples=[0.0131], description="Taxa de erro decimal"
+    )
+    error_rate_pct: str = Field(
+        ..., examples=["1.31%"], description="Taxa de erro formatada"
+    )
+    error_rate_status: str = Field(
+        ..., examples=["stable"], description="Status semântico da taxa de erro"
+    )
+    system_status: str = Field(
+        ..., examples=["operational"], description="Estado geral do sistema"
+    )
+    uptime: str = Field(
+        ..., examples=["2h 14m"], description="Tempo de atividade formatado"
+    )
     timestamp: str = Field(..., description="ISO 8601 timestamp da leitura")
