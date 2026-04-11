@@ -60,14 +60,14 @@ except ValueError:
 
 
 def _formatar_uptime(segundos: int) -> str:
-    """Converte segundos em formato legível (ex: 2h 14m)."""
+    """Converte segundos em formato legível e menos ruidoso (ex: 2h 14m)."""
     horas = segundos // 3600
     minutos = (segundos % 3600) // 60
     if horas > 0:
         return f"{horas}h {minutos}m"
     if minutos > 0:
-        return f"{minutos}m {segundos % 60}s"
-    return f"{segundos}s"
+        return f"{minutos}m"
+    return "just started"
 
 
 @roteador.get(
@@ -78,8 +78,7 @@ def _formatar_uptime(segundos: int) -> str:
 )
 async def obter_resumo_metricas(response: Response) -> ResumoMetricas:
     """
-    Retorna métricas consolidadas para o dashboard.
-    Tenta ler do Prometheus REGISTRY, senão retorna valores calculados 'vivos'.
+    Retorna métricas consolidadas para o dashboard con foco en UX profesional.
     """
     # 1. Cache para evitar spam de polling
     response.headers["Cache-Control"] = "public, max-age=15"
@@ -112,7 +111,7 @@ async def obter_resumo_metricas(response: Response) -> ResumoMetricas:
         pass
 
     return ResumoMetricas(
-        p95_ms=round(p95, 1),
+        p95_ms=int(p95),  # Menos ruido visual, int es suficiente para ms
         p95_status=p95_status,
         requests_24h=requests,
         error_rate=round(error_rate, 4),
@@ -120,6 +119,7 @@ async def obter_resumo_metricas(response: Response) -> ResumoMetricas:
         error_rate_status=error_status,
         system_status=system_status,
         uptime=_formatar_uptime(uptime_segundos),
+        window="last_24h",
         timestamp=datetime.now(UTC).isoformat(),
     )
 

@@ -45,8 +45,10 @@ async def test_metrics_summary():
         assert "error_rate_status" in data
         assert "system_status" in data
         assert "uptime" in data
+        assert "window" in data
         assert "timestamp" in data
         assert "%" in data["error_rate_pct"]
+        assert data["window"] == "last_24h"
         assert data["system_status"] == "operational"
 
 
