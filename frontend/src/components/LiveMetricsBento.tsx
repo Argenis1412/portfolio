@@ -133,18 +133,18 @@ export default function LiveMetricsBento() {
   // Rolling window of P95 samples for the sparkline.
   // Cold start: pre-fill all slots with the first value → no empty/jagged start.
   const [sparkPoints, setSparkPoints] = useState<number[]>([]);
+  const [prevP95, setPrevP95] = useState<number | undefined>(data?.p95_ms);
 
-  useEffect(() => {
-    if (data?.p95_ms === undefined) return;
-    const v = data.p95_ms;
-
-    setSparkPoints(prev => {
-      if (prev.length === 0) {
-        return Array(SPARKLINE_POINTS).fill(v);
-      }
-      return [...prev.slice(-(SPARKLINE_POINTS - 1)), v];
-    });
-  }, [data?.p95_ms]);
+  if (data?.p95_ms !== prevP95) {
+    setPrevP95(data?.p95_ms);
+    if (data?.p95_ms !== undefined) {
+      const v = data.p95_ms;
+      setSparkPoints(prev => {
+        if (prev.length === 0) return Array(SPARKLINE_POINTS).fill(v);
+        return [...prev.slice(-(SPARKLINE_POINTS - 1)), v];
+      });
+    }
+  }
 
   const statusCfg = STATUS_CONFIG[status];
   const sparkColor =
