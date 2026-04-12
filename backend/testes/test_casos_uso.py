@@ -139,9 +139,9 @@ async def test_enviar_contato_suspeito_recebe_marcacao_visivel(
     )
 
     mensagem_enviada = email_adaptador_mock.enviar_mensagem.call_args.args[0]
-    assert mensagem_enviada.assunto.startswith("[POSSIBLE SPAM]")
-    assert "SECURITY ALERT: POSSIBLE SPAM" in mensagem_enviada.mensagem
-    assert "Spam score: 45/100" in mensagem_enviada.mensagem
+    assert mensagem_enviada.assunto.startswith("[!]")
+    assert "SYSTEM NOTE: This message matched some automated filters." in mensagem_enviada.mensagem
+    assert "Confidence level: 45/100" in mensagem_enviada.mensagem
 
 
 @pytest.mark.asyncio
