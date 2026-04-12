@@ -88,6 +88,14 @@ def obter_enviar_contato_use_case() -> EnviarContatoUseCase:
         from app.adaptadores.email_adaptador import ConsoleEmailAdaptador
 
         email_adaptador = ConsoleEmailAdaptador()
+    elif configuracoes.resend_api_key.strip():
+        from app.adaptadores.email_adaptador import ResendEmailAdaptador
+
+        email_adaptador = ResendEmailAdaptador(
+            configuracoes.resend_api_key,
+            configuracoes.resend_from_email,
+            configuracoes.resend_to_email,
+        )
     else:
         email_adaptador = FormspreeEmailAdaptador(
             configuracoes.formspree_url,

@@ -6,8 +6,8 @@
  * Tile 3: Uptime       — backend-calculated string, refreshes on poll
  * Tile 4: System Status — derived from useLiveMetrics, pulse animation
  */
-import { useState } from 'react';
-import { motion, type Variants } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { m, type Variants } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { useLiveMetrics, type SystemStatus } from '../hooks/useLiveMetrics';
 
@@ -99,7 +99,7 @@ function Tile({
   children: React.ReactNode;
 }) {
   return (
-    <motion.div
+    <m.div
       custom={index}
       variants={tileVariants}
       initial="hidden"
@@ -110,7 +110,7 @@ function Tile({
         {label}
       </span>
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -129,6 +129,12 @@ function TileSkeleton({ index }: { index: number }) {
 export default function LiveMetricsBento() {
   const { data, status, isLoading } = useLiveMetrics();
   const { t } = useLanguage();
+
+  const [currentTime, setCurrentTime] = useState(Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Rolling window of P95 samples for the sparkline.
   // Cold start: pre-fill all slots with the first value → no empty/jagged start.
@@ -219,8 +225,8 @@ export default function LiveMetricsBento() {
               {t(statusCfg.i18nKey)}
             </span>
           </div>
-          <span className="text-xs text-app-muted font-mono truncate" title={data.timestamp}>
-            {new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+          <span className="text-xs text-app-muted font-mono truncate" title={new Date(currentTime).toISOString()}>
+            {new Date(currentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
           </span>
         </Tile>
 

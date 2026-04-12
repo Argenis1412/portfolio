@@ -51,6 +51,18 @@ class Configuracoes(BaseSettings):
         default="",
         alias="FORMSPREE_FORM_ID",
     )
+    resend_api_key: str = Field(
+        default="",
+        alias="RESEND_API_KEY",
+    )
+    resend_from_email: str = Field(
+        default="onboarding@resend.dev",
+        alias="RESEND_FROM_EMAIL",
+    )
+    resend_to_email: str = Field(
+        default="",
+        alias="RESEND_TO_EMAIL",
+    )
     database_url: str = Field(
         default="sqlite+aiosqlite:///./portfolio.db",
         alias="DATABASE_URL",

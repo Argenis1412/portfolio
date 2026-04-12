@@ -144,8 +144,8 @@ export default function Contact() {
           className="glass rounded-2xl p-8 md:p-12 border border-app-border hover:border-app-primary/50 hover:shadow-[0_0_40px_rgba(212,163,115,0.15)] transition-all duration-500"
         >
           <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-8">
-            <input type="text" name="website" id="hp_website" style={{ position: 'absolute', left: '-5000px' }} tabIndex={-1} autoComplete="off" />
-            <input type="text" name="fax" id="hp_fax" style={{ position: 'absolute', left: '-5000px' }} tabIndex={-1} autoComplete="off" />
+            <input type="text" name="website" id="hp_website" aria-label="Website" style={{ position: 'absolute', left: '-5000px' }} tabIndex={-1} autoComplete="off" />
+            <input type="text" name="fax" id="hp_fax" aria-label="Fax" style={{ position: 'absolute', left: '-5000px' }} tabIndex={-1} autoComplete="off" />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="flex flex-col gap-2.5">
@@ -223,9 +223,9 @@ export default function Contact() {
               <motion.button 
                 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                 type="submit" disabled={status === 'loading'}
-                className="bg-app-primary hover:bg-app-primary-hover text-white font-bold py-[18px] px-8 rounded-xl transition-all duration-300 shadow-lg shadow-app-primary/20 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-xs flex items-center justify-center gap-3"
+                className="bg-app-primary hover:bg-app-primary-hover text-app-primary-text font-bold py-[18px] px-8 rounded-xl transition-all duration-300 shadow-lg shadow-app-primary/20 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-xs flex items-center justify-center gap-3"
               >
-                {status === 'loading' ? <Loader2 className="animate-spin h-4 w-4 text-white" /> : <Mail className="w-4 h-4" />}
+                {status === 'loading' ? <Loader2 className="animate-spin h-4 w-4 text-app-primary-text" /> : <Mail className="w-4 h-4" />}
                 {status === 'loading' ? t('contact.sending') : t('contact.send')}
               </motion.button>
               <motion.button 

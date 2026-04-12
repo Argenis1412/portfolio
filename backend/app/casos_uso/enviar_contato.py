@@ -78,17 +78,17 @@ class EnviarContatoUseCase:
             assunto.strip() if assunto and assunto.strip() else "Contact via Portfolio"
         )
 
-        # Prefix subject with spam marker when suspicious
+        # Prefix subject with indicator when suspicious
         assunto_final = (
-            f"[POSSIBLE SPAM] {assunto_base}" if is_suspicious else assunto_base
+            f"[!] {assunto_base}" if is_suspicious else assunto_base
         )
 
         if is_suspicious:
             warning_lines = [
-                "SECURITY ALERT: POSSIBLE SPAM",
-                f"Spam score: {spam_score if spam_score is not None else 'unknown'}/100",
-                f"Sender email: {email}",
-                "Review this message before replying.",
+                "SYSTEM NOTE: This message matched some automated filters.",
+                f"Confidence level: {spam_score if spam_score is not None else 'unknown'}/100",
+                f"Source email: {email}",
+                "--------------------------------------------------",
                 "",
                 mensagem,
             ]

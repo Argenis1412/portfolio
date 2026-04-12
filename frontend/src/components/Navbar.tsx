@@ -82,6 +82,7 @@ export default function Navbar() {
               )}
             </button>
             <select
+              aria-label="Select Language"
               value={language}
               onChange={(e) => setLanguage(e.target.value as 'pt' | 'en' | 'es')}
               className="bg-app-surface border border-app-border text-sm rounded-lg focus:ring-app-primary focus:border-app-primary block p-2 transition-smooth shadow-sm text-app-text"
