@@ -110,10 +110,10 @@ const Hero = React.memo(() => {
           transition={{ duration: 1 }}
           className="order-1 md:order-2 flex justify-center md:justify-end relative mr-0 md:mr-4"
         >
-          {/* Intense bronze glow background */}
+          {/* Intense bronze glow background - Static for performance (removes pulse/blur overhead) */}
           <div 
             style={{ width: '430px', height: '430px' }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-app-primary/20 rounded-full blur-[70px] -z-10 animate-pulse"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-app-primary/15 rounded-full blur-[80px] -z-10"
           ></div>
           
           <div className="relative w-[276px] h-[276px] md:w-[368px] md:h-[368px] rounded-full p-1.5 bg-gradient-to-tr from-app-primary to-transparent shadow-[0_0_30px_rgba(212,163,115,0.3)]">

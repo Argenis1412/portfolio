@@ -43,9 +43,8 @@ h1, h2, h3 {
 
 /* ─── Glass cards ──────────────────────────────────────────── */
 .glass {
-  @apply bg-app-surface border border-app-border backdrop-blur-md transition-all duration-300 ease-in-out;
+  @apply bg-app-surface border border-app-border backdrop-blur-sm transition-all duration-300 ease-in-out;
   box-shadow: 0 2px 20px -2px rgba(120, 85, 40, 0.10), 0 1px 4px rgba(0,0,0,0.04);
-  will-change: transform, opacity, background-color, border-color;
 }
 
 .dark .glass {

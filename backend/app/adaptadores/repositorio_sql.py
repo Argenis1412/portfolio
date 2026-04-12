@@ -63,7 +63,7 @@ class RepositorioSQL(RepositorioPortfolio):
         """
         try:
             async with self.session_factory() as session:
-                await session.execute(text("SELECT 1"))
+                await session.exec(text("SELECT 1"))
             return {"status": "ok", "detalhes": "Banco de dados SQL conectado"}
         except Exception as e:
             return {"status": "erro", "detalhes": f"Falha na conexão SQL: {str(e)}"}

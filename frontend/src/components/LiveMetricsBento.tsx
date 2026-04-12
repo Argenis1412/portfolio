@@ -124,17 +124,28 @@ function TileSkeleton({ index }: { index: number }) {
   );
 }
 
+// ─── LiveClock ──────────────────────────────────────────────────────────────
+
+const LiveClock = React.memo(() => {
+  const [currentTime, setCurrentTime] = useState(Date.now());
+  
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <span className="text-xs text-app-muted font-mono truncate" title={new Date(currentTime).toISOString()}>
+      {new Date(currentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+    </span>
+  );
+});
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function LiveMetricsBento() {
   const { data, status, isLoading } = useLiveMetrics();
   const { t } = useLanguage();
-
-  const [currentTime, setCurrentTime] = useState(Date.now());
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(Date.now()), 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   // Rolling window of P95 samples for the sparkline.
   // Cold start: pre-fill all slots with the first value → no empty/jagged start.
@@ -225,9 +236,7 @@ export default function LiveMetricsBento() {
               {t(statusCfg.i18nKey)}
             </span>
           </div>
-          <span className="text-xs text-app-muted font-mono truncate" title={new Date(currentTime).toISOString()}>
-            {new Date(currentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-          </span>
+          <LiveClock />
         </Tile>
 
       </div>
@@ -248,3 +257,4 @@ export default function LiveMetricsBento() {
     </section>
   );
 }
+
