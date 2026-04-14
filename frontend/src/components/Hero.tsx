@@ -44,8 +44,8 @@ const Hero = React.memo(() => {
 
   return (
     <section id="hero" className="pt-20 pb-12 md:pt-28 md:pb-20 px-4 max-w-6xl mx-auto relative overflow-hidden min-h-screen flex items-center">
-      {/* Background decoration - very subtle copper glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-app-primary/5 rounded-full blur-[120px] -z-10"></div>
+      {/* Background decoration - subtle glow (reduced blur for mobile performance) */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-app-primary/5 rounded-full blur-[40px] md:blur-[120px] -z-10"></div>
       
       <m.div 
         initial={{ y: 10 }}
@@ -110,10 +110,10 @@ const Hero = React.memo(() => {
           transition={{ duration: 1 }}
           className="order-1 md:order-2 flex justify-center md:justify-end relative mr-0 md:mr-4"
         >
-          {/* Intense bronze glow background - Static for performance (removes pulse/blur overhead) */}
+          {/* Intense bronze glow background - Static for performance (reduced blur for mobile) */}
           <div 
             style={{ width: '430px', height: '430px' }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-app-primary/15 rounded-full blur-[80px] -z-10"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-app-primary/10 rounded-full blur-[30px] md:blur-[80px] -z-10"
           ></div>
           
           <div className="relative w-[276px] h-[276px] md:w-[368px] md:h-[368px] rounded-full p-1.5 bg-gradient-to-tr from-app-primary to-transparent shadow-[0_0_30px_rgba(212,163,115,0.3)]">
