@@ -57,9 +57,9 @@ def criar_aplicacao() -> FastAPI:
         title=configuracoes.nome_app,
         description=_obter_descricao_api(),
         version=__version__,
-        docs_url="/docs" if configuracoes.debug else None,
-        redoc_url="/redoc" if configuracoes.debug else None,
-        openapi_url="/openapi.json" if configuracoes.debug else None,
+        docs_url="/docs",
+        redoc_url="/redoc",
+        openapi_url="/openapi.json",
         openapi_tags=_obter_tags_openapi(),
         debug=configuracoes.debug,
     )
