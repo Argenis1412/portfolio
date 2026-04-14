@@ -1,12 +1,11 @@
 import React, { Suspense } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import LiveMetricsBento from './components/LiveMetricsBento';
 import { ThemeProvider } from './context/ThemeContext';
-import ServerWakeupNotice from './components/ServerWakeupNotice';
 import { LazyMotion, domAnimation } from 'framer-motion';
 
-// Lazy load below-the-fold components to reduce initial bundle size (FCP enhancement)
+const LiveMetricsBento = React.lazy(() => import('./components/LiveMetricsBento'));
+const ServerWakeupNotice = React.lazy(() => import('./components/ServerWakeupNotice'));
 const Skills = React.lazy(() => import('./components/Skills'));
 const Projects = React.lazy(() => import('./components/Projects'));
 const Experience = React.lazy(() => import('./components/Experience'));
@@ -21,9 +20,9 @@ function App() {
           <Navbar />
           <main className="flex-grow">
             <Hero />
-            <LiveMetricsBento />
             
             <Suspense fallback={<div className="h-24 w-full flex items-center justify-center text-app-muted text-sm opacity-50 tracking-widest mt-12 animate-pulse">CARGANDO...</div>}>
+              <LiveMetricsBento />
               <Skills />
               <Projects />
               <Experience />
