@@ -228,6 +228,16 @@ def _registrar_rotas(aplicacao: FastAPI) -> None:
     # Health check (sem prefixo, usado por probes)
     aplicacao.include_router(roteador_saude)
 
+    # Rota raiz para evitar 404 (Koyeb/Público)
+    @aplicacao.get("/", tags=["Health"])
+    async def root():
+        return {
+            "status": "ok",
+            "servico": configuracoes.nome_app,
+            "versao": __version__,
+            "docs": "/docs",
+        }
+
     # API v1 (recomendado)
     aplicacao.include_router(roteador_v1, prefix="/api")
 
