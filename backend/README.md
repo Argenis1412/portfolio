@@ -1,6 +1,6 @@
 # 🎯 Portfolio Backend API
 
-> **Live API Status:** [Healthy (JSON) →](https://selected-fionna-argenis1412-58caae17.koyeb.app/saude)
+> **Live API Status:** [Healthy (JSON) →](https://api.argenisbackend.com/saude)
 
 REST API built with **FastAPI** and **Clean Architecture** — engineered with a **language-agnostic core** so that the system remains portable, testable, and framework-independent.
 
@@ -105,8 +105,9 @@ python ./scripts/migrar_dados.py
 # Start the server
 python -m uvicorn app.principal:app --reload --port 8000
 ```
-- **Local Docs**: `http://localhost:8000/docs` (Only available in `desenvolvimento` mode)
-- **Production Status**: `https://selected-fionna-argenis1412-58caae17.koyeb.app/saude` (Swagger UI disabled for security)
+- **Production Docs**: `https://api.argenisbackend.com/docs` (Now enabled for showcase)
+- **Production Status**: `https://api.argenisbackend.com/saude` (Detailed health check)
+- **Production Health**: `https://api.argenisbackend.com/health` (Fast liveness check)
 
 ---
 

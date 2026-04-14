@@ -259,7 +259,7 @@ export default function LiveMetricsBento() {
       {/* Source link — one click verifies all tiles */}
       <div className="flex justify-end mt-2 pr-1">
         <a
-          href="https://selected-fionna-argenis1412-58caae17.koyeb.app/api/v1/metrics/summary"
+          href="https://api.argenisbackend.com/api/v1/metrics/summary"
           target="_blank"
           rel="noopener noreferrer"
           className="text-[11px] font-mono text-app-muted hover:text-app-primary transition-colors duration-200 flex items-center gap-1"
