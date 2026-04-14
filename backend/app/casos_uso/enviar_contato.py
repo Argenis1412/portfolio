@@ -80,14 +80,15 @@ class EnviarContatoUseCase:
 
         # Prefix subject with indicator when suspicious
         assunto_final = (
-            f"[!] {assunto_base}" if is_suspicious else assunto_base
+            f"[⚠ POSSÍVEL SPAM] {assunto_base}" if is_suspicious else assunto_base
         )
 
         if is_suspicious:
             warning_lines = [
-                "SYSTEM NOTE: This message matched some automated filters.",
-                f"Confidence level: {spam_score if spam_score is not None else 'unknown'}/100",
-                f"Source email: {email}",
+                "--- 🛡️ AVISO DE SEGURANÇA (FILTRO ANTI-SPAM) ---",
+                "Este e-mail foi classificado como suspeito pelos filtros automáticos.",
+                f"Nível de Risco: {spam_score if spam_score is not None else '?'}/100",
+                f"Remetente Original: {email}",
                 "--------------------------------------------------",
                 "",
                 mensagem,

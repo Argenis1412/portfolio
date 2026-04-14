@@ -77,25 +77,21 @@ def dep_formacao() -> ObterFormacaoUseCase:
 @lru_cache
 def obter_enviar_contato_use_case() -> EnviarContatoUseCase:
     """Retorna caso de uso para envio de contato."""
-    # Fallback para console em ambiente local se Formspree não estiver configurado
-    usar_console = (
-        configuracoes.ambiente == "local"
-        and not configuracoes.formspree_form_id.strip()
-    )
-
     email_adaptador: EmailAdaptador
-    if usar_console:
-        from app.adaptadores.email_adaptador import ConsoleEmailAdaptador
-
-        email_adaptador = ConsoleEmailAdaptador()
-    elif configuracoes.resend_api_key.strip():
+    
+    # Prioridade 1: Resend (Produção e profissional)
+    if configuracoes.resend_api_key.strip():
         from app.adaptadores.email_adaptador import ResendEmailAdaptador
-
         email_adaptador = ResendEmailAdaptador(
             configuracoes.resend_api_key,
             configuracoes.resend_from_email,
             configuracoes.resend_to_email,
         )
+    # Prioridade 2: Console (Desenvolvimento local)
+    elif configuracoes.ambiente == "local" and not configuracoes.formspree_form_id.strip():
+        from app.adaptadores.email_adaptador import ConsoleEmailAdaptador
+        email_adaptador = ConsoleEmailAdaptador()
+    # Prioridade 3: Formspree (Legado/Fallback)
     else:
         email_adaptador = FormspreeEmailAdaptador(
             configuracoes.formspree_url,

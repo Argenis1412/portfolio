@@ -158,7 +158,7 @@ class ResendEmailAdaptador(EmailAdaptador):
                         "Content-Type": "application/json",
                     },
                     json={
-                        "from": f"Portfolio <{self._from_email}>",
+                        "from": self._from_email if "<" in self._from_email else f"Portfolio <{self._from_email}>",
                         "to": self._to_email or self._from_email,
                         "subject": mensagem.assunto,
                         "reply_to": mensagem.email,
