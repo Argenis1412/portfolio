@@ -158,19 +158,25 @@ class ResendEmailAdaptador(EmailAdaptador):
                         "Content-Type": "application/json",
                     },
                     json={
-                        "from": self._from_email if "<" in self._from_email else f"Portfolio <{self._from_email}>",
+                        "from": self._from_email
+                        if "<" in self._from_email
+                        else f"Portfolio <{self._from_email}>",
                         "to": self._to_email or self._from_email,
                         "subject": mensagem.assunto,
                         "reply_to": mensagem.email,
                         "html": html_content,
                     },
                 )
-                
+
                 sucesso = resposta.status_code in (200, 201)
                 if sucesso:
                     logger.info("resend_envio_sucesso", id=resposta.json().get("id"))
                 else:
-                    logger.warning("resend_envio_falha", status=resposta.status_code, body=resposta.text)
+                    logger.warning(
+                        "resend_envio_falha",
+                        status=resposta.status_code,
+                        body=resposta.text,
+                    )
                 return sucesso
 
         except Exception as e:

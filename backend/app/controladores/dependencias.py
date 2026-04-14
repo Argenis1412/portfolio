@@ -78,18 +78,23 @@ def dep_formacao() -> ObterFormacaoUseCase:
 def obter_enviar_contato_use_case() -> EnviarContatoUseCase:
     """Retorna caso de uso para envio de contato."""
     email_adaptador: EmailAdaptador
-    
+
     # Prioridade 1: Resend (Produção e profissional)
     if configuracoes.resend_api_key.strip():
         from app.adaptadores.email_adaptador import ResendEmailAdaptador
+
         email_adaptador = ResendEmailAdaptador(
             configuracoes.resend_api_key,
             configuracoes.resend_from_email,
             configuracoes.resend_to_email,
         )
     # Prioridade 2: Console (Desenvolvimento local)
-    elif configuracoes.ambiente == "local" and not configuracoes.formspree_form_id.strip():
+    elif (
+        configuracoes.ambiente == "local"
+        and not configuracoes.formspree_form_id.strip()
+    ):
         from app.adaptadores.email_adaptador import ConsoleEmailAdaptador
+
         email_adaptador = ConsoleEmailAdaptador()
     # Prioridade 3: Formspree (Legado/Fallback)
     else:

@@ -9,12 +9,13 @@ from app.adaptadores.email_adaptador import ResendEmailAdaptador
 from app.entidades.mensagem import Mensagem
 from app.configuracao import configuracoes
 
+
 async def test_resend_connection():
     """
     Teste manual para verificar se o Resend está bem configurado.
     """
     print("\nIniciando teste do Resend...")
-    
+
     api_key = configuracoes.resend_api_key
     from_email = configuracoes.resend_from_email
     to_email = configuracoes.resend_to_email
@@ -28,12 +29,12 @@ async def test_resend_connection():
     print(f"Para (To): {to_email}")
 
     adaptador = ResendEmailAdaptador(api_key, from_email, to_email)
-    
+
     mensaje_prueba = Mensagem(
         nome="Argenis Test",
         email="test@example.com",
         assunto="Teste de Sistema - Resend Live",
-        mensagem="Se você recebeu isso, sua configuração do Resend e Cloudflare funciona perfeitamente!"
+        mensagem="Se você recebeu isso, sua configuração do Resend e Cloudflare funciona perfeitamente!",
     )
 
     print("Enviando e-mail de teste...")
@@ -43,6 +44,7 @@ async def test_resend_connection():
         print("SUCESSO! O e-mail foi enviado conforme o log do Resend.")
     else:
         print("FALHA: Não foi possível enviar o e-mail.")
+
 
 if __name__ == "__main__":
     # Garantir compatibilidade com Windows e Python 3.10+
