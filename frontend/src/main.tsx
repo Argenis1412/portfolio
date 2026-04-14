@@ -4,18 +4,12 @@ import App from './App.tsx'
 import './index.css'
 import { LanguageProvider } from './context/LanguageContext.tsx'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-// Deferred Sentry initialization to improve FCP/LCP
-const initSentry = async () => {
-  const Sentry = await import('@sentry/react');
-  Sentry.init({
-    dsn: import.meta.env.VITE_SENTRY_DSN || "",
-    sendDefaultPii: false,
-    tracesSampleRate: 0.1,
-  });
-};
+import * as Sentry from '@sentry/react'
 
-// Start initialization without blocking main thread
-initSentry().catch(console.error);
+Sentry.init({
+  dsn: import.meta.env.VITE_SENTRY_DSN || "",
+  sendDefaultPii: false,
+});
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,11 +29,17 @@ const queryClient = new QueryClient({
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <LanguageProvider>
-        <App />
-      </LanguageProvider>
-    </QueryClientProvider>
+    <Sentry.ErrorBoundary fallback={
+      <div className="flex h-screen w-full items-center justify-center bg-zinc-950 text-white">
+        <h2>Oops! Un error inesperado ocurrió en la aplicación.</h2>
+      </div>
+    }>
+      <QueryClientProvider client={queryClient}>
+        <LanguageProvider>
+          <App />
+        </LanguageProvider>
+      </QueryClientProvider>
+    </Sentry.ErrorBoundary>
   </React.StrictMode>,
 )
 

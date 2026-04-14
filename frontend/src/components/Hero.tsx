@@ -44,18 +44,18 @@ const Hero = React.memo(() => {
 
   return (
     <section id="hero" className="pt-20 pb-12 md:pt-28 md:pb-20 px-4 max-w-6xl mx-auto relative overflow-hidden min-h-screen flex items-center">
-      {/* Background decoration - subtle glow (reduced blur for mobile performance) */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-app-primary/5 rounded-full blur-[40px] md:blur-[120px] -z-10"></div>
+      {/* Background decoration - very subtle copper glow (Hidden on mobile for performance) */}
+      <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-app-primary/5 rounded-full blur-[120px] -z-10"></div>
       
       <m.div 
-        initial={{ y: 10 }}
+        initial={window.innerWidth > 768 ? { y: 10 } : false}
         animate={{ y: 0 }}
         transition={{ duration: 0.6 }}
         className="w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center"
       >
         <div className="text-center md:text-left order-2 md:order-1">
           <m.h1 
-            initial={{ opacity: 0.1, x: -10 }}
+            initial={window.innerWidth > 768 ? { opacity: 0.1, x: -10 } : { opacity: 1, x: 0 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
             className="text-4xl md:text-6xl font-extrabold tracking-tight mb-3 text-app-text"
@@ -63,7 +63,7 @@ const Hero = React.memo(() => {
             {t('hero.title')}
           </m.h1>
           <m.div
-            initial={{ opacity: 0, x: -20 }}
+            initial={window.innerWidth > 768 ? { opacity: 0, x: -20 } : { opacity: 1, x: 0 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, amount: 0.1 }}
             transition={{ duration: 0.6, delay: 0.3 }}
@@ -72,7 +72,7 @@ const Hero = React.memo(() => {
             <LiveStatusBadge status={status} latencyMs={data?.p95_ms} />
           </m.div>
           <m.p 
-            initial={{ opacity: 0, x: -20 }}
+            initial={window.innerWidth > 768 ? { opacity: 0, x: -20 } : { opacity: 1, x: 0 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, amount: 0.1 }}
             transition={{ duration: 0.8, delay: 0.4 }}
@@ -110,10 +110,10 @@ const Hero = React.memo(() => {
           transition={{ duration: 1 }}
           className="order-1 md:order-2 flex justify-center md:justify-end relative mr-0 md:mr-4"
         >
-          {/* Intense bronze glow background - Static for performance (reduced blur for mobile) */}
+          {/* Intense bronze glow background - Static for performance (Hidden on mobile) */}
           <div 
             style={{ width: '430px', height: '430px' }}
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-app-primary/10 rounded-full blur-[30px] md:blur-[80px] -z-10"
+            className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-app-primary/15 rounded-full blur-[80px] -z-10"
           ></div>
           
           <div className="relative w-[276px] h-[276px] md:w-[368px] md:h-[368px] rounded-full p-1.5 bg-gradient-to-tr from-app-primary to-transparent shadow-[0_0_30px_rgba(212,163,115,0.3)]">
