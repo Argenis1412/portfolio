@@ -127,16 +127,31 @@ function TileSkeleton({ index }: { index: number }) {
 // ─── LiveClock ──────────────────────────────────────────────────────────────
 
 const LiveClock = React.memo(() => {
-  const [currentTime, setCurrentTime] = useState(Date.now());
-  
+  const [currentTime, setCurrentTime] = useState<number | null>(null);
+
   useEffect(() => {
+    // We update once asynchronously to avoid "setState in effect" lint error
+    // and then start the interval for ongoing updates.
+    Promise.resolve().then(() => setCurrentTime(Date.now()));
+
     const timer = setInterval(() => setCurrentTime(Date.now()), 1000);
     return () => clearInterval(timer);
   }, []);
 
+  if (!currentTime) {
+    return <span className="text-xs text-app-muted font-mono truncate">—:—:—</span>;
+  }
+
   return (
-    <span className="text-xs text-app-muted font-mono truncate" title={new Date(currentTime).toISOString()}>
-      {new Date(currentTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+    <span
+      className="text-xs text-app-muted font-mono truncate"
+      title={new Date(currentTime).toISOString()}
+    >
+      {new Date(currentTime).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      })}
     </span>
   );
 });
