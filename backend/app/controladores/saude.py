@@ -29,6 +29,16 @@ async def verificar_liveness() -> dict:
     return {"status": "ok", "mensagem": "API alive"}
 
 
+@roteador.get("/health", summary="Alternative health check")
+async def health():
+    """Simple health check for monitoring tools."""
+    return {
+        "status": "ok",
+        "service": "portfolio",
+        "uptime": "running",
+    }
+
+
 @roteador.get(
     "/saude",
     response_model=RespostaSaude,
