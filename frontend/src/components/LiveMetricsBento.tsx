@@ -6,8 +6,8 @@
  * Tile 3: Uptime       — backend-calculated string, refreshes on poll
  * Tile 4: System Status — derived from useLiveMetrics, pulse animation
  */
-import { useState } from 'react';
-import { motion, type Variants } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { m, type Variants } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { useLiveMetrics, type SystemStatus } from '../hooks/useLiveMetrics';
 
@@ -99,7 +99,7 @@ function Tile({
   children: React.ReactNode;
 }) {
   return (
-    <motion.div
+    <m.div
       custom={index}
       variants={tileVariants}
       initial="hidden"
@@ -110,7 +110,7 @@ function Tile({
         {label}
       </span>
       {children}
-    </motion.div>
+    </m.div>
   );
 }
 
@@ -123,6 +123,38 @@ function TileSkeleton({ index }: { index: number }) {
     </Tile>
   );
 }
+
+// ─── LiveClock ──────────────────────────────────────────────────────────────
+
+const LiveClock = React.memo(() => {
+  const [currentTime, setCurrentTime] = useState<number | null>(null);
+
+  useEffect(() => {
+    // We update once asynchronously to avoid "setState in effect" lint error
+    // and then start the interval for ongoing updates.
+    Promise.resolve().then(() => setCurrentTime(Date.now()));
+
+    const timer = setInterval(() => setCurrentTime(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  if (!currentTime) {
+    return <span className="text-xs text-app-muted font-mono truncate">—:—:—</span>;
+  }
+
+  return (
+    <span
+      className="text-xs text-app-muted font-mono truncate"
+      title={new Date(currentTime).toISOString()}
+    >
+      {new Date(currentTime).toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      })}
+    </span>
+  );
+});
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
@@ -219,9 +251,7 @@ export default function LiveMetricsBento() {
               {t(statusCfg.i18nKey)}
             </span>
           </div>
-          <span className="text-xs text-app-muted font-mono truncate" title={data.timestamp}>
-            {new Date(data.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-          </span>
+          <LiveClock />
         </Tile>
 
       </div>
@@ -242,3 +272,4 @@ export default function LiveMetricsBento() {
     </section>
   );
 }
+

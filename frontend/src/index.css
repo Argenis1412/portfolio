@@ -10,47 +10,26 @@
   --color-app-muted: var(--theme-muted);
   --color-app-border: var(--theme-border);
   --color-app-primary: var(--theme-primary);
+  --color-app-primary-text: var(--theme-primary-text);
   --color-app-primary-hover: var(--theme-primary-hover);
   --color-app-secondary: var(--theme-secondary);
   --color-app-section-alt: var(--theme-section-alt);
 }
 
 :root {
-  color-scheme: light;
-  /* Warmer cream base — subtle contrast from surface */
-  --theme-bg:             #EFE9E0;
-  --theme-text:           #1C1712;
-  /* Warm white surface — clearly distinct from bg */
-  --theme-surface:        #FAF6F0;
+  /* Remaining specific theme tokens not in critical path */
   --theme-surface-hover:  #EDE4D8;
-  /* Visible warm border — not invisible gray */
-  --theme-border:         #D8CDBC;
-  /* Warmer mid-tone muted */
   --theme-muted:          #6B6055;
-  /* Deeper bronze for better contrast on light */
-  --theme-primary:        #A8692E;
   --theme-primary-hover:  #8F5620;
   --theme-secondary:      #C07A3A;
-  /* Subtle warm tint for alternating sections */
   --theme-section-alt:    #E6DDD1;
 }
 
 .dark {
-  color-scheme: dark;
-  /* Very dark warm brown/graphite base */
-  --theme-bg:             #161412;
-  --theme-text:           #EAE6E1;
-  /* Slightly lighter warm surface */
-  --theme-surface:        #221E1A;
   --theme-surface-hover:  #2C2723;
-  /* Warmer muted text */
   --theme-muted:          #A89F91;
-  /* Visible separating border */
-  --theme-border:         #36302A;
-  --theme-primary:        #D4A373;
   --theme-primary-hover:  #E2B68A;
   --theme-secondary:      #BC8E5B;
-  /* Section alternation */
   --theme-section-alt:    #1A1815;
 }
 
@@ -64,9 +43,8 @@ h1, h2, h3 {
 
 /* ─── Glass cards ──────────────────────────────────────────── */
 .glass {
-  @apply bg-app-surface border border-app-border backdrop-blur-md transition-all duration-300 ease-in-out;
+  @apply bg-app-surface border border-app-border backdrop-blur-sm transition-all duration-300 ease-in-out;
   box-shadow: 0 2px 20px -2px rgba(120, 85, 40, 0.10), 0 1px 4px rgba(0,0,0,0.04);
-  will-change: transform, opacity, background-color, border-color;
 }
 
 .dark .glass {

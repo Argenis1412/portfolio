@@ -19,17 +19,30 @@ SPAM_KEYWORDS = [
     r"\bdiscount\b",
     r"\burgent\b",
     r"\bofficial\b",
-    # Spanish keywords
+    r"\bagency\b",
+    r"\bapp development\b",
+    r"\bwebsite design\b",
+    r"\bproposal\b",
+    r"\bleads\b",
+    r"\blead generation\b",
+    r"\bfreelance\b",
+    r"\boutsourcing\b",
+    # Spanish/Portuguese keywords
     r"\binvertir\b",
     r"\binversión\b",
+    r"\binversion\b",
     r"\bganar\b",
     r"\bganador\b",
     r"\bnegocio\b",
     r"\bgratis\b",
     r"\bpromoción\b",
+    r"\bpromocion\b",
+    r"\bpromoção\b",
     r"\bgana\b",
+    r"\bganhe\b",
     r"\bdinero\b",
-    r"\bhacer\b",
+    r"\boferta\b",
+    r"\binvestimento\b",
 ]
 
 # Domains often used for temporary/burner emails
@@ -57,23 +70,25 @@ def calculate_spam_score(message: str, email: str) -> int:
     if len(message.strip()) < 10:
         score += 10
 
-    # Rule 2: Excessive links (http/https occurrences)
-    links = len(re.findall(r"https?://", message_lower))
+    # Rule 2: Excessive links (http/https/www occurrences)
+    links = len(re.findall(r"https?://|www\.", message_lower))
     if links >= 3:
-        score += 30
+        score += 40
     elif links >= 1:
-        score += 10
+        score += 15
 
     # Rule 3: Spam keywords (more precise with word boundaries)
     keyword_matches = 0
     for kw in SPAM_KEYWORDS:
-        if re.search(kw, message_lower):
+        if re.search(kw, message_lower, re.UNICODE | re.IGNORECASE):
             keyword_matches += 1
 
-    if keyword_matches >= 2:
-        score += 40
+    if keyword_matches >= 3:
+        score += 70  # Assured silent drop
+    elif keyword_matches == 2:
+        score += 40  # Highly suspect
     elif keyword_matches == 1:
-        score += 20
+        score += 30  # Needs something else to tip into suspect
 
     # Rule 4: Temporary email domains
     email_domain = email.split("@")[-1].lower() if "@" in email else ""

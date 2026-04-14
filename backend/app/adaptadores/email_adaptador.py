@@ -120,6 +120,70 @@ class FormspreeEmailAdaptador(EmailAdaptador):
             return False
 
 
+class ResendEmailAdaptador(EmailAdaptador):
+    """
+    Implementação de EmailAdaptador usando a API do Resend.
+    """
+
+    def __init__(self, api_key: str, from_email: str, to_email: str):
+        self._api_key = api_key
+        self._from_email = from_email
+        self._to_email = to_email
+        self._configurado = bool(api_key and api_key.strip())
+        self._url = "https://api.resend.com/emails"
+
+    async def enviar_mensagem(self, mensagem: Mensagem) -> bool:
+        if not self._configurado:
+            logger.warning("resend_nao_configurado", motivo="RESEND_API_KEY vazia")
+            return False
+
+        try:
+            # Prepara a mensagem HTML básica
+            html_content = f"""
+            <h3>Novo contato do Portfólio</h3>
+            <p><strong>Nome:</strong> {mensagem.nome}</p>
+            <p><strong>Email:</strong> {mensagem.email}</p>
+            <p><strong>Assunto:</strong> {mensagem.assunto}</p>
+            <p><strong>Mensagem:</strong></p>
+            <div style="white-space: pre-wrap; background: #f4f4f4; padding: 15px; border-radius: 5px;">
+                {mensagem.mensagem}
+            </div>
+            """
+
+            async with httpx.AsyncClient() as cliente:
+                resposta = await cliente.post(
+                    self._url,
+                    headers={
+                        "Authorization": f"Bearer {self._api_key}",
+                        "Content-Type": "application/json",
+                    },
+                    json={
+                        "from": self._from_email
+                        if "<" in self._from_email
+                        else f"Portfolio <{self._from_email}>",
+                        "to": self._to_email or self._from_email,
+                        "subject": mensagem.assunto,
+                        "reply_to": mensagem.email,
+                        "html": html_content,
+                    },
+                )
+
+                sucesso = resposta.status_code in (200, 201)
+                if sucesso:
+                    logger.info("resend_envio_sucesso", id=resposta.json().get("id"))
+                else:
+                    logger.warning(
+                        "resend_envio_falha",
+                        status=resposta.status_code,
+                        body=resposta.text,
+                    )
+                return sucesso
+
+        except Exception as e:
+            logger.error("resend_erro_inesperado", erro=str(e), exc_info=True)
+            return False
+
+
 class ConsoleEmailAdaptador(EmailAdaptador):
     """
     Adaptador de fallback que apenas loga a mensagem no console.

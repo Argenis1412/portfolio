@@ -78,17 +78,18 @@ class EnviarContatoUseCase:
             assunto.strip() if assunto and assunto.strip() else "Contact via Portfolio"
         )
 
-        # Prefix subject with spam marker when suspicious
+        # Prefix subject with indicator when suspicious
         assunto_final = (
-            f"[POSSIBLE SPAM] {assunto_base}" if is_suspicious else assunto_base
+            f"[⚠ POSSÍVEL SPAM] {assunto_base}" if is_suspicious else assunto_base
         )
 
         if is_suspicious:
             warning_lines = [
-                "SECURITY ALERT: POSSIBLE SPAM",
-                f"Spam score: {spam_score if spam_score is not None else 'unknown'}/100",
-                f"Sender email: {email}",
-                "Review this message before replying.",
+                "--- 🛡️ AVISO DE SEGURANÇA (FILTRO ANTI-SPAM) ---",
+                "Este e-mail foi classificado como suspeito pelos filtros automáticos.",
+                f"Nível de Risco: {spam_score if spam_score is not None else '?'}/100",
+                f"Remetente Original: {email}",
+                "--------------------------------------------------",
                 "",
                 mensagem,
             ]
