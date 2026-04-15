@@ -71,7 +71,9 @@ class ContactGuard:
         return hashlib.sha256(content_str.encode()).hexdigest()
 
     @staticmethod
-    def get_spam_score(message: str, email: str, nome: str = "", assunto: str = "") -> int:
+    def get_spam_score(
+        message: str, email: str, nome: str = "", assunto: str = ""
+    ) -> int:
         """
         Returns a spam score in [0, 100].
 
