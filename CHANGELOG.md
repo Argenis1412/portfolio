@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/en/2.0.0/).
 
 ---
 
+## [1.4.0] - 2026-04-15
+
+### 🎉 Release Candidate (Production Ready)
+
+#### ✅ Added
+
+**Infrastructure & Full-Stack:**
+- ✅ **Custom Domain Setup**: Domain successfully migrated to `argenisbackend.com`.
+- ✅ **Email Delivery**: Migrated from Formspree to **Resend** for higher deliverability and control over contact endpoints.
+- ✅ **System Demo UI**: Refactored the frontend into a High-Availability Evidence Demo. Contact forms now function as a real-time `TraceConsole`.
+- ✅ **Factual Live Metrics**: Removed visual flair from dashboards in favor of raw verifiable telemetry.
+- ✅ **Engineering Narrative**: Restructured project data to reflect production constraints (Problem, Challenge, Decision, Trade-off, Impact).
+
+#### 🐛 Fixed
+
+- ✅ **Translation Integrity**: Stabilized ES/PT metric internationalization and corrected UI components.
+
+---
+
 ## [1.3.1] - 2026-04-11
 
 ### 🔒 Security

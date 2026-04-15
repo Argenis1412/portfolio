@@ -48,7 +48,7 @@ graph TD
     
     subgraph External Layer
         A[Adapters / External Services]
-        A -.- note4[Email Resend / Formspree<br>PostgreSQL / Redis<br>Observability Stack]
+        A -.- note4[Email Resend<br>PostgreSQL / Redis<br>Observability Stack]
     end
 
     C -->|Calls| UC
@@ -147,7 +147,7 @@ Supported metrics:
 Returns status for:
 - API connectivity
 - **Database connection**
-- **External service config (Email: Resend/Formspree)**
+- **External service config (Email: Resend)**
 - **Uptime** and versioning.
 
 ### 📁 Portfolio Data
