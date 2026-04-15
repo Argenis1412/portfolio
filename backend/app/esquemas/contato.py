@@ -6,7 +6,7 @@ Define contratos de requisição e resposta para envio de mensagens.
 
 import re
 from typing import Optional
-from pydantic import BaseModel, Field, EmailStr, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 
 NOME_REGEX = re.compile(r"^[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ .,'-]{1,79}$")
