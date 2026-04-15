@@ -141,8 +141,11 @@ def test_enviar_contato_com_dados_validos_retorna_200(client):
     mock_uc.executar.assert_awaited_once()
 
 
-def test_enviar_contato_com_dados_invalidos_retorna_422(client):
-    """Testa POST /api/contato com dados inválidos."""
+def test_enviar_contato_com_dados_invalidos_retorna_sucesso_falso(client):
+    """
+    Testa POST /api/contato com dados inválidos.
+    Deve retornar 200 (Sucesso Falso) para não vazar informações sobre o filtro.
+    """
     payload = {
         "nome": "M",  # Muito curto
         "email": "email-invalido",
@@ -152,8 +155,7 @@ def test_enviar_contato_com_dados_invalidos_retorna_422(client):
 
     response = client.post("/api/v1/contato", json=payload)
 
-    assert response.status_code == 422
+    assert response.status_code == 200
     data = response.json()
-    assert "erro" in data
-    assert data["erro"]["codigo"] == "ERRO_VALIDACAO_ENTRADA"
-    assert "detalhes" in data["erro"]
+    assert data["sucesso"] is True
+    assert "mensagem" in data
