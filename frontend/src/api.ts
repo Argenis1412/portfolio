@@ -17,6 +17,7 @@ export const ProjectSchema = z.object({
   id: z.string(),
   nome: z.string(),
   descricao_curta: LocalizedStringSchema,
+  descricao_completa: LocalizedStringSchema.optional(),
   tecnologias: z.array(z.string()),
   destaque: z.boolean(),
   repositorio: z.string().nullable(),
@@ -214,9 +215,10 @@ export async function postContact(data: {
   mensagem: string;
   website: string; // Honeypot
   fax: string;     // Honeypot
-}, idempotencyKey: string): Promise<void> {
+}, idempotencyKey: string): Promise<{traceId?: string, durationMs: number}> {
   const apiUrl = buildApiUrl('/contato');
 
+  const start = performance.now();
   const res = await fetch(apiUrl, {
     method: 'POST',
     headers: {
@@ -225,8 +227,22 @@ export async function postContact(data: {
     },
     body: JSON.stringify(data),
   });
+  const durationMs = Math.round(performance.now() - start);
 
   if (!res.ok) {
-    throw new ApiError(res.status, `Failed to submit contact form: ${res.status}`);
+    let errTrace: string | undefined = res.headers.get('x-trace-id') ?? undefined;
+    if (!errTrace) {
+        const rawData = await res.json().catch(() => null);
+        errTrace = (rawData as Record<string, unknown>)?.trace_id as string | undefined;
+    }
+    throw new ApiError(res.status, `Failed to submit contact form: ${res.status}`, errTrace);
   }
+
+  const rawData = await res.json().catch(() => null);
+  const traceId: string | undefined =
+    res.headers.get('x-trace-id') ??
+    (rawData as Record<string, unknown>)?.trace_id as string | undefined ??
+    undefined;
+
+  return { traceId, durationMs };
 }

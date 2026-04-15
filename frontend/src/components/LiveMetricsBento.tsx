@@ -1,64 +1,7 @@
-/**
- * LiveMetricsBento — 4-tile evidence dashboard connected to the live backend.
- *
- * Tile 1: P95 Latency  — SVG Sparkline (10-point rolling window)
- * Tile 2: Error Rate   — dynamic badge with named thresholds
- * Tile 3: Uptime       — backend-calculated string, refreshes on poll
- * Tile 4: System Status — derived from useLiveMetrics, pulse animation
- */
 import React, { useState, useEffect } from 'react';
 import { m, type Variants } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { useLiveMetrics, type SystemStatus } from '../hooks/useLiveMetrics';
-
-// ─── Sparkline ────────────────────────────────────────────────────────────────
-
-const SPARKLINE_POINTS = 10;
-const SPARKLINE_W = 80;
-const SPARKLINE_H = 28;
-
-function buildSparklinePath(points: number[]): string {
-  if (points.length < 2) return '';
-  const min = Math.min(...points);
-  const max = Math.max(...points);
-  const range = max - min || 1; // guard against flat line
-
-  return points
-    .map((v, i) => {
-      const x = (i / (points.length - 1)) * SPARKLINE_W;
-      const y = SPARKLINE_H - ((v - min) / range) * SPARKLINE_H;
-      return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`;
-    })
-    .join(' ');
-}
-
-interface SparklineProps {
-  points: number[];
-  color: string;
-}
-
-function Sparkline({ points, color }: SparklineProps) {
-  if (points.length < 2) return null;
-  return (
-    <svg
-      width={SPARKLINE_W}
-      height={SPARKLINE_H}
-      viewBox={`0 0 ${SPARKLINE_W} ${SPARKLINE_H}`}
-      className="opacity-70"
-    >
-      <path
-        d={buildSparklinePath(points)}
-        fill="none"
-        stroke={color}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-// ─── Status pill ──────────────────────────────────────────────────────────────
 
 const STATUS_CONFIG: Record<
   SystemStatus,
@@ -69,16 +12,6 @@ const STATUS_CONFIG: Record<
   degraded:    { i18nKey: 'metrics.status.degraded', dot: 'bg-amber-400',                      text: 'text-amber-400' },
   down:        { i18nKey: 'metrics.status.down', dot: 'bg-red-500',                        text: 'text-red-500' },
 };
-
-// ─── Error Rate badge ─────────────────────────────────────────────────────────
-
-function errorRateBadge(rate: number): { i18nKey: string; className: string } {
-  if (rate < 0.01) return { i18nKey: 'metrics.health.stable',   className: 'bg-emerald-500/15 text-emerald-500' };
-  if (rate < 0.05) return { i18nKey: 'metrics.health.warning',  className: 'bg-amber-400/15 text-amber-400' };
-  return               { i18nKey: 'metrics.status.degraded', className: 'bg-red-500/15 text-red-500' };
-}
-
-// ─── Tile wrapper ─────────────────────────────────────────────────────────────
 
 const tileVariants: Variants = {
   hidden: { opacity: 0, y: 16 },
@@ -114,8 +47,6 @@ function Tile({
   );
 }
 
-// ─── Skeleton ─────────────────────────────────────────────────────────────────
-
 function TileSkeleton({ index }: { index: number }) {
   return (
     <Tile index={index} label="—">
@@ -124,65 +55,28 @@ function TileSkeleton({ index }: { index: number }) {
   );
 }
 
-// ─── LiveClock ──────────────────────────────────────────────────────────────
-
-const LiveClock = React.memo(() => {
-  const [currentTime, setCurrentTime] = useState<number | null>(null);
+const UpdatedAgo = React.memo(({ timestamp }: { timestamp: string }) => {
+  const { t } = useLanguage();
+  const [secondsAgo, setSecondsAgo] = useState<number>(0);
 
   useEffect(() => {
-    // We update once asynchronously to avoid "setState in effect" lint error
-    // and then start the interval for ongoing updates.
-    Promise.resolve().then(() => setCurrentTime(Date.now()));
-
-    const timer = setInterval(() => setCurrentTime(Date.now()), 1000);
+    const start = new Date(timestamp).getTime();
+    const update = () => setSecondsAgo(Math.max(0, Math.floor((Date.now() - start) / 1000)));
+    update();
+    const timer = setInterval(update, 1000);
     return () => clearInterval(timer);
-  }, []);
-
-  if (!currentTime) {
-    return <span className="text-xs text-app-muted font-mono truncate">—:—:—</span>;
-  }
+  }, [timestamp]);
 
   return (
-    <span
-      className="text-xs text-app-muted font-mono truncate"
-      title={new Date(currentTime).toISOString()}
-    >
-      {new Date(currentTime).toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-      })}
+    <span className="text-xs text-app-muted font-mono truncate">
+      {t('metrics.updated_ago', { s: secondsAgo })}
     </span>
   );
 });
 
-// ─── Main component ───────────────────────────────────────────────────────────
-
 export default function LiveMetricsBento() {
   const { data, status, isLoading } = useLiveMetrics();
   const { t } = useLanguage();
-
-  // Rolling window of P95 samples for the sparkline.
-  // Cold start: pre-fill all slots with the first value → no empty/jagged start.
-  const [sparkPoints, setSparkPoints] = useState<number[]>([]);
-  const [prevP95, setPrevP95] = useState<number | undefined>(data?.p95_ms);
-
-  if (data?.p95_ms !== prevP95) {
-    setPrevP95(data?.p95_ms);
-    if (data?.p95_ms !== undefined) {
-      const v = data.p95_ms;
-      setSparkPoints(prev => {
-        if (prev.length === 0) return Array(SPARKLINE_POINTS).fill(v);
-        return [...prev.slice(-(SPARKLINE_POINTS - 1)), v];
-      });
-    }
-  }
-
-  const statusCfg = STATUS_CONFIG[status];
-  const sparkColor =
-    status === 'operational' ? '#10b981'
-    : status === 'degraded'  ? '#f59e0b'
-    : '#6b6055';
 
   if (isLoading) {
     return (
@@ -196,7 +90,8 @@ export default function LiveMetricsBento() {
 
   if (!data) return null;
 
-  const errBadge = errorRateBadge(data.error_rate);
+  const statusCfg = STATUS_CONFIG[status];
+  const dbStatusOk = status === 'operational' || status === 'degraded';
 
   return (
     <section
@@ -205,14 +100,24 @@ export default function LiveMetricsBento() {
     >
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
 
-        {/* Tile 1 — Latency P95 */}
-        <Tile index={0} label={t('metrics.latency')}>
-          <div className="flex items-end justify-between gap-2">
+        {/* Tile 1 — API Status */}
+        <Tile index={0} label={t('metrics.system_status')}>
+          <div className="flex items-center gap-2 mt-1">
+            <span className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${statusCfg.dot}`} />
+            <span className={`font-mono text-lg font-bold ${statusCfg.text}`}>
+              {t(statusCfg.i18nKey)}
+            </span>
+          </div>
+          <UpdatedAgo timestamp={data.timestamp} />
+        </Tile>
+
+        {/* Tile 2 — P95 Latency */}
+        <Tile index={1} label={t('metrics.latency')}>
+          <div className="flex items-end gap-1 mt-1">
             <span className="font-mono text-2xl font-bold text-app-text">
               {data.p95_ms}
-              <span className="text-sm font-normal text-app-muted ml-0.5">ms</span>
             </span>
-            <Sparkline points={sparkPoints} color={sparkColor} />
+            <span className="text-sm font-normal text-app-muted mb-1">ms</span>
           </div>
           <span
             className={`text-xs font-mono px-2 py-0.5 rounded-full w-fit ${
@@ -225,38 +130,28 @@ export default function LiveMetricsBento() {
           </span>
         </Tile>
 
-        {/* Tile 2 — Error Rate */}
-        <Tile index={1} label={t('metrics.error_rate')}>
-          <span className="font-mono text-2xl font-bold text-app-text">
-            {data.error_rate_pct}
-          </span>
-          <span className={`text-xs font-mono px-2 py-0.5 rounded-full w-fit ${errBadge.className}`}>
-            {t(errBadge.i18nKey)}
-          </span>
-        </Tile>
-
-        {/* Tile 3 — Uptime */}
-        <Tile index={2} label={t('metrics.uptime')}>
-          <span className="font-mono text-2xl font-bold text-app-text">
-            {data.uptime}
-          </span>
-          <span className="text-xs text-app-muted font-mono">{data.window}</span>
-        </Tile>
-
-        {/* Tile 4 — System Status */}
-        <Tile index={3} label={t('metrics.system_status')}>
+        {/* Tile 3 — DB Connection */}
+        <Tile index={2} label={t('metrics.db_connected')}>
           <div className="flex items-center gap-2 mt-1">
-            <span className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${statusCfg.dot}`} />
-            <span className={`font-mono text-lg font-bold ${statusCfg.text}`}>
-              {t(statusCfg.i18nKey)}
+            <span className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${dbStatusOk ? 'bg-emerald-500' : 'bg-red-500'}`} />
+            <span className={`font-mono text-lg font-bold ${dbStatusOk ? 'text-app-text' : 'text-red-500'}`}>
+              {dbStatusOk ? 'Connected' : 'Disconnected'}
             </span>
           </div>
-          <LiveClock />
+          <span className="text-xs text-app-muted font-mono">{dbStatusOk ? 'healthy' : 'down'}</span>
+        </Tile>
+
+        {/* Tile 4 — Requests (24h) */}
+        <Tile index={3} label={t('metrics.requests_24h')}>
+          <span className="font-mono text-2xl font-bold text-app-text mt-1">
+            {data.requests_24h.toLocaleString()}
+          </span>
+          <UpdatedAgo timestamp={data.timestamp} />
         </Tile>
 
       </div>
 
-      {/* Source link — one click verifies all tiles */}
+      {/* Source link */}
       <div className="flex justify-end mt-2 pr-1">
         <a
           href="https://api.argenisbackend.com/api/v1/metrics/summary"
@@ -272,4 +167,3 @@ export default function LiveMetricsBento() {
     </section>
   );
 }
-

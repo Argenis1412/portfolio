@@ -88,18 +88,20 @@ const Hero = React.memo(() => {
             className="flex flex-col sm:flex-row justify-center md:justify-start gap-4"
           >
             <button
-              onClick={() => scrollToSection('projects')}
+              onClick={() => scrollToSection('contato')}
               className="bg-app-primary hover:bg-app-primary-hover text-app-primary-text font-bold py-3 px-8 rounded-full transition-smooth premium-shadow"
             >
-              {t('nav.projects')}
+              {t('hero.cta_primary')}
             </button>
-            <button
+            <a
               data-testid="hero-contact-cta"
-              onClick={() => scrollToSection('contato')}
-              className="bg-transparent hover:bg-app-surface-hover text-app-text font-semibold py-3 px-8 rounded-full transition-smooth border border-app-border"
+              href="https://github.com/Argenis1412/portfolio/blob/main/ARCHITECTURE.md"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-transparent hover:bg-app-surface-hover text-app-text font-semibold py-3 px-8 rounded-full transition-smooth border border-app-border text-center"
             >
-              {t('nav.contact')}
-            </button>
+              {t('hero.cta_secondary')}
+            </a>
           </m.div>
         </div>
 
