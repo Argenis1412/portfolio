@@ -25,27 +25,29 @@ class RequisicaoContato(BaseModel):
 
     nome: str = Field(
         ...,
-        min_length=2,
+        min_length=1,
         max_length=80,
         examples=["Maria Silva"],
         description="Nome de quem está enviando",
     )
-    email: EmailStr = Field(
+    email: str = Field(
         ...,
+        min_length=3,
+        max_length=100,
         examples=["maria@empresa.com"],
         description="Email para resposta",
     )
     assunto: Optional[str] = Field(
         default="Contato via Portfólio",
         min_length=0,
-        max_length=100,
+        max_length=120,
         examples=["Oportunidade de trabalho"],
         description="Assunto da mensagem",
     )
     mensagem: str = Field(
         ...,
-        min_length=10,
-        max_length=2000,
+        min_length=1,
+        max_length=3000,
         examples=["Olá, vi seu portfólio e gostaria de conversar..."],
         description="Conteúdo da mensagem",
     )
@@ -56,28 +58,22 @@ class RequisicaoContato(BaseModel):
     @field_validator("nome")
     @classmethod
     def validar_nome(cls, valor: str) -> str:
-        nome = re.sub(r"\s+", " ", valor).strip()
-        if not NOME_REGEX.fullmatch(nome):
-            raise ValueError("Nome contém caracteres inválidos")
-        return nome
+        """Sanitiza o nome, permitindo que falhe silenciosamente no guard."""
+        return re.sub(r"\s+", " ", valor).strip()
 
     @field_validator("assunto")
     @classmethod
     def validar_assunto(cls, valor: Optional[str]) -> Optional[str]:
+        """Sanitiza o assunto, permitindo que falhe silenciosamente no guard."""
         if valor is None:
             return valor
-        assunto = re.sub(r"\s+", " ", valor).strip()
-        if not ASSUNTO_REGEX.fullmatch(assunto):
-            raise ValueError("Assunto contém caracteres inválidos")
-        return assunto
+        return re.sub(r"\s+", " ", valor).strip()
 
     @field_validator("mensagem")
     @classmethod
     def validar_mensagem(cls, valor: str) -> str:
-        mensagem = re.sub(r"\s+", " ", valor).strip()
-        if any(ord(char) < 32 and char not in "\n\r\t" for char in mensagem):
-            raise ValueError("Mensagem contém caracteres inválidos")
-        return mensagem
+        """Sanitiza a mensagem, permitindo que falhe silenciosamente no guard."""
+        return re.sub(r"\s+", " ", valor).strip()
 
 
 class RespostaContato(BaseModel):

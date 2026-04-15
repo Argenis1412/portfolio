@@ -107,7 +107,12 @@ async def enviar_contato(
             return resposta_cacheavel
 
         # ── 2. Spam score ───────────────────────────────────────────────────
-        spam_score = _guard.get_spam_score(requisicao.mensagem, requisicao.email)
+        spam_score = _guard.get_spam_score(
+            requisicao.mensagem,
+            requisicao.email,
+            nome=requisicao.nome,
+            assunto=requisicao.assunto,
+        )
 
         if spam_score >= ContactGuard.SCORE_SILENT_DROP:
             logger.info(

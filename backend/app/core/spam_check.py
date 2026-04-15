@@ -56,47 +56,68 @@ TEMP_EMAIL_DOMAINS = [
 ]
 
 
-def calculate_spam_score(message: str, email: str) -> int:
+# Regexes previously in the schema, now used for scoring
+NOME_REGEX = re.compile(r"^[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ .,'-]{1,79}$")
+ASSUNTO_REGEX = re.compile(r"^[A-Za-zÀ-ÿ0-9 .,:;!?()/#&+@'\-]{0,120}$")
+EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+
+
+def calculate_spam_score(
+    message: str, email: str, nome: str = "", assunto: str = ""
+) -> int:
     """
-    Calculates a spam score based on message content and email domain.
+    Calculates a spam score based on message content, email, name and subject.
     0-30: Normal (deliver)
     31-69: Suspect (deliver with flag)
     >=70: Silent Spam (silent drop)
+
+    Invalid formats now return 100 to ensure silent drop (no 422 error to user).
     """
     score = 0
     message_lower = message.lower()
+
+    # Rule 0: Strict format validation (moved from schema to avoid 422)
+    # These return 100 immediately to ensure silent drop
+    if not EMAIL_REGEX.match(email):
+        return 100
+
+    if nome and not NOME_REGEX.fullmatch(nome):
+        return 100
+
+    if assunto and not ASSUNTO_REGEX.fullmatch(assunto):
+        return 100
 
     # Rule 1: Message too short
     if len(message.strip()) < 10:
         score += 10
 
-    # Rule 2: Excessive links (http/https/www occurrences)
+    # Rule 2: Excessive links
     links = len(re.findall(r"https?://|www\.", message_lower))
     if links >= 3:
         score += 40
     elif links >= 1:
         score += 15
 
-    # Rule 3: Spam keywords (more precise with word boundaries)
+    # Rule 3: Spam keywords
     keyword_matches = 0
     for kw in SPAM_KEYWORDS:
         if re.search(kw, message_lower, re.UNICODE | re.IGNORECASE):
             keyword_matches += 1
 
     if keyword_matches >= 3:
-        score += 70  # Assured silent drop
+        score += 70
     elif keyword_matches == 2:
-        score += 40  # Highly suspect
+        score += 40
     elif keyword_matches == 1:
-        score += 30  # Needs something else to tip into suspect
+        score += 30
 
     # Rule 4: Temporary email domains
     email_domain = email.split("@")[-1].lower() if "@" in email else ""
     if email_domain in TEMP_EMAIL_DOMAINS:
         score += 40
 
-    # Rule 5: No spaces in long message (obfuscation)
+    # Rule 5: No spaces in long message
     if len(message) > 50 and " " not in message:
         score += 20
 
-    return score
+    return min(score, 100)

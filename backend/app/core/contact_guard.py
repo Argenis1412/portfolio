@@ -71,7 +71,7 @@ class ContactGuard:
         return hashlib.sha256(content_str.encode()).hexdigest()
 
     @staticmethod
-    def get_spam_score(message: str, email: str) -> int:
+    def get_spam_score(message: str, email: str, nome: str = "", assunto: str = "") -> int:
         """
         Returns a spam score in [0, 100].
 
@@ -79,7 +79,7 @@ class ContactGuard:
         31–69  Suspect — deliver with [POSSIBLE SPAM] flag
         >=70   Silent spam — silently drop
         """
-        return calculate_spam_score(message, email)
+        return calculate_spam_score(message, email, nome=nome, assunto=assunto)
 
     @staticmethod
     async def reserve_dedup(content_hash: str) -> bool:
