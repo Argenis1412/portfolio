@@ -14,7 +14,7 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 export default function Contact() {
   const { t, language } = useLanguage();
   const { data: about } = useAbout();
-  const { mutate, isPending: isMutating, isSuccess: mutationSuccess, error: mutationError, reset } = useContactMutation();
+  const { mutate, isPending: isMutating, isSuccess: mutationSuccess, error: mutationError } = useContactMutation();
   
   const [formData, setFormData] = useState({
     nome: '',
