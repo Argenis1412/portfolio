@@ -111,7 +111,7 @@ async def enviar_contato(
             requisicao.mensagem,
             requisicao.email,
             nome=requisicao.nome,
-            assunto=requisicao.assunto,
+            assunto=requisicao.assunto or "",
         )
 
         if spam_score >= ContactGuard.SCORE_SILENT_DROP:
