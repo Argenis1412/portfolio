@@ -7,7 +7,7 @@ Prefixo: /api/v1
 
 from fastapi import APIRouter
 
-from app.controladores import api, contato
+from app.controladores import api, contato, chaos
 
 # Router principal da v1
 roteador_v1 = APIRouter(
@@ -18,5 +18,7 @@ roteador_v1 = APIRouter(
 # Incluir rotas de diferentes domínios
 roteador_v1.include_router(api.roteador, tags=["Portfólio"])
 roteador_v1.include_router(contato.roteador, tags=["Contato"])
+roteador_v1.include_router(chaos.roteador, tags=["Chaos Playground"])
 
 __all__ = ["roteador_v1"]
+

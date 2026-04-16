@@ -5,6 +5,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { LazyMotion, domAnimation } from 'framer-motion';
 
 const LiveMetricsBento = React.lazy(() => import('./components/LiveMetricsBento'));
+const ChaosPlayground = React.lazy(() => import('./components/ChaosPlayground'));
 const ServerWakeupNotice = React.lazy(() => import('./components/ServerWakeupNotice'));
 const Skills = React.lazy(() => import('./components/Skills'));
 const Projects = React.lazy(() => import('./components/Projects'));
@@ -23,6 +24,7 @@ function App() {
             
             <Suspense fallback={<div className="h-24 w-full flex items-center justify-center text-app-muted text-sm opacity-50 tracking-widest mt-12 animate-pulse">CARGANDO...</div>}>
               <LiveMetricsBento />
+              <ChaosPlayground />
               <Skills />
               <Projects />
               <Experience />
