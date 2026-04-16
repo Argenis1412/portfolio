@@ -14,7 +14,7 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 export default function Contact() {
   const { t, language } = useLanguage();
   const { data: about } = useAbout();
-  const { mutate, isPending: isMutating, isSuccess: mutationSuccess, error: mutationError } = useContactMutation();
+  const { mutate, isPending: isMutating, isSuccess: mutationSuccess, error: mutationError, reset } = useContactMutation();
   
   const [formData, setFormData] = useState({
     nome: '',
@@ -79,7 +79,8 @@ export default function Contact() {
           // so the user can observe the engineering evidence.
         },
         onError: (error: unknown) => {
-          setTraceResult(null);
+          // We do not setTraceResult(null) here, so the old trace stays visible if wanted.
+          // But technically if an error occurs, they just see the error snippet.
           if (error instanceof ApiError) {
             if (error.status === 429) {
               setErrors({ submit: 'contact.error.rate_limit' });
@@ -116,6 +117,12 @@ export default function Contact() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Reset success/error state when user starts typing again
+    if (mutationSuccess || mutationError || errors.submit) {
+      reset();
+    }
+    
     if (errors[name]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -211,7 +218,7 @@ export default function Contact() {
             </div>
 
             <AnimatePresence>
-              {status === 'success' && traceResult && (
+              {traceResult && (
                 <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-[#0A0A0A] border rounded-xl overflow-hidden font-mono text-xs text-left shadow-inner flex flex-col" style={{ borderColor: '#333' }}>
                   <div className="flex items-center px-4 py-2 border-b" style={{ backgroundColor: '#1A1A1A', borderColor: '#333' }}>
                     <div className="flex gap-1.5 mr-4">
@@ -242,12 +249,12 @@ export default function Contact() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
               <motion.button 
-                whileHover={status !== 'success' ? { scale: 1.02 } : {}} whileTap={status !== 'success' ? { scale: 0.98 } : {}}
-                type="submit" disabled={status === 'loading' || status === 'success'}
+                whileHover={status !== 'loading' ? { scale: 1.02 } : {}} whileTap={status !== 'loading' ? { scale: 0.98 } : {}}
+                type="submit" disabled={status === 'loading'}
                 className="bg-app-primary hover:bg-app-primary-hover text-app-primary-text font-bold py-[18px] px-8 rounded-xl transition-all duration-300 shadow-lg shadow-app-primary/20 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-xs flex items-center justify-center gap-3"
               >
                 {status === 'loading' ? <Loader2 className="animate-spin h-4 w-4 text-app-primary-text" /> : <Mail className="w-4 h-4" />}
-                {status === 'loading' ? t('contact.sending') : status === 'success' ? 'Delivered' : t('contact.send')}
+                {status === 'loading' ? t('contact.sending') : t('contact.send')}
               </motion.button>
               <motion.button 
                 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
