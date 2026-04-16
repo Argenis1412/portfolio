@@ -23,11 +23,13 @@ roteador = APIRouter(prefix="/chaos", tags=["Chaos Playground"])
 
 # ─── In-memory incident state (shared with metrics/summary) ──────────────────
 
+
 @dataclass
 class ChaosIncident:
     """A single recorded incident from a chaos action."""
-    type: str          # "traffic_spike" | "forced_failure" | "timeout"
-    timestamp: float   # time.time()
+
+    type: str  # "traffic_spike" | "forced_failure" | "timeout"
+    timestamp: float  # time.time()
     requests_sent: int = 0
     requests_dropped: int = 0
     recovery_ms: int = 0
@@ -37,6 +39,7 @@ class ChaosIncident:
 @dataclass
 class ChaosState:
     """Global mutable state for chaos metrics — consumed by /metrics/summary."""
+
     total_chaos_requests: int = 0
     incidents: list[ChaosIncident] = field(default_factory=list)
     # Separate retry timestamps — not capped like incidents.

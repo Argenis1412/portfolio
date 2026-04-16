@@ -16,4 +16,3 @@ from app.controladores.contato import roteador as roteador_contato
 from app.controladores.chaos import roteador as roteador_chaos
 
 __all__ = ["roteador_saude", "roteador_api", "roteador_contato", "roteador_chaos"]
-

@@ -21,4 +21,3 @@ roteador_v1.include_router(contato.roteador, tags=["Contato"])
 roteador_v1.include_router(chaos.roteador, tags=["Chaos Playground"])
 
 __all__ = ["roteador_v1"]
-
