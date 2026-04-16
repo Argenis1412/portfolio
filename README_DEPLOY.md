@@ -15,7 +15,7 @@ Scalable Python API hosting.
 
     | Variable | Required | Description |
     |---|---|---|
-    | `FORMSPREE_FORM_ID` | ✅ Yes | Formspree form ID (e.g. `xzdjqvok`) |
+    | `RESEND_API_KEY` | ✅ Yes | Resend API Key |
     | `AMBIENTE` | ✅ Yes | Set to `producao` |
     | `DATABASE_URL` | ⭐ Recommended | PostgreSQL URL (e.g. Supabase pooled connection with `postgresql+asyncpg://...`). Falls back to SQLite if empty. |
     | `REDIS_URL` | ⭐ Recommended | Redis URL (e.g. `rediss://...`). Falls back to memory if empty. |

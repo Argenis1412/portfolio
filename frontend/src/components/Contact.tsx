@@ -24,6 +24,7 @@ export default function Contact() {
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [traceResult, setTraceResult] = useState<{ traceId?: string; durationMs: number } | null>(null);
   
   const getNewKey = () => {
     return typeof crypto !== 'undefined' && crypto.randomUUID 
@@ -70,12 +71,16 @@ export default function Contact() {
     mutate(
       { data: dataToSend, idempotencyKey },
       {
-        onSuccess: () => {
+        onSuccess: (result) => {
+          setTraceResult(result);
           setFormData({ nome: '', email: '', assunto: '', mensagem: '' });
           generateNewKey();
-          setTimeout(() => reset(), 2500);
+          // We intentionally leave the form disabled and show the trace result
+          // so the user can observe the engineering evidence.
         },
         onError: (error: unknown) => {
+          // We do not setTraceResult(null) here, so the old trace stays visible if wanted.
+          // But technically if an error occurs, they just see the error snippet.
           if (error instanceof ApiError) {
             if (error.status === 429) {
               setErrors({ submit: 'contact.error.rate_limit' });
@@ -112,6 +117,12 @@ export default function Contact() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Reset success/error state when user starts typing again
+    if (mutationSuccess || mutationError || errors.submit) {
+      reset();
+    }
+    
     if (errors[name]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -207,9 +218,26 @@ export default function Contact() {
             </div>
 
             <AnimatePresence>
-              {status === 'success' && (
-                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 p-4 rounded-xl text-center text-sm font-semibold">
-                  {t('contact.success')}
+              {traceResult && (
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-[#0A0A0A] border rounded-xl overflow-hidden font-mono text-xs text-left shadow-inner flex flex-col" style={{ borderColor: '#333' }}>
+                  <div className="flex items-center px-4 py-2 border-b" style={{ backgroundColor: '#1A1A1A', borderColor: '#333' }}>
+                    <div className="flex gap-1.5 mr-4">
+                      <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
+                      <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
+                      <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
+                    </div>
+                    <span className="text-gray-400 font-semibold uppercase tracking-widest text-[10px]">Trace Console</span>
+                  </div>
+                  <div className="p-4 leading-relaxed text-gray-300">
+                    <div>
+                      <span className="text-emerald-400">[POST]</span> /api/v1/contact <span className="text-gray-500">→</span> <span className="text-emerald-400">200 OK</span> <span className="text-gray-500">({traceResult.durationMs}ms)</span>
+                    </div>
+                    {traceResult.traceId && (
+                      <div className="mt-1">
+                        <span className="text-blue-400">[TRACE]</span> {traceResult.traceId}
+                      </div>
+                    )}
+                  </div>
                 </motion.div>
               )}
               {status === 'error' && (
@@ -221,7 +249,7 @@ export default function Contact() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
               <motion.button 
-                whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                whileHover={status !== 'loading' ? { scale: 1.02 } : {}} whileTap={status !== 'loading' ? { scale: 0.98 } : {}}
                 type="submit" disabled={status === 'loading'}
                 className="bg-app-primary hover:bg-app-primary-hover text-app-primary-text font-bold py-[18px] px-8 rounded-xl transition-all duration-300 shadow-lg shadow-app-primary/20 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-xs flex items-center justify-center gap-3"
               >

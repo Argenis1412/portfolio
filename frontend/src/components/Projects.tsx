@@ -90,9 +90,14 @@ export default function Projects() {
               )}
               <h3 className="text-2xl font-bold text-app-text mb-3">{project.nome}</h3>
 
-              <p className="text-app-muted mb-6 leading-relaxed">
-                {project.descricao_curta[language as keyof typeof project.descricao_curta]}
-              </p>
+              <div 
+                className="text-app-muted mb-6 leading-relaxed text-sm"
+                dangerouslySetInnerHTML={{ 
+                  __html: (project.descricao_completa && project.nome === 'Full-Stack Portfolio')
+                    ? project.descricao_completa[language as keyof typeof project.descricao_completa] 
+                    : project.descricao_curta[language as keyof typeof project.descricao_curta] 
+                }} 
+              />
               
               <div className="flex flex-wrap gap-2 mb-6">
                 {project.tecnologias.slice(0, 11).map(tech => (

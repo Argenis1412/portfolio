@@ -16,8 +16,7 @@ The backend requires the following variables when `AMBIENTE=producao`:
 | `REDIS_URL` | ✅ | Required for rate limiting, idempotency, and dedup |
 | `METRICS_BASIC_AUTH_USERNAME` | ✅ | Basic auth for `/metrics` |
 | `METRICS_BASIC_AUTH_PASSWORD` | ✅ | Basic auth for `/metrics` |
-| `FORMSPREE_FORM_ID` | ⚠️ | Required for contact delivery |
-| `FORMSPREE_TIMEOUT_SECONDS` | Optional | Default: 10s |
+| `RESEND_API_KEY` | ⚠️ | Required for contact delivery |
 | `REDIS_SOCKET_TIMEOUT_SECONDS` | Optional | Default: 5s |
 | `REDIS_CONNECT_TIMEOUT_SECONDS` | Optional | Default: 5s |
 | `DB_CONNECT_TIMEOUT_SECONDS` | Optional | Default: 5s |
@@ -97,7 +96,7 @@ Step 1 — Rotate at the provider
   - Supabase: Settings → Database → Reset password
   - Redis (Upstash): Console → Reset token
   - Metrics auth: generate new random credentials locally
-  - Formspree: Settings → Change form ID if compromised
+  - Resend: Dashboard → Revoke API Key if compromised
 
 Step 2 — Update Koyeb environment variables
   - Koyeb dashboard → Service → Environment
@@ -123,7 +122,7 @@ Priority order for rotation:
 1. Supabase database password
 2. Redis token / password
 3. Metrics Basic Auth credentials
-4. Formspree form ID (if the form received spam or was leaked)
+4. Resend API Key (if the form received spam or was leaked)
 5. Sentry DSN (only if project scope changes)
 
 ---
@@ -147,7 +146,7 @@ Priority order for rotation:
 | P1 | /live returns non-200 | Rollback immediately |
 | P2 | /saude shows DB or Redis error | Investigate provider status, rotate if needed |
 | P3 | 5xx rate > 2% for 5 min | Check Sentry for root cause |
-| P4 | Contact form not delivering | Check Formspree status / credentials |
+| P4 | Contact form not delivering | Check Resend status / credentials |
 
 ### Post-Mortem Template
 

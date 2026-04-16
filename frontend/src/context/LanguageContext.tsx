@@ -30,9 +30,6 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     const saved = localStorage.getItem('portfolio_lang') as Language;
     if (saved && ['pt', 'en', 'es'].includes(saved)) return saved;
 
-    const browserLang = navigator.language.split('-')[0];
-    if (['pt', 'en', 'es'].includes(browserLang)) return browserLang as Language;
-
     return 'en';
   };
 
