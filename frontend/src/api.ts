@@ -83,6 +83,9 @@ export const MetricsSummarySchema = z.object({
   uptime: z.string(),
   window: z.string(),
   timestamp: z.string(),
+  retries_1h: z.number().int().default(0),
+  last_incident: z.string().default('none'),
+  last_incident_ago: z.string().default('none'),
 });
 
 export type MetricsSummary = z.infer<typeof MetricsSummarySchema>;
@@ -245,4 +248,35 @@ export async function postContact(data: {
     undefined;
 
   return { traceId, durationMs };
+}
+
+// ===================================================
+// Chaos Playground
+// ===================================================
+
+export interface ChaosResponse {
+  status: string;
+  incident_type: string;
+  elapsed_ms?: number;
+  recovery_ms?: number;
+  requests_sent?: number;
+  requests_dropped?: number;
+  error_triggered?: boolean;
+  timestamp: string;
+}
+
+export async function postChaosSpike(): Promise<ChaosResponse> {
+  const res = await fetch(buildApiUrl('/chaos/spike'), { method: 'POST' });
+  if (!res.ok) {
+    throw new ApiError(res.status, `Chaos spike failed: ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function postChaosFailure(): Promise<ChaosResponse> {
+  const res = await fetch(buildApiUrl('/chaos/failure'), { method: 'POST' });
+  if (!res.ok) {
+    throw new ApiError(res.status, `Chaos failure failed: ${res.status}`);
+  }
+  return res.json();
 }

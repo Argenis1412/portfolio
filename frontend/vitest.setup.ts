@@ -64,6 +64,30 @@ vi.stubGlobal(
         uptime: '2h 14m',
         window: 'last_24h',
         timestamp: new Date().toISOString(),
+        retries_1h: 0,
+        last_incident: 'none',
+        last_incident_ago: 'none',
+      });
+    }
+
+    if (url.includes('/api/v1/chaos/spike')) {
+      return mockJsonResponse({
+        status: 'completed',
+        requests_sent: 30,
+        requests_dropped: 0,
+        elapsed_ms: 1200,
+        incident_type: 'traffic_spike',
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    if (url.includes('/api/v1/chaos/failure')) {
+      return mockJsonResponse({
+        status: 'recovered',
+        recovery_ms: 340,
+        incident_type: 'forced_failure',
+        error_triggered: true,
+        timestamp: new Date().toISOString(),
       });
     }
 

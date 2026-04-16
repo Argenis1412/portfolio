@@ -17,6 +17,7 @@ import random
 from pathlib import Path
 from datetime import datetime, UTC
 from prometheus_client import REGISTRY
+from app.controladores.chaos import chaos_state
 
 from app.esquemas.sobre import RespostaSobre
 from app.esquemas.projetos import ProjetoResumo
@@ -88,13 +89,31 @@ async def obter_resumo_metricas(response: Response) -> ResumoMetricas:
     # 2. Valores base deterministas para credibilidad
     random.seed(int(time.time() // 60))
     p95 = 42.0 + (random.random() * 3.0)
-    requests = 980 + (uptime_segundos // 30)
+    requests = 980 + (uptime_segundos // 30) + chaos_state.total_chaos_requests
     error_rate = 0.012 + (random.random() * 0.002)
 
-    # Status semântico
+    # Factor in chaos incidents — real impact on error rate
+    last = chaos_state.last_incident
+    recent_incident_active = (
+        last is not None and (time.time() - last.timestamp) < 120  # 2min window
+    )
+    if recent_incident_active and last is not None:
+        if last.error_triggered:
+            error_rate += 0.03  # Real spike from forced failure
+        if last.requests_dropped > 0:
+            error_rate += last.requests_dropped * 0.005
+
+    # Status semántico — now reflects real state
     p95_status = "healthy" if p95 < 100 else "degraded"
-    error_status = "stable" if error_rate < 0.05 else "investigating"
-    system_status = "operational"
+    if recent_incident_active and last is not None and last.error_triggered:
+        error_status = "investigating"
+        system_status = "degraded"
+    elif error_rate > 0.05:
+        error_status = "warning"
+        system_status = "degraded"
+    else:
+        error_status = "stable"
+        system_status = "operational"
 
     # Tentar extrair métricas reais do Prometheus se disponíveis
     try:
@@ -110,6 +129,21 @@ async def obter_resumo_metricas(response: Response) -> ResumoMetricas:
     except Exception:
         pass
 
+    # Incident tracking from chaos playground
+    retries_1h = chaos_state.get_retries_last_hour()
+    if last is not None:
+        secs_ago = int(time.time() - last.timestamp)
+        if secs_ago < 60:
+            last_incident_ago = f"{secs_ago}s ago"
+        elif secs_ago < 3600:
+            last_incident_ago = f"{secs_ago // 60}m ago"
+        else:
+            last_incident_ago = f"{secs_ago // 3600}h ago"
+        last_incident_type = last.type
+    else:
+        last_incident_ago = "none"
+        last_incident_type = "none"
+
     return ResumoMetricas(
         p95_ms=int(p95),  # Menos ruido visual, int es suficiente para ms
         p95_status=p95_status,
@@ -121,6 +155,9 @@ async def obter_resumo_metricas(response: Response) -> ResumoMetricas:
         uptime=_formatar_uptime(uptime_segundos),
         window="last_24h",
         timestamp=datetime.now(UTC).isoformat(),
+        retries_1h=retries_1h,
+        last_incident=last_incident_type,
+        last_incident_ago=last_incident_ago,
     )
 
 

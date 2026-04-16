@@ -81,8 +81,8 @@ export default function LiveMetricsBento() {
   if (isLoading) {
     return (
       <section className="px-4 max-w-6xl mx-auto py-6">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {[0, 1, 2, 3].map((i) => <TileSkeleton key={i} index={i} />)}
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+          {[0, 1, 2, 3, 4, 5].map((i) => <TileSkeleton key={i} index={i} />)}
         </div>
       </section>
     );
@@ -91,14 +91,28 @@ export default function LiveMetricsBento() {
   if (!data) return null;
 
   const statusCfg = STATUS_CONFIG[status];
-  const dbStatusOk = status === 'operational' || status === 'degraded';
+
+  // Error rate color logic — dramatic red when elevated
+  const errorIsElevated = data.error_rate_status !== 'stable';
+  const errorRateColor =
+    data.error_rate_status === 'investigating'
+      ? 'bg-red-500/15 text-red-500'
+      : data.error_rate_status === 'warning'
+        ? 'bg-red-500/15 text-red-400'
+        : 'bg-emerald-500/15 text-emerald-500';
+  const errorNumberColor = errorIsElevated ? 'text-red-400' : 'text-app-text';
+
+  // Last incident color
+  const hasIncident = data.last_incident !== 'none';
+  const incidentDot = hasIncident ? 'bg-amber-400' : 'bg-emerald-500';
+  const incidentText = hasIncident ? 'text-amber-400' : 'text-emerald-500';
 
   return (
     <section
       aria-label="Live system metrics"
       className="px-4 max-w-6xl mx-auto py-6"
     >
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
 
         {/* Tile 1 — API Status */}
         <Tile index={0} label={t('metrics.system_status')}>
@@ -130,15 +144,17 @@ export default function LiveMetricsBento() {
           </span>
         </Tile>
 
-        {/* Tile 3 — DB Connection */}
-        <Tile index={2} label={t('metrics.db_connected')}>
+        {/* Tile 3 — Error Rate (1h) — red when elevated */}
+        <Tile index={2} label={t('metrics.error_rate')}>
           <div className="flex items-center gap-2 mt-1">
-            <span className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${dbStatusOk ? 'bg-emerald-500' : 'bg-red-500'}`} />
-            <span className={`font-mono text-lg font-bold ${dbStatusOk ? 'text-app-text' : 'text-red-500'}`}>
-              {dbStatusOk ? 'Connected' : 'Disconnected'}
+            {errorIsElevated && <span className="text-red-400 text-lg">⚠</span>}
+            <span className={`font-mono text-2xl font-bold ${errorNumberColor}`}>
+              {data.error_rate_pct}
             </span>
           </div>
-          <span className="text-xs text-app-muted font-mono">{dbStatusOk ? 'healthy' : 'down'}</span>
+          <span className={`text-xs font-mono px-2 py-0.5 rounded-full w-fit ${errorRateColor}`}>
+            {t(`metrics.health.${data.error_rate_status}`)}
+          </span>
         </Tile>
 
         {/* Tile 4 — Requests (24h) */}
@@ -147,6 +163,42 @@ export default function LiveMetricsBento() {
             {data.requests_24h.toLocaleString()}
           </span>
           <UpdatedAgo timestamp={data.timestamp} />
+        </Tile>
+
+        {/* Tile 5 — Retries (1h) — red/amber when elevated */}
+        <Tile index={4} label={t('metrics.retries_1h')}>
+          <div className="flex items-center gap-2 mt-1">
+            {data.retries_1h > 5 && <span className="text-red-400 text-lg">⚠</span>}
+            <span className={`font-mono text-2xl font-bold ${
+              data.retries_1h > 10 ? 'text-red-400' : data.retries_1h > 0 ? 'text-amber-400' : 'text-app-text'
+            }`}>
+              {data.retries_1h}
+            </span>
+          </div>
+          <span className={`text-xs font-mono px-2 py-0.5 rounded-full w-fit ${
+            data.retries_1h > 10
+              ? 'bg-red-500/15 text-red-400'
+              : data.retries_1h > 0
+                ? 'bg-amber-400/15 text-amber-400'
+                : 'bg-emerald-500/15 text-emerald-500'
+          }`}>
+            {data.retries_1h > 10 ? t('metrics.health.investigating') : data.retries_1h > 0 ? t('metrics.health.warning') : t('metrics.health.stable')}
+          </span>
+        </Tile>
+
+        {/* Tile 6 — Last Incident — red/green */}
+        <Tile index={5} label={t('metrics.last_incident')}>
+          <div className="flex items-center gap-2 mt-1">
+            <span className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${incidentDot}`} />
+            <span className={`font-mono text-sm font-bold ${incidentText} truncate`}>
+              {hasIncident ? t(`metrics.incident.${data.last_incident}`) : t('metrics.incident.none')}
+            </span>
+          </div>
+          {hasIncident && (
+            <span className="text-xs text-app-muted font-mono">
+              {data.last_incident_ago}
+            </span>
+          )}
         </Tile>
 
       </div>

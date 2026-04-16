@@ -81,3 +81,16 @@ class ResumoMetricas(BaseModel):
         ..., examples=["last_24h"], description="Janela de tempo das métricas"
     )
     timestamp: str = Field(..., description="ISO 8601 timestamp da leitura")
+    retries_1h: int = Field(
+        default=0, examples=[3], description="Retries triggered in the last hour"
+    )
+    last_incident: str = Field(
+        default="none",
+        examples=["traffic_spike", "forced_failure", "none"],
+        description="Type of last incident recorded",
+    )
+    last_incident_ago: str = Field(
+        default="none",
+        examples=["12m ago", "none"],
+        description="Time since last incident (human-readable)",
+    )
