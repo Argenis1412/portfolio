@@ -1,38 +1,16 @@
-## 🚀 Feature/Refactor: [Title]
+## What does this PR do?
+<!-- One paragraph. Link to ticket if exists. -->
 
-### 📝 Description
-[Provide a brief overview of the changes and the reasoning behind them.]
+## Type of change
+- [ ] feat · [ ] fix · [ ] refactor · [ ] chore · [ ] docs
 
-### 🛡️ Security & Architecture Highlights (Defense in Depth)
-- [ ] Layer 1: [e.g., Honeypot implementation]
-- [ ] Layer 2: [e.g., Rate Limiting configuration]
-- [ ] Layer 3: [e.g., Idempotency & Hashing]
-- [ ] Layer 4: [e.g., Heuristic Spam Scoring]
+## Definition of Done checklist
+- [ ] `ruff` + `mypy` pass locally
+- [ ] New logic has unit tests
+- [ ] Docs/README updated (if behavior changed)
+- [ ] No placeholders or dead code committed
 
-### ⚙️ Engineering & Reliability
-- [ ] [e.g., Structured Logging integration]
-- [ ] [e.g., Clean Architecture decoupling]
-- [ ] [e.g., External API error handling]
+## How to test
+<!-- Steps to verify this works. -->
 
-### 🔍 Evidence (Logs/Screenshots)
-#### Structured Logging Example:
-```json
-// Paste a snippet of your structlog output here
-```
-
-#### Client Response (Stealth Mode):
-```json
-{
-  "sucesso": true,
-  "mensagem": "Mensagem enviada com sucesso! Retornarei em breve."
-}
-```
-
-### ✅ QA Checklist
-- [ ] [ ] All tests passing (`pytest`)
-- [ ] [ ] Manually verified [Feature A]
-- [ ] [ ] Rate limiting verified
-- [ ] [ ] Edge cases handled (e.g., empty fields, special characters)
-
----
-*Generated using my Professional PR Template*
+## Screenshots (if UI change)
