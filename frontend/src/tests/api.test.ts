@@ -1,10 +1,10 @@
 /**
- * Testes de qualidade para as funções de API (`api.ts`).
+ * Quality tests for API functions (`api.ts`).
  *
- * Verifica que cada função fetch:
- * - Usa a URL correta
- * - Retorna os dados no formato esperado
- * - Lança erro quando a resposta não é OK
+ * Verifies that each fetch function:
+ * - Uses the correct URL
+ * - Returns data in the expected format
+ * - Throws error when response is not OK
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -66,21 +66,21 @@ const projectFixture = {
 describe('fetchAbout', () => {
   beforeEach(() => vi.restoreAllMocks());
 
-  it('retorna os dados do perfil quando a resposta é OK', async () => {
+  it('returns profile data when response is OK', async () => {
     mockFetchOk(aboutFixture);
     const about = await fetchAbout();
     expect(about.nome).toBe('Argenis Lopez');
     expect(about.descricao).toEqual({ pt: 'PT', en: 'EN', es: 'ES' });
   });
 
-  it('lança erro quando a resposta não é OK', async () => {
+  it('throws error when response is not OK', async () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockFetchError(404);
     await expect(fetchAbout()).rejects.toThrow(/API request failed: 404/);
     spy.mockRestore();
   });
 
-  it('chama a URL correta (/sobre)', async () => {
+  it('calls correct URL (/sobre)', async () => {
     mockFetchOk(aboutFixture);
     const spy = vi.spyOn(globalThis, 'fetch');
     await fetchAbout();
@@ -93,7 +93,7 @@ describe('fetchAbout', () => {
 describe('fetchProjects', () => {
   beforeEach(() => vi.restoreAllMocks());
 
-  it('retorna lista de projetos', async () => {
+  it('returns projects list', async () => {
     mockFetchOk({ projetos: [projectFixture], total: 1 });
     const projects = await fetchProjects();
     expect(Array.isArray(projects)).toBe(true);
@@ -101,14 +101,14 @@ describe('fetchProjects', () => {
     expect(projects[0].id).toBe('proj-1');
   });
 
-  it('retorna lista vazia se projetos não é array (Resiliência / Hardening)', async () => {
+  it('returns empty list if projects is not an array (Resilience / Hardening)', async () => {
     mockFetchOk({ projetos: null, total: 0 });
-    // Agora o sistema é robusto: detecta o erro mas falha para [] para não quebrar o site
+    // Now the system is robust: it detects the error but defaults to [] to avoid breaking the site
     const projects = await fetchProjects();
     expect(projects).toEqual([]);
   });
 
-  it('lança erro quando a resposta não é OK', async () => {
+  it('throws error when response is not OK', async () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockFetchError(500);
     await expect(fetchProjects()).rejects.toThrow(/API request failed: 500/);
@@ -121,7 +121,7 @@ describe('fetchProjects', () => {
 describe('fetchSkills', () => {
   beforeEach(() => vi.restoreAllMocks());
 
-  it('retorna lista de habilidades', async () => {
+  it('returns skills list', async () => {
     mockFetchOk({
       stack: [
         { nome: 'Python', categoria: 'backend', nivel: 5, icone: 'python' },
@@ -135,7 +135,7 @@ describe('fetchSkills', () => {
     expect(skills[0].nivel).toBe(5);
   });
 
-  it('lança erro quando o servidor retorna erro', async () => {
+  it('throws error when server returns error', async () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockFetchError(503);
     await expect(fetchSkills()).rejects.toThrow(/API request failed: 503/);
@@ -148,7 +148,7 @@ describe('fetchSkills', () => {
 describe('fetchExperience', () => {
   beforeEach(() => vi.restoreAllMocks());
 
-  it('retorna lista de experiências', async () => {
+  it('returns experience list', async () => {
     mockFetchOk({
       experiencias: [
         {
@@ -172,7 +172,7 @@ describe('fetchExperience', () => {
     expect(exp[0].atual).toBe(true);
   });
 
-  it('lança erro quando a resposta não é OK', async () => {
+  it('throws error when response is not OK', async () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockFetchError(500);
     await expect(fetchExperience()).rejects.toThrow(/API request failed: 500/);
@@ -185,7 +185,7 @@ describe('fetchExperience', () => {
 describe('fetchFormacao', () => {
   beforeEach(() => vi.restoreAllMocks());
 
-  it('retorna lista de formações', async () => {
+  it('returns education list', async () => {
     mockFetchOk({
       formacoes: [
         {
@@ -207,7 +207,7 @@ describe('fetchFormacao', () => {
     expect(formacao[0].instituicao).toBe('UFPR');
   });
 
-  it('lança erro quando a resposta não é OK', async () => {
+  it('throws error when response is not OK', async () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockFetchError(500);
     await expect(fetchFormacao()).rejects.toThrow(/API request failed: 500/);

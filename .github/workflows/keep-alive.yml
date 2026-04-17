@@ -2,9 +2,9 @@ name: Keep Backend Alive
 
 on:
   schedule:
-    # Executa a cada 5 minutos para garantir que o backend não durma
-    - cron: "*/5 * * * *"
-  workflow_dispatch: # Permite executar manualmente
+    # Execute every 4 minutes to ensure backend doesn't sleep
+    - cron: "*/4 * * * *"
+  workflow_dispatch: # Allows manual execution
 
 jobs:
   ping:
@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Ping Backend API
         run: |
-          # Aquecemos o endpoint /saude porque ele executa um SELECT 1 real no PostgreSQL.
-          # Isso mantém backend e banco vivos, evitando cold starts duplos no Koyeb.
-          # O primeiro ping do dia pode demorar mais se a instância estiver dormindo.
-          curl -sS -o /dev/null -w "%{http_code}" --retry 2 --retry-delay 5 --max-time 60 https://selected-fionna-argenis1412-58caae17.koyeb.app/saude || true
+          # We ping the /saude endpoint because it executes a real SELECT 1 on PostgreSQL.
+          # This keeps both the backend and DB active, avoiding cold starts.
+          # The first ping of the day might take longer if the instance is sleeping.
+          curl -sS -o /dev/null -w "%{http_code}" --retry 2 --retry-delay 5 --max-time 60 https://argenisbackend.com/saude || true

@@ -1,6 +1,6 @@
 /**
- * Hooks de React Query para todos los endpoints de la API.
- * Proveen caché automático, estados de carga/error y revalidación.
+ * React Query hooks for all API endpoints.
+ * Provide automatic caching, loading/error states, and revalidation.
  */
 import { useQuery, useMutation } from '@tanstack/react-query';
 import {
@@ -13,7 +13,7 @@ import {
 } from '../api';
 
 
-// Claves de query centralizadas para evitar errores de tipeo
+// Centralized query keys to avoid typos
 export const queryKeys = {
   about: ['about'] as const,
   projects: ['projects'] as const,
@@ -26,7 +26,7 @@ export function useAbout() {
   return useQuery({
     queryKey: queryKeys.about,
     queryFn: fetchAbout,
-    staleTime: 5 * 60 * 1000, // 5 minutos
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
 
@@ -42,7 +42,7 @@ export function useSkills() {
   return useQuery({
     queryKey: queryKeys.skills,
     queryFn: fetchSkills,
-    staleTime: 10 * 60 * 1000, // 10 minutos (datos más estáticos)
+    staleTime: 10 * 60 * 1000, // 10 minutes (static data)
   });
 }
 

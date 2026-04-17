@@ -13,34 +13,34 @@ on:
 
 jobs:
   test:
-    name: 🧪 Testes React
+    name: 🧪 React Tests
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [20]
 
     steps:
-      - name: 📥 Checkout código
+      - name: 📥 Code checkout
         uses: actions/checkout@v4
 
-      - name: 📦 Configurar Node.js ${{ matrix.node-version }}
+      - name: 📦 Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
-      - name: 📦 Instalar dependências
+      - name: 📦 Install dependencies
         run: |
           cd frontend
           npm ci
 
-      - name: 🧪 Executar testes
+      - name: 🧪 Run tests
         run: |
           cd frontend
           npm run test
 
-      - name: 🏗️ Build produção
+      - name: 🏗️ Production build
         run: |
           cd frontend
           npm run build
@@ -50,17 +50,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout código
+      - name: 📥 Code checkout
         uses: actions/checkout@v4
 
-      - name: 📦 Configurar Node.js
+      - name: 📦 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
-      - name: 📦 Instalar dependências
+      - name: 📦 Install dependencies
         run: |
           cd frontend
           npm ci
@@ -70,10 +70,10 @@ jobs:
           cd frontend
           npm run lint
 
-      - name: 🔒 Verificar placeholders hardcodeados
+      - name: 🔒 Check hardcoded placeholders
         run: |
           cd ..
           if grep -qrn --exclude-dir=".github" "https://seudominio.com" .; then
-            echo "❌ ERROR: Placeholder 'https://seudominio.com' encontrado. Usa variables de entorno."
+            echo "❌ ERROR: Placeholder 'https://seudominio.com' found. Use environment variables."
             exit 1
           fi

@@ -1,8 +1,8 @@
-# Script para verificar o CI localmente (Windows PowerShell)
+# Script to locally verify CI (Windows PowerShell)
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "--- Iniciando Verificacao Local do CI ---" -ForegroundColor Cyan
+Write-Host "--- Starting Local CI Verification ---" -ForegroundColor Cyan
 
 function Run-Check {
     param (
@@ -12,38 +12,38 @@ function Run-Check {
     Write-Host "`n$Name..." -ForegroundColor Yellow
     & $Command
     if ($LASTEXITCODE -ne 0) {
-        Write-Host "❌ $Name falhou! (Exit Code: $LASTEXITCODE)" -ForegroundColor Red
+        Write-Host "❌ $Name failed! (Exit Code: $LASTEXITCODE)" -ForegroundColor Red
         return $false
     }
-    Write-Host "✅ $Name passou!" -ForegroundColor Green
+    Write-Host "✅ $Name passed!" -ForegroundColor Green
     return $true
 }
 
 $AllPassed = $true
 
-# 1. Verificar dependencias
-if (!(Run-Check "Verificando dependencias" { py -3.12 -m pip install -r requirements.txt -r requirements-dev.txt -q })) { $AllPassed = $false }
+# 1. Verify dependencies
+if (!(Run-Check "Verify dependencies" { py -3.12 -m pip install -r requirements.txt -r requirements-dev.txt -q })) { $AllPassed = $false }
 
 # 2. Ruff Check (Linting)
 if (!(Run-Check "Ruff Check (Linting)" { py -3.12 -m ruff check . })) { $AllPassed = $false }
 
-# 3. Ruff Format (Estilo)
+# 3. Ruff Format Check (Style)
 if (!(Run-Check "Ruff Format Check" { py -3.12 -m ruff format --check . })) { 
-    Write-Host "DICA: Use 'py -3.12 -m ruff format .' para corrigir automaticamente." -ForegroundColor Gray
+    Write-Host "HINT: Use 'py -3.12 -m ruff format .' to fix automatically." -ForegroundColor Gray
     $AllPassed = $false 
 }
 
-# 4. Mypy (Tipagem)
-if (!(Run-Check "Mypy (Tipagem)" { py -3.12 -m mypy app/core app/casos_uso --ignore-missing-imports --explicit-package-bases })) { $AllPassed = $false }
+# 4. Mypy (Typing)
+if (!(Run-Check "Mypy (Typing)" { py -3.12 -m mypy app/core app/casos_uso --ignore-missing-imports --explicit-package-bases })) { $AllPassed = $false }
 
-# 5. Pytest (Testes)
-if (!(Run-Check "Pytest (Testes)" { py -3.12 -m pytest })) { $AllPassed = $false }
+# 5. Pytest (Tests)
+if (!(Run-Check "Pytest (Tests)" { py -3.12 -m pytest })) { $AllPassed = $false }
 
-Write-Host "`n--- Verificacao concluida ---" -ForegroundColor Cyan
+Write-Host "`n--- Verification complete ---" -ForegroundColor Cyan
 
 if ($AllPassed) {
-    Write-Host "✨ TUDO PASSOU! Pode subir os cambios com seguranca." -ForegroundColor Green
+    Write-Host "✨ ALL PASSED! You can push changes safely." -ForegroundColor Green
 } else {
-    Write-Host "⚠️  Alguns checks falharam. Corrija antes de subir." -ForegroundColor Red
+    Write-Host "⚠️  Some checks failed. Fix before pushing." -ForegroundColor Red
     exit 1
 }

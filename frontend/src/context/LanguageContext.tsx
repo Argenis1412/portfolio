@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 
-// --- Tipos ---
+// --- Types ---
 export type Language = 'pt' | 'en' | 'es';
 
 interface LanguageContextType {
@@ -10,8 +10,8 @@ interface LanguageContextType {
   t: (key: string, params?: Record<string, string | number>) => string;
 }
 
-// --- Carga de traducciones desde archivos JSON ---
-// Para añadir un nuevo idioma: crear el archivo JSON en src/i18n/ e importarlo aquí.
+// --- Load translations from JSON files ---
+// To add a new language: create the JSON file in src/i18n/ and import it here.
 import ptTranslations from '../i18n/pt.json';
 import enTranslations from '../i18n/en.json';
 import esTranslations from '../i18n/es.json';
@@ -22,7 +22,7 @@ const translations: Record<Language, Record<string, string>> = {
   es: esTranslations,
 };
 
-// --- Contexto ---
+// --- Context ---
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {

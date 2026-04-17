@@ -1,7 +1,7 @@
 /**
- * Testes de qualidade do componente Navbar.
+ * Quality tests for Navbar component.
  *
- * Verifica renderização, links de navegação, seletor de idioma e botão de tema.
+ * Verifies rendering, navigation links, language selector and theme button.
  */
 
 import { render, screen, fireEvent } from '@testing-library/react';
@@ -20,7 +20,7 @@ const queryClient = new QueryClient({
   },
 });
 
-// Helper para renderizar o Navbar com todos os contextos necessários
+// Helper to render Navbar with all required contexts
 const renderNavbar = () =>
   render(
     <QueryClientProvider client={queryClient}>
@@ -33,39 +33,39 @@ const renderNavbar = () =>
   );
 
 
-// ─── Renderização ─────────────────────────────────────────────────────────────
+// ─── Rendering ─────────────────────────────────────────────────────────────
 
-describe('Navbar – renderização', () => {
-  it('renderiza sem erros', () => {
+describe('Navbar - rendering', () => {
+  it('renders without errors', () => {
     expect(() => renderNavbar()).not.toThrow();
   });
 
-  it('renderiza o elemento <nav>', () => {
+  it('renders the <nav> element', () => {
     const { container } = renderNavbar();
     expect(container.querySelector('nav')).toBeTruthy();
   });
 });
 
-// ─── Links de navegação ────────────────────────────────────────────────────────
+// ─── Navigation links ────────────────────────────────────────────────────────
 
-describe('Navbar – navegação por botões', () => {
-  it('exibe o botón para Contato correctamente', () => {
+describe('Navbar - button navigation', () => {
+  it('displays the Contact button correctly', () => {
     const { getByTestId } = renderNavbar();
     const btn = getByTestId('nav-contact');
     expect(btn).toBeTruthy();
   });
 
-  it('o clique no botón de contato não lança erro', () => {
+  it('clicking the contact button does not throw error', () => {
     const { getByTestId } = renderNavbar();
     const btn = getByTestId('nav-contact');
     expect(() => fireEvent.click(btn)).not.toThrow();
   });
 });
 
-// ─── Seletor de idioma ─────────────────────────────────────────────────────────
+// ─── Language selector ─────────────────────────────────────────────────────────
 
-describe('Navbar – seletor de idioma', () => {
-  it('renderiza o seletor de idioma com as opções PT, EN e ES', () => {
+describe('Navbar - language selector', () => {
+  it('renders language selector with PT, EN and ES options', () => {
     renderNavbar();
     const select = screen.getByRole('combobox') as HTMLSelectElement;
     const options = Array.from(select.options).map((o) => o.value);
@@ -74,7 +74,7 @@ describe('Navbar – seletor de idioma', () => {
     expect(options).toContain('es');
   });
 
-  it('muda o idioma selecionado quando o usuário escolhe EN', () => {
+  it('changes selected language when user chooses EN', () => {
     renderNavbar();
     const select = screen.getByRole('combobox') as HTMLSelectElement;
     fireEvent.change(select, { target: { value: 'en' } });
@@ -82,16 +82,16 @@ describe('Navbar – seletor de idioma', () => {
   });
 });
 
-// ─── Botão de tema ─────────────────────────────────────────────────────────────
+// ─── Theme button ─────────────────────────────────────────────────────────────
 
-describe('Navbar – botão de tema', () => {
-  it('renderiza o botão de alternância de tema', () => {
+describe('Navbar - theme button', () => {
+  it('renders theme toggle button', () => {
     renderNavbar();
     const btn = screen.getByRole('button', { name: /toggle theme/i });
     expect(btn).toBeTruthy();
   });
 
-  it('o clique no botão não lança erro', () => {
+  it('clicking the button does not throw error', () => {
     renderNavbar();
     const btn = screen.getByRole('button', { name: /toggle theme/i });
     expect(() => fireEvent.click(btn)).not.toThrow();
