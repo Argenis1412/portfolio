@@ -8,7 +8,7 @@ from app.principal import app
 from app.controladores.dependencias import obter_enviar_contato_use_case
 from app.core.idempotencia import store
 
-# client = TestClient(app) # Removido para usar a fixture
+# client = TestClient(app) # Removed to use fixture
 
 
 def test_idempotencia_contato(client):
@@ -106,7 +106,7 @@ def test_idempotencia_sem_chave_funciona_normalmente(client):
         resp1 = client.post("/api/v1/contato", json=payload)
         assert resp1.status_code == 200
 
-        # Mudar conteúdo para não cair na deduplicação de 5 min
+        # Change content to avoid 5 min deduplication
         payload["mensagem"] = "Different message for second call."
         resp2 = client.post("/api/v1/contato", json=payload)
         assert resp2.status_code == 200
@@ -153,13 +153,13 @@ def test_rate_limiting_contato_por_email(client):
         "mensagem": "Some message",
     }
 
-    # Mock do Use Case para acelerar
+    # Mock Use Case to speed up
     mock_uc = AsyncMock()
     mock_uc.executar.return_value = True
     app.dependency_overrides[obter_enviar_contato_use_case] = lambda: mock_uc
 
     try:
-        # Fazer 10 requisições (mudar mensagem para evitar deduplicação de conteúdo)
+        # Make 10 requests (change message to avoid content deduplication)
         for i in range(10):
             payload["mensagem"] = f"Message number {i} for rate limiting test."
             resp = client.post("/api/v1/contato", json=payload)

@@ -48,7 +48,7 @@ from app.core.limite import limiter
 
 roteador = APIRouter(tags=["API"])
 
-# Persistência de Uptime (para evitar que reinícios de dev-server zerem o tempo)
+# Uptime persistence (to avoid dev-server restarts resetting time)
 # No Koyeb/Produção, esse arquivo será recriado no deploy, marcando o início real.
 _START_FILE = Path(".app_start_time")
 if not _START_FILE.exists():
@@ -81,12 +81,12 @@ async def obter_resumo_metricas(response: Response) -> ResumoMetricas:
     """
     Retorna métricas consolidadas para o dashboard con foco en UX profesional.
     """
-    # 1. Cache para evitar spam de polling
+    # 1. Cache to avoid polling spam
     response.headers["Cache-Control"] = "public, max-age=15"
 
     uptime_segundos = int(time.time() - _INICIO)
 
-    # 2. Valores base deterministas para credibilidad
+    # 2. Deterministic base values for credibility
     random.seed(int(time.time() // 60))
     p95 = 42.0 + (random.random() * 3.0)
     requests = 980 + (uptime_segundos // 30) + chaos_state.total_chaos_requests
@@ -145,7 +145,7 @@ async def obter_resumo_metricas(response: Response) -> ResumoMetricas:
         last_incident_type = "none"
 
     return ResumoMetricas(
-        p95_ms=int(p95),  # Menos ruido visual, int es suficiente para ms
+        p95_ms=int(p95),  # Less visual noise, int is enough for ms
         p95_status=p95_status,
         requests_24h=requests,
         error_rate=round(error_rate, 4),
@@ -352,7 +352,7 @@ async def obter_stack(
     """
     por_categoria = await obter_stack_uc.executar()
 
-    # Converter para ItemStack
+    # Convert to ItemStack
     stack_completo = []
     por_categoria_validado: dict[str, list[ItemStack]] = {}
 

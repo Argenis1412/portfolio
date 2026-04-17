@@ -60,7 +60,7 @@ class RepositorioPortfolio(ABC):
         pass
 
 
-# Caminho relativo ao projeto para os dados JSON
+# Relative path to project for JSON data
 DEFAULT_DADOS_PATH = Path(__file__).parent.parent.parent / "dados"
 
 

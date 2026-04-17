@@ -37,7 +37,7 @@ def configurar_structlog() -> None:
             structlog.processors.StackInfoRenderer(),
             structlog.processors.format_exc_info,
             structlog.processors.UnicodeDecoder(),
-            # JSON para produção, Console para desenvolvimento
+            # JSON for production, Console for development
             structlog.dev.ConsoleRenderer()
             if sys.stderr.isatty()
             else structlog.processors.JSONRenderer(),

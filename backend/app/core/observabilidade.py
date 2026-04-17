@@ -48,7 +48,7 @@ def _configurar_sentry(dsn: str, ambiente: str, traces_sample_rate: float) -> No
             dsn=dsn,
             environment=ambiente,
             traces_sample_rate=traces_sample_rate,
-            # Captura headers e dados de request para facilitar debug
+            # Capture headers and request data to facilitate debug
             send_default_pii=False,  # False: não captura dados de usuário por padrão
             integrations=[
                 StarletteIntegration(transaction_style="endpoint"),
@@ -166,7 +166,7 @@ def _configurar_opentelemetry(
         import io
 
         if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
-            # Durante os testes, não usamos BatchSpanProcessor para evitar
+            # During tests, we do not use BatchSpanProcessor to avoid
             # o erro "ValueError: I/O operation on closed file." ao final.
             from opentelemetry.sdk.trace.export import (
                 SimpleSpanProcessor,
@@ -215,7 +215,7 @@ def _configurar_opentelemetry(
             provider.add_span_processor(BatchSpanProcessor(exporter))
             logger.info("otel_exporter_console", motivo="OTLP_ENDPOINT não configurado")
 
-        # Registrar como provider global
+        # Register as global provider
         trace.set_tracer_provider(provider)
 
         # Auto-instrumentar FastAPI (captura spans por endpoint automaticamente)

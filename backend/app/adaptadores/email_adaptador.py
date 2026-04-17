@@ -138,7 +138,7 @@ class ResendEmailAdaptador(EmailAdaptador):
             return False
 
         try:
-            # Prepara a mensagem HTML básica
+            # Prepare basic HTML message
             html_content = f"""
             <h3>Novo contato do Portfólio</h3>
             <p><strong>Nome:</strong> {mensagem.nome}</p>
