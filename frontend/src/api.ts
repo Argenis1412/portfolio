@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // ===================================================
-// Esquemas de Validación (Sincronizados con Backend)
+// Validation Schemas (Synchronized with Backend)
 // ===================================================
 
 export const LocalizedStringSchema = z.object({
@@ -12,7 +12,7 @@ export const LocalizedStringSchema = z.object({
 
 export type LocalizedString = z.infer<typeof LocalizedStringSchema>;
 
-// Esquema para listagem (Resumo)
+// Schema for listing (Summary)
 export const ProjectSchema = z.object({
   id: z.string(),
   nome: z.string(),
@@ -27,7 +27,7 @@ export const ProjectSchema = z.object({
 
 export type Project = z.infer<typeof ProjectSchema>;
 
-// Esquema para detalhes (Detalhado)
+// Schema for details (Detailed)
 export const ProjectDetailedSchema = ProjectSchema.extend({
   descricao_completa: LocalizedStringSchema,
   funcionalidades: z.array(z.string()),
@@ -105,7 +105,7 @@ export const AboutSchema = z.object({
 export type About = z.infer<typeof AboutSchema>;
 
 // ===================================================
-// Cliente de API Centralizado con Validación Zod
+// Centralized API Client with Zod Validation
 // ===================================================
 
 const configuredApiBaseUrl = import.meta.env.VITE_API_URL?.trim();
@@ -151,7 +151,7 @@ async function apiGet<T>(path: string, schema: z.ZodSchema<T>): Promise<T> {
     );
   }
 
-  // Validación con Zod
+  // Zod validation
   const result = schema.safeParse(rawData);
 
   if (!result.success) {
@@ -163,7 +163,7 @@ async function apiGet<T>(path: string, schema: z.ZodSchema<T>): Promise<T> {
 }
 
 // ===================================================
-// Funciones de Fetch (Consumidor Estricto y Resiliente)
+// Fetch Functions (Strict and Resilient Consumer)
 // ===================================================
 
 export const fetchMetricsSummary = (): Promise<MetricsSummary> =>
@@ -208,7 +208,7 @@ export const fetchFormacao = async (): Promise<Formacao[]> => {
 };
 
 // ===================================================
-// Mutaciones (POST/PUT/DELETE)
+// Mutations (POST/PUT/DELETE)
 // ===================================================
 
 export async function postContact(data: {
