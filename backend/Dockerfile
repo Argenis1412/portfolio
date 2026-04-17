@@ -11,7 +11,7 @@
 # ===========================
 FROM python:3.12-slim as builder
 
-# Variáveis de build
+# Build variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
@@ -19,13 +19,13 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /build
 
-# Instalar dependências do sistema
+# Install system dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copiar e instalar dependências Python
+# Copy and install Python dependencies
 COPY requirements.txt .
 RUN pip install --user -r requirements.txt
 
@@ -34,46 +34,46 @@ RUN pip install --user -r requirements.txt
 # ===========================
 FROM python:3.12-slim
 
-# Metadados
+# Metadata
 LABEL maintainer="seuemail@exemplo.com"
 LABEL description="API FastAPI para Portfólio Profissional"
 LABEL version="1.0.0"
 
-# Variáveis de ambiente
+# Environment variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     AMBIENTE=producao \
     API_HOST=0.0.0.0 \
     API_PORT=8000
 
-# Criar usuário não-root para segurança
+# Create non-root user for security
 RUN useradd -m -u 1000 appuser && \
     mkdir -p /app && \
     chown -R appuser:appuser /app
 
 WORKDIR /app
 
-# Copiar dependências do stage builder
+# Copy dependencies from builder stage
 COPY --from=builder --chown=appuser:appuser /root/.local /home/appuser/.local
 
-# Adicionar local bin ao PATH
+# Add local bin to PATH
 ENV PATH=/home/appuser/.local/bin:$PATH
 
-# Copiar código da aplicação
+# Copy application code
 COPY --chown=appuser:appuser app/ ./app/
 COPY --chown=appuser:appuser dados/ ./dados/
 COPY --chown=appuser:appuser alembic/ ./alembic/
 COPY --chown=appuser:appuser alembic.ini .
 
-# Mudar para usuário não-root
+# Switch to non-root user
 USER appuser
 
-# Expor porta
+# Expose port
 EXPOSE 8000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/saude')"
 
-# Comando de inicialización: Migrar y luego Arrancar
-CMD python -m alembic upgrade head && uvicorn app.principal:app --host 0.0.0.0 --port 8000 --workers 2
+# Initialization command: Start Application
+CMD uvicorn app.principal:app --host 0.0.0.0 --port 8000 --workers 2
