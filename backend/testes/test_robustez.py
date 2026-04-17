@@ -197,7 +197,7 @@ def test_rate_limiter_redis_fallback(client, monkeypatch):
 
     try:
         resp = client.post("/api/v1/contato", json=payload)
-        # Ao invés de HTTP 500, o sistema retorna HTTP 200 graças ao fallback!
+        # Instead of HTTP 500, the system returns HTTP 200 thanks to fallback!
         assert resp.status_code == 200
         assert mock_uc.executar.call_count == 1
     finally:

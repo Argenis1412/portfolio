@@ -15,7 +15,7 @@ def test_etag_and_304_not_modified(client):
     # 2. Segunda requisição enviando If-None-Match
     resp2 = client.get("/api/v1/sobre", headers={"If-None-Match": etag})
 
-    # Deve retornar 304 Not Modified
+    # Should return 304 Not Modified
     assert resp2.status_code == 304
     # 304 NÃO deve ter corpo
     assert resp2.text == ""
@@ -53,7 +53,7 @@ def test_etag_changes_when_content_changes(client):
         resp1 = client.get("/api/v1/sobre")
         etag1 = resp1.headers.get("ETag")
 
-        # Mudar o dado retornado
+        # Change returned data
         mock_uc.executar.return_value = {
             "nome": "Argenis Lopez",
             "titulo": "Senior Dev",

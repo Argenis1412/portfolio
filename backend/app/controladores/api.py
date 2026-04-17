@@ -49,7 +49,7 @@ from app.core.limite import limiter
 roteador = APIRouter(tags=["API"])
 
 # Uptime persistence (to avoid dev-server restarts resetting time)
-# No Koyeb/Produção, esse arquivo será recriado no deploy, marcando o início real.
+# On Koyeb/Production, this file is recreated on deploy, marking the real start.
 _START_FILE = Path(".app_start_time")
 if not _START_FILE.exists():
     _START_FILE.write_text(str(time.time()))

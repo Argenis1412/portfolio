@@ -2,7 +2,7 @@ import asyncio
 import os
 import sys
 
-# Adicionar o diretório raiz ao path para poder importar a app
+# Add root directory to path to allow importing app
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from app.adaptadores.email_adaptador import ResendEmailAdaptador

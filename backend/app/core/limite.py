@@ -84,5 +84,5 @@ def check_rate_limit(request: Request, limit_string: str, key_func=get_email_or_
                 error=str(e),
                 limit=str(limit),
             )
-            # Ao invés de retornar 500, falhamos 'aberto' permitindo a requisição
+            # Instead of returning 500, we fail 'open' allowing the request
             continue
