@@ -65,7 +65,7 @@ def criar_aplicacao() -> FastAPI:
     )
 
     # Observabilidade deve ser inicializada ANTES dos middlewares e rotas
-    # para garantir que Sentry e Prometheus estejam ativos desde o início.
+    # to ensure Sentry and Prometheus are active from the beginning.
     configurar_observabilidade(aplicacao, configuracoes)
 
     _configurar_middleware(aplicacao)
@@ -228,7 +228,7 @@ def _registrar_rotas(aplicacao: FastAPI) -> None:
     # Health check (sem prefixo, usado por probes)
     aplicacao.include_router(roteador_saude)
 
-    # Rota raiz para evitar 404 (Koyeb/Público)
+    # Root route to avoid 404 (Koyeb/Public)
     @aplicacao.get("/", tags=["Health"])
     async def root():
         return {

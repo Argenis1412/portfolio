@@ -36,11 +36,11 @@ def repo_com_dados():
     Cria um RepositorioSQL com banco SQLite temporário populado com dados de teste.
     O banco é destruído automaticamente ao final de cada teste.
     """
-    # Cria arquivo temporário que será o banco de dados
+    # Create temporary file for database
     fd, db_path = tempfile.mkstemp(suffix=".db")
     os.close(fd)
 
-    # URLs para ambos os engines
+    # URLs for both engines
     sync_url = f"sqlite:///{db_path}"
     async_url = f"sqlite+aiosqlite:///{db_path}"
 
@@ -53,11 +53,11 @@ def repo_com_dados():
             _popular_banco(session)
             session.commit()
 
-        # Retorna o repositório assíncrono apontando para o mesmo arquivo
+        # Returns async repository pointing to the same file
         yield RepositorioSQL(database_url=async_url)
 
     finally:
-        # Cleanup: remove o arquivo temporário
+        # Cleanup: remove temporary file
         try:
             os.unlink(db_path)
         except OSError:

@@ -78,7 +78,7 @@ class RepositorioSQL(RepositorioPortfolio):
             modelo = resultado.first()
             if not modelo:
                 return {}
-            # Retorna como dict para manter compatibilidade com o caso de uso
+            # Return as dict to maintain use case compatibility
             dados = modelo.model_dump()
             dados.pop("id", None)
             dados["descricao"] = dados["descricao"]

@@ -200,7 +200,7 @@ def setup_database():
     engine = create_engine(sync_url)
     SQLModel.metadata.create_all(engine)
 
-    # Popular dados mínimos para os testes de integração passarem
+    # Populate minimum data for integration tests to pass
     with Session(engine) as session:
         session.add(
             SobreModelo(
@@ -314,7 +314,7 @@ def reset_global_state():
 
     # Limpar storage do rate limiter (slowapi)
     if hasattr(limiter, "_storage") and hasattr(limiter._storage, "storage"):
-        # Para MemoryStorage do limits, que o slowapi usa
+        # For limits MemoryStorage, which slowapi uses
         limiter._storage.storage.clear()
     elif hasattr(limiter, "_storage"):
         # Tentativa genérica caso a estrutura mude
@@ -374,7 +374,7 @@ async def override_dependencias(setup_database):
         repo_real_test
     )
 
-    # Mock para envio de email para evitar chamadas reais (Formspree) nos testes
+    # Mock for email sending to avoid real calls (Formspree) in tests
     from app.casos_uso.enviar_contato import EnviarContatoUseCase
 
     mock_email = AsyncMock(spec=EmailAdaptador)

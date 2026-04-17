@@ -113,4 +113,3 @@ A task is NOT finished until:
 - **AI writes code, humans own it**: If you can't explain the code, don't commit it.
 
 ---
-*Note: This file is for local reference only and must be ignored by git.*

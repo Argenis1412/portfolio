@@ -50,7 +50,7 @@ def test_obter_sobre_retorna_200(client):
 
 def test_listar_projetos_retorna_200(client):
     """Testa endpoint GET /api/v1/projetos retorna lista."""
-    # Como usamos mock no conftest, ele deve retornar os dados do mock
+    # Since we use mock in conftest, it should return mock data
     response = client.get("/api/v1/projetos")
 
     assert response.status_code == 200
@@ -62,7 +62,7 @@ def test_listar_projetos_retorna_200(client):
 
 def test_obter_projeto_existente_retorna_200(client):
     """Testa GET /api/v1/projetos/{id} com projeto existente."""
-    # O mock em conftest define 'projeto-1' como ID válido
+    # The mock in conftest defines 'projeto-1' as a valid ID
     response = client.get("/api/v1/projetos/projeto-1")
 
     assert response.status_code == 200

@@ -1,2 +1,2 @@
-# Arquivo de inicialização do pacote app
+# App package initialization file
 __version__ = "1.0.0"

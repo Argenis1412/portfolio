@@ -202,7 +202,7 @@ async def verificar_idempotencia(
             )
         raise IdempotencyException(record)
 
-    # Bloquear chave como em progresso
+    # Lock key as in progress
     acquired = await store.set_in_progress(effective_key)
     if not acquired:
         record = await store.get(effective_key)

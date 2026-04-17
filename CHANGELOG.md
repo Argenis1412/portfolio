@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/en/2.0.0/).
 
 ---
 
+## [1.4.1] - 2026-04-17
+
+### 🛠️ Enhancements & Reliability
+
+#### ✅ Added
+- ✅ **TraceConsole UI**: Allow continuous payload testing without reloading (`#10`).
+- ✅ **Chaos Engineering**: Implement honest chaos playground and enhanced failure metrics.
+
+#### 🚀 Performance
+- ✅ **Cold Start Optimization**: Removed `alembic upgrade head` from container boot sequence and fixed keep-alive targets for instant wakeups.
+
+#### 📝 Documentation & Style
+- ✅ **Codebase Translation**: Translated backend roots, infrastructure (`docker-compose`, CI, env files), frontend core API/state logic, and test comments comprehensively to English.
+- ✅ **Linting**: Fixed backend formatting and CI validation issues.
+
+---
+
 ## [1.4.0] - 2026-04-15
 
 ### 🎉 Release Candidate (Production Ready)

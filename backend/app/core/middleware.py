@@ -110,7 +110,7 @@ class MiddlewareRequisicao(BaseHTTPMiddleware):
         Returns:
             Response: Resposta com headers adicionais.
         """
-        # Gerar ID único para rastreamento
+        # Generate unique ID for tracking
         request_id = str(uuid.uuid4())
 
         # Adicionar request_id no state do request
@@ -139,7 +139,7 @@ class MiddlewareRequisicao(BaseHTTPMiddleware):
         try:
             response = await call_next(request)
         except Exception as exc:
-            # Log de erro e re-raise para handlers tratarem
+            # Log error and re-raise for handlers to catch
             logger.error(
                 "erro_processamento_requisicao",
                 erro=str(exc),
@@ -159,7 +159,7 @@ class MiddlewareRequisicao(BaseHTTPMiddleware):
         trace_id = _obter_trace_id()
         if trace_id:
             response.headers["X-Trace-ID"] = trace_id
-            # Enriquecer o log com o trace_id para correlacionar logs + traces
+            # Enrich log with trace_id to correlate logs + traces
             structlog.contextvars.bind_contextvars(trace_id=trace_id)
 
         # Log da resposta enviada
