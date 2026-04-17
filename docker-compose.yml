@@ -1,14 +1,14 @@
 # ============================================
-# DOCKER COMPOSE - PORTFÓLIO FULL-STACK
+# DOCKER COMPOSE - FULL-STACK PORTFOLIO
 # ============================================
 #
-# Este arquivo é uma ESTRUTURA MÍNIMA para futuro desenvolvimento
-# Descomente e configure conforme necessário
+# This file is a MINIMAL STRUCTURE for future development
+# Uncomment and configure as needed
 #
-# Uso:
-#   docker-compose up -d          # Inicia todos os serviços
-#   docker-compose down           # Para todos os serviços
-#   docker-compose logs -f api    # Visualiza logs do backend
+# Usage:
+#   docker-compose up -d          # Start all services
+#   docker-compose down           # Stop all services
+#   docker-compose logs -f api    # View backend logs
 # ============================================
 
 version: '3.8'
@@ -30,8 +30,8 @@ services:
       - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-portafolio}:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@db:5432/${POSTGRES_DB:-portafolio_db}
       - REDIS_URL=redis://redis:6379/0
     # volumes:
-      # - ./backend:/app  # Comentado para produção (segurança) - Descomente para desenvolvimento
-      # - /app/.venv  # Exclui virtualenv do volume
+      # - ./backend:/app  # Commented for production (security) - Uncomment for development
+      # - /app/.venv  # Excludes virtualenv from volume
     depends_on:
       db:
         condition: service_healthy
@@ -68,7 +68,7 @@ services:
   #     - portafolio-network
 
   # ===========================
-  # BANCO DE DADOS (PostgreSQL)
+  # DATABASE (PostgreSQL)
   # ===========================
   db:
     image: postgres:16-alpine
@@ -129,17 +129,17 @@ services:
   #     - portafolio-network
 
   # =============================================================
-  # OBSERVABILIDADE (Tier 1 — ativar para desenvolvimento local)
+  # OBSERVABILITY (Tier 1 — enable for local development)
   # =============================================================
-  # Para subir a stack completa de monitoring:
+  # To run the complete monitoring stack:
   #   docker-compose up -d api prometheus grafana jaeger
-  # Acesse:
+  # Access at:
   #   Grafana:    http://localhost:3000  (admin/admin)
   #   Prometheus: http://localhost:9090
   #   Jaeger UI:  http://localhost:16686
   # =============================================================
 
-  # --- Prometheus (coleta métricas do /metrics da API) ---
+  # --- Prometheus (collects metrics from API /metrics) ---
   prometheus:
     image: prom/prometheus:v2.52.0
     container_name: portafolio-prometheus
@@ -158,7 +158,7 @@ services:
     networks:
       - portafolio-network
 
-  # --- Grafana (visualização de dashboards) ---
+  # --- Grafana (dashboard visualization) ---
   grafana:
     image: grafana/grafana:11.1.0
     container_name: portafolio-grafana
@@ -176,7 +176,7 @@ services:
     networks:
       - portafolio-network
 
-  # --- Jaeger (distributed tracing — recebe spans do OpenTelemetry) ---
+  # --- Jaeger (distributed tracing — receives OpenTelemetry spans) ---
   jaeger:
     image: jaegertracing/all-in-one:1.57
     container_name: portafolio-jaeger
@@ -190,7 +190,7 @@ services:
       - portafolio-network
 
 # ===========================
-# VOLUMES PERSISTENTES
+# PERSISTENT VOLUMES
 # ===========================
 volumes:
   postgres_data:
@@ -203,7 +203,7 @@ volumes:
     driver: local
 
 # ===========================
-# REDES
+# NETWORKS
 # ===========================
 networks:
   portafolio-network:

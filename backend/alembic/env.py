@@ -2,7 +2,7 @@ from logging.config import fileConfig
 import sys
 from pathlib import Path
 
-# Adicionar o diretório backend ao sys.path para que as importações do 'app' funcionem
+# Add backend directory to sys.path so 'app' imports work
 backend_path = str(Path(__file__).parent.parent.absolute())
 if backend_path not in sys.path:
     sys.path.append(backend_path)
@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import create_async_engine  # noqa: E402
 from alembic import context  # noqa: E402
 from sqlmodel import SQLModel  # noqa: E402
 
-# Importar modelos para que sejam registrados no SQLModel.metadata
+# Import models so they are registered in SQLModel.metadata
 from app.adaptadores.modelos_sql import (  # noqa: E402
     SobreModelo,  # noqa: F401
     ProjetoModelo,  # noqa: F401
@@ -27,7 +27,7 @@ from app.configuracao import configuracoes  # noqa: E402
 # access to the values within the .ini file in use.
 config = context.config
 
-# Sobrescrever a URL do banco com a das configurações da aplicação
+# Override database URL with application config
 config.set_main_option("sqlalchemy.url", configuracoes.database_url)
 
 # Interpret the config file for Python logging.
@@ -100,14 +100,14 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    # Detectar se a URL é assíncrona (como no Koyeb ou local SQLite)
+    # Detect if URL is async (like on Koyeb or local SQLite)
     url = config.get_main_option("sqlalchemy.url")
     is_async = "+aiosqlite" in url or "+asyncpg" in url
 
     if is_async:
         asyncio.run(run_async_migrations())
     else:
-        # Modo síncrono tradicional
+        # Traditional sync mode
         from sqlalchemy import engine_from_config
 
         connectable = engine_from_config(

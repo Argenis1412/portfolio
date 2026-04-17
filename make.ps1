@@ -9,14 +9,14 @@ $commands = @{
     "test-back"   = "cd backend; .venv\Scripts\activate; python -m pytest"
     "test-front"  = "cd frontend; npm run test"
     "test"        = "cd backend; .venv\Scripts\activate; python -m pytest; cd ../frontend; npm run test"
-    "help"        = "Write-Host 'Atajos disponibles: dev, dev-back, dev-front, test-back, test-front, test' -ForegroundColor Yellow"
+    "help"        = "Write-Host 'Available shortcuts: dev, dev-back, dev-front, test-back, test-front, test' -ForegroundColor Yellow"
 }
 
 if ($commands.ContainsKey($target)) {
-    Write-Host "🚀 Ejecutando atajo: $target" -ForegroundColor Cyan
+    Write-Host "🚀 Running shortcut: $target" -ForegroundColor Cyan
     Invoke-Expression $commands[$target]
 }
 else {
-    Write-Host "❌ Atajo '$target' no encontrado." -ForegroundColor Red
+    Write-Host "❌ Shortcut '$target' not found." -ForegroundColor Red
     Invoke-Expression $commands["help"]
 }
