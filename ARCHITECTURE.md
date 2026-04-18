@@ -43,3 +43,10 @@ This document details the reasoning behind the architectural choices found in th
 ## 11. External Storage for Distributed State
 **Decision**: Migrating Rate Limiting and Persistence from local Memory/SQLite to Redis and PostgreSQL for production.
 **Why?** In "ephemeral" cloud environments like Koyeb, local file storage (SQLite) and in-memory caches (Rate limiting counters) are wiped on every container restart. By decoupling state into managed PostgreSQL (recommended: Supabase via `asyncpg`) and Redis (via `Upstash`), the application achieves true horizontal scalability and persistent antispam protection across multiple replicas.
+
+## 12. Future Strategy: Go (Golang) Migration
+**Decision**: Full backend rewrite to Golang is planned as an optional, long-term improvement.
+**Why?** While the current Python FastAPI setup is robust, migrating to Go aligns perfectly with the author's self-taught learning journey. Although moving to Go could be considered "over-engineering" for a simple portfolio, it provides tremendous infrastructure benefits:
+*   **Extreme Speed & No Cold Starts**: Go's compiled binary boots in <50ms natively, completely eliminating the 10-15s cold starts experienced in Python serverless environments.
+*   **Drastic Size Reduction**: The Docker container footprint will shrink from ~300+ MB (Python system dependencies + packages) to a mere ~15 MB using a `scratch` or `alpine` base image.
+*   **Clean Architecture Synergy**: Due to Go's intense focus on purely struct/interface-based duck typing natively embedded into the language, Clean Architecture principles (Repositories, Entities, Adapters) will become significantly more elegant, performant, and memory-safe compared to Python's injected dependencies.
