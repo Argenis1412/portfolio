@@ -10,6 +10,7 @@ const ServerWakeupNotice = React.lazy(() => import('./components/ServerWakeupNot
 const Skills = React.lazy(() => import('./components/Skills'));
 const Projects = React.lazy(() => import('./components/Projects'));
 const Experience = React.lazy(() => import('./components/Experience'));
+const Philosophy = React.lazy(() => import('./components/Philosophy'));
 const Contact = React.lazy(() => import('./components/Contact'));
 const Footer = React.lazy(() => import('./components/Footer'));
 
@@ -27,6 +28,7 @@ function App() {
               <ChaosPlayground />
               <Skills />
               <Projects />
+              <Philosophy />
               <Experience />
               <Contact />
               <ServerWakeupNotice />
