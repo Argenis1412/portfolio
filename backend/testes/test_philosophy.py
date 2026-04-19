@@ -1,4 +1,5 @@
 import pytest
+from app.adaptadores.repositorio import RepositorioJSON
 
 def test_api_philosophy_retorna_200_e_formato_valido(client) -> None:
     """Verifies the /api/v1/philosophy endpoint returns 200 OK and valid JSON schema."""
@@ -26,7 +27,6 @@ def test_api_philosophy_retorna_200_e_formato_valido(client) -> None:
     assert "pt" in first["role"]
     assert "en" in first["description"]
 
-from app.adaptadores.repositorio import RepositorioJSON
 
 @pytest.mark.asyncio
 async def test_repositorio_json_get_philosophy_parseia_corretamente() -> None:
