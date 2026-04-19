@@ -15,7 +15,7 @@ const TraceViewer     = React.lazy(() => import('./components/TraceViewer'));
 const LogStream       = React.lazy(() => import('./components/LogStream'));
 
 // Info sections
-const Skills          = React.lazy(() => import('./components/Skills'));
+
 const About           = React.lazy(() => import('./components/About'));
 const Experience      = React.lazy(() => import('./components/Experience'));
 const Philosophy      = React.lazy(() => import('./components/Philosophy'));
@@ -64,8 +64,6 @@ function App() {
                 {/* 6 — Log Stream: terminal event stream */}
                 <LogStream />
 
-                {/* 7 — Stack: minimal grid */}
-                <Skills />
 
                 {/* 8 — Experience + Education */}
                 <Experience />

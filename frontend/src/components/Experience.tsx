@@ -89,7 +89,7 @@ export default function Experience() {
           <div className="flex items-center gap-4 mb-12">
             <span className="text-xl md:text-2xl font-mono text-app-primary">02.</span>
             <h2 className="text-2xl md:text-4xl font-bold text-app-text tracking-widest">
-              Where I've Worked
+              {t('nav.journey')}
             </h2>
             <div className="hidden md:block h-px flex-grow bg-app-border opacity-50 ml-4 max-w-xs" />
           </div>

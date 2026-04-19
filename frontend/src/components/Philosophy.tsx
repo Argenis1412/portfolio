@@ -1,12 +1,11 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, User } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { m, AnimatePresence } from 'framer-motion';
+import { User } from 'lucide-react';
 import { usePhilosophy } from '../hooks/useApi';
 import { useLanguage } from '../context/LanguageContext';
 import type { LocalizedString } from '../api';
 import Skeleton from './ui/Skeleton';
 
-/** Returns the localized string for the active language. */
 function localize(obj: LocalizedString, lang: string): string {
   return obj[lang as keyof LocalizedString] ?? obj.en;
 }
@@ -14,174 +13,136 @@ function localize(obj: LocalizedString, lang: string): string {
 export default function Philosophy() {
   const { data: inspirations = [], isLoading } = usePhilosophy();
   const { language, t } = useLanguage();
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
 
-  const toggle = (id: string) =>
-    setExpandedId(prev => (prev === id ? null : id));
+  useEffect(() => {
+    if (inspirations.length > 0 && !activeId) {
+      setActiveId(inspirations[0].id.toString());
+    }
+  }, [inspirations, activeId]);
 
   const handleImgError = (id: string) =>
     setImgErrors(prev => ({ ...prev, [id]: true }));
 
-  return (
-    <section
-      id="philosophy"
-      aria-labelledby="philosophy-heading"
-      className="py-20 relative overflow-hidden"
-    >
-      {/* Ambient glow */}
-      <div
-        aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(212,163,115,0.07),transparent)]"
-      />
+  if (isLoading) {
+    return (
+      <section id="philosophy" className="py-20 relative overflow-hidden">
+        <div className="max-w-4xl mx-auto px-4">
+          <Skeleton className="h-10 w-64 mx-auto mb-16" />
+          <div className="flex flex-col md:flex-row gap-8">
+            <div className="md:w-1/4 flex flex-col gap-2">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+            <div className="md:w-3/4">
+              <Skeleton className="h-8 w-1/2 mb-4" />
+              <Skeleton className="h-48 w-48 mb-6" />
+              <Skeleton className="h-20 w-full" />
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
+  if (inspirations.length === 0) return null;
+
+  const activeInspiration = inspirations.find(i => i.id.toString() === activeId) || inspirations[0];
+  const imgFailed = imgErrors[activeInspiration.id];
+
+  return (
+    <section id="philosophy" className="py-20 relative overflow-hidden transition-colors duration-300 group">
       <div className="max-w-4xl mx-auto px-4">
-        {/* Heading */}
-        <motion.div
+        <m.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.7 }}
-          className="text-center mb-14"
+          viewport={{ once: true, amount: 0.1 }}
+          transition={{ duration: 0.8 }}
         >
-          <h2
-            id="philosophy-heading"
-            className="text-3xl md:text-5xl font-bold text-app-text tracking-tight"
-          >
-            {t('philosophy.title')}
-          </h2>
-        </motion.div>
+          {/* Header */}
+          <div className="flex items-center justify-center gap-4 mb-16">
+            <h2 className="text-3xl md:text-5xl font-bold text-center text-app-text tracking-widest">
+              {t('philosophy.title')}
+            </h2>
+          </div>
 
-        {/* Cards */}
-        <div role="list" className="space-y-4">
-          {isLoading
-            ? Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-20 rounded-xl" />
-              ))
-            : inspirations.map((item, index) => {
-                const isExpanded = expandedId === item.id;
-                const imgFailed = imgErrors[item.id];
+          <div className="flex flex-col md:flex-row gap-8 min-h-[400px]">
+            {/* Tabs List */}
+            <div className="flex md:flex-col overflow-x-auto md:overflow-x-visible no-scrollbar border-b md:border-b-0 md:border-l border-app-border w-full md:w-1/3 flex-shrink-0">
+              {inspirations.map((item) => {
+                const isActive = activeId === item.id.toString();
 
                 return (
-                  <motion.div
+                  <button
                     key={item.id}
-                    role="listitem"
-                    initial={{ opacity: 0, y: 16 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.1 }}
-                    transition={{ duration: 0.45, delay: index * 0.07 }}
-                    className="glass rounded-xl border border-app-border overflow-hidden hover:border-app-primary/40 transition-colors duration-300"
+                    onClick={() => setActiveId(item.id.toString())}
+                    className={`
+                      px-5 py-4 text-sm text-left transition-all duration-300 border-b-2 md:border-b-0 md:border-l-2 -mb-[2px] md:-mb-0 md:-ml-[1px]
+                      ${isActive 
+                        ? 'bg-app-primary/5 border-app-primary' 
+                        : 'hover:bg-app-surface-hover border-transparent'}
+                    `}
                   >
-                    {/* ── Collapsed header (always visible) ── */}
-                    <button
-                      id={`philosophy-btn-${item.id}`}
-                      aria-expanded={isExpanded}
-                      aria-controls={`philosophy-panel-${item.id}`}
-                      onClick={() => toggle(item.id)}
-                      className="w-full flex items-center gap-4 px-5 py-4 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-primary focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
-                    >
-                      {/* Avatar in header - Hidden when expanded to avoid saturation */}
-                      <AnimatePresence>
-                        {!isExpanded && (
-                          <motion.div
-                            initial={{ opacity: 0, width: 0, marginRight: 0 }}
-                            animate={{ opacity: 1, width: 48, marginRight: 16 }}
-                            exit={{ opacity: 0, width: 0, marginRight: 0 }}
-                            transition={{ duration: 0.3 }}
-                            aria-hidden="true"
-                            className="flex-shrink-0 w-12 h-12 rounded-full overflow-hidden border border-app-border bg-app-surface-hover flex items-center justify-center"
-                          >
-                            {imgFailed ? (
-                              <User className="w-6 h-6 text-app-muted" />
-                            ) : (
-                              <img
-                                src={item.image_url}
-                                alt=""
-                                loading="lazy"
-                                draggable={false}
-                                onError={() => handleImgError(item.id)}
-                                className="w-full h-full object-cover object-top"
-                              />
-                            )}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-
-                      {/* Name + role */}
-                      <div className="flex-1 min-w-0">
-                        <p className="font-bold text-app-text truncate">{item.name}</p>
-                        <p className="text-sm text-app-primary truncate">
-                          {localize(item.role, language)}
-                        </p>
-                      </div>
-
-                      {/* Chevron */}
-                      <motion.div
-                        aria-hidden="true"
-                        animate={{ rotate: isExpanded ? 180 : 0 }}
-                        transition={{ duration: 0.25 }}
-                        className="flex-shrink-0 text-app-muted"
-                      >
-                        <ChevronDown className="w-5 h-5" />
-                      </motion.div>
-                    </button>
-
-                    {/* ── Expanded panel ── */}
-                    <AnimatePresence initial={false}>
-                      {isExpanded && (
-                        <motion.section
-                          id={`philosophy-panel-${item.id}`}
-                          role="region"
-                          aria-labelledby={`philosophy-btn-${item.id}`}
-                          key="panel"
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: 'auto', opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.35, ease: 'easeInOut' }}
-                          className="overflow-hidden"
-                        >
-                          <div className="px-5 pb-6 pt-3 border-t border-app-border/60">
-                            <div className="flex flex-col sm:flex-row gap-5 items-start">
-
-                              {/* ── Large photo (Shown only here when expanded) ── */}
-                              {!imgFailed && (
-                                <motion.div
-                                  initial={{ opacity: 0, scale: 0.75 }}
-                                  animate={{ opacity: 1, scale: 1 }}
-                                  transition={{ duration: 0.35, ease: 'easeOut' }}
-                                  className="flex-shrink-0 self-center sm:self-start"
-                                >
-                                  <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-2xl overflow-hidden border-2 border-app-primary/30 shadow-[0_0_30px_rgba(212,163,115,0.2)]">
-                                    <img
-                                      src={item.image_url}
-                                      alt={item.name}
-                                      loading="lazy"
-                                      draggable={false}
-                                      onError={() => handleImgError(item.id)}
-                                      className="w-full h-full object-cover object-top"
-                                    />
-                                  </div>
-                                </motion.div>
-                              )}
-
-                              {/* ── Description ── */}
-                              <motion.p
-                                initial={{ opacity: 0, x: 10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ duration: 0.3, delay: 0.1 }}
-                                className="text-app-text leading-relaxed text-sm md:text-base pt-2"
-                              >
-                                {localize(item.description, language)}
-                              </motion.p>
-                            </div>
-                          </div>
-                        </motion.section>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
+                    <div className="flex flex-col">
+                      <span className={`font-mono text-base ${isActive ? 'text-app-primary' : 'text-app-muted hover:text-app-text'}`}>
+                        {item.name}
+                      </span>
+                    </div>
+                  </button>
                 );
               })}
-        </div>
+            </div>
+
+            {/* Tab Panel */}
+            <div className="w-full md:w-2/3 md:pl-4">
+              <AnimatePresence mode="wait">
+                <m.div
+                  key={activeInspiration.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                  className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-start"
+                >
+                  {/* Photo Profile */}
+                  <div className="flex-shrink-0 mt-2">
+                    <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-app-primary/30 shadow-[0_0_20px_rgba(212,163,115,0.15)] bg-app-surface-hover">
+                      {imgFailed ? (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <User className="w-12 h-12 text-app-muted" />
+                        </div>
+                      ) : (
+                         <img
+                          src={activeInspiration.image_url}
+                          alt={activeInspiration.name}
+                          loading="lazy"
+                          draggable={false}
+                          onError={() => handleImgError(activeInspiration.id)}
+                          className="w-full h-full object-cover object-top"
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex-1 mt-2">
+                    <h3 className="text-xl md:text-2xl font-bold text-app-text mb-1">
+                      {activeInspiration.name}
+                    </h3>
+                    <p className="text-sm font-mono text-app-primary tracking-widest mb-6">
+                      {localize(activeInspiration.role, language)}
+                    </p>
+                    
+                    <p className="text-app-muted leading-relaxed">
+                      {localize(activeInspiration.description, language)}
+                    </p>
+                  </div>
+                </m.div>
+              </AnimatePresence>
+            </div>
+          </div>
+        </m.div>
       </div>
     </section>
   );

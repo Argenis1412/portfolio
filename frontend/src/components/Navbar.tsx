@@ -48,14 +48,11 @@ export default function Navbar() {
                 {t('nav.observability')}
               </button>
               <button
-                onClick={() => scrollToSection('stack')}
-                onMouseEnter={() => prefetch(queryKeys.skills, fetchSkills)}
-                className="hover:text-app-primary px-3 py-3 rounded-md text-xs font-mono uppercase tracking-widest transition-colors text-app-text"
-              >
-                {t('nav.stack')}
-              </button>
-              <button
                 onClick={() => scrollToSection('about')}
+                onMouseEnter={() => {
+                  prefetch(queryKeys.about, fetchAbout);
+                  prefetch(queryKeys.skills, fetchSkills);
+                }}
                 className="hover:text-app-primary px-3 py-3 rounded-md text-xs font-mono uppercase tracking-widest transition-colors text-app-text"
               >
                 {t('nav.about')}
