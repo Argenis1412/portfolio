@@ -28,7 +28,7 @@ export default function Philosophy() {
   if (isLoading) {
     return (
       <section id="philosophy" className="py-20 relative overflow-hidden">
-        <div className="max-w-4xl mx-auto px-4">
+        <div className="max-w-6xl mx-auto px-4">
           <Skeleton className="h-10 w-64 mx-auto mb-16" />
           <div className="flex flex-col md:flex-row gap-8">
             <div className="md:w-1/4 flex flex-col gap-2">
@@ -54,7 +54,7 @@ export default function Philosophy() {
 
   return (
     <section id="philosophy" className="py-20 relative overflow-hidden transition-colors duration-300 group">
-      <div className="max-w-4xl mx-auto px-4">
+      <div className="max-w-6xl mx-auto px-4">
         <m.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -70,7 +70,7 @@ export default function Philosophy() {
 
           <div className="flex flex-col md:flex-row gap-8 min-h-[400px]">
             {/* Tabs List */}
-            <div className="flex md:flex-col overflow-x-auto md:overflow-x-visible no-scrollbar border-b md:border-b-0 md:border-l border-app-border w-full md:w-1/3 flex-shrink-0">
+            <div className="flex md:flex-col overflow-x-auto md:overflow-x-visible no-scrollbar border-b md:border-b-0 md:border-l border-app-border w-full md:w-1/4 flex-shrink-0">
               {inspirations.map((item) => {
                 const isActive = activeId === item.id.toString();
 
@@ -96,7 +96,7 @@ export default function Philosophy() {
             </div>
 
             {/* Tab Panel */}
-            <div className="w-full md:w-2/3 md:pl-4">
+            <div className="w-full md:w-3/4 md:pl-4">
               <AnimatePresence mode="wait">
                 <m.div
                   key={activeInspiration.id}
@@ -104,14 +104,14 @@ export default function Philosophy() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
-                  className="flex flex-col sm:flex-row gap-6 sm:gap-8 items-start"
+                  className="flex flex-col sm:flex-row-reverse gap-6 sm:gap-16 items-start"
                 >
                   {/* Photo Profile */}
                   <div className="flex-shrink-0 mt-2">
-                    <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-app-primary/30 shadow-[0_0_20px_rgba(212,163,115,0.15)] bg-app-surface-hover">
+                    <div className="w-56 h-56 md:w-80 md:h-80 rounded-full overflow-hidden border-2 border-app-primary/30 shadow-[0_0_40px_rgba(212,163,115,0.15)] bg-app-surface-hover">
                       {imgFailed ? (
                         <div className="w-full h-full flex items-center justify-center">
-                          <User className="w-12 h-12 text-app-muted" />
+                          <User className="w-20 h-20 text-app-muted" />
                         </div>
                       ) : (
                          <img
