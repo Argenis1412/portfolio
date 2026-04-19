@@ -298,3 +298,24 @@ export async function postChaosFailure(): Promise<ChaosResponse> {
   }
   return res.json();
 }
+
+// ─── Cache Stress (client-side simulation) ───────────────────────────────────
+// Fires 10 concurrent GETs against existing read endpoints.
+// NOTE: This is a client-side simulation — it generates real backend load
+// but does not appear as a tracked chaos incident in /metrics/summary.
+export async function postChaosCache(): Promise<{ requests_sent: number; elapsed_ms: number; timestamp: string }> {
+  const endpoints = [
+    '/sobre', '/stack', '/projetos', '/experiencias', '/formacao',
+    '/sobre', '/stack', '/projetos', '/experiencias', '/formacao',
+  ];
+  const start = performance.now();
+  await Promise.allSettled(
+    endpoints.map((path) => fetch(buildApiUrl(path)))
+  );
+  const elapsed_ms = Math.round(performance.now() - start);
+  return {
+    requests_sent: endpoints.length,
+    elapsed_ms,
+    timestamp: new Date().toISOString(),
+  };
+}
