@@ -7,11 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/en/2.0.0/).
 
 ---
 
-## [1.4.1] - 2026-04-17
+## [1.4.1] - 2026-04-19
 
 ### 🛠️ Enhancements & Reliability
 
 #### ✅ Added
+- ✅ **Philosophy & Inspirations**: Implemented a new section showcasing engineering pillars with Clean Architecture backend (JSON data source), accessible card-based UI with adaptive animations, and 100% test coverage.
 - ✅ **TraceConsole UI**: Allow continuous payload testing without reloading (`#10`).
 - ✅ **Chaos Engineering**: Implement honest chaos playground and enhanced failure metrics.
 
