@@ -7,31 +7,59 @@
  *   refetchIntervalInBackground: false — no requests when tab is hidden
  *   refetchOnWindowFocus: false — explicit guard (don't rely on global default)
  *   gcTime: 60s — keeps data in cache during brief unmounts
+ *
+ * Extras:
+ *   history   — rolling last-20 P95 values for the sparkline chart
+ *   previous  — snapshot of the prior fetch for delta calculation
  */
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchMetricsSummary } from '../api';
+import { fetchMetricsSummary, type MetricsSummary } from '../api';
 
 // Named thresholds — visible numbers = engineering confidence
 const LATENCY_DEGRADED_MS = 800;
 const ERROR_RATE_DEGRADED = 0.05;
+const MAX_HISTORY = 20;
 
 export type SystemStatus = 'loading' | 'operational' | 'degraded' | 'down';
 
 export function useLiveMetrics() {
-  // useRef: internal source of truth — no re-renders during normal polling
+  // Internal source of truth — no re-renders during normal polling
   const lastSuccessRef = useRef<number | null>(null);
-  // useState: the reactive value exposed outside the hook.
-  // Only updates on a successful fetch — exactly when ErrorNotification needs to re-render.
+  // Reactive value exposed outside (only updates on successful fetch)
   const [lastSuccessSnapshot, setLastSuccessSnapshot] = useState<number | null>(null);
+
+  // Rolling history of P95 samples for sparkline
+  const historyRef = useRef<number[]>([]);
+  const [history, setHistory] = useState<number[]>([]);
+
+  // Previous snapshot for delta calculation
+  const previousRef = useRef<MetricsSummary | null>(null);
+  const [previous, setPrevious] = useState<MetricsSummary | null>(null);
+
+  const onSuccess = useCallback((data: MetricsSummary) => {
+    // Update last success timestamp
+    lastSuccessRef.current = Date.now();
+    setLastSuccessSnapshot(Date.now());
+
+    // Update previous before rolling in new data
+    if (previousRef.current !== null) {
+      setPrevious(previousRef.current);
+    }
+
+    // Roll in new P95 value
+    historyRef.current = [...historyRef.current, data.p95_ms].slice(-MAX_HISTORY);
+    setHistory([...historyRef.current]);
+
+    // Store current as next "previous"
+    previousRef.current = data;
+  }, []);
 
   const query = useQuery({
     queryKey: ['metrics-summary'],
     queryFn: async () => {
       const data = await fetchMetricsSummary();
-      // Update both: ref (immediate internal) and snapshot (triggers re-render)
-      lastSuccessRef.current = Date.now();
-      setLastSuccessSnapshot(Date.now());
+      onSuccess(data);
       return data;
     },
     staleTime: 10_000,
@@ -56,6 +84,8 @@ export function useLiveMetrics() {
   return {
     ...query,
     status,
-    lastSuccessAt: lastSuccessSnapshot, // reactive, safe to pass as prop
+    history,       // number[] — last 20 P95 values
+    previous,      // MetricsSummary | null — previous snapshot for deltas
+    lastSuccessAt: lastSuccessSnapshot,
   };
 }
