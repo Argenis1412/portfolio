@@ -7,7 +7,7 @@
       "pt": "Educador e Engenheiro (Programação ATS)",
       "en": "Educator and Engineer (Programación ATS)"
     },
-    "image_url": "/images/philosophy/alejandro.jpg",
+    "image_url": "/philosophy/alejandro.jpg",
     "description": {
       "es": "\"Si puedes imaginarlo, puedes programarlo\". Alejandro fue el punto de partida de mi viaje tecnológico. Gracias a su capacidad estratégica para simplificar fundamentos complejos, logré dominar conceptos desde la sintaxis básica hasta la jerarquía de clases en C++. Su metodología despertó en mí la convicción de que no existen límites para lo que podemos construir con código. Su legado como educador sigue siendo mi base fundamental.",
       "pt": "\"Se você pode imaginar, você pode programar\". Alejandro foi o ponto de partida da minha jornada tecnológica. Graças à sua capacidade estratégica de simplificar fundamentos complexos, consegui dominar conceitos desde a sintaxe básica até a hierarquia de classes em C++. Sua metodologia despertou em mim a convicção de que não existem limites para o que podemos construir com código. Seu legado como educador continua sendo minha base fundamental.",
@@ -22,7 +22,7 @@
       "pt": "Pioneira da Engenharia de Software",
       "en": "Software Engineering Pioneer"
     },
-    "image_url": "/images/philosophy/margaret.jpg",
+    "image_url": "/philosophy/margaret.jpg",
     "description": {
       "es": "Directora de ingeniería en el Laboratorio de Instrumentación del MIT, Hamilton lideró el desarrollo del software de vuelo para el programa Apolo. Su enfoque en la \"programación defensiva\" salvó el alunizaje del Apolo 11. Le debo a ella no solo el término \"Ingeniería de Software\", sino la comprensión absoluta de que la robustez y la gestión de errores son el verdadero corazón de un sistema backend confiable.",
       "pt": "Diretora de engenharia do Laboratório de Instrumentação do MIT, Hamilton liderou o desenvolvimento do software de voo para o programa Apollo. Seu foco na \"programação defensiva\" salvou o pouso lunar da Apollo 11. Devo a ela não apenas o termo \"Engenharia de Software\", mas a compreensão absoluta de que a robustez e o tratamento de erros são o verdadeiro coração de um sistema backend confiável.",
@@ -37,7 +37,7 @@
       "pt": "Integridade, Resistência e Propósito",
       "en": "Integrity, Resilience, and Purpose"
     },
-    "image_url": "/images/philosophy/ali.jpg",
+    "image_url": "/philosophy/ali.jpg",
     "description": {
       "es": "Más allá de su grandeza en el ring, Ali me inspira profundamente por su inquebrantable valentía para defender sus principios. Se negó a ir a la guerra para defender a un país que no le otorgaba derechos básicos. Arriesgar su libertad y su prometedora carrera por mantenerse fiel a sus convicciones es mi recordatorio definitivo del poder de tener un propósito innegociable en la vida.",
       "pt": "Além de sua grandeza no ringue, Ali me inspira profundamente por sua coragem inabalável em defender seus princípios. Ele se recusou a ir à guerra para defender um país que não lhe concedia direitos básicos. Arriscar sua liberdade e sua carreira promissora para se manter fiel às suas convicções é meu lembrete definitivo do poder de ter um propósito inegociável na vida.",
@@ -52,7 +52,7 @@
       "pt": "Arquitetura da Descentralização Absoluta",
       "en": "Architecture of Absolute Decentralization"
     },
-    "image_url": "/images/philosophy/satoshi.jpg",
+    "image_url": "/philosophy/satoshi.jpg",
     "description": {
       "es": "Satoshi creó Bitcoin como respuesta a la crisis financiera de 2008, buscando un sistema descentralizado, seguro y sin confianza (trustless). Me fascina su genialidad técnica al resolver el problema del \"doble gasto\" mediante tecnología blockchain, creando un ecosistema inmutable donde la confianza no reside en los gobiernos ni en los bancos, sino estrictamente en el consenso matemático y las pruebas criptográficas.",
       "pt": "Satoshi criou o Bitcoin em resposta à crise financeira de 2008, buscando um sistema descentralizado, seguro e sem necessidade de confiança em terceiros (trustless). Sou fascinado por sua genialidade técnica em resolver o problema do \"gasto duplo\" por meio da tecnologia blockchain, criando um ecossistema imutável onde a confiança não reside em governos ou bancos, mas estritamente no consenso matemático e em provas criptográficas.",
@@ -67,7 +67,7 @@
       "pt": "O Arquiteto do Mundo Moderno",
       "en": "The Architect of the Modern World"
     },
-    "image_url": "/images/philosophy/linus.jpg",
+    "image_url": "/philosophy/linus.jpg",
     "description": {
       "es": "Creador del núcleo Linux y de Git, Torvalds redefinió literalmente la colaboración global. Su impacto en la ingeniería de software es incalculable: desde los servidores que sostienen la web hasta las herramientas de control de versiones que utilizamos rigurosamente a diario. Su modelo pragmático es la prueba definitiva de que el código abierto es el motor humano más potente para la innovación tecnológica.",
       "pt": "Criador do kernel do Linux e do Git, Torvalds redefiniu literalmente a colaboração global. Seu impacto na engenharia de software é incalculável: desde os servidores que sustentam a web até as ferramentas de controle de versão que usamos rigorosamente todos os dias. Seu modelo pragmático é a prova definitiva de que o código aberto é o motor humano mais poderoso para a inovação tecnológica.",
