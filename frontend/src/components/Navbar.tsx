@@ -3,7 +3,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../hooks/useApi';
-import { fetchAbout, fetchProjects, fetchSkills, fetchExperience } from '../api';
+import { fetchAbout, fetchProjects, fetchSkills, fetchExperience, fetchPhilosophy } from '../api';
 import { scrollToSection } from '../utils/scrollToSection';
 
 export default function Navbar() {
@@ -51,6 +51,14 @@ export default function Navbar() {
                 className="hover:text-app-primary px-3 py-3 rounded-md text-xs font-semibold uppercase tracking-widest transition-colors text-app-text"
               >
                 {t('nav.projects')}
+              </button>
+              <button
+                onClick={() => scrollToSection('philosophy')}
+                onMouseEnter={() => prefetch(queryKeys.philosophy, fetchPhilosophy)}
+                onFocus={() => prefetch(queryKeys.philosophy, fetchPhilosophy)}
+                className="hover:text-app-primary px-3 py-3 rounded-md text-xs font-semibold uppercase tracking-widest transition-colors text-app-text"
+              >
+                {t('nav.philosophy')}
               </button>
               <button
                 onClick={() => scrollToSection('experience')}

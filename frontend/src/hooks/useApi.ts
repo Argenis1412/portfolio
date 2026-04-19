@@ -10,6 +10,7 @@ import {
   fetchExperience,
   fetchFormacao,
   postContact,
+  fetchPhilosophy,
 } from '../api';
 
 
@@ -20,6 +21,7 @@ export const queryKeys = {
   skills: ['skills'] as const,
   experience: ['experience'] as const,
   formacao: ['formacao'] as const,
+  philosophy: ['philosophy'] as const,
 };
 
 export function useAbout() {
@@ -59,6 +61,14 @@ export function useFormacao() {
     queryKey: queryKeys.formacao,
     queryFn: fetchFormacao,
     staleTime: 10 * 60 * 1000,
+  });
+}
+
+export function usePhilosophy() {
+  return useQuery({
+    queryKey: queryKeys.philosophy,
+    queryFn: fetchPhilosophy,
+    staleTime: 60 * 60 * 1000, // 1 hour caching for static philosophy data
   });
 }
 

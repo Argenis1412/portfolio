@@ -14,6 +14,7 @@ import {
   fetchSkills,
   fetchExperience,
   fetchFormacao,
+  fetchPhilosophy,
 } from '../api';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -212,5 +213,48 @@ describe('fetchFormacao', () => {
     mockFetchError(500);
     await expect(fetchFormacao()).rejects.toThrow(/API request failed: 500/);
     spy.mockRestore();
+  });
+});
+
+// ─── fetchPhilosophy ───────────────────────────────────────────────────────────
+
+const philosophyFixture = {
+  id: 'linus-torvalds',
+  name: 'Linus Torvalds',
+  role: { pt: 'Criador do Linux', en: 'Creator of Linux', es: 'Creador de Linux' },
+  image_url: '/images/philosophy/linus.jpg',
+  description: { pt: 'PT desc', en: 'EN desc', es: 'ES desc' },
+};
+
+describe('fetchPhilosophy', () => {
+  beforeEach(() => vi.restoreAllMocks());
+
+  it('returns list of philosophy inspirations', async () => {
+    mockFetchOk({ inspirations: [philosophyFixture], total: 1 });
+    const items = await fetchPhilosophy();
+    expect(Array.isArray(items)).toBe(true);
+    expect(items.length).toBe(1);
+    expect(items[0].id).toBe('linus-torvalds');
+    expect(items[0].role.en).toBe('Creator of Linux');
+  });
+
+  it('returns empty list when inspirations is null (resilience)', async () => {
+    mockFetchOk({ inspirations: null, total: 0 });
+    const items = await fetchPhilosophy();
+    expect(items).toEqual([]);
+  });
+
+  it('throws ApiError when the server returns a non-OK status', async () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    mockFetchError(500);
+    await expect(fetchPhilosophy()).rejects.toThrow(/API request failed: 500/);
+    spy.mockRestore();
+  });
+
+  it('calls the correct endpoint (/philosophy)', async () => {
+    mockFetchOk({ inspirations: [], total: 0 });
+    const spy = vi.spyOn(globalThis, 'fetch');
+    await fetchPhilosophy();
+    expect(spy).toHaveBeenCalledWith(expect.stringContaining('/philosophy'));
   });
 });

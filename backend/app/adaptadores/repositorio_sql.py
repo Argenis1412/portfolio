@@ -19,6 +19,7 @@ from app.adaptadores.modelos_sql import (
 from app.entidades.projeto import Projeto
 from app.entidades.experiencia import ExperienciaProfissional
 from app.entidades.formacao import FormacaoAcademica
+from app.entidades.philosophy import PhilosophyInspiration
 from app.configuracao import configuracoes
 
 
@@ -200,3 +201,9 @@ class RepositorioSQL(RepositorioPortfolio):
                 )
                 for m in modelos
             ]
+
+    async def get_philosophy(self) -> List[PhilosophyInspiration]:
+        """
+        Philosophy is static JSON data. Not implemented in SQL.
+        """
+        return []

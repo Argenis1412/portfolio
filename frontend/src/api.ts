@@ -72,6 +72,16 @@ export const FormacaoSchema = z.object({
 
 export type Formacao = z.infer<typeof FormacaoSchema>;
 
+export const PhilosophyItemSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  role: LocalizedStringSchema,
+  image_url: z.string(),
+  description: LocalizedStringSchema,
+});
+
+export type PhilosophyItem = z.infer<typeof PhilosophyItemSchema>;
+
 export const MetricsSummarySchema = z.object({
   p95_ms: z.number().int(),
   p95_status: z.enum(['healthy', 'degraded']),
@@ -205,6 +215,14 @@ export const fetchFormacao = async (): Promise<Formacao[]> => {
   });
   const data = await apiGet('/formacao', schema);
   return data.formacoes || [];
+};
+
+export const fetchPhilosophy = async (): Promise<PhilosophyItem[]> => {
+  const schema = z.object({
+    inspirations: z.array(PhilosophyItemSchema).nullable().catch([])
+  });
+  const data = await apiGet('/philosophy', schema);
+  return data.inspirations || [];
 };
 
 // ===================================================

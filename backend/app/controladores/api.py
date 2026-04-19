@@ -30,18 +30,21 @@ from app.esquemas.experiencias import RespostaExperiencias
 from app.esquemas.formacao import ItemFormacao
 from app.esquemas.formacao import RespostaFormacao
 from app.esquemas.saude import ResumoMetricas
+from app.esquemas.philosophy import PhilosophyItemSchema, PhilosophyResponseSchema
 from app.casos_uso import ObterExperienciasUseCase
 from app.casos_uso import ObterFormacaoUseCase
 from app.casos_uso import ObterProjetoPorIdUseCase
 from app.casos_uso import ObterProjetosUseCase
 from app.casos_uso import ObterSobreUseCase
 from app.casos_uso import ObterStackUseCase
+from app.casos_uso import GetPhilosophyUseCase
 from app.controladores.dependencias import dep_experiencias
 from app.controladores.dependencias import dep_formacao
 from app.controladores.dependencias import dep_projeto_por_id
 from app.controladores.dependencias import dep_projetos
 from app.controladores.dependencias import dep_sobre
 from app.controladores.dependencias import dep_stack
+from app.controladores.dependencias import dep_philosophy
 from app.core.cache_http import resposta_cacheavel
 from app.core.excecoes import ErroRecursoNaoEncontrado
 from app.core.limite import limiter
@@ -465,6 +468,50 @@ async def listar_formacao(
     resultado = RespostaFormacao(
         formacoes=formacoes_schema,
         total=len(formacoes_schema),
+    )
+
+    return resposta_cacheavel(request, response, resultado)
+
+
+@roteador.get(
+    "/philosophy",
+    response_model=PhilosophyResponseSchema,
+    summary="System Philosophy",
+    description="Returns list of philosophical inspirations, in multiple languages.",
+    responses={
+        200: {"description": "Philosophical inspirations returned successfully"},
+    },
+)
+async def get_philosophy(
+    request: Request,
+    response: Response,
+    get_philosophy_uc: Annotated[
+        GetPhilosophyUseCase,
+        Depends(dep_philosophy),
+    ],
+) -> PhilosophyResponseSchema:
+    """
+    Lista inspirações e filosofias de engenharia (tri-language).
+
+    Returns:
+        PhilosophyResponseSchema: Lista completa.
+    """
+    inspirations = await get_philosophy_uc.execute()
+
+    inspirations_schema = [
+        PhilosophyItemSchema(
+            id=i.id,
+            name=i.name,
+            role=i.role,
+            image_url=i.image_url,
+            description=i.description,
+        )
+        for i in inspirations
+    ]
+
+    resultado = PhilosophyResponseSchema(
+        inspirations=inspirations_schema,
+        total=len(inspirations_schema),
     )
 
     return resposta_cacheavel(request, response, resultado)

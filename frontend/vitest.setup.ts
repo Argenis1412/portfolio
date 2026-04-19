@@ -91,6 +91,10 @@ vi.stubGlobal(
       });
     }
 
+    if (url.includes('/api/v1/philosophy')) {
+      return mockJsonResponse({ inspirations: [], total: 0 });
+    }
+
     // Default: explicit failure (helps detect unexpected network calls)
     return mockJsonResponse({ message: `Unhandled fetch: ${url}` }, 500);
   })

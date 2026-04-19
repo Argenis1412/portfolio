@@ -22,6 +22,7 @@ from app.casos_uso import (
     ObterProjetosUseCase,
     ObterSobreUseCase,
     ObterStackUseCase,
+    GetPhilosophyUseCase,
 )
 from app.configuracao import configuracoes
 
@@ -72,6 +73,12 @@ def dep_experiencias() -> ObterExperienciasUseCase:
 def dep_formacao() -> ObterFormacaoUseCase:
     """Retorna caso de uso para formações acadêmicas."""
     return ObterFormacaoUseCase(obter_repositorio_estatico())
+
+
+@lru_cache
+def dep_philosophy() -> GetPhilosophyUseCase:
+    """Returns use case for philosophical principles."""
+    return GetPhilosophyUseCase(obter_repositorio_estatico())
 
 
 @lru_cache
