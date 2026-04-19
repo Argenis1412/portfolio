@@ -113,5 +113,9 @@
   "metrics.incident.none": "No incidents",
   "metrics.incident.traffic_spike": "Traffic spike",
   "metrics.incident.forced_failure": "Forced 503",
-  "metrics.health.investigating": "investigating"
+  "metrics.health.investigating": "investigating",
+  "nav.philosophy": "Inspiration",
+  "philosophy.title": "The starting point does not determine your destination",
+  "philosophy.expand_tooltip": "Click to expand",
+  "philosophy.collapse_tooltip": "Click to collapse"
 }
