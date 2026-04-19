@@ -179,9 +179,6 @@ export default function LiveMetricsBento() {
       {/* Section header */}
       <div className="mb-6">
         <h2 className="text-xs font-mono uppercase tracking-[0.2em] text-app-primary mb-1">
-          {t('stack.section_title') /* reuse pattern — using metrics key */}
-        </h2>
-        <h2 className="text-xs font-mono uppercase tracking-[0.2em] text-app-primary mb-1">
           {t('metrics.system_status').toUpperCase()}
         </h2>
         <p className="text-xs font-mono text-app-muted max-w-lg">

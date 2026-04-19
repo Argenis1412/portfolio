@@ -48,23 +48,24 @@ function App() {
               <Hero />
 
               <Suspense fallback={<SectionFallback />}>
-                {/* 2 — Live Metrics: tiles + sparkline */}
+
+                {/* 2 — About: bio + photo + links */}
+                <About />
+
+                {/* 3 — Live Metrics: tiles + sparkline */}
                 <LiveMetricsBento />
 
-                {/* 3 — Chaos Playground: control panel */}
+                {/* 4 — Chaos Playground: control panel */}
                 <ChaosPlayground />
 
-                {/* 4 — Trace Viewer: per-request waterfall */}
+                {/* 5 — Trace Viewer: per-request waterfall */}
                 <TraceViewer />
 
-                {/* 5 — Log Stream: terminal event stream */}
+                {/* 6 — Log Stream: terminal event stream */}
                 <LogStream />
 
-                {/* 6 — Stack: minimal grid */}
+                {/* 7 — Stack: minimal grid */}
                 <Skills />
-
-                {/* 7 — About: bio + photo + links */}
-                <About />
 
                 {/* 8 — Experience + Education */}
                 <Experience />

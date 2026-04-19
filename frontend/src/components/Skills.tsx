@@ -47,9 +47,6 @@ export default function Skills() {
             <h2 className="text-xs font-mono uppercase tracking-[0.2em] text-app-primary mb-1">
               {t('stack.section_title')}
             </h2>
-            <p className="text-xs font-mono text-app-muted">
-              {t('stack.section_subtitle')}
-            </p>
           </div>
 
           {/* Grid of category blocks */}
