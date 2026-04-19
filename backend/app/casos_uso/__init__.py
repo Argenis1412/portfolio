@@ -18,6 +18,7 @@ from app.casos_uso.obter_stack import ObterStackUseCase
 from app.casos_uso.obter_experiencias import ObterExperienciasUseCase
 from app.casos_uso.obter_formacao import ObterFormacaoUseCase
 from app.casos_uso.enviar_contato import EnviarContatoUseCase
+from app.casos_uso.get_philosophy import GetPhilosophyUseCase
 
 __all__ = [
     "ObterSobreUseCase",
@@ -27,4 +28,5 @@ __all__ = [
     "ObterExperienciasUseCase",
     "ObterFormacaoUseCase",
     "EnviarContatoUseCase",
+    "GetPhilosophyUseCase",
 ]

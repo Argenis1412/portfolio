@@ -15,6 +15,7 @@ import anyio
 from app.entidades.projeto import Projeto
 from app.entidades.experiencia import ExperienciaProfissional
 from app.entidades.formacao import FormacaoAcademica
+from app.entidades.philosophy import PhilosophyInspiration
 
 
 class RepositorioPortfolio(ABC):
@@ -57,6 +58,11 @@ class RepositorioPortfolio(ABC):
     @abstractmethod
     async def verificar_saude(self) -> dict:
         """Verifica se o repositório está acessível."""
+        pass
+
+    @abstractmethod
+    async def get_philosophy(self) -> list[PhilosophyInspiration]:
+        """Returns the list of philosophical inspirations."""
         pass
 
 
@@ -241,4 +247,23 @@ class RepositorioJSON(RepositorioPortfolio):
                 atual=f.get("atual", False),
             )
             for f in dados
+        ]
+
+    async def get_philosophy(self) -> list[PhilosophyInspiration]:
+        """
+        Gets the philosophy/inspirations data.
+        
+        Returns:
+            list[PhilosophyInspiration]: List of inspiration entities.
+        """
+        dados = await self._ler_json("philosophy.json")
+        return [
+            PhilosophyInspiration(
+                id=i["id"],
+                name=i["name"],
+                role=i["role"],
+                image_url=i["image_url"],
+                description=i["description"],
+            )
+            for i in dados
         ]
