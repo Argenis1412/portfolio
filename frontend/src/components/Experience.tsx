@@ -87,7 +87,6 @@ export default function Experience() {
         >
           {/* Header */}
           <div className="flex items-center gap-4 mb-12">
-            <span className="text-xl md:text-2xl font-mono text-app-primary">02.</span>
             <h2 className="text-2xl md:text-4xl font-bold text-app-text tracking-widest">
               {t('nav.journey')}
             </h2>

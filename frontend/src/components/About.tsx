@@ -121,22 +121,20 @@ export default function About() {
 
         {/* Photo column */}
         <div className="flex justify-center md:justify-end">
-          <div className="relative w-[280px] h-[280px] md:w-[320px] md:h-[320px] rounded-lg p-3 border-2 border-app-primary/60 shadow-[8px_8px_0_0_rgba(212,163,115,1)] hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[12px_12px_0_0_rgba(212,163,115,1)] transition-all duration-300">
-            <div className="w-full h-full overflow-hidden bg-app-surface-hover rounded filter grayscale hover:grayscale-0 transition-all duration-500">
+          <div className="relative w-[220px] h-[220px] md:w-[280px] md:h-[280px] rounded-full p-1.5 bg-gradient-to-tr from-app-primary to-transparent shadow-[0_0_30px_rgba(212,163,115,0.2)]">
+            <div className="w-full h-full rounded-full overflow-hidden bg-app-surface-hover">
               <picture>
                 <source srcSet="/profile.webp" type="image/webp" />
                 <img
                   src="/profile.jpg"
                   alt="Argenis"
-                  width="320"
-                  height="320"
+                  width="280"
+                  height="280"
                   loading="lazy"
-                  className="w-full h-full object-cover object-top"
+                  className="w-full h-full object-cover rounded-full filter brightness-105"
                 />
               </picture>
             </div>
-            {/* Aesthetic tint overlay (fades on hover) */}
-            <div className="absolute inset-2 bg-app-primary/10 mix-blend-multiply opacity-100 hover:opacity-0 transition-opacity duration-500 pointer-events-none rounded"></div>
           </div>
         </div>
       </m.div>
