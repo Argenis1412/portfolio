@@ -5,7 +5,7 @@
  * useLiveMetrics errors, and any component that calls useLog()).
  * Auto-scrolls to latest. Filterable by level.
  */
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { useLog, type LogLevel } from '../context/LogContext';

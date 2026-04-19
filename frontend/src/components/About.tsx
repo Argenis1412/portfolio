@@ -3,7 +3,6 @@
  *
  * Short bio + profile photo (moved here from Hero) + social links.
  */
-import React from 'react';
 import { m } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { useAbout } from '../hooks/useApi';

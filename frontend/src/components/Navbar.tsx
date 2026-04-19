@@ -3,7 +3,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../hooks/useApi';
-import { fetchAbout, fetchProjects, fetchSkills, fetchExperience, fetchPhilosophy } from '../api';
+import { fetchAbout, fetchSkills } from '../api';
 import { scrollToSection } from '../utils/scrollToSection';
 
 export default function Navbar() {

@@ -5,7 +5,7 @@
  * Renders a list of recent requests with expandable waterfall traces,
  * bottleneck detection, and type badges (CHAOS / NORMAL).
  */
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { subscribeToTraces, type TraceEntry } from './ChaosPlayground';
@@ -163,7 +163,7 @@ export default function TraceViewer() {
     const unsub = subscribeToTraces((entry) => {
       setTraces((prev) => [entry, ...prev].slice(0, 10));
     });
-    return unsub;
+    return () => { unsub(); };
   }, []);
 
   return (
