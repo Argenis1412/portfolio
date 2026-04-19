@@ -1,215 +1,443 @@
-import React, { useState, useCallback, useRef } from 'react';
+/**
+ * ChaosPlayground — Redesigned as an operational control panel.
+ *
+ * Three action cards (Spike / Failure / Cache Stress).
+ * Active Incidents panel with TTL tracking.
+ * Terminal-style log with request_id and structured format.
+ * Writes events to shared LogContext.
+ */
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { useQueryClient } from '@tanstack/react-query';
-import { postChaosSpike, postChaosFailure, type ChaosResponse } from '../api';
+import { postChaosSpike, postChaosFailure, postChaosCache, type ChaosResponse } from '../api';
+import { useLog } from '../context/LogContext';
 
-interface LogEntry {
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface TerminalEntry {
   id: number;
-  type: 'spike' | 'failure' | 'error';
+  level: 'INFO' | 'WARN' | 'ERROR';
   message: string;
+  requestId: string;
   timestamp: string;
 }
 
+export interface TraceEntry {
+  id: string;
+  requestId: string;
+  type: 'traffic_spike' | 'forced_failure' | 'cache_stress';
+  endpoint: string;
+  status: 'ok' | 'error';
+  totalMs: number;
+  apiMs: number;
+  dbMs: number;
+  cacheMs: number;
+  timestamp: Date;
+}
+
+interface Incident {
+  id: string;
+  type: string;
+  labelKey: string;
+  startedAt: number; // ms
+  ttl: number;       // ms
+}
+
+// Shared trace store — read by TraceViewer via context / prop drilling avoided
+// We export a simple event emitter pattern via module-level callback registry
+type TraceListener = (entry: TraceEntry) => void;
+const _traceListeners = new Set<TraceListener>();
+export function subscribeToTraces(fn: TraceListener) {
+  _traceListeners.add(fn);
+  return () => _traceListeners.delete(fn);
+}
+function emitTrace(entry: TraceEntry) {
+  _traceListeners.forEach((fn) => fn(entry));
+}
+
+function genReqId(): string {
+  return Math.random().toString(36).slice(2, 10).toUpperCase();
+}
+
 const COOLDOWN_SECONDS = 30;
+const INCIDENT_TTL_MS = 2 * 60 * 1000; // 2 minutes
+
+// ─── Action Card ─────────────────────────────────────────────────────────────
+
+interface ActionCardProps {
+  icon: string;
+  titleKey: string;
+  descKey: string;
+  accentClass: string;
+  borderClass: string;
+  hoverClass: string;
+  loading: boolean;
+  cooldown: number;
+  loadingKey: string;
+  actionKey: string;
+  disabled: boolean;
+  onClick: () => void;
+  disclaimer?: string;
+}
+
+function ActionCard({
+  icon, titleKey, descKey, accentClass, borderClass, hoverClass,
+  loading, cooldown, loadingKey, actionKey, disabled, onClick, disclaimer,
+}: ActionCardProps) {
+  const { t } = useLanguage();
+  return (
+    <div className={`glass rounded-xl p-4 flex flex-col gap-3 border ${borderClass} transition-all duration-200`}>
+      <div className="flex items-center gap-2">
+        <span className="text-lg">{icon}</span>
+        <span className={`font-mono text-sm font-bold ${accentClass}`}>{t(titleKey)}</span>
+      </div>
+      <p className="text-xs text-app-muted leading-relaxed">{t(descKey)}</p>
+      {disclaimer && (
+        <p className="text-[10px] font-mono text-app-muted/60 italic">{disclaimer}</p>
+      )}
+      <button
+        onClick={onClick}
+        disabled={disabled}
+        className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-mono text-xs font-semibold transition-all duration-200 mt-auto ${
+          disabled
+            ? 'bg-app-surface-hover text-app-muted cursor-not-allowed opacity-60'
+            : `${hoverClass} border ${borderClass} active:scale-[0.97]`
+        }`}
+      >
+        {loading ? (
+          <>
+            <span className={`w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin`} />
+            {t(loadingKey)}
+          </>
+        ) : cooldown > 0 ? (
+          `Cooldown (${cooldown}s)`
+        ) : (
+          t(actionKey)
+        )}
+      </button>
+    </div>
+  );
+}
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function ChaosPlayground() {
   const { t } = useLanguage();
   const queryClient = useQueryClient();
-  const [logs, setLogs] = useState<LogEntry[]>([]);
+  const { addEntry } = useLog();
+
+  // Terminal log (local, lightweight)
+  const [terminal, setTerminal] = useState<TerminalEntry[]>([]);
+  const termIdRef = useRef(0);
+
+  // Loading states
   const [spikeLoading, setSpikeLoading] = useState(false);
   const [failureLoading, setFailureLoading] = useState(false);
+  const [cacheLoading, setCacheLoading] = useState(false);
+
+  // Cooldowns
   const [spikeCooldown, setSpikeCooldown] = useState(0);
   const [failureCooldown, setFailureCooldown] = useState(0);
-  const idRef = useRef(0);
+  const [cacheCooldown, setCacheCooldown] = useState(0);
+
+  // Active incidents
+  const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [, setTick] = useState(0); // forces re-render for TTL countdown
+
+  // Tick timer for TTL display
+  useEffect(() => {
+    const t = setInterval(() => {
+      setTick((n) => n + 1);
+      setIncidents((prev) => prev.filter((i) => Date.now() - i.startedAt < i.ttl + 5000));
+    }, 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const addIncident = useCallback((type: string, labelKey: string) => {
+    const incident: Incident = {
+      id: Math.random().toString(36).slice(2),
+      type,
+      labelKey,
+      startedAt: Date.now(),
+      ttl: INCIDENT_TTL_MS,
+    };
+    setIncidents((prev) => [incident, ...prev].slice(0, 5));
+  }, []);
 
   const startCooldown = useCallback((setter: React.Dispatch<React.SetStateAction<number>>) => {
     setter(COOLDOWN_SECONDS);
-    const interval = setInterval(() => {
+    const iv = setInterval(() => {
       setter((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          return 0;
-        }
+        if (prev <= 1) { clearInterval(iv); return 0; }
         return prev - 1;
       });
     }, 1000);
   }, []);
 
-  const addLog = useCallback((type: LogEntry['type'], message: string) => {
-    const entry: LogEntry = {
-      id: ++idRef.current,
-      type,
+  const addTerminalEntry = useCallback((level: TerminalEntry['level'], message: string, requestId: string) => {
+    const entry: TerminalEntry = {
+      id: ++termIdRef.current,
+      level,
       message,
-      timestamp: new Date().toLocaleTimeString(),
+      requestId,
+      timestamp: new Date().toLocaleTimeString('en-GB', { hour12: false }),
     };
-    setLogs((prev) => [entry, ...prev].slice(0, 8));
+    setTerminal((prev) => [entry, ...prev].slice(0, 12));
   }, []);
 
   const invalidateMetrics = useCallback(() => {
-    // Force metrics to refetch immediately so the dashboard reacts
     queryClient.invalidateQueries({ queryKey: ['metrics-summary'] });
   }, [queryClient]);
+
+  // ─── Handlers ──────────────────────────────────────────────────────────────
 
   const handleSpike = useCallback(async () => {
     if (spikeLoading || spikeCooldown > 0) return;
     setSpikeLoading(true);
+    const rid = genReqId();
+    addTerminalEntry('INFO', `chaos.spike triggered request_id=${rid}`, rid);
+    addEntry('INFO', `chaos.spike triggered`, rid);
     try {
       const res: ChaosResponse = await postChaosSpike();
-      addLog(
-        'spike',
-        t('chaos.log.spike_ok', {
-          n: res.requests_sent ?? 0,
-          t: ((res.elapsed_ms ?? 0) / 1000).toFixed(1),
-          d: res.requests_dropped ?? 0,
-        }),
-      );
+      const elapsed = res.elapsed_ms ?? 0;
+      addTerminalEntry('WARN', `traffic.spike completed requests=${res.requests_sent ?? 0} dropped=${res.requests_dropped ?? 0} elapsed_ms=${elapsed} request_id=${rid}`, rid);
+      addEntry('WARN', `traffic.spike elapsed_ms=${elapsed} dropped=${res.requests_dropped ?? 0}`, rid);
+      addIncident('traffic_spike', 'chaos.action.spike.title');
+      emitTrace({
+        id: `trace-${rid}`,
+        requestId: rid,
+        type: 'traffic_spike',
+        endpoint: '/chaos/spike',
+        status: 'ok',
+        totalMs: elapsed,
+        apiMs: Math.round(elapsed * 0.15),
+        dbMs: Math.round(elapsed * 0.70),
+        cacheMs: Math.round(elapsed * 0.15),
+        timestamp: new Date(),
+      });
       invalidateMetrics();
       startCooldown(setSpikeCooldown);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
-      addLog('error', t('chaos.log.error', { msg }));
+      addTerminalEntry('ERROR', `chaos.spike failed error="${msg}" request_id=${rid}`, rid);
+      addEntry('ERROR', `chaos.spike failed: ${msg}`, rid);
     } finally {
       setSpikeLoading(false);
     }
-  }, [spikeLoading, spikeCooldown, t, addLog, invalidateMetrics, startCooldown]);
+  }, [spikeLoading, spikeCooldown, addTerminalEntry, addEntry, addIncident, invalidateMetrics, startCooldown]);
 
   const handleFailure = useCallback(async () => {
     if (failureLoading || failureCooldown > 0) return;
     setFailureLoading(true);
+    const rid = genReqId();
+    addTerminalEntry('INFO', `chaos.failure triggered request_id=${rid}`, rid);
+    addEntry('INFO', `chaos.failure triggered`, rid);
     try {
       const res: ChaosResponse = await postChaosFailure();
-      addLog(
-        'failure',
-        t('chaos.log.failure_ok', { t: res.recovery_ms ?? 0 }),
-      );
+      const recovery = res.recovery_ms ?? 0;
+      addTerminalEntry('WARN', `forced.failure 503 triggered recovery_ms=${recovery} request_id=${rid}`, rid);
+      addEntry('WARN', `forced.failure 503 → recovered=${recovery}ms`, rid);
+      addIncident('forced_failure', 'chaos.action.failure.title');
+      emitTrace({
+        id: `trace-${rid}`,
+        requestId: rid,
+        type: 'forced_failure',
+        endpoint: '/chaos/failure',
+        status: 'error',
+        totalMs: recovery,
+        apiMs: Math.round(recovery * 0.10),
+        dbMs: Math.round(recovery * 0.80),
+        cacheMs: Math.round(recovery * 0.10),
+        timestamp: new Date(),
+      });
       invalidateMetrics();
       startCooldown(setFailureCooldown);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
-      addLog('error', t('chaos.log.error', { msg }));
+      addTerminalEntry('ERROR', `chaos.failure error="${msg}" request_id=${rid}`, rid);
+      addEntry('ERROR', `chaos.failure failed: ${msg}`, rid);
     } finally {
       setFailureLoading(false);
     }
-  }, [failureLoading, failureCooldown, t, addLog, invalidateMetrics, startCooldown]);
+  }, [failureLoading, failureCooldown, addTerminalEntry, addEntry, addIncident, invalidateMetrics, startCooldown]);
 
-  const spikeDisabled = spikeLoading || spikeCooldown > 0;
-  const failureDisabled = failureLoading || failureCooldown > 0;
+  const handleCache = useCallback(async () => {
+    if (cacheLoading || cacheCooldown > 0) return;
+    setCacheLoading(true);
+    const rid = genReqId();
+    addTerminalEntry('INFO', `cache.stress triggered requests=10 request_id=${rid}`, rid);
+    addEntry('INFO', `cache.stress.sim triggered`, rid);
+    try {
+      const res = await postChaosCache();
+      addTerminalEntry('INFO', `cache.stress completed requests_sent=${res.requests_sent} elapsed_ms=${res.elapsed_ms} request_id=${rid}`, rid);
+      addEntry('INFO', `cache.stress done: ${res.requests_sent} requests in ${res.elapsed_ms}ms`, rid);
+      addIncident('cache_stress', 'chaos.action.cache.title');
+      emitTrace({
+        id: `trace-${rid}`,
+        requestId: rid,
+        type: 'cache_stress',
+        endpoint: '/sobre, /stack, /projetos×3',
+        status: 'ok',
+        totalMs: res.elapsed_ms,
+        apiMs: Math.round(res.elapsed_ms * 0.20),
+        dbMs: Math.round(res.elapsed_ms * 0.30),
+        cacheMs: Math.round(res.elapsed_ms * 0.50),
+        timestamp: new Date(),
+      });
+      startCooldown(setCacheCooldown);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      addTerminalEntry('ERROR', `cache.stress failed error="${msg}" request_id=${rid}`, rid);
+      addEntry('ERROR', `cache.stress failed: ${msg}`, rid);
+    } finally {
+      setCacheLoading(false);
+    }
+  }, [cacheLoading, cacheCooldown, addTerminalEntry, addEntry, addIncident, startCooldown]);
+
+  const activeIncidents = incidents.filter((i) => Date.now() - i.startedAt < i.ttl);
+  const resolvedIncidents = incidents.filter((i) => Date.now() - i.startedAt >= i.ttl);
 
   return (
-    <section
-      aria-label="Chaos Playground"
-      className="px-4 max-w-6xl mx-auto py-8"
-    >
+    <section id="chaos" aria-label="Chaos Playground" className="px-4 max-w-6xl mx-auto py-12">
       <m.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6 }}
-        className="glass rounded-2xl p-6 md:p-8 border border-app-border"
+        viewport={{ once: true, amount: 0.15 }}
+        transition={{ duration: 0.5 }}
       >
         {/* Header */}
-        <div className="flex items-center gap-3 mb-2">
-          <span className="text-xl">🔥</span>
-          <h3 className="font-mono text-lg font-bold text-app-text uppercase tracking-wider">
+        <div className="mb-2">
+          <h2 className="text-xs font-mono uppercase tracking-[0.2em] text-app-primary mb-1">
             {t('chaos.title')}
-          </h3>
+          </h2>
+          <p className="text-sm text-app-muted max-w-lg">{t('chaos.subtitle')}</p>
+          <p className="text-xs font-mono text-app-primary/70 mt-1">{t('chaos.note')}</p>
         </div>
 
-        <p className="text-sm text-app-muted mb-1 max-w-lg">
-          {t('chaos.subtitle')}
-        </p>
-
-        {/* Honest disclaimer */}
-        <p className="text-xs font-mono text-app-muted/70 mb-6 max-w-lg italic">
-          {t('chaos.disclaimer')}
-        </p>
-
-        {/* Action buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-6">
-          <button
+        {/* Action cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
+          <ActionCard
+            icon="⚡"
+            titleKey="chaos.action.spike.title"
+            descKey="chaos.action.spike.desc"
+            accentClass="text-amber-400"
+            borderClass="border-amber-500/20"
+            hoverClass="bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
+            loading={spikeLoading}
+            cooldown={spikeCooldown}
+            loadingKey="chaos.spike_running"
+            actionKey="chaos.action.spike.title"
+            disabled={spikeLoading || spikeCooldown > 0}
             onClick={handleSpike}
-            disabled={spikeDisabled}
-            className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-mono text-sm font-semibold transition-all duration-200 ${
-              spikeDisabled
-                ? 'bg-app-surface-hover text-app-muted cursor-not-allowed opacity-60'
-                : 'bg-amber-500/15 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25 hover:border-amber-500/50 active:scale-[0.97]'
-            }`}
-          >
-            {spikeLoading ? (
-              <>
-                <span className="w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
-                {t('chaos.spike_running')}
-              </>
-            ) : spikeCooldown > 0 ? (
-              t('chaos.cooldown', { s: spikeCooldown })
-            ) : (
-              <>⚡ {t('chaos.spike')}</>
-            )}
-          </button>
-
-          <button
+          />
+          <ActionCard
+            icon="💥"
+            titleKey="chaos.action.failure.title"
+            descKey="chaos.action.failure.desc"
+            accentClass="text-red-400"
+            borderClass="border-red-500/20"
+            hoverClass="bg-red-500/10 text-red-400 hover:bg-red-500/20"
+            loading={failureLoading}
+            cooldown={failureCooldown}
+            loadingKey="chaos.failure_running"
+            actionKey="chaos.action.failure.title"
+            disabled={failureLoading || failureCooldown > 0}
             onClick={handleFailure}
-            disabled={failureDisabled}
-            className={`flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-mono text-sm font-semibold transition-all duration-200 ${
-              failureDisabled
-                ? 'bg-app-surface-hover text-app-muted cursor-not-allowed opacity-60'
-                : 'bg-red-500/15 text-red-400 border border-red-500/30 hover:bg-red-500/25 hover:border-red-500/50 active:scale-[0.97]'
-            }`}
-          >
-            {failureLoading ? (
-              <>
-                <span className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
-                {t('chaos.failure_running')}
-              </>
-            ) : failureCooldown > 0 ? (
-              t('chaos.cooldown', { s: failureCooldown })
-            ) : (
-              <>💥 {t('chaos.failure')}</>
-            )}
-          </button>
+          />
+          <ActionCard
+            icon="🗄"
+            titleKey="chaos.action.cache.title"
+            descKey="chaos.action.cache.desc"
+            accentClass="text-blue-400"
+            borderClass="border-blue-500/20"
+            hoverClass="bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
+            loading={cacheLoading}
+            cooldown={cacheCooldown}
+            loadingKey="chaos.action.cache.running"
+            actionKey="chaos.action.cache.title"
+            disabled={cacheLoading || cacheCooldown > 0}
+            onClick={handleCache}
+            disclaimer={t('chaos.action.cache.disclaimer')}
+          />
         </div>
 
-        {/* Response log */}
-        <AnimatePresence mode="popLayout">
-          {logs.length > 0 && (
-            <m.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="rounded-xl bg-app-bg/60 border border-app-border p-4 mb-5 font-mono text-xs space-y-1.5 max-h-[200px] overflow-y-auto"
-            >
-              {logs.map((entry) => (
-                <m.div
-                  key={entry.id}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="flex gap-2"
-                >
-                  <span className="text-app-muted flex-shrink-0">{entry.timestamp}</span>
-                  <span
-                    className={
-                      entry.type === 'error'
-                        ? 'text-red-400'
-                        : entry.type === 'failure'
-                          ? 'text-amber-400'
-                          : 'text-emerald-400'
-                    }
-                  >
-                    {entry.type === 'error' ? '✗' : entry.type === 'failure' ? '⚠' : '✓'}
-                  </span>
-                  <span className="text-app-text">{entry.message}</span>
-                </m.div>
-              ))}
-            </m.div>
-          )}
-        </AnimatePresence>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+          {/* Active Incidents panel */}
+          <div className="glass rounded-xl p-4 border border-app-border">
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xs font-mono uppercase tracking-widest text-app-muted">{t('chaos.incidents.active')}</span>
+              {activeIncidents.length > 0 && (
+                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+              )}
+            </div>
+            {activeIncidents.length === 0 ? (
+              <p className="text-xs font-mono text-app-muted/50">{t('chaos.incidents.empty')}</p>
+            ) : (
+              <ul className="space-y-2">
+                {activeIncidents.map((inc) => {
+                  const remaining = Math.max(0, Math.ceil((inc.ttl - (Date.now() - inc.startedAt)) / 1000));
+                  return (
+                    <li key={inc.id} className="flex items-center justify-between">
+                      <span className="text-xs font-mono text-amber-400">{t(inc.labelKey)}</span>
+                      <span className="text-[10px] font-mono text-app-muted">{t('chaos.incidents.remaining', { s: remaining })}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
 
-        {/* War story narrative */}
-        <div className="border-t border-app-border pt-4">
-          <p className="text-sm text-app-muted italic leading-relaxed">
-            "{t('chaos.narrative')}"
-          </p>
+            {resolvedIncidents.length > 0 && (
+              <>
+                <div className="border-t border-app-border mt-3 pt-3">
+                  <span className="text-xs font-mono uppercase tracking-widest text-app-muted">{t('chaos.incidents.resolved')}</span>
+                </div>
+                <ul className="space-y-1 mt-2">
+                  {resolvedIncidents.slice(0, 3).map((inc) => {
+                    const ago = Math.round((Date.now() - inc.startedAt) / 60000);
+                    return (
+                      <li key={inc.id} className="flex items-center justify-between">
+                        <span className="text-xs font-mono text-app-muted/70">{t(inc.labelKey)}</span>
+                        <span className="text-[10px] font-mono text-app-muted/50">{ago}m ago</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </>
+            )}
+          </div>
+
+          {/* Terminal log */}
+          <AnimatePresence mode="popLayout">
+            <div className="rounded-xl bg-[#0a0a0a] border border-app-border p-4 font-mono text-xs overflow-y-auto max-h-[220px]">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-400/60" />
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/60" />
+                <span className="text-[10px] text-app-muted/50 ml-2 uppercase tracking-widest">chaos-log</span>
+              </div>
+              {terminal.length === 0 ? (
+                <p className="text-app-muted/40">{'>'} Waiting for events...</p>
+              ) : (
+                terminal.map((entry) => (
+                  <m.div
+                    key={entry.id}
+                    initial={{ opacity: 0, x: -4 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="flex gap-2 mb-1"
+                  >
+                    <span className="text-app-muted/50 flex-shrink-0">[{entry.timestamp}]</span>
+                    <span className={
+                      entry.level === 'ERROR' ? 'text-red-400 flex-shrink-0' :
+                      entry.level === 'WARN' ? 'text-amber-400 flex-shrink-0' :
+                      'text-emerald-400/70 flex-shrink-0'
+                    }>{entry.level.padEnd(5)}</span>
+                    <span className="text-app-text/80 break-all">{entry.message}</span>
+                  </m.div>
+                ))
+              )}
+            </div>
+          </AnimatePresence>
         </div>
       </m.div>
     </section>

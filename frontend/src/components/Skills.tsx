@@ -1,68 +1,87 @@
-import { motion } from 'framer-motion';
+/**
+ * Skills → Technology Stack
+ *
+ * Minimal icon grid. No progress bars, no level indicators.
+ * Groups by category. Signal only.
+ */
+import { m } from 'framer-motion';
 import { useSkills } from '../hooks/useApi';
 import { useLanguage } from '../context/LanguageContext';
 import { ServerWakeupError } from './ServerWakeupNotice';
+
+// Category display order (featured first)
+const CATEGORY_ORDER = ['backend', 'banco_dados', 'database', 'devops', 'frontend', 'testing', 'tools', 'automation'];
 
 export default function Skills() {
   const { data: skills = [], isLoading, isError } = useSkills();
   const { t } = useLanguage();
 
-  if (isLoading) return null; // Or a skeleton if we had one for skills
+  if (isLoading) return null;
 
   if (isError) {
     return (
-      <section id="stack" className="py-16 bg-transparent section-alt">
+      <section id="stack" className="py-16">
         <ServerWakeupError />
       </section>
     );
   }
 
-  const categories = Array.from(new Set(skills.map(s => s.categoria)));
-
-
+  // Sort categories by preferred order
+  const allCats = Array.from(new Set(skills.map((s) => s.categoria)));
+  const categories = [
+    ...CATEGORY_ORDER.filter((c) => allCats.includes(c)),
+    ...allCats.filter((c) => !CATEGORY_ORDER.includes(c)),
+  ];
 
   return (
-    <section id="stack" className="py-16 bg-transparent section-alt transition-colors duration-300 relative group overflow-hidden">
-      {/* Dynamic hover glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-app-primary/5 dark:bg-app-primary/10 rounded-full blur-[120px] -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+    <section id="stack" className="py-12 section-alt transition-colors duration-300">
       <div className="max-w-6xl mx-auto px-4">
-        <motion.div 
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.1, margin: "0px 0px -100px 0px" }}
-          transition={{ duration: 0.8 }}
+          viewport={{ once: true, amount: 0.1 }}
+          transition={{ duration: 0.5 }}
         >
-          <h2 className="text-3xl md:text-5xl font-bold mb-12 text-center text-app-text tracking-widest">
-            {t('nav.stack')}
-          </h2>
+          {/* Section header — monospace, like every other ops section */}
+          <div className="mb-8">
+            <h2 className="text-xs font-mono uppercase tracking-[0.2em] text-app-primary mb-1">
+              {t('stack.section_title')}
+            </h2>
+            <p className="text-xs font-mono text-app-muted">
+              {t('stack.section_subtitle')}
+            </p>
+          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Grid of category blocks */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {categories.map((category, idx) => (
-              <motion.div 
+              <m.div
                 key={category}
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.1 }}
-                transition={{ duration: 0.5, delay: idx * 0.1 }}
-                className="glass rounded-xl p-6 border border-app-border hover:border-app-primary hover:shadow-[0_0_20px_rgba(212,163,115,0.2)] transition-all duration-300"
+                transition={{ duration: 0.35, delay: idx * 0.06 }}
+                className="glass rounded-xl p-4 border border-app-border"
               >
-                <h3 className="text-xl font-bold text-app-primary mb-5 capitalize tracking-widest">
+                <h3 className="text-[10px] font-mono uppercase tracking-[0.2em] text-app-primary mb-3">
                   {t(`stack.category.${category}`)}
                 </h3>
-                <div className="flex flex-wrap gap-2">
-                  {skills.filter(s => s.categoria === category).map(skill => (
-                    <span
-                      key={skill.nome}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-app-primary/5 text-app-primary border border-app-primary/20 hover:bg-app-primary/10 transition-colors duration-200"
-                    >
-                      {skill.nome}
-                    </span>
-                  ))}
+                <div className="flex flex-wrap gap-1.5">
+                  {skills
+                    .filter((s) => s.categoria === category)
+                    .map((skill) => (
+                      <span
+                        key={skill.nome}
+                        className="inline-flex items-center px-2 py-1 rounded text-xs font-mono text-app-text bg-app-surface-hover border border-app-border"
+                      >
+                        {skill.nome}
+                      </span>
+                    ))}
                 </div>
-              </motion.div>
+              </m.div>
             ))}
           </div>
-        </motion.div>
+        </m.div>
       </div>
     </section>
   );

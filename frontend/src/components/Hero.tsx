@@ -3,8 +3,9 @@ import { m } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { scrollToSection } from '../utils/scrollToSection';
 import { useLiveMetrics, type SystemStatus } from '../hooks/useLiveMetrics';
+import type { MetricsSummary } from '../api';
 
-// ─── LiveStatusBadge ────────────────────────────────────────────────────────
+// ─── LiveStatusBadge ─────────────────────────────────────────────────────────
 
 const BADGE_CONFIG: Record<
   SystemStatus,
@@ -27,10 +28,7 @@ const LiveStatusBadge = React.memo(({ status, latencyMs }: { status: SystemStatu
       <span className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
       <span className={cfg.text}>
         {t(cfg.i18nKey)}
-        {status === 'operational' && latencyMs !== undefined && (
-          <span className="text-app-muted ml-1">· {latencyMs}ms</span>
-        )}
-        {status === 'degraded' && latencyMs !== undefined && (
+        {(status === 'operational' || status === 'degraded') && latencyMs !== undefined && (
           <span className="text-app-muted ml-1">· {latencyMs}ms</span>
         )}
       </span>
@@ -38,101 +36,193 @@ const LiveStatusBadge = React.memo(({ status, latencyMs }: { status: SystemStatu
   );
 });
 
+// ─── KPI Strip ───────────────────────────────────────────────────────────────
+
+interface DeltaBadgeProps {
+  current: number;
+  previous: number | null;
+  unit?: string;
+  invertColor?: boolean; // true = higher is bad (latency, errors)
+  decimals?: number;
+}
+
+function DeltaBadge({ current, previous, unit = '', invertColor = true, decimals = 0 }: DeltaBadgeProps) {
+  if (previous === null) return null;
+  const diff = current - previous;
+  if (Math.abs(diff) < 0.001) return null;
+
+  const isUp = diff > 0;
+  const isBad = invertColor ? isUp : !isUp;
+  const color = isBad ? 'text-red-400' : 'text-emerald-400';
+  const sign = isUp ? '+' : '';
+  const val = decimals > 0 ? Math.abs(diff).toFixed(decimals) : Math.abs(Math.round(diff)).toString();
+
+  return (
+    <span className={`text-[10px] font-mono ml-1 ${color}`}>
+      ({sign}{isUp ? '' : '-'}{val}{unit})
+    </span>
+  );
+}
+
+interface KpiStripProps {
+  data: MetricsSummary;
+  previous: MetricsSummary | null;
+  status: SystemStatus;
+}
+
+function KpiStrip({ data, previous, status }: KpiStripProps) {
+  const statusColor: Record<SystemStatus, string> = {
+    loading: 'text-app-muted',
+    operational: 'text-emerald-400',
+    degraded: 'text-amber-400',
+    down: 'text-red-400',
+  };
+
+  const items = [
+    {
+      label: 'P95',
+      value: `${data.p95_ms}ms`,
+      delta: <DeltaBadge current={data.p95_ms} previous={previous?.p95_ms ?? null} unit="ms" />,
+    },
+    {
+      label: 'Error Rate',
+      value: data.error_rate_pct,
+      delta: <DeltaBadge current={data.error_rate * 100} previous={previous ? previous.error_rate * 100 : null} unit="%" decimals={2} />,
+    },
+    {
+      label: 'Requests',
+      value: data.requests_24h.toLocaleString(),
+      delta: null,
+    },
+    {
+      label: 'Status',
+      value: data.system_status.toUpperCase(),
+      className: statusColor[status],
+      delta: null,
+    },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-8 max-w-xl">
+      {items.map((item) => (
+        <div key={item.label} className="glass rounded-xl px-4 py-3 flex flex-col gap-1">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-app-muted">{item.label}</span>
+          <div className="flex items-baseline flex-wrap">
+            <span className={`font-mono text-lg font-bold ${item.className ?? 'text-app-text'}`}>
+              {item.value}
+            </span>
+            {item.delta}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Hero ────────────────────────────────────────────────────────────────────
+
 const Hero = React.memo(() => {
   const { t } = useLanguage();
-  const { status, data } = useLiveMetrics();
+  const { status, data, previous } = useLiveMetrics();
 
   return (
     <section id="hero" className="pt-20 pb-12 md:pt-28 md:pb-20 px-4 max-w-6xl mx-auto relative overflow-hidden min-h-screen flex items-center">
-      {/* Background decoration - very subtle copper glow (Hidden on mobile for performance) */}
-      <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-app-primary/5 rounded-full blur-[120px] -z-10"></div>
-      
-      <m.div 
-        initial={window.innerWidth > 768 ? { y: 10 } : false}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center"
-      >
-        <div className="text-center md:text-left order-2 md:order-1">
-          <m.h1 
-            initial={window.innerWidth > 768 ? { opacity: 0.1, x: -10 } : { opacity: 1, x: 0 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-4xl md:text-6xl font-extrabold tracking-tight mb-3 text-app-text"
-          >
-            {t('hero.title')}
-          </m.h1>
-          <m.div
-            initial={window.innerWidth > 768 ? { opacity: 0, x: -20 } : { opacity: 1, x: 0 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.1 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="mb-5"
-          >
-            <LiveStatusBadge status={status} latencyMs={data?.p95_ms} />
-          </m.div>
-          <m.p 
-            initial={window.innerWidth > 768 ? { opacity: 0, x: -20 } : { opacity: 1, x: 0 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.1 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            className="mt-4 text-lg md:text-xl text-app-muted mb-10 max-w-xl mx-auto md:mx-0 whitespace-pre-line"
-          >
-            {t('hero.subtitle')}
-          </m.p>
-          <m.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.1 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-            className="flex flex-col sm:flex-row justify-center md:justify-start gap-4"
-          >
-            <button
-              onClick={() => scrollToSection('contato')}
-              className="bg-app-primary hover:bg-app-primary-hover text-app-primary-text font-bold py-3 px-8 rounded-full transition-smooth premium-shadow"
-            >
-              {t('hero.cta_primary')}
-            </button>
-            <a
-              data-testid="hero-contact-cta"
-              href="https://github.com/Argenis1412/portfolio/blob/main/ARCHITECTURE.md"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-transparent hover:bg-app-surface-hover text-app-text font-semibold py-3 px-8 rounded-full transition-smooth border border-app-border text-center"
-            >
-              {t('hero.cta_secondary')}
-            </a>
-          </m.div>
-        </div>
+      {/* Background glow */}
+      <div className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-app-primary/5 rounded-full blur-[120px] -z-10" />
 
-        <m.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true, amount: 0.1 }}
-          transition={{ duration: 1 }}
-          className="order-1 md:order-2 flex justify-center md:justify-end relative mr-0 md:mr-4"
+      <m.div
+        initial={window.innerWidth > 768 ? { y: 10, opacity: 0 } : false}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        className="w-full max-w-3xl"
+      >
+        {/* Status badge */}
+        <m.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4 }}
+          className="mb-4"
         >
-          {/* Intense bronze glow background - Static for performance (Hidden on mobile) */}
-          <div 
-            style={{ width: '430px', height: '430px' }}
-            className="hidden md:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-app-primary/15 rounded-full blur-[80px] -z-10"
-          ></div>
-          
-          <div className="relative w-[276px] h-[276px] md:w-[368px] md:h-[368px] rounded-full p-1.5 bg-gradient-to-tr from-app-primary to-transparent shadow-[0_0_30px_rgba(212,163,115,0.3)]">
-            <div className="w-full h-full rounded-full overflow-hidden bg-app-surface-hover flex items-center justify-center relative">
-               <picture>
-                 <source srcSet="/profile.webp" type="image/webp" />
-                 <img 
-                   src="/profile.jpg" 
-                   alt="Profile" 
-                   fetchPriority="high"
-                   width="368"
-                   height="368"
-                   className="w-full h-full object-cover rounded-full filter grayscale-[10%] brightness-110" 
-                 />
-               </picture>
-            </div>
-          </div>
+          <LiveStatusBadge status={status} latencyMs={data?.p95_ms} />
+        </m.div>
+
+        {/* H1 */}
+        <m.h1
+          initial={window.innerWidth > 768 ? { opacity: 0, x: -10 } : { opacity: 1, x: 0 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4 text-app-text"
+        >
+          {t('hero.title')}
+        </m.h1>
+
+        {/* Subtitle */}
+        <m.p
+          initial={window.innerWidth > 768 ? { opacity: 0, x: -10 } : { opacity: 1, x: 0 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="text-lg md:text-xl text-app-muted max-w-2xl"
+        >
+          {t('hero.subtitle')}
+        </m.p>
+
+        {/* Differentiator line */}
+        <m.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="mt-3 text-sm font-mono italic text-app-primary/80 max-w-2xl"
+        >
+          {t('hero.differentiator')}
+        </m.p>
+
+        {/* KPI strip — shows immediately from useLiveMetrics */}
+        {data && (
+          <m.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.35 }}
+          >
+            <KpiStrip data={data} previous={previous} status={status} />
+          </m.div>
+        )}
+
+        {/* CTAs */}
+        <m.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.45 }}
+          className="flex flex-col sm:flex-row gap-3 mt-8"
+        >
+          <button
+            onClick={() => scrollToSection('metrics')}
+            className="bg-app-primary hover:bg-app-primary-hover text-app-primary-text font-bold py-3 px-8 rounded-full transition-smooth premium-shadow font-mono text-sm"
+          >
+            → {t('hero.cta_metrics')}
+          </button>
+          <button
+            onClick={() => scrollToSection('chaos')}
+            className="bg-transparent hover:bg-app-surface-hover text-app-text font-semibold py-3 px-8 rounded-full transition-smooth border border-app-border font-mono text-sm"
+          >
+            → {t('hero.cta_chaos')}
+          </button>
+        </m.div>
+
+        {/* Secondary links row */}
+        <m.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.6 }}
+          className="flex gap-4 mt-4"
+        >
+          <a
+            href="https://github.com/Argenis1412/portfolio/blob/main/ARCHITECTURE.md"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-mono text-app-muted hover:text-app-primary transition-colors"
+          >
+            {t('hero.cta_secondary')} ↗
+          </a>
         </m.div>
       </m.div>
     </section>
