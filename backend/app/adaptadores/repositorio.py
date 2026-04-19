@@ -252,7 +252,7 @@ class RepositorioJSON(RepositorioPortfolio):
     async def get_philosophy(self) -> list[PhilosophyInspiration]:
         """
         Gets the philosophy/inspirations data.
-        
+
         Returns:
             list[PhilosophyInspiration]: List of inspiration entities.
         """

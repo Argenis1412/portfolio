@@ -515,4 +515,3 @@ async def get_philosophy(
     )
 
     return resposta_cacheavel(request, response, resultado)
-
