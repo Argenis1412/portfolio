@@ -18,7 +18,7 @@ const LogStream       = React.lazy(() => import('./components/LogStream'));
 
 const About           = React.lazy(() => import('./components/About'));
 const Experience      = React.lazy(() => import('./components/Experience'));
-const Philosophy      = React.lazy(() => import('./components/Philosophy'));
+
 const Projects        = React.lazy(() => import('./components/Projects'));
 const Contact         = React.lazy(() => import('./components/Contact'));
 const ServerWakeupNotice = React.lazy(() => import('./components/ServerWakeupNotice'));
@@ -72,8 +72,6 @@ function App() {
                 {/* 8 — Experience + Education */}
                 <Experience />
 
-                {/* 9 — Philosophy (below the fold, secondary) */}
-                <Philosophy />
 
                 {/* 10 — Projects */}
                 <Projects />
