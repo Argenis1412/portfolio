@@ -107,7 +107,7 @@ export default function LogStream() {
           {/* Log body */}
           <div ref={bodyRef} className="h-[280px] overflow-y-auto p-4 font-mono text-xs space-y-1.5 scroll-smooth">
             {filtered.length === 0 ? (
-              <p className="text-app-muted/30">{'>'} {t('logs.waiting')}</p>
+              <p className="text-white/40">{'>'} {t('logs.waiting')}</p>
             ) : (
               <AnimatePresence mode="popLayout" initial={false}>
                 {[...filtered].reverse().map((entry) => (
@@ -118,16 +118,16 @@ export default function LogStream() {
                     transition={{ duration: 0.15 }}
                     className="flex gap-2 min-w-0"
                   >
-                    <span className="text-app-muted/40 flex-shrink-0">
+                    <span className="text-white/60 flex-shrink-0">
                       [{entry.timestamp.toLocaleTimeString('en-GB', { hour12: false })}]
                     </span>
                     <span className={`flex-shrink-0 w-5 ${LEVEL_COLOR[entry.level]}`}>
                       {entry.level[0]}
                     </span>
-                    <span className="text-app-text/70 break-all">
+                    <span className="text-white/90 break-all">
                       {entry.message}
                       {entry.requestId && (
-                        <span className="text-app-muted/50 ml-1">
+                        <span className="text-white/50 ml-1 text-[10px]">
                           request_id={entry.requestId}
                         </span>
                       )}

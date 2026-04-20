@@ -77,16 +77,17 @@ export function LogProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'ADD_INCIDENT', incident });
   }, []);
 
-  // Boot entries keep the stream structured before the first manual chaos event.
+  const initialized = React.useRef(false);
   React.useEffect(() => {
-    if (state.entries.length === 0) {
+    if (!initialized.current) {
+      initialized.current = true;
       const sessionId = Math.random().toString(36).substring(2, 10);
       addEntry('INFO', `system.init status=BOOT session_id=${sessionId} request_id=boot-${sessionId} trace_id=trace-boot-${sessionId}`);
       setTimeout(() => {
         addEntry('INFO', `health.check status=UP db=CONNECTED session_id=${sessionId} request_id=boot-${sessionId} trace_id=trace-boot-${sessionId}`);
       }, 800);
     }
-  }, [addEntry, state.entries.length]);
+  }, [addEntry]);
 
   const clear = useCallback(() => dispatch({ type: 'CLEAR' }), []);
 

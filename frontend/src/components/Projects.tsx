@@ -135,12 +135,12 @@ export default function Projects() {
                 <div className="rounded-xl border border-app-border/60 bg-[#0F141A] p-4 mb-5 font-mono text-xs text-slate-300">
                   <div className="flex flex-wrap gap-x-6 gap-y-2">
                     <div>
-                      <span className="text-slate-500">{t('projects.runtime')}:</span>
-                      <span className="ml-2 text-app-text">{project.tecnologias.slice(0, 3).join(' / ')}</span>
+                      <span className="text-slate-400">{t('projects.runtime')}:</span>
+                      <span className="ml-2 text-slate-100">{project.tecnologias.slice(0, 3).join(' / ')}</span>
                     </div>
                     <div>
-                      <span className="text-slate-500">{t('projects.surface')}:</span>
-                      <span className="ml-2 text-app-text">{capabilities.length} checks</span>
+                      <span className="text-slate-400">{t('projects.surface')}:</span>
+                      <span className="ml-2 text-slate-100">{capabilities.length} checks</span>
                     </div>
                   </div>
                 </div>

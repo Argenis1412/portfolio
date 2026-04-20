@@ -32,11 +32,19 @@ export default function Footer() {
     setTimeout(() => setCopiedWhatsApp(false), 2000);
   };
 
+  const maskEmail = (str: string) => {
+    const [name, domain] = str.split('@');
+    if (!name || !domain) return str;
+    return `${name[0]}${name[1] || ''}***@${domain}`;
+  };
+
+  const maskPhone = (str: string) => str.replace(/\d(?=.{4})/g, '•');
+
   const contactCards = [
     {
       key: 'email',
       label: 'Email',
-      value: email,
+      value: maskEmail(email),
       icon: <Mail className="w-4 h-4" />,
       accent: 'text-app-primary bg-app-primary/10 group-hover:bg-app-primary group-hover:text-white',
       buttonAccent: 'group-hover:text-app-primary',
@@ -46,7 +54,7 @@ export default function Footer() {
     {
       key: 'whatsapp',
       label: 'WhatsApp',
-      value: phone,
+      value: maskPhone(phone),
       icon: <WhatsAppIcon className="w-4 h-4" />,
       accent: 'text-[#25D366] bg-[#25D366]/10 group-hover:bg-[#25D366] group-hover:text-white',
       buttonAccent: 'group-hover:text-[#25D366]',

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { m, type Variants } from 'framer-motion';
+import { m, AnimatePresence, type Variants } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { useLiveMetrics, type SystemStatus } from '../hooks/useLiveMetrics';
 import { useCurrentTime } from '../hooks/useCurrentTime';
@@ -96,11 +96,11 @@ export default function LiveMetricsBento() {
   if (!data) return null;
 
   const statusCfg = STATUS_CONFIG[status];
-  const errorIsElevated = data.error_rate_status !== 'stable';
+  const errorIsElevated = data.error_rate_status !== 'stable' || data.error_rate > 0.045;
   const errorRateColor =
-    data.error_rate_status === 'investigating'
+    (data.error_rate_status === 'investigating' || data.error_rate > 0.08)
       ? 'bg-red-500/15 text-red-500'
-      : data.error_rate_status === 'warning'
+      : (data.error_rate_status === 'warning' || data.error_rate > 0.045)
         ? 'bg-red-500/15 text-red-400'
         : 'bg-emerald-500/15 text-emerald-500';
   const errorNumberColor = errorIsElevated ? 'text-red-400' : 'text-app-text';
@@ -178,12 +178,31 @@ export default function LiveMetricsBento() {
 
         <Tile index={2} label={t('metrics.error_rate')}>
           <div className="flex items-center gap-2 mt-1">
-            {errorIsElevated && <span className="text-red-400 text-lg">⚠</span>}
-            <span className={`font-mono text-2xl font-bold ${errorNumberColor}`}>{data.error_rate_pct}</span>
+            <AnimatePresence>
+              {errorIsElevated && (
+                <m.span
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.5 }}
+                  className="text-red-500 text-xl drop-shadow-[0_0_8px_rgba(239,68,68,0.4)]"
+                >
+                  ⚠
+                </m.span>
+              )}
+            </AnimatePresence>
+            <m.span 
+              animate={errorIsElevated ? { color: '#f87171' } : { color: 'inherit' }}
+              className={`font-mono text-2xl font-bold ${errorNumberColor}`}
+            >
+              {data.error_rate_pct}
+            </m.span>
           </div>
-          <span className={`text-xs font-mono px-2 py-0.5 rounded-full w-fit ${errorRateColor}`}>
+          <m.div
+            animate={errorIsElevated ? { scale: [1, 1.05, 1], transition: { repeat: Infinity, duration: 2 } } : {}}
+            className={`text-xs font-mono px-2 py-0.5 rounded-full w-fit ${errorRateColor}`}
+          >
             {t(`metrics.health.${data.error_rate_status}`)}
-          </span>
+          </m.div>
         </Tile>
 
         <Tile index={3} label={t('metrics.requests_24h')}>

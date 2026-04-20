@@ -403,7 +403,7 @@ export default function ChaosPlayground() {
                 <span className="text-[10px] text-app-muted/50 ml-2 uppercase tracking-widest">chaos-log</span>
               </div>
               {terminal.length === 0 ? (
-                <p className="text-app-muted/40">{'>'} {t('logs.waiting')}</p>
+                <p className="text-white/40">{'>'} {t('logs.waiting')}</p>
               ) : (
                 terminal.map((entry) => (
                   <m.div
@@ -412,13 +412,13 @@ export default function ChaosPlayground() {
                     animate={{ opacity: 1, x: 0 }}
                     className="flex gap-2 mb-1"
                   >
-                    <span className="text-app-muted/50 flex-shrink-0">[{entry.timestamp}]</span>
+                    <span className="text-white/60 flex-shrink-0">[{entry.timestamp}]</span>
                     <span className={
                       entry.level === 'ERROR' ? 'text-red-400 flex-shrink-0' :
                       entry.level === 'WARN' ? 'text-amber-400 flex-shrink-0' :
                       'text-emerald-400/70 flex-shrink-0'
                     }>{entry.level.padEnd(5)}</span>
-                    <span className="text-app-text/80 break-all">{entry.message}</span>
+                    <span className="text-white/90 break-all">{entry.message}</span>
                   </m.div>
                 ))
               )}

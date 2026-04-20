@@ -83,6 +83,13 @@ export default function MetricsSparkline({
 
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden>
+      <defs>
+        <linearGradient id="sparkline-gradient" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#14d3a5" stopOpacity="0.25" />
+          <stop offset="100%" stopColor="#14d3a5" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+
       {thresholdLines.map(({ threshold, y }) => (
         <g key={threshold}>
           <line
@@ -91,45 +98,61 @@ export default function MetricsSparkline({
             x2={width}
             y2={y}
             stroke={threshold === 100 ? '#ef4444' : '#f59e0b'}
-            strokeOpacity={compact ? 0.18 : 0.24}
-            strokeDasharray="3 3"
+            strokeOpacity={compact ? 0.12 : 0.18}
+            strokeDasharray="2 2"
             strokeWidth="1"
           />
           {!compact && (
-            <text x={width - 2} y={y - 2} textAnchor="end" fontSize="9" fill="#7c7469">
+            <text x={width - 2} y={y - 2} textAnchor="end" fontSize="8" fontFamily="monospace" fill="#7c7469" opacity="0.5">
               {threshold}ms
             </text>
           )}
         </g>
       ))}
 
+      {/* Area under the curve */}
+      <path
+        d={`M ${model.points[0].x},${height} L ${model.points.map(p => `${p.x},${p.y}`).join(' L ')} L ${model.points[model.points.length - 1].x},${height} Z`}
+        fill="url(#sparkline-gradient)"
+        stroke="none"
+      />
+
       <polyline
         fill="none"
         stroke="#14d3a5"
-        strokeWidth={compact ? '1.6' : '2'}
-        strokeLinejoin="miter"
-        strokeLinecap="square"
+        strokeWidth={compact ? '1.5' : '1.8'}
+        strokeLinejoin="round"
+        strokeLinecap="round"
         points={model.polyline}
       />
 
-      {model.annotations.map(({ trace, point }, index) => {
+      {model.annotations.map(({ trace, point }) => {
         const style = TRACE_STYLE[trace.type];
-        const x = Math.min(width - 26, point.x + 4 + index * 2);
+        const isSpike = trace.type === 'traffic_spike';
+        const markerColor = isSpike ? '#ef4444' : style.stroke;
+        
         return (
           <g key={trace.id}>
             <line
               x1={point.x}
-              y1="2"
+              y1="0"
               x2={point.x}
-              y2={height - 2}
-              stroke={style.stroke}
-              strokeWidth="1"
-              strokeOpacity={0.75}
+              y2={height}
+              stroke={markerColor}
+              strokeWidth="1.2"
+              strokeDasharray={isSpike ? "none" : "3 2"}
+              strokeOpacity={0.8}
             />
             {!compact && (
-              <text x={x} y="10" fontSize="9" fill={style.fill}>
-                {style.label}
-              </text>
+              <g transform={`translate(${point.x + 4}, 12)`}>
+                <rect 
+                   x="-2" y="-10" width={trace.type.length * 5 + 10} height="14" 
+                   fill={markerColor} rx="2" 
+                />
+                <text x="2" y="1" fontSize="9" fontWeight="bold" fill="#000" fontFamily="monospace">
+                  {isSpike ? 'SPIKE' : style.label}
+                </text>
+              </g>
             )}
           </g>
         );
@@ -140,8 +163,10 @@ export default function MetricsSparkline({
           key={`${point.x}-${index}`}
           cx={point.x}
           cy={point.y}
-          r={index === recentPoints.length - 1 ? '2.8' : '2.2'}
+          r={index === recentPoints.length - 1 ? '3' : '2'}
           fill="#14d3a5"
+          stroke="#000"
+          strokeWidth="0.5"
         />
       ))}
     </svg>

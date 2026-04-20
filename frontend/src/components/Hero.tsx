@@ -93,6 +93,7 @@ function KpiStrip({ data, previous, status }: KpiStripProps) {
     {
       label: 'Error Rate',
       value: data.error_rate_pct,
+      className: data.error_rate > 0.045 ? 'text-red-400' : 'text-app-text',
       delta: <DeltaBadge current={data.error_rate * 100} previous={previous ? previous.error_rate * 100 : null} unit="%" decimals={2} />,
     },
     {
