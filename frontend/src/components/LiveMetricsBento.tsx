@@ -182,7 +182,7 @@ export default function LiveMetricsBento() {
           {t('metrics.system_status').toUpperCase()}
         </h2>
         <p className="text-xs font-mono text-app-muted max-w-lg">
-          Metrics derived from real system traffic and execution. Not simulated or pre-computed.
+          {t('metrics.section_subtitle')}
         </p>
       </div>
 

@@ -417,7 +417,7 @@ export default function ChaosPlayground() {
                 <span className="text-[10px] text-app-muted/50 ml-2 uppercase tracking-widest">chaos-log</span>
               </div>
               {terminal.length === 0 ? (
-                <p className="text-app-muted/40">{'>'} Waiting for events...</p>
+                <p className="text-app-muted/40">{'>'} {t('logs.waiting')}</p>
               ) : (
                 terminal.map((entry) => (
                   <m.div

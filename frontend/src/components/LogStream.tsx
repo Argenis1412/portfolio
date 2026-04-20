@@ -107,7 +107,7 @@ export default function LogStream() {
           {/* Log body */}
           <div className="p-4 font-mono text-xs h-[280px] overflow-y-auto space-y-1.5">
             {filtered.length === 0 ? (
-              <p className="text-app-muted/30">{'>'} {t('logs.empty')}</p>
+              <p className="text-app-muted/30">{'>'} {t('logs.waiting')}</p>
             ) : (
               <AnimatePresence mode="popLayout" initial={false}>
                 {[...filtered].reverse().map((entry) => (
