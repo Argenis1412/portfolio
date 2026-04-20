@@ -42,6 +42,16 @@ export function LogProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'ADD', entry });
   }, []);
 
+  // Early feed simulation for a "lived-in" system look
+  React.useEffect(() => {
+    if (state.entries.length === 0) {
+      addEntry('INFO', 'system.init session_id=' + Math.random().toString(36).substring(7));
+      setTimeout(() => {
+        addEntry('INFO', 'health.check status=UP db=CONNECTED');
+      }, 800);
+    }
+  }, [addEntry, state.entries.length]);
+
   const clear = useCallback(() => dispatch({ type: 'CLEAR' }), []);
 
   const value: LogContextValue = useMemo(() => ({ entries: state.entries, addEntry, clear }), [

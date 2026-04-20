@@ -175,12 +175,12 @@ export default function ChaosPlayground() {
     setSpikeLoading(true);
     const rid = genReqId();
     addTerminalEntry('INFO', `chaos.spike triggered request_id=${rid}`, rid);
-    addEntry('INFO', `chaos.spike triggered`, rid);
+    addEntry('INFO', 'chaos.spike status=TRIGGERED type=TRAFFIC_SPIKE', rid);
     try {
       const res: ChaosResponse = await postChaosSpike();
       const elapsed = res.elapsed_ms ?? 0;
       addTerminalEntry('WARN', `traffic.spike completed requests=${res.requests_sent ?? 0} dropped=${res.requests_dropped ?? 0} elapsed_ms=${elapsed} request_id=${rid}`, rid);
-      addEntry('WARN', `traffic.spike elapsed_ms=${elapsed} dropped=${res.requests_dropped ?? 0}`, rid);
+      addEntry('WARN', `traffic.spike status=COMPLETED elapsed_ms=${elapsed} dropped=${res.requests_dropped ?? 0}`, rid);
       addIncident('traffic_spike', 'chaos.action.spike.title');
       emitTrace({
         id: `trace-${rid}`,
@@ -199,7 +199,7 @@ export default function ChaosPlayground() {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
       addTerminalEntry('ERROR', `chaos.spike failed error="${msg}" request_id=${rid}`, rid);
-      addEntry('ERROR', `chaos.spike failed: ${msg}`, rid);
+      addEntry('ERROR', `chaos.spike status=FAILED error="${msg}"`, rid);
     } finally {
       setSpikeLoading(false);
     }
@@ -210,12 +210,12 @@ export default function ChaosPlayground() {
     setFailureLoading(true);
     const rid = genReqId();
     addTerminalEntry('INFO', `chaos.failure triggered request_id=${rid}`, rid);
-    addEntry('INFO', `chaos.failure triggered`, rid);
+    addEntry('INFO', 'chaos.failure status=TRIGGERED type=FORCED_503', rid);
     try {
       const res: ChaosResponse = await postChaosFailure();
       const recovery = res.recovery_ms ?? 0;
       addTerminalEntry('WARN', `forced.failure 503 triggered recovery_ms=${recovery} request_id=${rid}`, rid);
-      addEntry('WARN', `forced.failure 503 → recovered=${recovery}ms`, rid);
+      addEntry('WARN', `forced.failure status=503 recovery_ms=${recovery}`, rid);
       addIncident('forced_failure', 'chaos.action.failure.title');
       emitTrace({
         id: `trace-${rid}`,
@@ -234,7 +234,7 @@ export default function ChaosPlayground() {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
       addTerminalEntry('ERROR', `chaos.failure error="${msg}" request_id=${rid}`, rid);
-      addEntry('ERROR', `chaos.failure failed: ${msg}`, rid);
+      addEntry('ERROR', `chaos.failure status=FAILED error="${msg}"`, rid);
     } finally {
       setFailureLoading(false);
     }
@@ -245,11 +245,11 @@ export default function ChaosPlayground() {
     setCacheLoading(true);
     const rid = genReqId();
     addTerminalEntry('INFO', `cache.stress triggered requests=10 request_id=${rid}`, rid);
-    addEntry('INFO', `cache.stress.sim triggered`, rid);
+    addEntry('INFO', 'cache.stress status=TRIGGERED type=CACHE_STRESS', rid);
     try {
       const res = await postChaosCache();
       addTerminalEntry('INFO', `cache.stress completed requests_sent=${res.requests_sent} elapsed_ms=${res.elapsed_ms} request_id=${rid}`, rid);
-      addEntry('INFO', `cache.stress done: ${res.requests_sent} requests in ${res.elapsed_ms}ms`, rid);
+      addEntry('INFO', `cache.stress status=DONE requests=${res.requests_sent} elapsed_ms=${res.elapsed_ms}`, rid);
       addIncident('cache_stress', 'chaos.action.cache.title');
       emitTrace({
         id: `trace-${rid}`,
@@ -267,7 +267,7 @@ export default function ChaosPlayground() {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
       addTerminalEntry('ERROR', `cache.stress failed error="${msg}" request_id=${rid}`, rid);
-      addEntry('ERROR', `cache.stress failed: ${msg}`, rid);
+      addEntry('ERROR', `cache.stress status=FAILED error="${msg}"`, rid);
     } finally {
       setCacheLoading(false);
     }
