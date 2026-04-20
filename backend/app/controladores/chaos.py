@@ -15,8 +15,11 @@ import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, Request, Response
+from fastapi import APIRouter, Request, Response, Depends
 
+from app.adaptadores.modelos_sql import ChaosIncidentModelo
+from app.adaptadores.repositorio import RepositorioPortfolio
+from app.controladores.dependencias import obter_repositorio
 from app.core.limite import limiter
 
 roteador = APIRouter(prefix="/chaos", tags=["Chaos Playground"])
@@ -80,6 +83,22 @@ class ChaosState:
 chaos_state = ChaosState()
 
 
+async def _persistir_incidente(incident: ChaosIncident, repo: RepositorioPortfolio) -> None:
+    """Saves the chaos incident to Postgres via SQLAlchemy."""
+    if hasattr(repo, "session_factory"):
+        async with repo.session_factory() as session:
+            incidente_db = ChaosIncidentModelo(
+                type=incident.type,
+                timestamp=incident.timestamp,
+                requests_sent=incident.requests_sent,
+                requests_dropped=incident.requests_dropped,
+                recovery_ms=incident.recovery_ms,
+                error_triggered=incident.error_triggered
+            )
+            session.add(incidente_db)
+            await session.commit()
+
+
 @roteador.post(
     "/spike",
     summary="Simulate traffic spike",
@@ -89,7 +108,7 @@ chaos_state = ChaosState()
     ),
 )
 @limiter.limit("2/minute")
-async def simulate_spike(request: Request) -> dict:
+async def simulate_spike(request: Request, repo: RepositorioPortfolio = Depends(obter_repositorio)) -> dict:
     """
     Simulates a burst of concurrent requests.
     The system handles them through its normal rate-limiting and
@@ -125,6 +144,7 @@ async def simulate_spike(request: Request) -> dict:
         recovery_ms=elapsed_ms,
     )
     chaos_state.record_incident(incident)
+    await _persistir_incidente(incident, repo)
     chaos_state.total_chaos_requests += sent
     # A traffic spike generates retries proportional to burst size
     # (realistic: ~10-15% of burst requests trigger retries)
@@ -151,7 +171,7 @@ async def simulate_spike(request: Request) -> dict:
     ),
 )
 @limiter.limit("2/minute")
-async def trigger_failure(request: Request, response: Response) -> dict:
+async def trigger_failure(request: Request, response: Response, repo: RepositorioPortfolio = Depends(obter_repositorio)) -> dict:
     """
     Forces a 503 condition and records the recovery time.
     The incident is visible in /metrics/summary immediately.
@@ -171,6 +191,7 @@ async def trigger_failure(request: Request, response: Response) -> dict:
         error_triggered=True,
     )
     chaos_state.record_incident(incident)
+    await _persistir_incidente(incident, repo)
     # A failure triggers 2-3 retries (retry + health recheck)
     chaos_state.record_retries(3)
 
@@ -189,7 +210,7 @@ async def trigger_failure(request: Request, response: Response) -> dict:
     description="Purges the current request queue to simulate shedding load during severe backpressure.",
 )
 @limiter.limit("2/minute")
-async def drain_queue(request: Request) -> dict:
+async def drain_queue(request: Request, repo: RepositorioPortfolio = Depends(obter_repositorio)) -> dict:
     """
     Simulates queue drain behavior as defined in the Failure Model.
     """
@@ -203,6 +224,7 @@ async def drain_queue(request: Request) -> dict:
         recovery_ms=int((time.time() - start) * 1000)
     )
     chaos_state.record_incident(incident)
+    await _persistir_incidente(incident, repo)
     
     return {
         "status": "queue_drained",
@@ -240,7 +262,7 @@ async def force_retry(request: Request) -> dict:
     description="Injects 3000ms latency to simulate DB timeout or network partition.",
 )
 @limiter.limit("2/minute")
-async def inject_latency(request: Request) -> dict:
+async def inject_latency(request: Request, repo: RepositorioPortfolio = Depends(obter_repositorio)) -> dict:
     """
     Simulates severe latency to test circuit breakers and timeout policies.
     """
@@ -255,6 +277,7 @@ async def inject_latency(request: Request) -> dict:
         error_triggered=True
     )
     chaos_state.record_incident(incident)
+    await _persistir_incidente(incident, repo)
     chaos_state.record_retries(1)
     
     return {

@@ -116,3 +116,17 @@ class StackModelo(SQLModel, table=True):  # type: ignore[call-arg]
     categoria: str
     nivel: int
     icone: Optional[str] = None
+
+
+class ChaosIncidentModelo(SQLModel, table=True):  # type: ignore[call-arg]
+    """Modelo para histórico de incidentes do Chaos Playground."""
+
+    __tablename__ = "chaos_incidents"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    type: str
+    timestamp: float
+    requests_sent: int = 0
+    requests_dropped: int = 0
+    recovery_ms: int = 0
+    error_triggered: bool = False
