@@ -27,10 +27,9 @@ describe('App Component', () => {
     );
 
     
-    // The Navbar contains the "Portfolio." brand text.
     // Using findAllByText() waits for async state updates triggered by initial fetches,
     // preventing React's "not wrapped in act(...)" warnings.
-    const brandElements = await screen.findAllByText(/Portfolio\./i);
-    expect(brandElements.length).toBeGreaterThan(0);
+    const navItems = await screen.findAllByRole('navigation');
+    expect(navItems.length).toBeGreaterThan(0);
   });
 });

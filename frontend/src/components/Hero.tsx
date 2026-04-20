@@ -71,6 +71,7 @@ interface KpiStripProps {
 }
 
 function KpiStrip({ data, previous, status }: KpiStripProps) {
+  const { t } = useLanguage();
   const statusColor: Record<SystemStatus, string> = {
     loading: 'text-app-muted',
     operational: 'text-emerald-400',
