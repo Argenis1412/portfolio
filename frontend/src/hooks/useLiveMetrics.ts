@@ -17,11 +17,12 @@ import { useQuery } from '@tanstack/react-query';
 import { fetchMetricsSummary, type MetricsSummary } from '../api';
 
 // Named thresholds — visible numbers = engineering confidence
-const LATENCY_DEGRADED_MS = 800;
+const LATENCY_WARNING_MS = 60;
+const LATENCY_DEGRADED_MS = 100;
 const ERROR_RATE_DEGRADED = 0.05;
 const MAX_HISTORY = 20;
 
-export type SystemStatus = 'loading' | 'operational' | 'degraded' | 'down';
+export type SystemStatus = 'loading' | 'operational' | 'warning' | 'degraded' | 'down';
 
 export function useLiveMetrics() {
   // Internal source of truth — no re-renders during normal polling
@@ -78,6 +79,7 @@ export function useLiveMetrics() {
     const { p95_ms, system_status, error_rate } = query.data;
     if (system_status === 'down') return 'down';
     if (p95_ms > LATENCY_DEGRADED_MS || error_rate > ERROR_RATE_DEGRADED) return 'degraded';
+    if (p95_ms > LATENCY_WARNING_MS) return 'warning';
     return 'operational';
   }, [query.data, query.isLoading, query.isError]);
 
