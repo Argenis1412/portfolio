@@ -122,10 +122,7 @@
   "metrics.incident.traffic_spike": "Pico de tráfico",
   "metrics.incident.forced_failure": "503 forzado",
   "metrics.health.investigating": "investigando",
-  "nav.philosophy": "Inspiraciones",
-  "philosophy.title": "El punto de partida no determina tu destino",
-  "philosophy.expand_tooltip": "Haz clic para expandir",
-  "philosophy.collapse_tooltip": "Haz clic para colapsar",
+
   "banner.cause": "Causa",
   "banner.impact": "Impacto",
   "banner.recovery": "Recuperación: en progreso",
