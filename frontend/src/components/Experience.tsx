@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
 import Skeleton from './ui/Skeleton';
 import { MapPin } from 'lucide-react';
@@ -28,12 +28,7 @@ export default function Experience() {
   });
 
   const [activeId, setActiveId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (entries.length > 0 && !activeId) {
-      setActiveId(entries[0].id.toString());
-    }
-  }, [entries, activeId]);
+  const effectiveActiveId = activeId || (entries.length > 0 ? entries[0].id.toString() : null);
 
   const formatDate = (date: string | null, isActual: boolean) => {
     if (!date) return isActual ? t('experience.label.present') : '?';
@@ -71,7 +66,7 @@ export default function Experience() {
     );
   }
 
-  const activeEntry = entries.find(e => e.id.toString() === activeId) || entries[0];
+  const activeEntry = entries.find(e => e.id.toString() === effectiveActiveId) || entries[0];
   if (!activeEntry) return null;
 
   const lang = language as keyof LocalizedString;
@@ -99,7 +94,7 @@ export default function Experience() {
               {entries.map((entry) => {
                 const isEducation = entry.kind === 'education';
                 const subtitle = isEducation ? (entry as Formacao).instituicao : (entry as ExperienceType).empresa;
-                const isActive = activeId === entry.id.toString();
+                const isActive = effectiveActiveId === entry.id.toString();
 
                 return (
                   <button

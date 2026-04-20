@@ -8,7 +8,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
-import { useLog, type LogLevel } from '../context/LogContext';
+import { useLog } from '../hooks/useLog';
+import { type LogLevel } from '../types/logs';
 
 type FilterLevel = 'ALL' | LogLevel;
 

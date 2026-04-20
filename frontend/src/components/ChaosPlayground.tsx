@@ -11,7 +11,8 @@ import { m, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { postChaosSpike, postChaosFailure, postChaosCache, type ChaosResponse } from '../api';
-import { useLog } from '../context/LogContext';
+import { useLog } from '../hooks/useLog';
+import { emitTrace } from '../services/TraceEmitter';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -23,18 +24,7 @@ interface TerminalEntry {
   timestamp: string;
 }
 
-export interface TraceEntry {
-  id: string;
-  requestId: string;
-  type: 'traffic_spike' | 'forced_failure' | 'cache_stress';
-  endpoint: string;
-  status: 'ok' | 'error';
-  totalMs: number;
-  apiMs: number;
-  dbMs: number;
-  cacheMs: number;
-  timestamp: Date;
-}
+// Shared trace store moved to src/services/TraceEmitter.ts
 
 interface Incident {
   id: string;
@@ -42,18 +32,6 @@ interface Incident {
   labelKey: string;
   startedAt: number; // ms
   ttl: number;       // ms
-}
-
-// Shared trace store — read by TraceViewer via context / prop drilling avoided
-// We export a simple event emitter pattern via module-level callback registry
-type TraceListener = (entry: TraceEntry) => void;
-const _traceListeners = new Set<TraceListener>();
-export function subscribeToTraces(fn: TraceListener) {
-  _traceListeners.add(fn);
-  return () => _traceListeners.delete(fn);
-}
-function emitTrace(entry: TraceEntry) {
-  _traceListeners.forEach((fn) => fn(entry));
 }
 
 function genReqId(): string {

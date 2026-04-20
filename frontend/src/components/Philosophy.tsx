@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
 import { User } from 'lucide-react';
 import { usePhilosophy } from '../hooks/useApi';
@@ -15,12 +15,7 @@ export default function Philosophy() {
   const { language, t } = useLanguage();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    if (inspirations.length > 0 && !activeId) {
-      setActiveId(inspirations[0].id.toString());
-    }
-  }, [inspirations, activeId]);
+  const effectiveActiveId = activeId || (inspirations.length > 0 ? inspirations[0].id.toString() : null);
 
   const handleImgError = (id: string) =>
     setImgErrors(prev => ({ ...prev, [id]: true }));
@@ -49,7 +44,7 @@ export default function Philosophy() {
 
   if (inspirations.length === 0) return null;
 
-  const activeInspiration = inspirations.find(i => i.id.toString() === activeId) || inspirations[0];
+  const activeInspiration = inspirations.find(i => i.id.toString() === effectiveActiveId) || inspirations[0];
   const imgFailed = imgErrors[activeInspiration.id];
 
   return (
@@ -72,7 +67,7 @@ export default function Philosophy() {
             {/* Tabs List */}
             <div className="flex md:flex-col overflow-x-auto md:overflow-x-visible no-scrollbar border-b md:border-b-0 md:border-l border-app-border w-full md:w-1/4 flex-shrink-0">
               {inspirations.map((item) => {
-                const isActive = activeId === item.id.toString();
+                const isActive = effectiveActiveId === item.id.toString();
 
                 return (
                   <button

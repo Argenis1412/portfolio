@@ -8,7 +8,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
-import { subscribeToTraces, type TraceEntry } from './ChaosPlayground';
+import { subscribeToTraces, type TraceEntry } from '../services/TraceEmitter';
 
 const TYPE_COLOR: Record<TraceEntry['type'], string> = {
   traffic_spike: 'text-amber-400 border-amber-500/40 bg-amber-500/10',
