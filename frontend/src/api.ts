@@ -290,6 +290,8 @@ export interface ChaosResponse {
   requests_dropped?: number;
   error_triggered?: boolean;
   timestamp: string;
+  latency_ms?: number;
+  tasks_purged?: number;
 }
 
 export async function postChaosSpike(): Promise<ChaosResponse> {
@@ -300,10 +302,26 @@ export async function postChaosSpike(): Promise<ChaosResponse> {
   return res.json();
 }
 
-export async function postChaosFailure(): Promise<ChaosResponse> {
-  const res = await fetch(buildApiUrl('/chaos/failure'), { method: 'POST' });
+export async function postChaosDrain(): Promise<ChaosResponse> {
+  const res = await fetch(buildApiUrl('/chaos/drain'), { method: 'POST' });
   if (!res.ok) {
-    throw new ApiError(res.status, `Chaos failure failed: ${res.status}`);
+    throw new ApiError(res.status, `Chaos drain failed: ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function postChaosRetry(): Promise<ChaosResponse> {
+  const res = await fetch(buildApiUrl('/chaos/retry'), { method: 'POST' });
+  if (!res.ok) {
+    throw new ApiError(res.status, `Chaos retry failed: ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function postChaosLatency(): Promise<ChaosResponse> {
+  const res = await fetch(buildApiUrl('/chaos/latency'), { method: 'POST' });
+  if (!res.ok) {
+    throw new ApiError(res.status, `Chaos latency failed: ${res.status}`);
   }
   return res.json();
 }

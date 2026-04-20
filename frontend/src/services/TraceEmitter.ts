@@ -2,7 +2,7 @@ export interface TraceEntry {
   id: string;
   traceId: string;
   requestId: string;
-  type: 'traffic_spike' | 'forced_failure' | 'cache_stress';
+  type: 'traffic_spike' | 'forced_failure' | 'cache_stress' | 'queue_drain' | 'manual_retry' | 'latency_injection';
   endpoint: string;
   status: 'ok' | 'error';
   totalMs: number;

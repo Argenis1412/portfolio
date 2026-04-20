@@ -174,15 +174,15 @@ export default function Contact() {
           </p>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-[0.95fr_1.35fr] items-start">
+        <div className="grid gap-8 lg:grid-cols-[0.95fr_1.35fr] items-stretch">
           <motion.aside
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, amount: 0.1 }}
             transition={{ duration: 0.6 }}
-            className="glass rounded-2xl p-6 md:p-8 border border-app-border hover:border-app-primary/40 transition-all duration-500"
+            className="flex flex-col h-full glass rounded-2xl p-6 md:p-8 border border-app-border hover:border-app-primary/40 transition-all duration-500"
           >
-            <div className="inline-flex items-center gap-2 rounded-full border border-app-primary/20 bg-app-primary/5 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.25em] text-app-primary">
+            <div className="inline-flex items-start self-start items-center gap-2 rounded-full border border-app-primary/20 bg-app-primary/5 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.25em] text-app-primary">
               <ShieldCheck className="h-3.5 w-3.5" />
               {t('contact.api.title')}
             </div>
@@ -200,7 +200,7 @@ export default function Contact() {
               ))}
             </div>
 
-            <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            <div className="mt-auto pt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
               <a
                 href={`mailto:${about?.email ?? ''}`}
                 className="flex items-center justify-center gap-3 rounded-xl border border-app-border bg-app-surface/50 px-4 py-4 text-sm font-semibold text-app-text transition-colors hover:border-app-primary/40 hover:text-app-primary"

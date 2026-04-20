@@ -18,6 +18,9 @@ const TRACE_STYLE: Record<TraceEntry['type'], { stroke: string; fill: string; la
   traffic_spike: { stroke: '#fbbf24', fill: '#fbbf24', label: 'SPIKE' },
   forced_failure: { stroke: '#f87171', fill: '#f87171', label: '503' },
   cache_stress: { stroke: '#60a5fa', fill: '#60a5fa', label: 'CACHE' },
+  queue_drain: { stroke: '#10b981', fill: '#10b981', label: 'DRAIN' },
+  manual_retry: { stroke: '#3b82f6', fill: '#3b82f6', label: 'RETRY' },
+  latency_injection: { stroke: '#f59e0b', fill: '#f59e0b', label: 'LATENCY' },
 };
 
 export default function MetricsSparkline({
@@ -28,7 +31,11 @@ export default function MetricsSparkline({
   compact = false,
 }: MetricsSparklineProps) {
   const model = useMemo(() => {
-    if (samples.length < 2) return null;
+    if (samples.length === 0) return null;
+
+    const _samples = samples.length === 1 
+      ? [{ value: samples[0].value, timestamp: samples[0].timestamp - 15000 }, samples[0]]
+      : samples;
 
     const paddingX = compact ? 4 : 8;
     const paddingY = compact ? 6 : 10;
@@ -40,12 +47,12 @@ export default function MetricsSparkline({
     const range = max - min || 1;
 
     const pointAt = (sample: MetricSample, index: number) => {
-      const x = paddingX + (index / (samples.length - 1)) * innerW;
+      const x = paddingX + (index / (_samples.length - 1)) * innerW;
       const y = paddingY + innerH - ((sample.value - min) / range) * innerH;
       return { x, y };
     };
 
-    const points = samples.map(pointAt);
+    const points = _samples.map(pointAt);
     const polyline = points.map((point) => `${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(' ');
 
     const annotations = traces
@@ -54,7 +61,7 @@ export default function MetricsSparkline({
         let closestIndex = 0;
         let closestDistance = Number.POSITIVE_INFINITY;
 
-        samples.forEach((sample, index) => {
+        _samples.forEach((sample, index) => {
           const distance = Math.abs(sample.timestamp - trace.timestamp.getTime());
           if (distance < closestDistance) {
             closestDistance = distance;

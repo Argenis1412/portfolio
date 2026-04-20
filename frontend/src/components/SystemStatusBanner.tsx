@@ -14,6 +14,9 @@ function causeKey(lastIncident: string): string {
     traffic_spike: 'banner.cause.traffic_spike',
     forced_failure: 'banner.cause.forced_failure',
     cache_stress: 'banner.cause.cache_stress',
+    queue_drain: 'banner.cause.queue_drain',
+    manual_retry: 'banner.cause.manual_retry',
+    latency_injection: 'banner.cause.latency_injection',
   };
   return map[lastIncident] ?? 'banner.cause.backend';
 }
