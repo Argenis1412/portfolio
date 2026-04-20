@@ -7,7 +7,7 @@ Prefixo: /api/v1
 
 from fastapi import APIRouter
 
-from app.controladores import api, contato, chaos
+from app.controladores import api, chaos, contato
 
 # Router principal da v1
 roteador_v1 = APIRouter(

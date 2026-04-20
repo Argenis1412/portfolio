@@ -4,9 +4,9 @@ Use case: Send contact message.
 Pure business logic with async operation, no FastAPI dependency.
 """
 
-from app.entidades.mensagem import Mensagem
 from app.adaptadores.email_adaptador import EmailAdaptador
 from app.adaptadores.logger_adaptador import LoggerAdaptador
+from app.entidades.mensagem import Mensagem
 
 
 class EnviarContatoUseCase:

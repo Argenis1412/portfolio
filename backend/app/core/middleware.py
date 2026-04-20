@@ -8,11 +8,11 @@ Adiciona:
 - Headers customizados de resposta
 """
 
-import json
-import uuid
-import hmac
 import base64
+import hmac
+import json
 import time
+import uuid
 from typing import Callable
 
 import structlog
@@ -24,7 +24,6 @@ from app.adaptadores.logger_adaptador import configurar_structlog
 from app.configuracao import configuracoes
 from app.core.limite import get_client_ip
 from app.utils.email import mascarar_email
-
 
 # Configurar structlog no módulo
 configurar_structlog()

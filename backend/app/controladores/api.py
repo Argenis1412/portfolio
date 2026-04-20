@@ -10,44 +10,44 @@ Endpoints:
 - GET /api/formacao
 """
 
-from typing import Annotated
-from fastapi import Response, Request, Depends, APIRouter
-import time
 import random
+import time
+from datetime import UTC, datetime
 from pathlib import Path
-from datetime import datetime, UTC
-from prometheus_client import REGISTRY
-from app.controladores.chaos import chaos_state
+from typing import Annotated
 
-from app.esquemas.sobre import RespostaSobre
-from app.esquemas.projetos import ProjetoResumo
-from app.esquemas.projetos import ProjetoDetalhado
-from app.esquemas.projetos import RespostaProjetos
-from app.esquemas.stack import ItemStack
-from app.esquemas.stack import RespostaStack
-from app.esquemas.experiencias import Experiencia
-from app.esquemas.experiencias import RespostaExperiencias
-from app.esquemas.formacao import ItemFormacao
-from app.esquemas.formacao import RespostaFormacao
-from app.esquemas.saude import ResumoMetricas
-from app.esquemas.philosophy import PhilosophyItemSchema, PhilosophyResponseSchema
-from app.casos_uso import ObterExperienciasUseCase
-from app.casos_uso import ObterFormacaoUseCase
-from app.casos_uso import ObterProjetoPorIdUseCase
-from app.casos_uso import ObterProjetosUseCase
-from app.casos_uso import ObterSobreUseCase
-from app.casos_uso import ObterStackUseCase
-from app.casos_uso import GetPhilosophyUseCase
-from app.controladores.dependencias import dep_experiencias
-from app.controladores.dependencias import dep_formacao
-from app.controladores.dependencias import dep_projeto_por_id
-from app.controladores.dependencias import dep_projetos
-from app.controladores.dependencias import dep_sobre
-from app.controladores.dependencias import dep_stack
-from app.controladores.dependencias import dep_philosophy
+from fastapi import APIRouter, Depends, Request, Response
+from prometheus_client import REGISTRY
+
+from app.casos_uso import (
+    GetPhilosophyUseCase,
+    ObterExperienciasUseCase,
+    ObterFormacaoUseCase,
+    ObterProjetoPorIdUseCase,
+    ObterProjetosUseCase,
+    ObterSobreUseCase,
+    ObterStackUseCase,
+)
+from app.controladores.chaos import chaos_state
+from app.controladores.dependencias import (
+    dep_experiencias,
+    dep_formacao,
+    dep_philosophy,
+    dep_projeto_por_id,
+    dep_projetos,
+    dep_sobre,
+    dep_stack,
+)
 from app.core.cache_http import resposta_cacheavel
 from app.core.excecoes import ErroRecursoNaoEncontrado
 from app.core.limite import limiter
+from app.esquemas.experiencias import Experiencia, RespostaExperiencias
+from app.esquemas.formacao import ItemFormacao, RespostaFormacao
+from app.esquemas.philosophy import PhilosophyItemSchema, PhilosophyResponseSchema
+from app.esquemas.projetos import ProjetoDetalhado, ProjetoResumo, RespostaProjetos
+from app.esquemas.saude import ResumoMetricas
+from app.esquemas.sobre import RespostaSobre
+from app.esquemas.stack import ItemStack, RespostaStack
 
 roteador = APIRouter(tags=["API"])
 

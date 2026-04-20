@@ -5,8 +5,8 @@ Usa pydantic-settings para validação automática e valores padrão.
 Todas as configurações podem ser sobrescritas via .env ou variáveis de ambiente.
 """
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Configuracoes(BaseSettings):

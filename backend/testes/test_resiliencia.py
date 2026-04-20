@@ -3,14 +3,14 @@ Resilience tests: Redis failures, Supabase transient errors,
 Formspree timeouts, and concurrent idempotency conflicts.
 """
 
-import pytest
 import time
 from unittest.mock import AsyncMock, patch
+
+import pytest
 import redis
 
+from app.core.idempotencia import IdempotencyRecord, IdempotencyStore
 from app.principal import app
-from app.core.idempotencia import IdempotencyStore, IdempotencyRecord
-
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Idempotency Store — Redis failure fallback
@@ -126,9 +126,10 @@ async def test_formspree_timeout_returns_200_backgrounded(client):
     A ConnectTimeout from Formspree must produce HTTP 200 because the delivery
     happens in the background. The error is only logged.
     """
+    from httpx import ConnectTimeout
+
     from app.casos_uso import EnviarContatoUseCase
     from app.controladores.dependencias import obter_enviar_contato_use_case
-    from httpx import ConnectTimeout
 
     mock_uc = AsyncMock(spec=EnviarContatoUseCase)
     mock_uc.executar.side_effect = ConnectTimeout("Formspree timed out")

@@ -4,18 +4,19 @@ Configurações compartilhadas de pytest.
 Define fixtures reutilizáveis para testes.
 """
 
-import pytest
 from datetime import date
 from unittest.mock import AsyncMock, MagicMock
 
-from app.entidades.projeto import Projeto
-from app.entidades.experiencia import ExperienciaProfissional
-from app.entidades.formacao import FormacaoAcademica
-from app.adaptadores.repositorio import RepositorioPortfolio
+import pytest
+from fastapi.testclient import TestClient
+
 from app.adaptadores.email_adaptador import EmailAdaptador
 from app.adaptadores.logger_adaptador import LoggerAdaptador
+from app.adaptadores.repositorio import RepositorioPortfolio
+from app.entidades.experiencia import ExperienciaProfissional
+from app.entidades.formacao import FormacaoAcademica
+from app.entidades.projeto import Projeto
 from app.principal import app
-from fastapi.testclient import TestClient
 
 
 @pytest.fixture
@@ -180,14 +181,16 @@ def setup_database():
     """
     Cria e inicializa um banco SQLite temporário para a sessão de testes.
     """
-    import tempfile
     import os
-    from sqlmodel import SQLModel, create_engine, Session
+    import tempfile
+
+    from sqlmodel import Session, SQLModel, create_engine
+
     from app.adaptadores.modelos_sql import (
-        SobreModelo,
-        ProjetoModelo,
         ExperienciaModelo,
         FormacaoModelo,
+        ProjetoModelo,
+        SobreModelo,
         StackModelo,
     )
 
@@ -335,15 +338,15 @@ async def override_dependencias(setup_database):
     Limpa o cache dos providers para garantir que o novo RepoSQL seja usado.
     """
     from app.adaptadores.repositorio_sql import RepositorioSQL
-    from app.controladores import dependencias
     from app.casos_uso import (
-        ObterSobreUseCase,
-        ObterProjetosUseCase,
-        ObterProjetoPorIdUseCase,
-        ObterStackUseCase,
         ObterExperienciasUseCase,
         ObterFormacaoUseCase,
+        ObterProjetoPorIdUseCase,
+        ObterProjetosUseCase,
+        ObterSobreUseCase,
+        ObterStackUseCase,
     )
+    from app.controladores import dependencias
 
     repo_real_test = RepositorioSQL(database_url=setup_database)
 

@@ -8,7 +8,7 @@ Endpoint:
 from typing import Annotated, Optional
 
 import structlog
-from fastapi import APIRouter, Depends, Request, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, Depends, Request
 from fastapi.responses import JSONResponse
 
 from app.casos_uso import EnviarContatoUseCase

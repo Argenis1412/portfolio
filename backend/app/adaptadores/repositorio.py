@@ -4,18 +4,18 @@ Adaptador para repositório de dados do portfólio.
 Interface abstrata + implementação com arquivos JSON.
 """
 
-from abc import ABC, abstractmethod
 import json
-from pathlib import Path
+from abc import ABC, abstractmethod
 from datetime import date
+from pathlib import Path
 from typing import Any
 
 import anyio
 
-from app.entidades.projeto import Projeto
 from app.entidades.experiencia import ExperienciaProfissional
 from app.entidades.formacao import FormacaoAcademica
 from app.entidades.philosophy import PhilosophyInspiration
+from app.entidades.projeto import Projeto
 
 
 class RepositorioPortfolio(ABC):

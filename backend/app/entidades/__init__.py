@@ -9,11 +9,11 @@ Responsabilidade:
 Entidades são imutáveis (frozen=True) para garantir consistência.
 """
 
-from app.entidades.mensagem import Mensagem
-from app.entidades.projeto import Projeto
 from app.entidades.experiencia import ExperienciaProfissional
 from app.entidades.formacao import FormacaoAcademica
+from app.entidades.mensagem import Mensagem
 from app.entidades.philosophy import PhilosophyInspiration
+from app.entidades.projeto import Projeto
 
 __all__ = [
     "Mensagem",

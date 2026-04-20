@@ -14,7 +14,7 @@ import re
 import structlog
 from fastapi import Request
 
-from app.core.honeypot import is_honeypot_triggered, HONEYPOT_FIELDS
+from app.core.honeypot import HONEYPOT_FIELDS, is_honeypot_triggered
 from app.core.limite import check_rate_limit, get_client_ip, get_contact_fingerprint_key
 from app.core.spam_check import calculate_spam_score
 from app.core.spam_store import spam_dedup_store

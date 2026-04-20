@@ -2,25 +2,26 @@
 Implementação do repositório usando SQLModel (SQL).
 """
 
-from typing import List, Optional, Any
-from sqlmodel import select, col
-from sqlmodel.ext.asyncio.session import AsyncSession
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from sqlalchemy import text
+from typing import Any, List, Optional
 
-from app.adaptadores.repositorio import RepositorioPortfolio
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlmodel import col, select
+from sqlmodel.ext.asyncio.session import AsyncSession
+
 from app.adaptadores.modelos_sql import (
-    SobreModelo,
-    ProjetoModelo,
     ExperienciaModelo,
     FormacaoModelo,
+    ProjetoModelo,
+    SobreModelo,
     StackModelo,
 )
-from app.entidades.projeto import Projeto
+from app.adaptadores.repositorio import RepositorioPortfolio
+from app.configuracao import configuracoes
 from app.entidades.experiencia import ExperienciaProfissional
 from app.entidades.formacao import FormacaoAcademica
 from app.entidades.philosophy import PhilosophyInspiration
-from app.configuracao import configuracoes
+from app.entidades.projeto import Projeto
 
 
 class RepositorioSQL(RepositorioPortfolio):

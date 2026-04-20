@@ -12,6 +12,7 @@ Deploy:
 """
 
 from typing import Any
+
 import structlog
 from fastapi import FastAPI
 
@@ -144,10 +145,10 @@ def _configurar_opentelemetry(
     """
     try:
         from opentelemetry import trace
+        from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+        from opentelemetry.sdk.resources import SERVICE_NAME, SERVICE_VERSION, Resource
         from opentelemetry.sdk.trace import TracerProvider
         from opentelemetry.sdk.trace.export import BatchSpanProcessor
-        from opentelemetry.sdk.resources import SERVICE_NAME, SERVICE_VERSION, Resource
-        from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
         # Recurso com metadados do serviço
         resource = Resource.create(
@@ -161,16 +162,16 @@ def _configurar_opentelemetry(
         provider = TracerProvider(resource=resource)
 
         # Exportador baseado no ambiente
+        import io
         import os
         import sys
-        import io
 
         if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
             # During tests, we do not use BatchSpanProcessor to avoid
             # o erro "ValueError: I/O operation on closed file." ao final.
             from opentelemetry.sdk.trace.export import (
-                SimpleSpanProcessor,
                 ConsoleSpanExporter,
+                SimpleSpanProcessor,
             )
 
             exporter: Any = ConsoleSpanExporter(out=io.StringIO())

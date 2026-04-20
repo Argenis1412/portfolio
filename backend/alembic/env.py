@@ -1,5 +1,5 @@
-from logging.config import fileConfig
 import sys
+from logging.config import fileConfig
 from pathlib import Path
 
 # Add backend directory to sys.path so 'app' imports work
@@ -8,17 +8,19 @@ if backend_path not in sys.path:
     sys.path.append(backend_path)
 
 import asyncio  # noqa: E402
+
 from sqlalchemy import pool  # noqa: E402
 from sqlalchemy.ext.asyncio import create_async_engine  # noqa: E402
-from alembic import context  # noqa: E402
 from sqlmodel import SQLModel  # noqa: E402
+
+from alembic import context  # noqa: E402
 
 # Import models so they are registered in SQLModel.metadata
 from app.adaptadores.modelos_sql import (  # noqa: E402
-    SobreModelo,  # noqa: F401
-    ProjetoModelo,  # noqa: F401
     ExperienciaModelo,  # noqa: F401
     FormacaoModelo,  # noqa: F401
+    ProjetoModelo,  # noqa: F401
+    SobreModelo,  # noqa: F401
     StackModelo,  # noqa: F401
 )
 from app.configuracao import configuracoes  # noqa: E402

@@ -2,11 +2,13 @@
 Configuração do Rate Limiter para a aplicação.
 """
 
+import hashlib
+
 from fastapi import Request
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+
 from app.configuracao import configuracoes
-import hashlib
 
 
 def get_client_ip(request: Request) -> str:
@@ -58,8 +60,8 @@ def check_rate_limit(request: Request, limit_string: str, key_func=get_email_or_
     """
     Manually applies a rate limit hit and raises RateLimitExceeded if the limit is reached.
     """
-    from slowapi.errors import RateLimitExceeded
     from limits import parse_many
+    from slowapi.errors import RateLimitExceeded
 
     # Mock to satisfy RateLimitExceeded constructor (expects an object with `error_message`)
     class MockLimit:

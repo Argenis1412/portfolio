@@ -6,6 +6,7 @@ Representa uma formação acadêmica no currículo.
 
 from dataclasses import dataclass
 from datetime import date
+
 from dateutil.relativedelta import relativedelta
 
 

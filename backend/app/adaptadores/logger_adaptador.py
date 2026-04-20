@@ -4,11 +4,11 @@ Adaptador para logging estruturado.
 Interface abstrata + implementação com structlog para logs estruturados.
 """
 
-from abc import ABC, abstractmethod
 import sys
+from abc import ABC, abstractmethod
 from typing import Any
-import structlog
 
+import structlog
 
 _structlog_configured = False
 

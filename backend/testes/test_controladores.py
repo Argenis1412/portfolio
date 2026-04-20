@@ -4,12 +4,13 @@ Testes dos controladores (endpoints HTTP).
 Testa integração entre rotas FastAPI e casos de uso.
 """
 
-import pytest
 from unittest.mock import AsyncMock
+
+import pytest
 from fastapi.testclient import TestClient
 
-from app.principal import app
 from app.controladores.dependencias import obter_enviar_contato_use_case
+from app.principal import app
 
 
 @pytest.fixture

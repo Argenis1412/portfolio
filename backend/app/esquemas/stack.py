@@ -4,8 +4,9 @@ Schemas para endpoint /api/stack.
 Define contratos para listagem de tecnologias organizadas por categoria.
 """
 
-from pydantic import BaseModel, Field
 from enum import Enum
+
+from pydantic import BaseModel, Field
 
 
 class CategoriaStack(str, Enum):

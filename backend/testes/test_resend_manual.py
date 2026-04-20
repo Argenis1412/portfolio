@@ -6,8 +6,8 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from app.adaptadores.email_adaptador import ResendEmailAdaptador
-from app.entidades.mensagem import Mensagem
 from app.configuracao import configuracoes
+from app.entidades.mensagem import Mensagem
 
 
 async def test_resend_connection():

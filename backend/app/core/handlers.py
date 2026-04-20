@@ -5,22 +5,22 @@ Converte exceções customizadas em respostas HTTP padronizadas.
 Registrado automaticamente no startup da aplicação.
 """
 
-import structlog
 from typing import Any
 
+import structlog
 from fastapi import FastAPI, Request, status
-from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from slowapi.errors import RateLimitExceeded
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.excecoes import (
     ErroDominio,
-    ErroValidacao,
     ErroInfraestrutura,
     ErroRecursoNaoEncontrado,
+    ErroValidacao,
 )
 from app.core.idempotencia import IdempotencyException
-from slowapi.errors import RateLimitExceeded
 
 logger = structlog.get_logger(__name__)
 
