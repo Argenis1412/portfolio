@@ -11,9 +11,9 @@
     "data_inicio": "2025-12-20",
     "data_fim": "2026-03-06",
     "descricao": {
-      "pt": "API REST com FastAPI para sistema de pagamentos com regras de negócio financeiras (cálculo de juros, descontos, parcelamentos). Arquitetura Hexagonal: separação clara entre domínio, casos de uso, adaptadores e infraestrutura. Validação de dados com Pydantic, documentação automática com Swagger UI/OpenAPI. Suite de testes unitários e de integração com pytest executados em CI com GitHub Actions. Persistência com PostgreSQL + SQLAlchemy ORM + Alembic para versionamento de schema. Frontend consumidor: React + TypeScript com Tailwind CSS.",
-      "en": "REST API with FastAPI for a payment system with financial business rules (interest, discounts, installments). Hexagonal Architecture: clear separation of domain, use cases, adapters, and infrastructure. Pydantic data validation, automatic Swagger UI/OpenAPI documentation. Unit and integration test suite with pytest running in CI via GitHub Actions. Persistence with PostgreSQL + SQLAlchemy ORM + Alembic for schema versioning. Consumer frontend: React + TypeScript + Tailwind CSS.",
-      "es": "API REST con FastAPI para sistema de pagos con reglas de negocio financieras (cálculo de intereses, descuentos, cuotas). Arquitectura Hexagonal: separación clara entre dominio, casos de uso, adaptadores e infraestructura. Validación con Pydantic, documentación automática con Swagger UI/OpenAPI. Suite de pruebas unitarias y de integración con pytest en CI con GitHub Actions. Persistencia con PostgreSQL + SQLAlchemy ORM + Alembic. Frontend en React + TypeScript + Tailwind CSS."
+      "pt": "Designed REST APIs with FastAPI\nImplemented structured logging and Hexagonal Architecture\nBuilt metrics collection (p95, error rate)",
+      "en": "Designed REST APIs with FastAPI\nImplemented structured logging and Hexagonal Architecture\nBuilt metrics collection (p95, error rate)",
+      "es": "Diseñé APIs REST con FastAPI\nImplementé logging estructurado y Arquitectura Hexagonal\nConstruí recolección de métricas (p95, tasa de error)"
     },
     "tecnologias": [
       "Python",
@@ -42,11 +42,11 @@
     "data_inicio": "2025-06-01",
     "data_fim": "2025-10-31",
     "descricao": {
-      "pt": "Atendimento consultivo a clientes interessados em consórcios, esclarecendo regras, prazos, assembleias e condições contratuais. Análise de perfil financeiro dos clientes para enquadramento em planos adequados. Registro, acompanhamento e conferência de propostas, contratos e dados cadastrais em sistemas internos. Suporte ao cliente durante o andamento do grupo, fortalecendo relacionamento e confiança. Atuação em ambiente regulado, seguindo normas internas e diretrizes legais do setor de consórcios.",
-      "en": "Consultative service to clients interested in consortiums, clarifying rules, deadlines, assemblies and contractual conditions. Financial profile analysis to match clients with suitable plans. Registration, tracking and verification of proposals, contracts and registration data in internal systems. Customer support throughout the group's progress, strengthening relationships and trust. Work in a regulated environment, following internal standards and legal guidelines of the consortium sector.",
-      "es": "Atención consultiva a clientes interesados en consorcios, aclarando reglas, plazos, asambleas y condiciones contractuales. Análisis del perfil financiero de los clientes para adecuarlos a planes apropiados. Registro, seguimiento y verificación de propuestas, contratos y datos catastrales en sistemas internos. Soporte al cliente durante el desenvolvimiento del grupo, fortaleciendo la relación y la confianza. Actuación en entorno regulado, siguiendo normas internas y directrices legales del sector de consorcios."
+      "pt": "Operated regulated onboarding and contract workflows\nValidated proposal and customer data across internal systems\nSupported financial operations under compliance constraints",
+      "en": "Operated regulated onboarding and contract workflows\nValidated proposal and customer data across internal systems\nSupported financial operations under compliance constraints",
+      "es": "Operé flujos regulados de onboarding y contratos\nValidé propuestas y datos de clientes en sistemas internos\nDi soporte a operaciones financieras bajo restricciones de cumplimiento"
     },
     "tecnologias": [],
     "atual": false
   }
-]
+]
