@@ -1,17 +1,18 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { m, type Variants } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { useLiveMetrics, type SystemStatus } from '../hooks/useLiveMetrics';
+import MetricsSparkline from './ui/MetricsSparkline';
 
 const STATUS_CONFIG: Record<
   SystemStatus,
   { i18nKey: string; dot: string; text: string }
 > = {
-  loading:     { i18nKey: 'metrics.status.loading',     dot: 'bg-app-muted animate-pulse',   text: 'text-app-muted' },
+  loading: { i18nKey: 'metrics.status.loading', dot: 'bg-app-muted animate-pulse', text: 'text-app-muted' },
   operational: { i18nKey: 'metrics.status.operational', dot: 'bg-emerald-500 animate-pulse', text: 'text-emerald-500' },
-  warning:     { i18nKey: 'metrics.status.warning',     dot: 'bg-amber-400 animate-pulse',   text: 'text-amber-400' },
-  degraded:    { i18nKey: 'metrics.status.degraded',    dot: 'bg-red-400',                   text: 'text-red-400' },
-  down:        { i18nKey: 'metrics.status.down',        dot: 'bg-red-600',                   text: 'text-red-600' },
+  warning: { i18nKey: 'metrics.status.warning', dot: 'bg-amber-400 animate-pulse', text: 'text-amber-400' },
+  degraded: { i18nKey: 'metrics.status.degraded', dot: 'bg-red-400', text: 'text-red-400' },
+  down: { i18nKey: 'metrics.status.down', dot: 'bg-red-600', text: 'text-red-600' },
 };
 
 const tileVariants: Variants = {
@@ -23,85 +24,16 @@ const tileVariants: Variants = {
   }),
 };
 
-// ─── Sparkline ───────────────────────────────────────────────────────────────
-
-function Sparkline({ values }: { values: number[] }) {
-  const points = useMemo(() => {
-    if (values.length < 2) return '';
-    const min = Math.min(...values);
-    const max = Math.max(...values);
-    const range = max - min || 1;
-    const W = 120;
-    const H = 36;
-    const pts = values.map((v, i) => {
-      const x = (i / (values.length - 1)) * W;
-      const y = H - ((v - min) / range) * H;
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    });
-    return pts.join(' ');
-  }, [values]);
-
-  if (values.length < 2) return null;
-
-  return (
-    <svg
-      width={120}
-      height={36}
-      viewBox="0 0 120 36"
-      className="opacity-70"
-      aria-hidden
-    >
-      <polyline
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-        points={points}
-        className="text-app-primary"
-      />
-      {/* Latest dot */}
-      {values.length > 0 && (() => {
-        const min = Math.min(...values);
-        const max = Math.max(...values);
-        const range = max - min || 1;
-        const x = 120;
-        const y = 36 - ((values[values.length - 1] - min) / range) * 36;
-        return (
-          <circle
-            cx={x.toFixed(1)}
-            cy={y.toFixed(1)}
-            r="2.5"
-            className="fill-app-primary"
-          />
-        );
-      })()}
-    </svg>
-  );
-}
-
-// ─── Tile ────────────────────────────────────────────────────────────────────
-
-function Tile({
-  index,
-  label,
-  children,
-}: {
-  index: number;
-  label: string;
-  children: React.ReactNode;
-}) {
+function Tile({ index, label, children }: { index: number; label: string; children: React.ReactNode }) {
   return (
     <m.div
       custom={index}
       variants={tileVariants}
       initial="hidden"
       animate="visible"
-      className="glass rounded-2xl p-5 flex flex-col gap-3 min-h-[120px]"
+      className="glass min-h-[120px] rounded-2xl p-5 flex flex-col gap-3"
     >
-      <span className="text-xs font-mono uppercase tracking-widest text-app-muted">
-        {label}
-      </span>
+      <span className="text-xs font-mono uppercase tracking-widest text-app-muted">{label}</span>
       {children}
     </m.div>
   );
@@ -127,17 +59,22 @@ const UpdatedAgo = React.memo(({ timestamp }: { timestamp: string }) => {
     return () => clearInterval(timer);
   }, [timestamp]);
 
-  return (
-    <span className="text-xs text-app-muted font-mono truncate">
-      {t('metrics.updated_ago', { s: secondsAgo })}
-    </span>
-  );
+  return <span className="text-xs text-app-muted font-mono truncate">{t('metrics.updated_ago', { s: secondsAgo })}</span>;
 });
 
-// ─── Main Component ───────────────────────────────────────────────────────────
-
 export default function LiveMetricsBento() {
-  const { data, status, isLoading, history } = useLiveMetrics();
+  const {
+    data,
+    status,
+    isLoading,
+    previous,
+    sampleHistory,
+    baselineP95,
+    latestTrace,
+    recentTraces,
+    recoveryState,
+    timeoutState,
+  } = useLiveMetrics();
   const { t } = useLanguage();
 
   if (isLoading) {
@@ -157,7 +94,6 @@ export default function LiveMetricsBento() {
   if (!data) return null;
 
   const statusCfg = STATUS_CONFIG[status];
-
   const errorIsElevated = data.error_rate_status !== 'stable';
   const errorRateColor =
     data.error_rate_status === 'investigating'
@@ -166,18 +102,26 @@ export default function LiveMetricsBento() {
         ? 'bg-red-500/15 text-red-400'
         : 'bg-emerald-500/15 text-emerald-500';
   const errorNumberColor = errorIsElevated ? 'text-red-400' : 'text-app-text';
-
   const hasIncident = data.last_incident !== 'none';
   const incidentDot = hasIncident ? 'bg-amber-400' : 'bg-emerald-500';
   const incidentText = hasIncident ? 'text-amber-400' : 'text-emerald-500';
+  const latencyDelta = previous ? data.p95_ms - previous.p95_ms : null;
+  const baselineDelta = baselineP95 === null ? null : data.p95_ms - baselineP95;
+  const circuitColor = recoveryState === 'open'
+    ? 'text-red-400 bg-red-500/10'
+    : recoveryState === 'half_open'
+      ? 'text-amber-400 bg-amber-500/10'
+      : 'text-emerald-500 bg-emerald-500/10';
+  const timeoutColor = timeoutState === 'visible'
+    ? 'text-red-400 bg-red-500/10'
+    : timeoutState === 'risk'
+      ? 'text-amber-400 bg-amber-500/10'
+      : 'text-emerald-500 bg-emerald-500/10';
+  const latestEventLabel = latestTrace ? t(`metrics.incident.${latestTrace.type}`) : t('metrics.incident.none');
+  const latestEventAgoSeconds = latestTrace ? Math.max(0, Math.floor((Date.now() - latestTrace.timestamp.getTime()) / 1000)) : null;
 
   return (
-    <section
-      id="metrics"
-      aria-label="Live system metrics"
-      className="px-4 max-w-6xl mx-auto py-12"
-    >
-      {/* Section header */}
+    <section id="metrics" aria-label="Live system metrics" className="px-4 max-w-6xl mx-auto py-12">
       <div className="mb-6">
         <h2 className="text-xs font-mono uppercase tracking-[0.2em] text-app-primary mb-1">
           {t('metrics.system_status').toUpperCase()}
@@ -188,8 +132,6 @@ export default function LiveMetricsBento() {
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-
-        {/* Tile 1 — API Status */}
         <Tile index={0} label={t('metrics.system_status')}>
           <div className="flex items-center gap-2 mt-1">
             <span className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${statusCfg.dot}`} />
@@ -200,71 +142,65 @@ export default function LiveMetricsBento() {
           <UpdatedAgo timestamp={data.timestamp} />
         </Tile>
 
-        {/* Tile 2 — P95 Latency + sparkline */}
         <Tile index={1} label={t('metrics.latency')}>
-          <div className="flex items-end justify-between">
-            <div className="flex items-end gap-1 mt-1">
-              <span className="font-mono text-2xl font-bold text-app-text">
-                {data.p95_ms}
-              </span>
-              <span className="text-sm font-normal text-app-muted mb-1">ms</span>
+          <div className="mt-1 flex flex-col gap-3">
+            <div className="flex items-end justify-between gap-4">
+              <div className="flex items-end gap-1">
+                <span className="font-mono text-2xl font-bold text-app-text">{data.p95_ms}</span>
+                <span className="text-sm font-normal text-app-muted mb-1">ms</span>
+              </div>
+              {baselineP95 !== null && <span className="text-[10px] font-mono text-app-muted">baseline {baselineP95}ms</span>}
             </div>
-            {history.length >= 2 && <Sparkline values={history} />}
+            {sampleHistory.length >= 2 && (
+              <div className="rounded-xl border border-app-border/40 bg-app-surface/30 px-2 py-2 overflow-hidden">
+                <MetricsSparkline samples={sampleHistory} traces={recentTraces} width={248} height={72} compact />
+              </div>
+            )}
+            <div className="flex flex-wrap gap-2">
+              {latencyDelta !== null && (
+                <span className={`rounded-full px-2 py-0.5 text-[10px] font-mono ${latencyDelta > 0 ? 'bg-red-500/10 text-red-400' : 'bg-emerald-500/10 text-emerald-500'}`}>
+                  {t('metrics.delta.previous')} {latencyDelta > 0 ? '+' : ''}{latencyDelta}ms
+                </span>
+              )}
+              {baselineDelta !== null && (
+                <span className={`rounded-full px-2 py-0.5 text-[10px] font-mono ${baselineDelta > 0 ? 'bg-amber-500/10 text-amber-400' : 'bg-emerald-500/10 text-emerald-500'}`}>
+                  {t('metrics.delta.baseline')} {baselineDelta > 0 ? '+' : ''}{baselineDelta}ms
+                </span>
+              )}
+            </div>
           </div>
-          <span
-            className={`text-xs font-mono px-2 py-0.5 rounded-full w-fit ${
-              data.p95_status === 'healthy'
-                ? 'bg-emerald-500/15 text-emerald-500'
-                : 'bg-amber-400/15 text-amber-400'
-            }`}
-          >
+          <span className={`text-xs font-mono px-2 py-0.5 rounded-full w-fit ${data.p95_status === 'healthy' ? 'bg-emerald-500/15 text-emerald-500' : 'bg-amber-400/15 text-amber-400'}`}>
             {t(`metrics.health.${data.p95_status}`)}
           </span>
         </Tile>
 
-        {/* Tile 3 — Error Rate */}
         <Tile index={2} label={t('metrics.error_rate')}>
           <div className="flex items-center gap-2 mt-1">
             {errorIsElevated && <span className="text-red-400 text-lg">⚠</span>}
-            <span className={`font-mono text-2xl font-bold ${errorNumberColor}`}>
-              {data.error_rate_pct}
-            </span>
+            <span className={`font-mono text-2xl font-bold ${errorNumberColor}`}>{data.error_rate_pct}</span>
           </div>
           <span className={`text-xs font-mono px-2 py-0.5 rounded-full w-fit ${errorRateColor}`}>
             {t(`metrics.health.${data.error_rate_status}`)}
           </span>
         </Tile>
 
-        {/* Tile 4 — Requests (24h) */}
         <Tile index={3} label={t('metrics.requests_24h')}>
-          <span className="font-mono text-2xl font-bold text-app-text mt-1">
-            {data.requests_24h.toLocaleString()}
-          </span>
+          <span className="font-mono text-2xl font-bold text-app-text mt-1">{data.requests_24h.toLocaleString()}</span>
           <UpdatedAgo timestamp={data.timestamp} />
         </Tile>
 
-        {/* Tile 5 — Retries (1h) */}
         <Tile index={4} label={t('metrics.retries_1h')}>
           <div className="flex items-center gap-2 mt-1">
             {data.retries_1h > 5 && <span className="text-red-400 text-lg">⚠</span>}
-            <span className={`font-mono text-2xl font-bold ${
-              data.retries_1h > 10 ? 'text-red-400' : data.retries_1h > 0 ? 'text-amber-400' : 'text-app-text'
-            }`}>
+            <span className={`font-mono text-2xl font-bold ${data.retries_1h > 10 ? 'text-red-400' : data.retries_1h > 0 ? 'text-amber-400' : 'text-app-text'}`}>
               {data.retries_1h}
             </span>
           </div>
-          <span className={`text-xs font-mono px-2 py-0.5 rounded-full w-fit ${
-            data.retries_1h > 10
-              ? 'bg-red-500/15 text-red-400'
-              : data.retries_1h > 0
-                ? 'bg-amber-400/15 text-amber-400'
-                : 'bg-emerald-500/15 text-emerald-500'
-          }`}>
+          <span className={`text-xs font-mono px-2 py-0.5 rounded-full w-fit ${data.retries_1h > 10 ? 'bg-red-500/15 text-red-400' : data.retries_1h > 0 ? 'bg-amber-400/15 text-amber-400' : 'bg-emerald-500/15 text-emerald-500'}`}>
             {data.retries_1h > 10 ? t('metrics.health.investigating') : data.retries_1h > 0 ? t('metrics.health.warning') : t('metrics.health.stable')}
           </span>
         </Tile>
 
-        {/* Tile 6 — Last Incident */}
         <Tile index={5} label={t('metrics.last_incident')}>
           <div className="flex items-center gap-2 mt-1">
             <span className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${incidentDot}`} />
@@ -272,16 +208,63 @@ export default function LiveMetricsBento() {
               {hasIncident ? t(`metrics.incident.${data.last_incident}`) : t('metrics.incident.none')}
             </span>
           </div>
-          {hasIncident && (
-            <span className="text-xs text-app-muted font-mono">
-              {data.last_incident_ago}
-            </span>
-          )}
+          {hasIncident && <span className="text-xs text-app-muted font-mono">{data.last_incident_ago}</span>}
         </Tile>
-
       </div>
 
-      {/* Source link */}
+      <m.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, delay: 0.25 }}
+        className="mt-4 grid gap-3 lg:grid-cols-[1.4fr_1fr]"
+      >
+        <div className="glass rounded-2xl border border-app-border p-5 overflow-hidden">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <span className="text-xs font-mono uppercase tracking-widest text-app-muted">{t('metrics.telemetry.title')}</span>
+            <span className="text-[10px] font-mono text-app-muted">p95 timeline</span>
+          </div>
+          <div className="overflow-x-auto">
+            <div className="min-w-[520px]">
+              <MetricsSparkline samples={sampleHistory} traces={recentTraces} width={560} height={120} />
+            </div>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-3 text-[10px] font-mono text-app-muted">
+            <span>{t('metrics.legend.healthy')}</span>
+            <span>{t('metrics.legend.warning')}</span>
+            <span>{t('metrics.legend.degraded')}</span>
+          </div>
+        </div>
+
+        <div className="glass rounded-2xl border border-app-border p-5">
+          <div className="mb-4 text-xs font-mono uppercase tracking-widest text-app-muted">{t('metrics.failure_model.title')}</div>
+          <div className="grid gap-3">
+            <div className="rounded-xl border border-app-border/50 bg-app-surface/30 p-3">
+              <div className="text-[10px] font-mono uppercase tracking-widest text-app-muted">{t('metrics.failure_model.circuit')}</div>
+              <div className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-mono ${circuitColor}`}>
+                {t(`metrics.failure_model.circuit_state.${recoveryState}`)}
+              </div>
+            </div>
+            <div className="rounded-xl border border-app-border/50 bg-app-surface/30 p-3">
+              <div className="text-[10px] font-mono uppercase tracking-widest text-app-muted">{t('metrics.failure_model.timeout')}</div>
+              <div className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-mono ${timeoutColor}`}>
+                {t(`metrics.failure_model.timeout_state.${timeoutState}`)}
+              </div>
+            </div>
+            <div className="rounded-xl border border-app-border/50 bg-app-surface/30 p-3">
+              <div className="text-[10px] font-mono uppercase tracking-widest text-app-muted">{t('metrics.failure_model.latest_event')}</div>
+              <div className="mt-2 text-sm font-mono text-app-text break-all">{latestEventLabel}</div>
+              {latestTrace && (
+                <div className="mt-2 text-[10px] font-mono text-app-muted space-y-1">
+                  <div>request_id={latestTrace.requestId}</div>
+                  <div>trace_id={latestTrace.traceId}</div>
+                  {latestEventAgoSeconds !== null && <div>{t('metrics.updated_ago', { s: latestEventAgoSeconds })}</div>}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </m.div>
+
       <div className="flex justify-end mt-2 pr-1">
         <a
           href="https://api.argenisbackend.com/api/v1/metrics/summary"

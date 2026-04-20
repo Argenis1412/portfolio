@@ -144,6 +144,7 @@ function TraceRow({ entry }: { entry: TraceEntry }) {
               <p className="text-[10px] font-mono text-app-muted/50 pt-1">
                 {entry.timestamp.toLocaleTimeString('en-GB', { hour12: false })}
                 {' · '}request_id={entry.requestId}
+                {' · '}trace_id={entry.traceId}
               </p>
             </div>
           </m.div>

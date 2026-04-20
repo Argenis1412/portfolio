@@ -77,12 +77,13 @@ export function LogProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'ADD_INCIDENT', incident });
   }, []);
 
-  // Early feed simulation for a "lived-in" system look
+  // Boot entries keep the stream structured before the first manual chaos event.
   React.useEffect(() => {
     if (state.entries.length === 0) {
-      addEntry('INFO', 'system.init session_id=' + Math.random().toString(36).substring(7));
+      const sessionId = Math.random().toString(36).substring(2, 10);
+      addEntry('INFO', `system.init status=BOOT session_id=${sessionId} request_id=boot-${sessionId} trace_id=trace-boot-${sessionId}`);
       setTimeout(() => {
-        addEntry('INFO', 'health.check status=UP db=CONNECTED');
+        addEntry('INFO', `health.check status=UP db=CONNECTED session_id=${sessionId} request_id=boot-${sessionId} trace_id=trace-boot-${sessionId}`);
       }, 800);
     }
   }, [addEntry, state.entries.length]);

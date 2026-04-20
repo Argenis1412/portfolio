@@ -90,9 +90,15 @@ The system implements a manual ETag generation strategy. Every GET response incl
 
 ### 5. Observability
 - **Sentry**: Error tracking and performance tracing (Full-stack).
-- **Prometheus**: Metrics endpoint at `/metrics`.
-- **OpenTelemetry**: Distributed tracing for request lifecycles.
+- **Prometheus**: Metrics endpoint at `/metrics` (protected with Basic Auth in production).
+- **OpenTelemetry**: Distributed tracing for request lifecycles, enriched with `trace_id` and `request_id` correlation.
 - **[Architecture Decision Record: Observability](docs/architecture/observability.md)**
+
+#### 📊 Enhanced Frontend Telemetry
+- **Metrics Sparkline**: Real-time P95 latency sparkline with baseline deltas, threshold lines, and vertical incident markers.
+- **Failure Visibility**: Circuit-breaker and timeout states exposed in UI; logs display both `request_id` and `trace_id` for end-to-end traceability.
+- **Chaos Playground**: Emits `trace_id` and includes richer log fields (retry_triggered, circuit_breaker, timeout_ms) for experimental failure injection.
+- **LogStream**: Auto-scroll fixed to stay within terminal container, eliminating unwanted page jumps.
 
 #### 📊 Performance Baseline
 *Based on production monitoring:*

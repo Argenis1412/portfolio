@@ -95,3 +95,18 @@ class RespostaContato(BaseModel):
         examples=["Mensagem enviada com sucesso!"],
         description="Descrição do resultado",
     )
+    queue_status: str = Field(
+        default="queued",
+        examples=["queued"],
+        description="Queue/processing status exposed to the client",
+    )
+    delivery_mode: str = Field(
+        default="background",
+        examples=["background"],
+        description="How delivery is processed after acceptance",
+    )
+    downstream: str = Field(
+        default="email_adapter",
+        examples=["formspree"],
+        description="Downstream provider or adapter selected by the backend",
+    )

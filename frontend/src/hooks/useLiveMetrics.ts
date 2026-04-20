@@ -12,15 +12,21 @@
  *   history   — rolling last-20 P95 values for the sparkline chart
  *   previous  — snapshot of the prior fetch for delta calculation
  */
-import { useMemo, useRef, useState, useCallback } from 'react';
+import { useMemo, useRef, useState, useCallback, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchMetricsSummary, type MetricsSummary } from '../api';
+import { getRecentTraces, subscribeToTraces, type TraceEntry } from '../services/TraceEmitter';
 
 // Named thresholds — visible numbers = engineering confidence
 const LATENCY_WARNING_MS = 60;
 const LATENCY_DEGRADED_MS = 100;
 const ERROR_RATE_DEGRADED = 0.05;
 const MAX_HISTORY = 20;
+
+export interface MetricSample {
+  value: number;
+  timestamp: number;
+}
 
 export type SystemStatus = 'loading' | 'operational' | 'warning' | 'degraded' | 'down';
 
@@ -33,15 +39,19 @@ export function useLiveMetrics() {
   // Rolling history of P95 samples for sparkline
   const historyRef = useRef<number[]>([]);
   const [history, setHistory] = useState<number[]>([]);
+  const sampleHistoryRef = useRef<MetricSample[]>([]);
+  const [sampleHistory, setSampleHistory] = useState<MetricSample[]>([]);
 
   // Previous snapshot for delta calculation
   const previousRef = useRef<MetricsSummary | null>(null);
   const [previous, setPrevious] = useState<MetricsSummary | null>(null);
+  const [recentTraces, setRecentTraces] = useState<TraceEntry[]>(() => getRecentTraces());
 
   const onSuccess = useCallback((data: MetricsSummary) => {
+    const now = Date.now();
     // Update last success timestamp
-    lastSuccessRef.current = Date.now();
-    setLastSuccessSnapshot(Date.now());
+    lastSuccessRef.current = now;
+    setLastSuccessSnapshot(now);
 
     // Update previous before rolling in new data
     if (previousRef.current !== null) {
@@ -51,9 +61,17 @@ export function useLiveMetrics() {
     // Roll in new P95 value
     historyRef.current = [...historyRef.current, data.p95_ms].slice(-MAX_HISTORY);
     setHistory([...historyRef.current]);
+    sampleHistoryRef.current = [...sampleHistoryRef.current, { value: data.p95_ms, timestamp: now }].slice(-MAX_HISTORY);
+    setSampleHistory([...sampleHistoryRef.current]);
 
     // Store current as next "previous"
     previousRef.current = data;
+  }, []);
+
+  useEffect(() => {
+    return subscribeToTraces(() => {
+      setRecentTraces(getRecentTraces());
+    });
   }, []);
 
   const query = useQuery({
@@ -83,11 +101,40 @@ export function useLiveMetrics() {
     return 'operational';
   }, [query.data, query.isLoading, query.isError]);
 
+  const latestTrace = recentTraces[0] ?? null;
+
+  const baselineP95 = useMemo(() => {
+    if (sampleHistory.length === 0) return null;
+    const avg = sampleHistory.reduce((sum, sample) => sum + sample.value, 0) / sampleHistory.length;
+    return Math.round(avg);
+  }, [sampleHistory]);
+
+  const recoveryState = useMemo(() => {
+    if (!latestTrace || latestTrace.type !== 'forced_failure') return 'closed' as const;
+    const ageMs = Date.now() - latestTrace.timestamp.getTime();
+    if (ageMs < 20_000) return 'open' as const;
+    if (ageMs < 45_000) return 'half_open' as const;
+    return 'closed' as const;
+  }, [latestTrace]);
+
+  const timeoutState = useMemo(() => {
+    const p95 = query.data?.p95_ms ?? 0;
+    if (p95 > LATENCY_DEGRADED_MS) return 'visible' as const;
+    if (p95 > LATENCY_WARNING_MS) return 'risk' as const;
+    return 'within_budget' as const;
+  }, [query.data?.p95_ms]);
+
   return {
     ...query,
     status,
     history,       // number[] — last 20 P95 values
+    sampleHistory,
     previous,      // MetricsSummary | null — previous snapshot for deltas
     lastSuccessAt: lastSuccessSnapshot,
+    recentTraces,
+    latestTrace,
+    baselineP95,
+    recoveryState,
+    timeoutState,
   };
 }

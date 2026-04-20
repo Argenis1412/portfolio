@@ -22,6 +22,7 @@ const Experience      = React.lazy(() => import('./components/Experience'));
 const Projects        = React.lazy(() => import('./components/Projects'));
 const Contact         = React.lazy(() => import('./components/Contact'));
 const ServerWakeupNotice = React.lazy(() => import('./components/ServerWakeupNotice'));
+const SocialRail      = React.lazy(() => import('./components/SocialRail'));
 const Footer          = React.lazy(() => import('./components/Footer'));
 
 const SectionFallback = () => (
@@ -37,6 +38,10 @@ function App() {
         <LazyMotion features={domAnimation}>
           <div className="min-h-screen flex flex-col pt-16 selection:bg-app-primary/30 selection:text-app-text transition-colors duration-300">
             <Navbar />
+
+            <Suspense fallback={null}>
+              <SocialRail />
+            </Suspense>
 
             {/* System Status Banner — appears only when degraded/down */}
             <Suspense fallback={null}>

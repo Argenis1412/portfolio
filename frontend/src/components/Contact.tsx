@@ -24,7 +24,7 @@ export default function Contact() {
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [traceResult, setTraceResult] = useState<{ traceId?: string; durationMs: number } | null>(null);
+  const [traceResult, setTraceResult] = useState<{ traceId?: string; durationMs: number; queueStatus?: string; deliveryMode?: string; downstream?: string; message?: string } | null>(null);
   
   const getNewKey = () => {
     return typeof crypto !== 'undefined' && crypto.randomUUID 
@@ -137,6 +137,9 @@ export default function Contact() {
   const submitError = errors.submit ? t(errors.submit) : t('contact.error.generic');
   const responseStatusCode = mutationError instanceof ApiError ? mutationError.status : null;
   const responseTraceId = traceResult?.traceId || (mutationError instanceof ApiError ? mutationError.traceId : undefined);
+  const queueStatus = traceResult?.queueStatus ?? 'idle';
+  const deliveryMode = traceResult?.deliveryMode ?? 'background';
+  const downstream = traceResult?.downstream ?? 'email_adapter';
   const responseTone = status === 'success'
     ? 'text-emerald-400'
     : status === 'error'
@@ -149,6 +152,7 @@ export default function Contact() {
     { label: t('contact.spec.idempotency'), value: 'Idempotency-Key header' },
     { label: t('contact.spec.protection'), value: t('contact.spec.protection_value') },
     { label: t('contact.spec.availability'), value: availability },
+    { label: t('contact.spec.delivery_mode'), value: 'background_tasks' },
     { label: t('contact.spec.response'), value: t('contact.spec.response_value') },
   ];
 
@@ -378,6 +382,23 @@ export default function Contact() {
                       <span className="text-slate-500">{t('contact.console.trace')}:</span>
                       <span className="ml-2 break-all text-blue-400">{responseTraceId}</span>
                     </div>
+                  )}
+
+                  {status === 'success' && traceResult && (
+                    <>
+                      <div>
+                        <span className="text-slate-500">{t('contact.console.queue')}:</span>
+                        <span className="ml-2 text-amber-300">{queueStatus}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500">{t('contact.console.mode')}:</span>
+                        <span className="ml-2 text-slate-300">{deliveryMode}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500">{t('contact.console.downstream')}:</span>
+                        <span className="ml-2 text-slate-300">{downstream}</span>
+                      </div>
+                    </>
                   )}
 
                   {status === 'success' && (

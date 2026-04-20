@@ -4,6 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { scrollToSection } from '../utils/scrollToSection';
 import { useLiveMetrics, type SystemStatus } from '../hooks/useLiveMetrics';
 import type { MetricsSummary } from '../api';
+import MetricsSparkline from './ui/MetricsSparkline';
 
 // ─── LiveStatusBadge ─────────────────────────────────────────────────────────
 
@@ -128,7 +129,7 @@ function KpiStrip({ data, previous, status }: KpiStripProps) {
 
 const Hero = React.memo(() => {
   const { t } = useLanguage();
-  const { status, data, previous } = useLiveMetrics();
+  const { status, data, previous, sampleHistory, recentTraces, latestTrace, recoveryState } = useLiveMetrics();
 
   return (
     <section id="hero" className="pt-12 pb-12 md:pt-16 md:pb-20 px-4 max-w-6xl mx-auto relative min-h-[85vh] flex items-center">
@@ -263,32 +264,42 @@ const Hero = React.memo(() => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="text-[10px] font-mono text-app-muted mb-1">LAST_INCIDENT</div>
+                  <div className="text-[10px] font-mono text-app-muted mb-1">LAST_REQUEST_ID</div>
                   <div className="text-sm font-mono text-app-text">
-                    {data?.last_incident === 'none' ? 'NONE' : data?.last_incident_ago || 'N/A'}
+                    {latestTrace ? latestTrace.requestId : data?.last_incident === 'none' ? 'NONE' : data?.last_incident_ago || 'N/A'}
                   </div>
                 </div>
                 <div>
                   <div className="text-[10px] font-mono text-app-muted mb-1">RECOVERY_TIME</div>
                   <div className="text-sm font-mono text-app-text">
-                    {data?.last_incident === 'none' ? '0ms' : '229ms'}
+                    {latestTrace ? `${latestTrace.totalMs}ms` : data?.last_incident === 'none' ? '0ms' : '229ms'}
                   </div>
                 </div>
               </div>
 
               <div>
                 <div className="text-[10px] font-mono text-app-muted mb-2">P95_LATENCY_HISTORY</div>
-                <div className="h-16 w-full bg-app-surface/40 rounded-lg border border-app-border/20 flex items-center justify-center relative overflow-hidden">
-                   {/* We could embed a mini sparkline component here if desired, 
-                       for now using a descriptive placeholder consistent with the "SRE visual signal" */}
-                   <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
-                     <svg width="100%" height="100%" viewBox="0 0 200 60" preserveAspectRatio="none">
-                       <path d="M0,45 Q20,35 40,50 T80,30 T120,40 T160,20 T200,35" fill="none" stroke="currentColor" strokeWidth="2" className={STATUS_COLORS[status]} />
-                     </svg>
-                   </div>
-                   <span className="text-[10px] font-mono text-app-muted/60 relative z-10 tracking-widest">
-                     ▁▂▃▅▂▁▆▇▂
-                   </span>
+                <div className="w-full rounded-lg border border-app-border/20 bg-app-surface/30 px-2 py-2 overflow-hidden">
+                  {sampleHistory.length >= 2 ? (
+                    <MetricsSparkline samples={sampleHistory} traces={recentTraces} width={360} height={76} compact />
+                  ) : (
+                    <span className="text-[10px] font-mono text-app-muted/60 tracking-widest">warming-up...</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="text-[10px] font-mono text-app-muted mb-1">CIRCUIT_BREAKER</div>
+                  <div className={`text-sm font-mono ${recoveryState === 'open' ? 'text-red-400' : recoveryState === 'half_open' ? 'text-amber-400' : 'text-emerald-400'}`}>
+                    {recoveryState.toUpperCase()}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-mono text-app-muted mb-1">LATEST_TRACE</div>
+                  <div className="text-sm font-mono text-app-text truncate">
+                    {latestTrace ? latestTrace.traceId : 'NONE'}
+                  </div>
                 </div>
               </div>
             </div>

@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Github, Linkedin, Code2, Mail, Copy, Check } from 'lucide-react';
+import { Code2, Mail, Copy, Check } from 'lucide-react';
 import { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAbout } from '../hooks/useApi';
@@ -32,9 +32,6 @@ export default function Footer() {
     setTimeout(() => setCopiedWhatsApp(false), 2000);
   };
 
-  const githubUrl = about?.github || "https://github.com/Argenis1412";
-  const linkedinUrl = about?.linkedin || "https://www.linkedin.com/in/argenis1412/";
-
   const contactCards = [
     {
       key: 'email',
@@ -59,26 +56,26 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="mt-12 w-full border-t border-app-border bg-transparent py-12 transition-colors duration-300">
+    <footer className="mt-12 w-full border-t border-app-border bg-transparent py-10 transition-colors duration-300">
       <div className="mx-auto max-w-6xl px-4">
-        <div className="mx-auto max-w-4xl text-center">
-          <div className="grid gap-4 md:grid-cols-2">
+        <div className="mx-auto max-w-3xl text-center">
+          <div className="grid gap-3 md:grid-cols-2">
             {contactCards.map((card) => (
               <motion.button
                 key={card.key}
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
                 onClick={card.onCopy}
-                className="group flex min-h-[84px] items-center gap-4 rounded-2xl border border-app-border bg-app-surface/60 px-5 py-4 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-app-primary/40 hover:bg-app-surface-hover/60"
+                className="group flex min-h-[68px] items-center gap-3 rounded-xl border border-app-border bg-app-surface/50 px-4 py-3 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-app-primary/40 hover:bg-app-surface-hover/60"
               >
-                <div className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full transition-colors duration-300 ${card.accent}`}>
+                <div className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full transition-colors duration-300 ${card.accent}`}>
                   {card.icon}
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-app-muted">{card.label}</p>
-                  <p className="truncate text-sm font-semibold text-app-text sm:text-base">{card.value}</p>
+                  <p className="truncate text-xs font-semibold text-app-text sm:text-sm">{card.value}</p>
                 </div>
-                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-app-border bg-app-bg/40">
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-app-border bg-app-bg/40">
                   <AnimatePresence mode="wait">
                     {card.copied ? (
                       <motion.div
@@ -105,25 +102,7 @@ export default function Footer() {
             ))}
           </div>
 
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-4 sm:gap-5">
-            <a
-              href={githubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-app-border bg-app-surface/40 text-app-muted transition-colors hover:border-app-primary/40 hover:text-app-primary"
-            >
-              <span className="sr-only">GitHub</span>
-              <Github className="h-5 w-5" />
-            </a>
-            <a
-              href={linkedinUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-app-border bg-app-surface/40 text-app-muted transition-colors hover:border-app-primary/40 hover:text-app-primary"
-            >
-              <span className="sr-only">LinkedIn</span>
-              <Linkedin className="h-5 w-5" />
-            </a>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
             <a
               href="https://github.com/Argenis1412/portfolio"
               target="_blank"
@@ -135,7 +114,7 @@ export default function Footer() {
             </a>
           </div>
 
-          <p className="mt-8 text-xs font-medium tracking-wide text-app-muted">
+          <p className="mt-6 text-xs font-medium tracking-wide text-app-muted">
           {t('footer.rights')}
           </p>
         </div>

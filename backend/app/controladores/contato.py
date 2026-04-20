@@ -90,6 +90,11 @@ async def enviar_contato(
     resposta_cacheavel: RespostaContato | None = None
     content_hash: str | None = None
     dedup_reserved = False
+    email_adapter = getattr(enviar_contato_uc, "email_adaptador", None)
+    downstream = (
+        getattr(email_adapter, "__class__", type("Adapter", (), {})).__name__.replace("EmailAdaptador", "").lower()
+        or "email_adapter"
+    )
 
     try:
         # ── 1. Honeypot check ───────────────────────────────────────────────
@@ -103,6 +108,9 @@ async def enviar_contato(
             resposta_cacheavel = RespostaContato(
                 sucesso=True,
                 mensagem="Mensagem enviada com sucesso! Retornarei em breve.",
+                queue_status="accepted",
+                delivery_mode="silent_drop",
+                downstream="honeypot_guard",
             )
             return resposta_cacheavel
 
@@ -126,6 +134,9 @@ async def enviar_contato(
             resposta_cacheavel = RespostaContato(
                 sucesso=True,
                 mensagem="Mensagem enviada com sucesso! Retornarei em breve.",
+                queue_status="accepted",
+                delivery_mode="silent_drop",
+                downstream="spam_guard",
             )
             return resposta_cacheavel
 
@@ -182,6 +193,9 @@ async def enviar_contato(
         resposta_cacheavel = RespostaContato(
             sucesso=True,
             mensagem="Mensagem enviada com sucesso! Retornarei em breve.",
+            queue_status="queued",
+            delivery_mode="background",
+            downstream=downstream,
         )
         return resposta_cacheavel
 
