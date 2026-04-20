@@ -81,9 +81,9 @@ def test_rate_limiting_projetos(client):
 
     # A 21ª deve falhar
     resp = client.get("/api/v1/projetos")
-    assert (
-        resp.status_code == 429
-    ), f"Expected 429, got {resp.status_code}. Body: {resp.text}"
+    assert resp.status_code == 429, (
+        f"Expected 429, got {resp.status_code}. Body: {resp.text}"
+    )
     data = resp.json()
     assert "erro" in data, f"Key 'erro' not in response: {data}"
     assert "rate limit exceeded" in data["erro"]["mensagem"].lower()
