@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { m, type Variants } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { useLiveMetrics, type SystemStatus } from '../hooks/useLiveMetrics';
@@ -7,10 +7,10 @@ const STATUS_CONFIG: Record<
   SystemStatus,
   { i18nKey: string; dot: string; text: string }
 > = {
-  loading:     { i18nKey: 'metrics.status.loading', dot: 'bg-app-muted animate-pulse',        text: 'text-app-muted' },
-  operational: { i18nKey: 'metrics.status.operational', dot: 'bg-emerald-500 animate-pulse',      text: 'text-emerald-500' },
-  degraded:    { i18nKey: 'metrics.status.degraded', dot: 'bg-amber-400',                      text: 'text-amber-400' },
-  down:        { i18nKey: 'metrics.status.down', dot: 'bg-red-500',                        text: 'text-red-500' },
+  loading:     { i18nKey: 'metrics.status.loading',     dot: 'bg-app-muted animate-pulse',   text: 'text-app-muted' },
+  operational: { i18nKey: 'metrics.status.operational', dot: 'bg-emerald-500 animate-pulse', text: 'text-emerald-500' },
+  degraded:    { i18nKey: 'metrics.status.degraded',    dot: 'bg-amber-400',                 text: 'text-amber-400' },
+  down:        { i18nKey: 'metrics.status.down',        dot: 'bg-red-500',                   text: 'text-red-500' },
 };
 
 const tileVariants: Variants = {
@@ -21,6 +21,65 @@ const tileVariants: Variants = {
     transition: { duration: 0.45, delay: i * 0.08, ease: 'easeOut' as const },
   }),
 };
+
+// ─── Sparkline ───────────────────────────────────────────────────────────────
+
+function Sparkline({ values }: { values: number[] }) {
+  const points = useMemo(() => {
+    if (values.length < 2) return '';
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const range = max - min || 1;
+    const W = 120;
+    const H = 36;
+    const pts = values.map((v, i) => {
+      const x = (i / (values.length - 1)) * W;
+      const y = H - ((v - min) / range) * H;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    });
+    return pts.join(' ');
+  }, [values]);
+
+  if (values.length < 2) return null;
+
+  return (
+    <svg
+      width={120}
+      height={36}
+      viewBox="0 0 120 36"
+      className="opacity-70"
+      aria-hidden
+    >
+      <polyline
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+        points={points}
+        className="text-app-primary"
+      />
+      {/* Latest dot */}
+      {values.length > 0 && (() => {
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        const range = max - min || 1;
+        const x = 120;
+        const y = 36 - ((values[values.length - 1] - min) / range) * 36;
+        return (
+          <circle
+            cx={x.toFixed(1)}
+            cy={y.toFixed(1)}
+            r="2.5"
+            className="fill-app-primary"
+          />
+        );
+      })()}
+    </svg>
+  );
+}
+
+// ─── Tile ────────────────────────────────────────────────────────────────────
 
 function Tile({
   index,
@@ -74,13 +133,19 @@ const UpdatedAgo = React.memo(({ timestamp }: { timestamp: string }) => {
   );
 });
 
+// ─── Main Component ───────────────────────────────────────────────────────────
+
 export default function LiveMetricsBento() {
-  const { data, status, isLoading } = useLiveMetrics();
+  const { data, status, isLoading, history } = useLiveMetrics();
   const { t } = useLanguage();
 
   if (isLoading) {
     return (
-      <section className="px-4 max-w-6xl mx-auto py-6">
+      <section id="metrics" className="px-4 max-w-6xl mx-auto py-12">
+        <div className="mb-6">
+          <div className="h-5 w-48 rounded bg-app-border animate-pulse mb-2" />
+          <div className="h-4 w-72 rounded bg-app-border animate-pulse opacity-60" />
+        </div>
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
           {[0, 1, 2, 3, 4, 5].map((i) => <TileSkeleton key={i} index={i} />)}
         </div>
@@ -92,7 +157,6 @@ export default function LiveMetricsBento() {
 
   const statusCfg = STATUS_CONFIG[status];
 
-  // Error rate color logic — dramatic red when elevated
   const errorIsElevated = data.error_rate_status !== 'stable';
   const errorRateColor =
     data.error_rate_status === 'investigating'
@@ -102,16 +166,26 @@ export default function LiveMetricsBento() {
         : 'bg-emerald-500/15 text-emerald-500';
   const errorNumberColor = errorIsElevated ? 'text-red-400' : 'text-app-text';
 
-  // Last incident color
   const hasIncident = data.last_incident !== 'none';
   const incidentDot = hasIncident ? 'bg-amber-400' : 'bg-emerald-500';
   const incidentText = hasIncident ? 'text-amber-400' : 'text-emerald-500';
 
   return (
     <section
+      id="metrics"
       aria-label="Live system metrics"
-      className="px-4 max-w-6xl mx-auto py-6"
+      className="px-4 max-w-6xl mx-auto py-12"
     >
+      {/* Section header */}
+      <div className="mb-6">
+        <h2 className="text-xs font-mono uppercase tracking-[0.2em] text-app-primary mb-1">
+          {t('metrics.system_status').toUpperCase()}
+        </h2>
+        <p className="text-xs font-mono text-app-muted max-w-lg">
+          {t('metrics.section_subtitle')}
+        </p>
+      </div>
+
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
 
         {/* Tile 1 — API Status */}
@@ -125,13 +199,16 @@ export default function LiveMetricsBento() {
           <UpdatedAgo timestamp={data.timestamp} />
         </Tile>
 
-        {/* Tile 2 — P95 Latency */}
+        {/* Tile 2 — P95 Latency + sparkline */}
         <Tile index={1} label={t('metrics.latency')}>
-          <div className="flex items-end gap-1 mt-1">
-            <span className="font-mono text-2xl font-bold text-app-text">
-              {data.p95_ms}
-            </span>
-            <span className="text-sm font-normal text-app-muted mb-1">ms</span>
+          <div className="flex items-end justify-between">
+            <div className="flex items-end gap-1 mt-1">
+              <span className="font-mono text-2xl font-bold text-app-text">
+                {data.p95_ms}
+              </span>
+              <span className="text-sm font-normal text-app-muted mb-1">ms</span>
+            </div>
+            {history.length >= 2 && <Sparkline values={history} />}
           </div>
           <span
             className={`text-xs font-mono px-2 py-0.5 rounded-full w-fit ${
@@ -144,7 +221,7 @@ export default function LiveMetricsBento() {
           </span>
         </Tile>
 
-        {/* Tile 3 — Error Rate (1h) — red when elevated */}
+        {/* Tile 3 — Error Rate */}
         <Tile index={2} label={t('metrics.error_rate')}>
           <div className="flex items-center gap-2 mt-1">
             {errorIsElevated && <span className="text-red-400 text-lg">⚠</span>}
@@ -165,7 +242,7 @@ export default function LiveMetricsBento() {
           <UpdatedAgo timestamp={data.timestamp} />
         </Tile>
 
-        {/* Tile 5 — Retries (1h) — red/amber when elevated */}
+        {/* Tile 5 — Retries (1h) */}
         <Tile index={4} label={t('metrics.retries_1h')}>
           <div className="flex items-center gap-2 mt-1">
             {data.retries_1h > 5 && <span className="text-red-400 text-lg">⚠</span>}
@@ -186,7 +263,7 @@ export default function LiveMetricsBento() {
           </span>
         </Tile>
 
-        {/* Tile 6 — Last Incident — red/green */}
+        {/* Tile 6 — Last Incident */}
         <Tile index={5} label={t('metrics.last_incident')}>
           <div className="flex items-center gap-2 mt-1">
             <span className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${incidentDot}`} />

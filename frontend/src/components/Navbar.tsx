@@ -3,7 +3,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../hooks/useApi';
-import { fetchAbout, fetchProjects, fetchSkills, fetchExperience, fetchPhilosophy } from '../api';
+import { fetchAbout, fetchSkills } from '../api';
 import { scrollToSection } from '../utils/scrollToSection';
 
 export default function Navbar() {
@@ -27,56 +27,46 @@ export default function Navbar() {
             {/* Optional logo or leave empty. Kept div for flex spacing. */}
           </div>
           <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-6">
+            <div className="ml-10 flex items-baseline space-x-1">
               <button
-                onClick={() => scrollToSection('hero')}
+                onClick={() => scrollToSection('metrics')}
                 onMouseEnter={() => prefetch(queryKeys.about, fetchAbout)}
-                onFocus={() => prefetch(queryKeys.about, fetchAbout)}
-                className="hover:text-app-primary px-3 py-3 rounded-md text-xs font-semibold uppercase tracking-widest transition-colors text-app-text"
+                className="hover:text-app-primary px-3 py-3 rounded-md text-xs font-mono uppercase tracking-widest transition-colors text-app-text"
+              >
+                {t('nav.metrics')}
+              </button>
+              <button
+                onClick={() => scrollToSection('chaos')}
+                className="hover:text-app-primary px-3 py-3 rounded-md text-xs font-mono uppercase tracking-widest transition-colors text-app-text"
+              >
+                {t('nav.chaos')}
+              </button>
+              <button
+                onClick={() => scrollToSection('observability')}
+                className="hover:text-app-primary px-3 py-3 rounded-md text-xs font-mono uppercase tracking-widest transition-colors text-app-text"
+              >
+                {t('nav.observability')}
+              </button>
+              <button
+                onClick={() => scrollToSection('about')}
+                onMouseEnter={() => {
+                  prefetch(queryKeys.about, fetchAbout);
+                  prefetch(queryKeys.skills, fetchSkills);
+                }}
+                className="hover:text-app-primary px-3 py-3 rounded-md text-xs font-mono uppercase tracking-widest transition-colors text-app-text"
               >
                 {t('nav.about')}
               </button>
               <button
-                onClick={() => scrollToSection('stack')}
-                onMouseEnter={() => prefetch(queryKeys.skills, fetchSkills)}
-                onFocus={() => prefetch(queryKeys.skills, fetchSkills)}
-                className="hover:text-app-primary px-3 py-3 rounded-md text-xs font-semibold uppercase tracking-widest transition-colors text-app-text"
-              >
-                {t('nav.stack')}
-              </button>
-              <button
-                onClick={() => scrollToSection('projects')}
-                onMouseEnter={() => prefetch(queryKeys.projects, fetchProjects)}
-                onFocus={() => prefetch(queryKeys.projects, fetchProjects)}
-                className="hover:text-app-primary px-3 py-3 rounded-md text-xs font-semibold uppercase tracking-widest transition-colors text-app-text"
-              >
-                {t('nav.projects')}
-              </button>
-              <button
-                onClick={() => scrollToSection('philosophy')}
-                onMouseEnter={() => prefetch(queryKeys.philosophy, fetchPhilosophy)}
-                onFocus={() => prefetch(queryKeys.philosophy, fetchPhilosophy)}
-                className="hover:text-app-primary px-3 py-3 rounded-md text-xs font-semibold uppercase tracking-widest transition-colors text-app-text"
-              >
-                {t('nav.philosophy')}
-              </button>
-              <button
-                onClick={() => scrollToSection('experience')}
-                onMouseEnter={() => prefetch(queryKeys.experience, fetchExperience)}
-                onFocus={() => prefetch(queryKeys.experience, fetchExperience)}
-                className="hover:text-app-primary px-3 py-3 rounded-md text-xs font-semibold uppercase tracking-widest transition-colors text-app-text"
-              >
-                {t('nav.journey')}
-              </button>
-              <button
                 data-testid="nav-contact"
                 onClick={() => scrollToSection('contato')}
-                className="hover:text-app-primary px-3 py-3 rounded-md text-xs font-semibold uppercase tracking-widest transition-colors text-app-text"
+                className="hover:text-app-primary px-3 py-3 rounded-md text-xs font-mono uppercase tracking-widest transition-colors text-app-text"
               >
                 {t('nav.contact')}
               </button>
             </div>
           </div>
+
           <div className="flex items-center gap-4">
             <button
               onClick={toggleTheme}
