@@ -11,21 +11,21 @@ Por que arquivo temporário e não :memory:?
   por isso usamos um arquivo temporário que ambos os engines conseguem ler.
 """
 
-import pytest
-import tempfile
 import os
+import tempfile
 from datetime import date
-from sqlmodel import SQLModel, create_engine, Session
+
+import pytest
+from sqlmodel import Session, SQLModel, create_engine
 
 from app.adaptadores.modelos_sql import (
-    SobreModelo,
-    ProjetoModelo,
     ExperienciaModelo,
     FormacaoModelo,
+    ProjetoModelo,
+    SobreModelo,
     StackModelo,
 )
 from app.adaptadores.repositorio_sql import RepositorioSQL
-
 
 # ─── Fixtures ─────────────────────────────────────────────────────────────────
 

@@ -17,20 +17,19 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 
+from app import __version__
 from app.configuracao import configuracoes
 from app.controladores import roteador_saude
 from app.controladores.v1 import roteador_v1
+from app.core.handlers import registrar_handlers_excecao
+from app.core.limite import limiter
 from app.core.middleware import (
-    MiddlewareRequisicao,
     ChaosMonkeyMiddleware,
     MetricsAccessMiddleware,
+    MiddlewareRequisicao,
     SegurancaHeadersMiddleware,
 )
-from app.core.handlers import registrar_handlers_excecao
 from app.core.observabilidade import configurar_observabilidade
-
-from app.core.limite import limiter
-from app import __version__
 
 
 def criar_aplicacao() -> FastAPI:

@@ -2,13 +2,14 @@
 Tests for Honeypot and Spam Scoring defense layers.
 """
 
+from unittest.mock import AsyncMock
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import AsyncMock
-from app.core.honeypot import is_honeypot_triggered
 
-from app.principal import app
 from app.controladores.dependencias import obter_enviar_contato_use_case
+from app.core.honeypot import is_honeypot_triggered
+from app.principal import app
 
 client = TestClient(app)
 

@@ -7,6 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/en/2.0.0/).
 
 ---
 
+## [1.4.2] - 2026-04-20
+
+### 🔧 Observability & Engineering Rigor
+
+#### ✅ Added
+- ✅ **Enhanced Metrics Sparkline**: Added MetricsSparkline component with linear line, threshold lines, and vertical incident markers for real-time telemetry.
+- ✅ **Extended Metrics Hook**: Extended useLiveMetrics to keep timestamped samples, baseline P95, recent traces, latest event, circuit-breaker and timeout states.
+- ✅ **Rewritten Live Metrics Bento**: LiveMetricsBento now shows delta vs previous, delta vs baseline, failure-model panel, and telemetry timeline.
+- ✅ **Hero Sidecar Updates**: Updated Hero sidecar to render real sparkline, circuit state, and latest trace.
+- ✅ **Chaos Playground Enhancements**: Modified ChaosPlayground to emit trace_id and include richer log fields (retry_triggered, circuit_breaker, timeout_ms).
+- ✅ **Trace & Log Improvements**: Enhanced TraceViewer and LogStream to display both request_id and trace_id for end-to-end correlation.
+- ✅ **Fixed LogStream Auto-scroll**: Fixed LogStream auto-scroll to stay inside the terminal and removed global window.scrollTo in App.tsx.
+- ✅ **Engineering-Focused Journey**: Converted backend/dados/experiencias.json from prose to engineering bullets (same text in EN/PT/ES).
+- ✅ **Enriched Contact Contract**: Enriched backend contract (RespostaContato) with queue_status, delivery_mode, and downstream; updated controller and frontend API/UI to display enriched response.
+- ✅ **Streamlined Contact UI**: Compacted footer contact cards, removed duplicated GitHub/LinkedIn buttons, added fixed lateral SocialRail component.
+- ✅ **Operational Case Studies**: Rewrote Projects.tsx to render each project as an operational case study (capabilities, engineering notes, runtime, evidence surface) using existing funcionalidades and aprendizados fields.
+- ✅ **Added Missing i18n Keys**: Added missing i18n keys for metrics, failure model, telemetry legend, contact spec fields, and console lines.
+- ✅ **UI Refinements**: Redesigned MetricsSparkline (linear, markers, gradients), obfuscated contact info for privacy, and fixed terminal visibility in light mode.
+- ✅ **Alert Tuning**: Optimized Error Rate thresholds (4.5%) and high-visibility incident animations.
+- ✅ **Bug Fixes**: Resolved LogContext initialization and SVG syntax errors.
+
+#### 🗑️ Removed
+- ✅ **Unused Philosophy Assets**: Deleted unused philosophy assets (frontend/public/philosophy/*.jpg).
+- ✅ **Stale i18n Keys**: Removed stale i18n keys (about.github, about.linkedin, contact.*_copy_*).
+
+#### 📚 Documentation & Cleanup
+- ✅ **Updated Documentation**: Updated Markdown documentation (README, ARCHITECTURE) to reflect new observable behavior and contracts.
+- ✅ **Verified Test Suite**: Ensured all changes pass lint, type-check, unit tests, and backend pytest suite.
+
+---
 ## [1.4.1] - 2026-04-19
 
 ### 🛠️ Enhancements & Reliability

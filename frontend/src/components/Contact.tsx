@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Loader2, AlertCircle } from 'lucide-react';
+import { Mail, Loader2, AlertCircle, Terminal, ShieldCheck, Clock3 } from 'lucide-react';
 import { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAbout, useContactMutation } from '../hooks/useApi';
@@ -24,7 +24,7 @@ export default function Contact() {
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [traceResult, setTraceResult] = useState<{ traceId?: string; durationMs: number } | null>(null);
+  const [traceResult, setTraceResult] = useState<{ traceId?: string; durationMs: number; queueStatus?: string; deliveryMode?: string; downstream?: string; message?: string } | null>(null);
   
   const getNewKey = () => {
     return typeof crypto !== 'undefined' && crypto.randomUUID 
@@ -133,140 +133,286 @@ export default function Contact() {
   };
 
   const status = isMutating ? 'loading' : (mutationSuccess ? 'success' : (mutationError || errors.submit ? 'error' : 'idle'));
+  const availability = about?.disponibilidade?.[language as 'pt' | 'en' | 'es'] ?? '...';
+  const submitError = errors.submit ? t(errors.submit) : t('contact.error.generic');
+  const responseStatusCode = mutationError instanceof ApiError ? mutationError.status : null;
+  const responseTraceId = traceResult?.traceId || (mutationError instanceof ApiError ? mutationError.traceId : undefined);
+  const queueStatus = traceResult?.queueStatus ?? 'idle';
+  const deliveryMode = traceResult?.deliveryMode ?? 'background';
+  const downstream = traceResult?.downstream ?? 'email_adapter';
+  const responseTone = status === 'success'
+    ? 'text-emerald-400'
+    : status === 'error'
+      ? 'text-red-400'
+      : status === 'loading'
+        ? 'text-amber-400'
+        : 'text-slate-400';
+  const specRows = [
+    { label: t('contact.spec.endpoint'), value: 'POST /api/v1/contact' },
+    { label: t('contact.spec.idempotency'), value: 'Idempotency-Key header' },
+    { label: t('contact.spec.protection'), value: t('contact.spec.protection_value') },
+    { label: t('contact.spec.availability'), value: availability },
+    { label: t('contact.spec.delivery_mode'), value: 'background_tasks' },
+    { label: t('contact.spec.response'), value: t('contact.spec.response_value') },
+  ];
 
   return (
-    <section id="contato" className="py-16 max-w-4xl mx-auto px-4 relative group overflow-hidden">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-app-primary/5 dark:bg-app-primary/10 rounded-full blur-[120px] -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+    <section id="contato" className="py-16 max-w-6xl mx-auto px-4 relative group overflow-hidden">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-app-primary/5 dark:bg-app-primary/10 rounded-full blur-[140px] -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.1, margin: "0px 0px -100px 0px" }}
         transition={{ duration: 0.8 }}
       >
-        <h2 className="text-3xl md:text-5xl font-bold mb-16 text-center text-app-text tracking-widest uppercase">
+        <div className="max-w-3xl mx-auto mb-14 text-center">
+          <h2 className="text-3xl md:text-5xl font-bold text-app-text tracking-widest uppercase">
             {t('contact.title')}
-        </h2>
+          </h2>
+          <p className="mt-4 text-sm md:text-base text-app-muted leading-relaxed">
+            {t('contact.subtitle')}
+          </p>
+        </div>
 
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true, amount: 0.1 }}
-          transition={{ duration: 0.6 }}
-          className="glass rounded-2xl p-8 md:p-12 border border-app-border hover:border-app-primary/50 hover:shadow-[0_0_40px_rgba(212,163,115,0.15)] transition-all duration-500"
-        >
-          <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-8">
-            <input type="text" name="website" id="hp_website" aria-label="Website" style={{ position: 'absolute', left: '-5000px' }} tabIndex={-1} autoComplete="off" />
-            <input type="text" name="fax" id="hp_fax" aria-label="Fax" style={{ position: 'absolute', left: '-5000px' }} tabIndex={-1} autoComplete="off" />
+        <div className="grid gap-8 lg:grid-cols-[0.95fr_1.35fr] items-start">
+          <motion.aside
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.6 }}
+            className="glass rounded-2xl p-6 md:p-8 border border-app-border hover:border-app-primary/40 transition-all duration-500"
+          >
+            <div className="inline-flex items-center gap-2 rounded-full border border-app-primary/20 bg-app-primary/5 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.25em] text-app-primary">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              {t('contact.api.title')}
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="flex flex-col gap-2.5">
-                <label htmlFor="nome" className="text-xs font-bold text-app-muted uppercase tracking-widest ml-1">{t('contact.name')}</label>
-                <input 
-                  type="text" id="nome" name="nome" placeholder={t('contact.placeholder.name')}
-                  value={formData.nome} onChange={handleChange}
-                  className={`bg-app-surface/50 border ${errors.nome ? 'border-red-500/50 focus:ring-red-500/20' : 'border-app-border focus:ring-app-primary/50'} rounded-xl px-5 py-3.5 focus:outline-none focus:ring-2 text-app-text transition-all duration-300 placeholder:text-app-muted/30`}
+            <h3 className="mt-5 text-2xl font-bold text-app-text">
+              {t('contact.api.summary')}
+            </h3>
+
+            <div className="mt-8 space-y-4">
+              {specRows.map((row) => (
+                <div key={row.label} className="rounded-xl border border-app-border bg-app-surface/40 px-4 py-3">
+                  <p className="text-[10px] font-mono uppercase tracking-[0.25em] text-app-muted">{row.label}</p>
+                  <p className="mt-2 text-sm text-app-text break-words">{row.value}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+              <a
+                href={`mailto:${about?.email ?? ''}`}
+                className="flex items-center justify-center gap-3 rounded-xl border border-app-border bg-app-surface/50 px-4 py-4 text-sm font-semibold text-app-text transition-colors hover:border-app-primary/40 hover:text-app-primary"
+              >
+                <Mail className="h-4 w-4" />
+                {t('contact.channel.email')}
+              </a>
+              <button
+                type="button"
+                onClick={handleWhatsApp}
+                className="flex items-center justify-center gap-3 rounded-xl bg-[#0A854D] px-4 py-4 text-sm font-semibold text-white transition-colors hover:bg-[#075E54]"
+              >
+                <WhatsAppIcon className="h-5 w-5 flex-shrink-0" />
+                {t('contact.whatsapp')}
+              </button>
+            </div>
+          </motion.aside>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.6 }}
+            className="overflow-hidden rounded-2xl border border-[#2A2A2A] bg-[#0B0F14] shadow-[0_20px_60px_rgba(0,0,0,0.35)]"
+          >
+            <div className="flex items-center justify-between border-b border-[#20262D] bg-[#11161D] px-4 py-3 font-mono text-[11px] text-slate-400">
+              <div className="flex items-center gap-3">
+                <div className="flex gap-1.5">
+                  <div className="h-2.5 w-2.5 rounded-full bg-red-500" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-yellow-500" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
+                </div>
+                <span>{t('contact.form.title')}</span>
+              </div>
+              <div className={`inline-flex items-center gap-2 uppercase tracking-[0.2em] ${responseTone}`}>
+                <Terminal className="h-3.5 w-3.5" />
+                {t(`contact.console.status.${status}`)}
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} noValidate className="p-5 md:p-7">
+              <input type="text" name="website" id="hp_website" aria-label="Website" style={{ position: 'absolute', left: '-5000px' }} tabIndex={-1} autoComplete="off" />
+              <input type="text" name="fax" id="hp_fax" aria-label="Fax" style={{ position: 'absolute', left: '-5000px' }} tabIndex={-1} autoComplete="off" />
+
+              <div className="mb-6 grid gap-3 rounded-xl border border-[#20262D] bg-[#0F141A] p-4 font-mono text-xs text-slate-300 md:grid-cols-2">
+                <div>
+                  <span className="text-slate-500">{t('contact.console.request')}:</span>
+                  <span className="ml-2 text-app-primary">POST /api/v1/contact</span>
+                </div>
+                <div className="break-all">
+                  <span className="text-slate-500">{t('contact.spec.idempotency')}:</span>
+                  <span className="ml-2 text-slate-300">{idempotencyKey}</span>
+                </div>
+              </div>
+
+              <div className="grid gap-5 md:grid-cols-2">
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="nome" className="text-[11px] font-mono uppercase tracking-[0.25em] text-slate-500">{t('contact.name')}</label>
+                  <input
+                    type="text"
+                    id="nome"
+                    name="nome"
+                    placeholder={t('contact.placeholder.name')}
+                    value={formData.nome}
+                    onChange={handleChange}
+                    className={`rounded-xl border bg-[#11161D] px-4 py-3 text-sm text-slate-100 outline-none transition-all placeholder:text-slate-500 ${errors.nome ? 'border-red-500/60 focus:ring-2 focus:ring-red-500/20' : 'border-[#20262D] focus:border-app-primary/60 focus:ring-2 focus:ring-app-primary/20'}`}
+                  />
+                  <AnimatePresence>
+                    {errors.nome && (
+                      <motion.p initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="flex items-center gap-1 text-[11px] text-red-400">
+                        <AlertCircle className="h-3.5 w-3.5" />
+                        {t(`contact.error.${errors.nome}`)}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="email" className="text-[11px] font-mono uppercase tracking-[0.25em] text-slate-500">{t('contact.email')}</label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder={t('contact.placeholder.email')}
+                    value={formData.email}
+                    onChange={handleChange}
+                    className={`rounded-xl border bg-[#11161D] px-4 py-3 text-sm text-slate-100 outline-none transition-all placeholder:text-slate-500 ${errors.email ? 'border-red-500/60 focus:ring-2 focus:ring-red-500/20' : 'border-[#20262D] focus:border-app-primary/60 focus:ring-2 focus:ring-app-primary/20'}`}
+                  />
+                  <AnimatePresence>
+                    {errors.email && (
+                      <motion.p initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="flex items-center gap-1 text-[11px] text-red-400">
+                        <AlertCircle className="h-3.5 w-3.5" />
+                        {t(`contact.error.${errors.email}`)}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+
+              <div className="mt-5 flex flex-col gap-2">
+                <label htmlFor="assunto" className="text-[11px] font-mono uppercase tracking-[0.25em] text-slate-500">{t('contact.subject')}</label>
+                <input
+                  type="text"
+                  id="assunto"
+                  name="assunto"
+                  placeholder={t('contact.placeholder.subject')}
+                  value={formData.assunto}
+                  onChange={handleChange}
+                  className="rounded-xl border border-[#20262D] bg-[#11161D] px-4 py-3 text-sm text-slate-100 outline-none transition-all placeholder:text-slate-500 focus:border-app-primary/60 focus:ring-2 focus:ring-app-primary/20"
+                />
+              </div>
+
+              <div className="mt-5 flex flex-col gap-2">
+                <label htmlFor="mensagem" className="text-[11px] font-mono uppercase tracking-[0.25em] text-slate-500">{t('contact.message')}</label>
+                <textarea
+                  id="mensagem"
+                  name="mensagem"
+                  rows={6}
+                  placeholder={t('contact.placeholder.message')}
+                  value={formData.mensagem}
+                  onChange={handleChange}
+                  className={`resize-none rounded-xl border bg-[#11161D] px-4 py-3 text-sm text-slate-100 outline-none transition-all placeholder:text-slate-500 ${errors.mensagem ? 'border-red-500/60 focus:ring-2 focus:ring-red-500/20' : 'border-[#20262D] focus:border-app-primary/60 focus:ring-2 focus:ring-app-primary/20'}`}
                 />
                 <AnimatePresence>
-                  {errors.nome && (
-                    <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="text-red-500 text-[10px] font-bold mt-1 ml-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> {t(`contact.error.${errors.nome}`)}
+                  {errors.mensagem && (
+                    <motion.p initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="flex items-center gap-1 text-[11px] text-red-400">
+                      <AlertCircle className="h-3.5 w-3.5" />
+                      {t(`contact.error.${errors.mensagem}`)}
                     </motion.p>
                   )}
                 </AnimatePresence>
               </div>
 
-              <div className="flex flex-col gap-2.5">
-                <label htmlFor="email" className="text-xs font-bold text-app-muted uppercase tracking-widest ml-1">{t('contact.email')}</label>
-                <input 
-                  type="email" id="email" name="email" placeholder={t('contact.placeholder.email')}
-                  value={formData.email} onChange={handleChange}
-                  className={`bg-app-surface/50 border ${errors.email ? 'border-red-500/50 focus:ring-red-500/20' : 'border-app-border focus:ring-app-primary/50'} rounded-xl px-5 py-3.5 focus:outline-none focus:ring-2 text-app-text transition-all duration-300 placeholder:text-app-muted/30`}
-                />
-                <AnimatePresence>
-                  {errors.email && (
-                    <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="text-red-500 text-[10px] font-bold mt-1 ml-1 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> {t(`contact.error.${errors.email}`)}
-                    </motion.p>
-                  )}
-                </AnimatePresence>
+              <div className="mt-6 grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                <div className="inline-flex items-center gap-2 rounded-xl border border-[#20262D] bg-[#0F141A] px-4 py-3 font-mono text-xs text-slate-400">
+                  <Clock3 className="h-4 w-4 text-app-primary" />
+                  {t('contact.spec.response_value')}
+                </div>
+                <motion.button
+                  whileHover={status !== 'loading' ? { scale: 1.02 } : {}}
+                  whileTap={status !== 'loading' ? { scale: 0.98 } : {}}
+                  type="submit"
+                  disabled={status === 'loading'}
+                  className="inline-flex items-center justify-center gap-3 rounded-xl bg-app-primary px-6 py-3.5 text-xs font-bold uppercase tracking-[0.25em] text-app-primary-text transition-all duration-300 hover:bg-app-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {status === 'loading' ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+                  {status === 'loading' ? t('contact.sending') : t('contact.send')}
+                </motion.button>
               </div>
-            </div>
 
-            <div className="flex flex-col gap-2.5">
-              <label htmlFor="assunto" className="text-xs font-bold text-app-muted uppercase tracking-widest ml-1">{t('contact.subject')}</label>
-              <input 
-                type="text" id="assunto" name="assunto" placeholder={t('contact.placeholder.subject')}
-                value={formData.assunto} onChange={handleChange}
-                className={`bg-app-surface/50 border ${errors.assunto ? 'border-red-500/50 focus:ring-red-500/20' : 'border-app-border focus:ring-app-primary/50'} rounded-xl px-5 py-3.5 focus:outline-none focus:ring-2 text-app-text transition-all duration-300 placeholder:text-app-muted/30`}
-              />
-            </div>
-
-            <div className="flex flex-col gap-2.5">
-              <label htmlFor="mensagem" className="text-xs font-bold text-app-muted uppercase tracking-widest ml-1">{t('contact.message')}</label>
-              <textarea 
-                id="mensagem" name="mensagem" rows={5} placeholder={t('contact.placeholder.message')}
-                value={formData.mensagem} onChange={handleChange}
-                className={`bg-app-surface/50 border ${errors.mensagem ? 'border-red-500/50 focus:ring-red-500/20' : 'border-app-border focus:ring-app-primary/50'} rounded-xl px-5 py-3.5 focus:outline-none focus:ring-2 text-app-text transition-all duration-300 placeholder:text-app-muted/30 resize-none`}
-              ></textarea>
-              <AnimatePresence>
-                {errors.mensagem && (
-                  <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="text-red-500 text-[10px] font-bold mt-1 ml-1 flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" /> {t(`contact.error.${errors.mensagem}`)}
-                  </motion.p>
-                )}
-              </AnimatePresence>
-            </div>
-
-            <AnimatePresence>
-              {traceResult && (
-                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="bg-[#0A0A0A] border rounded-xl overflow-hidden font-mono text-xs text-left shadow-inner flex flex-col" style={{ borderColor: '#333' }}>
-                  <div className="flex items-center px-4 py-2 border-b" style={{ backgroundColor: '#1A1A1A', borderColor: '#333' }}>
-                    <div className="flex gap-1.5 mr-4">
-                      <div className="w-2.5 h-2.5 rounded-full bg-red-500"></div>
-                      <div className="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
-                      <div className="w-2.5 h-2.5 rounded-full bg-green-500"></div>
-                    </div>
-                    <span className="text-gray-400 font-semibold uppercase tracking-widest text-[10px]">Trace Console</span>
+              <div className="mt-6 overflow-hidden rounded-xl border border-[#20262D] bg-[#0F141A] font-mono text-xs text-slate-300">
+                <div className="border-b border-[#20262D] px-4 py-3 text-[11px] uppercase tracking-[0.25em] text-slate-500">
+                  {t('contact.console.title')}
+                </div>
+                <div className="space-y-2 px-4 py-4 leading-6">
+                  <div>
+                    <span className="text-slate-500">$</span>
+                    <span className="ml-2 text-slate-200">curl -X POST /api/v1/contact</span>
                   </div>
-                  <div className="p-4 leading-relaxed text-gray-300">
-                    <div>
-                      <span className="text-emerald-400">[POST]</span> /api/v1/contact <span className="text-gray-500">→</span> <span className="text-emerald-400">200 OK</span> <span className="text-gray-500">({traceResult.durationMs}ms)</span>
-                    </div>
-                    {traceResult.traceId && (
-                      <div className="mt-1">
-                        <span className="text-blue-400">[TRACE]</span> {traceResult.traceId}
-                      </div>
+                  <div>
+                    <span className="text-slate-500">{t('contact.console.request')}:</span>
+                    <span className="ml-2 text-slate-300">payload=name,email,subject,message</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-500">{t('contact.console.response')}:</span>
+                    {status === 'success' && traceResult ? (
+                      <span className="ml-2 text-emerald-400">200 OK ({traceResult.durationMs}ms)</span>
+                    ) : status === 'error' ? (
+                      <span className="ml-2 text-red-400">{responseStatusCode ?? 500} ERROR</span>
+                    ) : status === 'loading' ? (
+                      <span className="ml-2 text-amber-400">{t('contact.sending')}</span>
+                    ) : (
+                      <span className="ml-2 text-slate-500">{t('contact.console.ready')}</span>
                     )}
                   </div>
-                </motion.div>
-              )}
-              {status === 'error' && (
-                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="bg-red-500/10 border border-red-500/20 text-red-500 p-4 rounded-xl text-center text-sm font-semibold">
-                  {errors.submit ? t(errors.submit) : t('contact.error.generic')}
-                </motion.div>
-              )}
-            </AnimatePresence>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-              <motion.button 
-                whileHover={status !== 'loading' ? { scale: 1.02 } : {}} whileTap={status !== 'loading' ? { scale: 0.98 } : {}}
-                type="submit" disabled={status === 'loading'}
-                className="bg-app-primary hover:bg-app-primary-hover text-app-primary-text font-bold py-[18px] px-8 rounded-xl transition-all duration-300 shadow-lg shadow-app-primary/20 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-widest text-xs flex items-center justify-center gap-3"
-              >
-                {status === 'loading' ? <Loader2 className="animate-spin h-4 w-4 text-app-primary-text" /> : <Mail className="w-4 h-4" />}
-                {status === 'loading' ? t('contact.sending') : t('contact.send')}
-              </motion.button>
-              <motion.button 
-                whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                type="button" onClick={handleWhatsApp}
-                className="bg-[#0A854D] hover:bg-[#075E54] text-white font-bold py-[18px] px-8 rounded-xl transition-all duration-300 shadow-lg shadow-green-500/20 flex items-center justify-center gap-3 uppercase tracking-widest text-xs"
-              >
-                <WhatsAppIcon className="w-5 h-5 flex-shrink-0" />
-                {t('contact.whatsapp')}
-              </motion.button>
-            </div>
-          </form>
-        </motion.div>
+                  {responseTraceId && (
+                    <div>
+                      <span className="text-slate-500">{t('contact.console.trace')}:</span>
+                      <span className="ml-2 break-all text-blue-400">{responseTraceId}</span>
+                    </div>
+                  )}
+
+                  {status === 'success' && traceResult && (
+                    <>
+                      <div>
+                        <span className="text-slate-500">{t('contact.console.queue')}:</span>
+                        <span className="ml-2 text-amber-300">{queueStatus}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500">{t('contact.console.mode')}:</span>
+                        <span className="ml-2 text-slate-300">{deliveryMode}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500">{t('contact.console.downstream')}:</span>
+                        <span className="ml-2 text-slate-300">{downstream}</span>
+                      </div>
+                    </>
+                  )}
+
+                  {status === 'success' && (
+                    <div className="text-emerald-400">{t('contact.console.delivered')}</div>
+                  )}
+
+                  {status === 'error' && (
+                    <div className="text-red-400">{submitError || t('contact.console.rejected')}</div>
+                  )}
+                </div>
+              </div>
+            </form>
+          </motion.div>
+        </div>
       </motion.div>
     </section>
   );

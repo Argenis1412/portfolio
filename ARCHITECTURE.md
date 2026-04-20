@@ -52,3 +52,15 @@ If Go is integrated in the future, it will only be under real necessity signals 
 1.  **Create a minimal Go service** (e.g., isolated deploy) for specific tasks.
 2.  **FastAPI acts as the consumer** (`Client -> FastAPI -> Go Service`).
 3.  **Measure** the real latency, consumption, and added complexity before deciding to expand further.
+
+## 13. Frontend Observability Enhancements
+**Decision**: Enhanced frontend observability with real-time telemetry, failure visibility, and end-to-end traceability.
+**Why?** To provide engineers with actionable insights into system behavior, making failure/recovery visible and ensuring strong correlation in logs.
+- Added MetricsSparkline component with linear line, threshold lines, and vertical incident markers for real-time P95 latency telemetry.
+- Extended useLiveMetrics hook to keep timestamped samples, baseline P95, recent traces, latest event, circuit-breaker and timeout states.
+- Rewrote LiveMetricsBento to show delta vs previous, delta vs baseline, failure-model panel, and telemetry timeline.
+- Updated Hero sidecar to render real sparkline, circuit state, and latest trace.
+- Modified ChaosPlayground to emit trace_id and include richer log fields (retry_triggered, circuit_breaker, timeout_ms).
+- Enhanced TraceViewer and LogStream to display both request_id and trace_id for end-to-end correlation.
+- Fixed LogStream auto-scroll to stay inside the terminal and removed global window.scrollTo in App.tsx.
+- Added missing i18n keys for metrics, failure model, and telemetry legend.

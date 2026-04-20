@@ -11,13 +11,13 @@ Schemas são diferentes de Entidades:
 - Entidades: modelos de domínio (lógica de negócio)
 """
 
-from app.esquemas.saude import RespostaSaude
-from app.esquemas.sobre import RespostaSobre
-from app.esquemas.projetos import ProjetoResumo, ProjetoDetalhado, RespostaProjetos
-from app.esquemas.stack import ItemStack, RespostaStack
+from app.esquemas.contato import RequisicaoContato, RespostaContato
 from app.esquemas.experiencias import Experiencia, RespostaExperiencias
 from app.esquemas.formacao import ItemFormacao, RespostaFormacao
-from app.esquemas.contato import RequisicaoContato, RespostaContato
+from app.esquemas.projetos import ProjetoDetalhado, ProjetoResumo, RespostaProjetos
+from app.esquemas.saude import RespostaSaude
+from app.esquemas.sobre import RespostaSobre
+from app.esquemas.stack import ItemStack, RespostaStack
 
 __all__ = [
     "RespostaSaude",

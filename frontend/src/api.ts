@@ -19,6 +19,8 @@ export const ProjectSchema = z.object({
   descricao_curta: LocalizedStringSchema,
   descricao_completa: LocalizedStringSchema.optional(),
   tecnologias: z.array(z.string()),
+  funcionalidades: z.array(z.string()).optional().default([]),
+  aprendizados: z.array(z.string()).optional().default([]),
   destaque: z.boolean(),
   repositorio: z.string().nullable(),
   demo: z.string().nullable(),
@@ -236,7 +238,7 @@ export async function postContact(data: {
   mensagem: string;
   website: string; // Honeypot
   fax: string;     // Honeypot
-}, idempotencyKey: string): Promise<{traceId?: string, durationMs: number}> {
+}, idempotencyKey: string): Promise<{traceId?: string, durationMs: number, queueStatus?: string, deliveryMode?: string, downstream?: string, message?: string}> {
   const apiUrl = buildApiUrl('/contato');
 
   const start = performance.now();
@@ -265,7 +267,14 @@ export async function postContact(data: {
     (rawData as Record<string, unknown>)?.trace_id as string | undefined ??
     undefined;
 
-  return { traceId, durationMs };
+  return {
+    traceId,
+    durationMs,
+    queueStatus: (rawData as Record<string, unknown>)?.queue_status as string | undefined,
+    deliveryMode: (rawData as Record<string, unknown>)?.delivery_mode as string | undefined,
+    downstream: (rawData as Record<string, unknown>)?.downstream as string | undefined,
+    message: (rawData as Record<string, unknown>)?.mensagem as string | undefined,
+  };
 }
 
 // ===================================================

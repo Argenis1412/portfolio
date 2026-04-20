@@ -5,6 +5,7 @@ Interface abstrata + implementação com Formspree.
 """
 
 from abc import ABC, abstractmethod
+
 import httpx
 import structlog
 

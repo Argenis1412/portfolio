@@ -6,12 +6,13 @@ Usado por load balancers, kubernetes probes e monitoramento.
 """
 
 import time
+
 from fastapi import APIRouter, Depends, Response, status
 
-from app.esquemas.saude import RespostaSaude
+from app.adaptadores.repositorio import RepositorioPortfolio
 from app.configuracao import configuracoes
 from app.controladores.dependencias import obter_repositorio
-from app.adaptadores.repositorio import RepositorioPortfolio
+from app.esquemas.saude import RespostaSaude
 
 roteador = APIRouter(tags=["Health"])
 

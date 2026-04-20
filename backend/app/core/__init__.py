@@ -10,9 +10,9 @@ Contém funcionalidades transversais:
 
 from app.core.excecoes import (
     ErroDominio,
-    ErroValidacao,
     ErroInfraestrutura,
     ErroRecursoNaoEncontrado,
+    ErroValidacao,
 )
 from app.core.handlers import registrar_handlers_excecao
 

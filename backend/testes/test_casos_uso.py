@@ -7,13 +7,13 @@ Testa lógica de negócio isoladamente, sem dependências de HTTP.
 import pytest
 
 from app.casos_uso import (
-    ObterSobreUseCase,
-    ObterProjetosUseCase,
-    ObterProjetoPorIdUseCase,
-    ObterStackUseCase,
+    EnviarContatoUseCase,
     ObterExperienciasUseCase,
     ObterFormacaoUseCase,
-    EnviarContatoUseCase,
+    ObterProjetoPorIdUseCase,
+    ObterProjetosUseCase,
+    ObterSobreUseCase,
+    ObterStackUseCase,
 )
 
 

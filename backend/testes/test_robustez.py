@@ -4,9 +4,9 @@ Testes de robustez: Idempotência e Rate Limiting.
 
 from unittest.mock import AsyncMock
 
-from app.principal import app
 from app.controladores.dependencias import obter_enviar_contato_use_case
 from app.core.idempotencia import store
+from app.principal import app
 
 # client = TestClient(app) # Removed to use fixture
 
@@ -129,8 +129,9 @@ def test_idempotencia_em_progresso(client):
     headers = {"Idempotency-Key": "progress-key-456"}
 
     # Simular em progresso manualmente no store
-    from app.core.idempotencia import IdempotencyRecord
     import time
+
+    from app.core.idempotencia import IdempotencyRecord
 
     store._cache["progress-key-456"] = IdempotencyRecord(
         status_code=0, content={}, timestamp=time.time(), in_progress=True

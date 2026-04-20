@@ -4,7 +4,7 @@ Schemas para endpoint /api/sobre.
 Define o contrato de resposta com informações pessoais do desenvolvedor.
 """
 
-from pydantic import BaseModel, Field, EmailStr, HttpUrl
+from pydantic import BaseModel, EmailStr, Field, HttpUrl
 
 from app.esquemas.tipos_base import TextoLocalizado
 

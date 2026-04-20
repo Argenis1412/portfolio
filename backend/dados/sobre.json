@@ -7,9 +7,9 @@
   "github": "https://github.com/Argenis1412",
   "linkedin": "https://www.linkedin.com/in/argenis1412/",
   "descricao": {
-    "pt": "Sou um desenvolvedor focado em backend com Python, atualmente cursando sistemas na UFPR. Especialista na criação de APIs REST seguras e escaláveis, aplico arquitetura hexagonal e testes automatizados para garantir soluções de alta performance com lógica financeira determinística.",
-    "en": "Backend-focused developer with Python, currently studying systems at UFPR. Specialist in building secure and scalable REST APIs, applying hexagonal architecture and automated testing to deliver high-performance solutions with deterministic financial logic.",
-    "es": "Desarrollador enfocado en backend con Python, actualmente cursando sistemas en la UFPR. Especialista en la creación de APIs REST seguras y escalables, aplico arquitectura hexagonal y pruebas automatizadas para garantizar soluciones de alto rendimiento con lógica financiera determinística."
+    "pt": "Focado em sistemas determinísticos, observabilidade estruturada e resiliência (graceful failure).",
+    "en": "Focused on deterministic systems, structured observability, and graceful failure.",
+    "es": "Enfocado en sistemas deterministas, observabilidad estructurada y resiliencia ante fallos (graceful failure)."
   },
   "disponibilidade": {
     "pt": "Remoto, híbrido ou presencial",

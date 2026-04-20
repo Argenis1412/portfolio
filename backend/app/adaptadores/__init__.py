@@ -14,9 +14,9 @@ from app.adaptadores.email_adaptador import (
     FormspreeEmailAdaptador,
     ResendEmailAdaptador,
 )
-from app.adaptadores.repositorio import RepositorioPortfolio, RepositorioJSON
-from app.adaptadores.repositorio_sql import RepositorioSQL
 from app.adaptadores.logger_adaptador import LoggerAdaptador, LoggerEstruturado
+from app.adaptadores.repositorio import RepositorioJSON, RepositorioPortfolio
+from app.adaptadores.repositorio_sql import RepositorioSQL
 
 __all__ = [
     "EmailAdaptador",

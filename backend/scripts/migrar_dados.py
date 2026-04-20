@@ -2,11 +2,12 @@
 Script para migrar dados de arquivos JSON para o banco de dados SQL.
 """
 
-import sys
 import json
-from pathlib import Path
+import sys
 from datetime import date
-from sqlmodel import SQLModel, create_engine, Session, text
+from pathlib import Path
+
+from sqlmodel import Session, SQLModel, create_engine, text
 
 # Adicionar o diretório backend ao sys.path
 current_dir = Path(__file__).parent.absolute()
@@ -15,10 +16,10 @@ if str(backend_dir) not in sys.path:
     sys.path.append(str(backend_dir))
 
 from app.adaptadores.modelos_sql import (  # noqa: E402
-    SobreModelo,
-    ProjetoModelo,
     ExperienciaModelo,
     FormacaoModelo,
+    ProjetoModelo,
+    SobreModelo,
     StackModelo,
 )
 from app.configuracao import configuracoes  # noqa: E402

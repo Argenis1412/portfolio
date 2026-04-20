@@ -26,20 +26,11 @@ interface TerminalEntry {
 
 // Shared trace store moved to src/services/TraceEmitter.ts
 
-interface Incident {
-  id: string;
-  type: string;
-  labelKey: string;
-  startedAt: number; // ms
-  ttl: number;       // ms
-}
-
 function genReqId(): string {
   return Math.random().toString(36).slice(2, 10).toUpperCase();
 }
 
 const COOLDOWN_SECONDS = 30;
-const INCIDENT_TTL_MS = 2 * 60 * 1000; // 2 minutes
 
 // ─── Action Card ─────────────────────────────────────────────────────────────
 
@@ -103,7 +94,7 @@ function ActionCard({
 export default function ChaosPlayground() {
   const { t } = useLanguage();
   const queryClient = useQueryClient();
-  const { addEntry } = useLog();
+  const { addEntry, incidents, addIncident } = useLog();
 
   // Terminal log (local, lightweight)
   const [terminal, setTerminal] = useState<TerminalEntry[]>([]);
@@ -119,28 +110,14 @@ export default function ChaosPlayground() {
   const [failureCooldown, setFailureCooldown] = useState(0);
   const [cacheCooldown, setCacheCooldown] = useState(0);
 
-  // Active incidents
-  const [incidents, setIncidents] = useState<Incident[]>([]);
   const [, setTick] = useState(0); // forces re-render for TTL countdown
 
-  // Tick timer for TTL display
+  // Tick timer for TTL display — only for UI re-renders, state is global
   useEffect(() => {
     const t = setInterval(() => {
       setTick((n) => n + 1);
-      setIncidents((prev) => prev.filter((i) => Date.now() - i.startedAt < i.ttl + 5000));
     }, 1000);
     return () => clearInterval(t);
-  }, []);
-
-  const addIncident = useCallback((type: string, labelKey: string) => {
-    const incident: Incident = {
-      id: Math.random().toString(36).slice(2),
-      type,
-      labelKey,
-      startedAt: Date.now(),
-      ttl: INCIDENT_TTL_MS,
-    };
-    setIncidents((prev) => [incident, ...prev].slice(0, 5));
   }, []);
 
   const startCooldown = useCallback((setter: React.Dispatch<React.SetStateAction<number>>) => {
@@ -174,16 +151,18 @@ export default function ChaosPlayground() {
     if (spikeLoading || spikeCooldown > 0) return;
     setSpikeLoading(true);
     const rid = genReqId();
-    addTerminalEntry('INFO', `chaos.spike triggered request_id=${rid}`, rid);
-    addEntry('INFO', `chaos.spike triggered`, rid);
+    const traceId = `trace-${rid}`;
+    addTerminalEntry('INFO', `chaos.spike triggered request_id=${rid} trace_id=${traceId}`, rid);
+    addEntry('INFO', `chaos.spike status=TRIGGERED type=TRAFFIC_SPIKE trace_id=${traceId}`, rid);
     try {
       const res: ChaosResponse = await postChaosSpike();
       const elapsed = res.elapsed_ms ?? 0;
-      addTerminalEntry('WARN', `traffic.spike completed requests=${res.requests_sent ?? 0} dropped=${res.requests_dropped ?? 0} elapsed_ms=${elapsed} request_id=${rid}`, rid);
-      addEntry('WARN', `traffic.spike elapsed_ms=${elapsed} dropped=${res.requests_dropped ?? 0}`, rid);
+      addTerminalEntry('WARN', `traffic.spike completed requests=${res.requests_sent ?? 0} dropped=${res.requests_dropped ?? 0} elapsed_ms=${elapsed} retry_triggered=${res.requests_dropped ?? 0 ? 'true' : 'false'} request_id=${rid} trace_id=${traceId}`, rid);
+      addEntry('WARN', `traffic.spike status=COMPLETED elapsed_ms=${elapsed} dropped=${res.requests_dropped ?? 0} retry_triggered=${res.requests_dropped ?? 0 ? 'true' : 'false'} trace_id=${traceId}`, rid);
       addIncident('traffic_spike', 'chaos.action.spike.title');
       emitTrace({
         id: `trace-${rid}`,
+        traceId,
         requestId: rid,
         type: 'traffic_spike',
         endpoint: '/chaos/spike',
@@ -198,8 +177,8 @@ export default function ChaosPlayground() {
       startCooldown(setSpikeCooldown);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
-      addTerminalEntry('ERROR', `chaos.spike failed error="${msg}" request_id=${rid}`, rid);
-      addEntry('ERROR', `chaos.spike failed: ${msg}`, rid);
+      addTerminalEntry('ERROR', `chaos.spike failed error="${msg}" request_id=${rid} trace_id=${traceId}`, rid);
+      addEntry('ERROR', `chaos.spike status=FAILED error="${msg}" trace_id=${traceId}`, rid);
     } finally {
       setSpikeLoading(false);
     }
@@ -209,16 +188,18 @@ export default function ChaosPlayground() {
     if (failureLoading || failureCooldown > 0) return;
     setFailureLoading(true);
     const rid = genReqId();
-    addTerminalEntry('INFO', `chaos.failure triggered request_id=${rid}`, rid);
-    addEntry('INFO', `chaos.failure triggered`, rid);
+    const traceId = `trace-${rid}`;
+    addTerminalEntry('INFO', `chaos.failure triggered request_id=${rid} trace_id=${traceId}`, rid);
+    addEntry('INFO', `chaos.failure status=TRIGGERED type=FORCED_503 trace_id=${traceId}`, rid);
     try {
       const res: ChaosResponse = await postChaosFailure();
       const recovery = res.recovery_ms ?? 0;
-      addTerminalEntry('WARN', `forced.failure 503 triggered recovery_ms=${recovery} request_id=${rid}`, rid);
-      addEntry('WARN', `forced.failure 503 → recovered=${recovery}ms`, rid);
+      addTerminalEntry('WARN', `forced.failure status=503 recovery_ms=${recovery} circuit_breaker=OPEN timeout_ms=${recovery} request_id=${rid} trace_id=${traceId}`, rid);
+      addEntry('WARN', `forced.failure status=503 recovery_ms=${recovery} circuit_breaker=OPEN timeout_ms=${recovery} trace_id=${traceId}`, rid);
       addIncident('forced_failure', 'chaos.action.failure.title');
       emitTrace({
         id: `trace-${rid}`,
+        traceId,
         requestId: rid,
         type: 'forced_failure',
         endpoint: '/chaos/failure',
@@ -233,8 +214,8 @@ export default function ChaosPlayground() {
       startCooldown(setFailureCooldown);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
-      addTerminalEntry('ERROR', `chaos.failure error="${msg}" request_id=${rid}`, rid);
-      addEntry('ERROR', `chaos.failure failed: ${msg}`, rid);
+      addTerminalEntry('ERROR', `chaos.failure error="${msg}" request_id=${rid} trace_id=${traceId}`, rid);
+      addEntry('ERROR', `chaos.failure status=FAILED error="${msg}" trace_id=${traceId}`, rid);
     } finally {
       setFailureLoading(false);
     }
@@ -244,15 +225,17 @@ export default function ChaosPlayground() {
     if (cacheLoading || cacheCooldown > 0) return;
     setCacheLoading(true);
     const rid = genReqId();
-    addTerminalEntry('INFO', `cache.stress triggered requests=10 request_id=${rid}`, rid);
-    addEntry('INFO', `cache.stress.sim triggered`, rid);
+    const traceId = `trace-${rid}`;
+    addTerminalEntry('INFO', `cache.stress triggered requests=10 request_id=${rid} trace_id=${traceId}`, rid);
+    addEntry('INFO', `cache.stress status=TRIGGERED type=CACHE_STRESS trace_id=${traceId}`, rid);
     try {
       const res = await postChaosCache();
-      addTerminalEntry('INFO', `cache.stress completed requests_sent=${res.requests_sent} elapsed_ms=${res.elapsed_ms} request_id=${rid}`, rid);
-      addEntry('INFO', `cache.stress done: ${res.requests_sent} requests in ${res.elapsed_ms}ms`, rid);
+      addTerminalEntry('INFO', `cache.stress completed requests_sent=${res.requests_sent} elapsed_ms=${res.elapsed_ms} request_id=${rid} trace_id=${traceId}`, rid);
+      addEntry('INFO', `cache.stress status=DONE requests=${res.requests_sent} elapsed_ms=${res.elapsed_ms} trace_id=${traceId}`, rid);
       addIncident('cache_stress', 'chaos.action.cache.title');
       emitTrace({
         id: `trace-${rid}`,
+        traceId,
         requestId: rid,
         type: 'cache_stress',
         endpoint: '/sobre, /stack, /projetos×3',
@@ -266,8 +249,8 @@ export default function ChaosPlayground() {
       startCooldown(setCacheCooldown);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
-      addTerminalEntry('ERROR', `cache.stress failed error="${msg}" request_id=${rid}`, rid);
-      addEntry('ERROR', `cache.stress failed: ${msg}`, rid);
+      addTerminalEntry('ERROR', `cache.stress failed error="${msg}" request_id=${rid} trace_id=${traceId}`, rid);
+      addEntry('ERROR', `cache.stress status=FAILED error="${msg}" trace_id=${traceId}`, rid);
     } finally {
       setCacheLoading(false);
     }
@@ -344,44 +327,69 @@ export default function ChaosPlayground() {
           {/* Active Incidents panel */}
           <div className="glass rounded-xl p-4 border border-app-border">
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs font-mono uppercase tracking-widest text-app-muted">{t('chaos.incidents.active')}</span>
+              <span className="text-xs font-mono uppercase tracking-widest text-app-muted">Incident History</span>
               {activeIncidents.length > 0 && (
                 <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
               )}
             </div>
-            {activeIncidents.length === 0 ? (
+            
+            {incidents.length === 0 ? (
               <p className="text-xs font-mono text-app-muted/50">{t('chaos.incidents.empty')}</p>
             ) : (
-              <ul className="space-y-2">
-                {activeIncidents.map((inc) => {
-                  const remaining = Math.max(0, Math.ceil((inc.ttl - (Date.now() - inc.startedAt)) / 1000));
-                  return (
-                    <li key={inc.id} className="flex items-center justify-between">
-                      <span className="text-xs font-mono text-amber-400">{t(inc.labelKey)}</span>
-                      <span className="text-[10px] font-mono text-app-muted">{t('chaos.incidents.remaining', { s: remaining })}</span>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
+              <div className="space-y-4">
+                {/* Active/Mitigating */}
+                {activeIncidents.length > 0 && (
+                  <div className="space-y-2">
+                    {activeIncidents.map((inc) => {
+                      const elapsed = Date.now() - inc.startedAt;
+                      const remaining = Math.max(0, Math.ceil((inc.ttl - elapsed) / 1000));
+                      const isInvestigating = elapsed < 5000;
+                      
+                      return (
+                        <div key={inc.id} className="flex flex-col gap-1 border-l-2 border-amber-500/30 pl-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-mono text-amber-400 font-bold uppercase tracking-wider">
+                              {t(inc.labelKey)}
+                            </span>
+                            <span className="text-[10px] font-mono text-app-muted opacity-60">
+                              {remaining}s
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${
+                              isInvestigating 
+                                ? 'bg-amber-500/10 border-amber-500/20 text-amber-200' 
+                                : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200'
+                            }`}>
+                              {isInvestigating ? 'INVESTIGATING' : 'MITIGATING'}
+                            </span>
+                            <div className="flex-grow h-[2px] bg-app-border/30 rounded-full overflow-hidden">
+                              <m.div 
+                                initial={{ width: '100%' }}
+                                animate={{ width: `${(remaining / (inc.ttl/1000)) * 100}%` }}
+                                className="h-full bg-amber-500/40"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
 
-            {resolvedIncidents.length > 0 && (
-              <>
-                <div className="border-t border-app-border mt-3 pt-3">
-                  <span className="text-xs font-mono uppercase tracking-widest text-app-muted">{t('chaos.incidents.resolved')}</span>
-                </div>
-                <ul className="space-y-1 mt-2">
-                  {resolvedIncidents.slice(0, 3).map((inc) => {
-                    const ago = Math.round((Date.now() - inc.startedAt) / 60000);
-                    return (
-                      <li key={inc.id} className="flex items-center justify-between">
-                        <span className="text-xs font-mono text-app-muted/70">{t(inc.labelKey)}</span>
-                        <span className="text-[10px] font-mono text-app-muted/50">{ago}m ago</span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </>
+                {/* Resolved */}
+                {resolvedIncidents.length > 0 && (
+                  <div className="space-y-1 pt-2 border-t border-app-border/20">
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-app-muted/60 block mb-2">Resolved</span>
+                    {resolvedIncidents.slice(0, 3).map((inc) => (
+                      <div key={inc.id} className="flex items-center justify-between opacity-50">
+                        <span className="text-[10px] font-mono text-app-text">{t(inc.labelKey)}</span>
+                        <span className="text-[9px] font-mono text-emerald-500/70">RESOLVED</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
           </div>
 
@@ -395,7 +403,7 @@ export default function ChaosPlayground() {
                 <span className="text-[10px] text-app-muted/50 ml-2 uppercase tracking-widest">chaos-log</span>
               </div>
               {terminal.length === 0 ? (
-                <p className="text-app-muted/40">{'>'} {t('logs.waiting')}</p>
+                <p className="text-white/40">{'>'} {t('logs.waiting')}</p>
               ) : (
                 terminal.map((entry) => (
                   <m.div
@@ -404,13 +412,13 @@ export default function ChaosPlayground() {
                     animate={{ opacity: 1, x: 0 }}
                     className="flex gap-2 mb-1"
                   >
-                    <span className="text-app-muted/50 flex-shrink-0">[{entry.timestamp}]</span>
+                    <span className="text-white/60 flex-shrink-0">[{entry.timestamp}]</span>
                     <span className={
                       entry.level === 'ERROR' ? 'text-red-400 flex-shrink-0' :
                       entry.level === 'WARN' ? 'text-amber-400 flex-shrink-0' :
                       'text-emerald-400/70 flex-shrink-0'
                     }>{entry.level.padEnd(5)}</span>
-                    <span className="text-app-text/80 break-all">{entry.message}</span>
+                    <span className="text-white/90 break-all">{entry.message}</span>
                   </m.div>
                 ))
               )}

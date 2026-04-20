@@ -12,13 +12,13 @@ Casos de uso NÃO devem:
 - Lidar com validação de entrada (feito por schemas)
 """
 
-from app.casos_uso.obter_sobre import ObterSobreUseCase
-from app.casos_uso.obter_projetos import ObterProjetosUseCase, ObterProjetoPorIdUseCase
-from app.casos_uso.obter_stack import ObterStackUseCase
-from app.casos_uso.obter_experiencias import ObterExperienciasUseCase
-from app.casos_uso.obter_formacao import ObterFormacaoUseCase
 from app.casos_uso.enviar_contato import EnviarContatoUseCase
 from app.casos_uso.get_philosophy import GetPhilosophyUseCase
+from app.casos_uso.obter_experiencias import ObterExperienciasUseCase
+from app.casos_uso.obter_formacao import ObterFormacaoUseCase
+from app.casos_uso.obter_projetos import ObterProjetoPorIdUseCase, ObterProjetosUseCase
+from app.casos_uso.obter_sobre import ObterSobreUseCase
+from app.casos_uso.obter_stack import ObterStackUseCase
 
 __all__ = [
     "ObterSobreUseCase",

@@ -5,6 +5,7 @@ Define contratos de entrada/saída para validação automática.
 """
 
 from typing import Any, Optional
+
 from pydantic import BaseModel, Field
 
 

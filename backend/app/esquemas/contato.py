@@ -6,8 +6,8 @@ Define contratos de requisição e resposta para envio de mensagens.
 
 import re
 from typing import Optional
-from pydantic import BaseModel, Field, field_validator
 
+from pydantic import BaseModel, Field, field_validator
 
 NOME_REGEX = re.compile(r"^[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ .,'-]{1,79}$")
 ASSUNTO_REGEX = re.compile(r"^[A-Za-zÀ-ÿ0-9 .,:;!?()/#&+@'\-]{0,120}$")
@@ -94,4 +94,19 @@ class RespostaContato(BaseModel):
         ...,
         examples=["Mensagem enviada com sucesso!"],
         description="Descrição do resultado",
+    )
+    queue_status: str = Field(
+        default="queued",
+        examples=["queued"],
+        description="Queue/processing status exposed to the client",
+    )
+    delivery_mode: str = Field(
+        default="background",
+        examples=["background"],
+        description="How delivery is processed after acceptance",
+    )
+    downstream: str = Field(
+        default="email_adapter",
+        examples=["formspree"],
+        description="Downstream provider or adapter selected by the backend",
     )

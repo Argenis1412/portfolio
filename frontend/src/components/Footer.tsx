@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Github, Linkedin, Code2, Mail, Copy, Check } from 'lucide-react';
+import { Code2, Mail, Copy, Check } from 'lucide-react';
 import { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAbout } from '../hooks/useApi';
@@ -15,10 +15,11 @@ export default function Footer() {
   const { data: about } = useAbout();
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedWhatsApp, setCopiedWhatsApp] = useState(false);
+  const email = about?.email || 'argenislopez28708256@gmail.com';
+  const phone = about?.telefone || '(41) 9 9510-3364';
 
   const handleCopyEmail = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const email = about?.email || 'argenislopez28708256@gmail.com';
     navigator.clipboard.writeText(email);
     setCopiedEmail(true);
     setTimeout(() => setCopiedEmail(false), 2000);
@@ -26,119 +27,105 @@ export default function Footer() {
 
   const handleCopyWhatsApp = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const phone = about?.telefone || '(41) 9 9510-3364';
     navigator.clipboard.writeText(phone);
     setCopiedWhatsApp(true);
     setTimeout(() => setCopiedWhatsApp(false), 2000);
   };
 
-  const githubUrl = about?.github || "https://github.com/Argenis1412";
-  const linkedinUrl = about?.linkedin || "https://www.linkedin.com/in/argenis1412/";
+  const maskEmail = (str: string) => {
+    const [name, domain] = str.split('@');
+    if (!name || !domain) return str;
+    return `${name[0]}${name[1] || ''}***@${domain}`;
+  };
+
+  const maskPhone = (str: string) => str.replace(/\d(?=.{4})/g, '•');
+
+  const contactCards = [
+    {
+      key: 'email',
+      label: 'Email',
+      value: maskEmail(email),
+      icon: <Mail className="w-4 h-4" />,
+      accent: 'text-app-primary bg-app-primary/10 group-hover:bg-app-primary group-hover:text-white',
+      buttonAccent: 'group-hover:text-app-primary',
+      copied: copiedEmail,
+      onCopy: handleCopyEmail,
+    },
+    {
+      key: 'whatsapp',
+      label: 'WhatsApp',
+      value: maskPhone(phone),
+      icon: <WhatsAppIcon className="w-4 h-4" />,
+      accent: 'text-[#25D366] bg-[#25D366]/10 group-hover:bg-[#25D366] group-hover:text-white',
+      buttonAccent: 'group-hover:text-[#25D366]',
+      copied: copiedWhatsApp,
+      onCopy: handleCopyWhatsApp,
+    },
+  ];
 
   return (
-    <footer className="w-full bg-transparent border-t border-app-border py-12 mt-12 transition-colors duration-300">
-      <div className="max-w-6xl mx-auto px-4 text-center">
-        
-        {/* Contact Badges - Highly valued by recruiters */}
-        <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-10">
-          
-          {/* Email Copy Badge */}
-          <motion.button 
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleCopyEmail}
-            className="group flex items-center gap-3 px-5 py-2.5 bg-app-surface border border-app-border rounded-2xl hover:border-app-primary transition-all duration-300 shadow-sm relative overflow-hidden w-full max-w-[320px] md:w-auto"
-          >
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-app-primary/10 text-app-primary group-hover:bg-app-primary group-hover:text-white transition-colors duration-300 flex-shrink-0">
-              <Mail className="w-4 h-4" />
-            </div>
-            <div className="text-left flex-1 min-w-0">
-              <p className="text-[10px] uppercase tracking-widest text-app-muted font-bold leading-none mb-1">Email</p>
-              <p className="text-xs font-semibold text-app-text truncate">{about?.email || 'argenislopez28708256@gmail.com'}</p>
-            </div>
-            <div className="ml-2 pl-3 border-l border-app-border flex items-center justify-center flex-shrink-0">
-              <AnimatePresence mode="wait">
-                {copiedEmail ? (
-                  <motion.div
-                    key="check"
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0, opacity: 0 }}
-                  >
-                    <Check className="w-4 h-4 text-emerald-500" />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="copy"
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0, opacity: 0 }}
-                  >
-                    <Copy className="w-4 h-4 text-app-muted group-hover:text-app-primary transition-colors" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </motion.button>
+    <footer className="mt-12 w-full border-t border-app-border bg-transparent py-10 transition-colors duration-300">
+      <div className="mx-auto max-w-6xl px-4">
+        <div className="mx-auto max-w-3xl text-center">
+          <div className="grid gap-3 md:grid-cols-2">
+            {contactCards.map((card) => (
+              <motion.button
+                key={card.key}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
+                onClick={card.onCopy}
+                className="group flex min-h-[68px] items-center gap-3 rounded-xl border border-app-border bg-app-surface/50 px-4 py-3 text-left shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-app-primary/40 hover:bg-app-surface-hover/60"
+              >
+                <div className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full transition-colors duration-300 ${card.accent}`}>
+                  {card.icon}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.22em] text-app-muted">{card.label}</p>
+                  <p className="truncate text-xs font-semibold text-app-text sm:text-sm">{card.value}</p>
+                </div>
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-app-border bg-app-bg/40">
+                  <AnimatePresence mode="wait">
+                    {card.copied ? (
+                      <motion.div
+                        key={`${card.key}-check`}
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0, opacity: 0 }}
+                      >
+                        <Check className="w-4 h-4 text-emerald-500" />
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key={`${card.key}-copy`}
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0, opacity: 0 }}
+                      >
+                        <Copy className={`w-4 h-4 text-app-muted transition-colors ${card.buttonAccent}`} />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </motion.button>
+            ))}
+          </div>
 
-          {/* WhatsApp Copy Badge */}
-          <motion.button 
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleCopyWhatsApp}
-            className="group flex items-center gap-3 px-5 py-2.5 bg-app-surface border border-app-border rounded-2xl hover:border-[#25D366] transition-all duration-300 shadow-sm relative overflow-hidden w-full max-w-[320px] md:w-auto"
-          >
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-[#25D366]/10 text-[#25D366] group-hover:bg-[#25D366] group-hover:text-white transition-colors duration-300 flex-shrink-0">
-              <WhatsAppIcon className="w-4 h-4" />
-            </div>
-            <div className="text-left flex-1 min-w-0">
-              <p className="text-[10px] uppercase tracking-widest text-app-muted font-bold leading-none mb-1">WhatsApp</p>
-              <p className="text-xs font-semibold text-app-text truncate">{about?.telefone || '(41) 9 9510-3364'}</p>
-            </div>
-            <div className="ml-2 pl-3 border-l border-app-border flex items-center justify-center flex-shrink-0">
-              <AnimatePresence mode="wait">
-                {copiedWhatsApp ? (
-                  <motion.div
-                    key="check"
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0, opacity: 0 }}
-                  >
-                    <Check className="w-4 h-4 text-emerald-500" />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="copy"
-                    initial={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    exit={{ scale: 0, opacity: 0 }}
-                  >
-                    <Copy className="w-4 h-4 text-app-muted group-hover:text-[#25D366] transition-colors" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </motion.button>
-        </div>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
+            <a
+              href="https://github.com/Argenis1412/portfolio"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-app-border bg-app-surface/40 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-app-muted transition-colors hover:border-app-primary/40 hover:text-app-primary"
+            >
+              <Code2 className="w-3.5 h-3.5" />
+              <span>{t('projects.source_code')}</span>
+            </a>
+          </div>
 
-        <div className="flex items-center justify-center space-x-6 mb-8">
-          <a href={githubUrl} target="_blank" rel="noopener noreferrer" className="text-app-muted hover:text-app-primary transition-colors">
-            <span className="sr-only">GitHub</span>
-            <Github className="h-6 w-6" />
-          </a>
-          <a href={linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-app-muted hover:text-app-primary transition-colors">
-            <span className="sr-only">LinkedIn</span>
-            <Linkedin className="h-6 w-6" />
-          </a>
-          <a href="https://github.com/Argenis1412/portfolio" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-app-muted hover:text-app-primary transition-colors px-4 py-1.5 bg-app-surface-hover rounded-full text-[10px] font-bold uppercase tracking-widest border border-app-border">
-            <Code2 className="w-3 h-3" />
-            <span>{t('projects.source_code')}</span>
-          </a>
-        </div>
-        
-        <p className="text-xs text-app-muted font-medium tracking-wide">
+          <p className="mt-6 text-xs font-medium tracking-wide text-app-muted">
           {t('footer.rights')}
-        </p>
+          </p>
+        </div>
       </div>
     </footer>
   );

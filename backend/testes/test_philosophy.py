@@ -1,4 +1,5 @@
 import pytest
+
 from app.adaptadores.repositorio import RepositorioJSON
 
 

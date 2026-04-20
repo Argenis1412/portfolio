@@ -4,8 +4,9 @@ Schemas para endpoint /api/experiencias.
 Define contratos para listagem de experiências profissionais.
 """
 
-from pydantic import BaseModel, Field
 from datetime import date
+
+from pydantic import BaseModel, Field
 
 from app.esquemas.tipos_base import TextoLocalizado
 

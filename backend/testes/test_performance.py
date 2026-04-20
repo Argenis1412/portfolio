@@ -29,8 +29,9 @@ def test_etag_changes_when_content_changes(client):
     Verifica se o ETag muda quando o payload é diferente.
     """
     # Mocking different data to force ETag change
-    from app.casos_uso import ObterSobreUseCase
     from unittest.mock import AsyncMock
+
+    from app.casos_uso import ObterSobreUseCase
 
     mock_uc = AsyncMock(spec=ObterSobreUseCase)
     mock_uc.executar.return_value = {

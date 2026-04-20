@@ -18,10 +18,11 @@ const LogStream       = React.lazy(() => import('./components/LogStream'));
 
 const About           = React.lazy(() => import('./components/About'));
 const Experience      = React.lazy(() => import('./components/Experience'));
-const Philosophy      = React.lazy(() => import('./components/Philosophy'));
+
 const Projects        = React.lazy(() => import('./components/Projects'));
 const Contact         = React.lazy(() => import('./components/Contact'));
 const ServerWakeupNotice = React.lazy(() => import('./components/ServerWakeupNotice'));
+const SocialRail      = React.lazy(() => import('./components/SocialRail'));
 const Footer          = React.lazy(() => import('./components/Footer'));
 
 const SectionFallback = () => (
@@ -31,16 +32,16 @@ const SectionFallback = () => (
 );
 
 function App() {
-  React.useEffect(() => {
-    window.scrollTo?.(0, 0);
-  }, []);
-
   return (
     <ThemeProvider>
       <LogProvider>
         <LazyMotion features={domAnimation}>
           <div className="min-h-screen flex flex-col pt-16 selection:bg-app-primary/30 selection:text-app-text transition-colors duration-300">
             <Navbar />
+
+            <Suspense fallback={null}>
+              <SocialRail />
+            </Suspense>
 
             {/* System Status Banner — appears only when degraded/down */}
             <Suspense fallback={null}>
@@ -72,8 +73,6 @@ function App() {
                 {/* 8 — Experience + Education */}
                 <Experience />
 
-                {/* 9 — Philosophy (below the fold, secondary) */}
-                <Philosophy />
 
                 {/* 10 — Projects */}
                 <Projects />

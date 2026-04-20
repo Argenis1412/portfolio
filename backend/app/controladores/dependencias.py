@@ -16,13 +16,13 @@ from app.adaptadores import (
 from app.adaptadores.repositorio import RepositorioPortfolio
 from app.casos_uso import (
     EnviarContatoUseCase,
+    GetPhilosophyUseCase,
     ObterExperienciasUseCase,
     ObterFormacaoUseCase,
     ObterProjetoPorIdUseCase,
     ObterProjetosUseCase,
     ObterSobreUseCase,
     ObterStackUseCase,
-    GetPhilosophyUseCase,
 )
 from app.configuracao import configuracoes
 
