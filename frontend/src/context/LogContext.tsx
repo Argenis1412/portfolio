@@ -1,26 +1,38 @@
 import React, { useReducer, useCallback, useMemo } from 'react';
 import { type LogLevel, type LogEntry } from '../types/logs';
+import { type Incident } from '../types/incidents';
 import { LogContext, type LogContextValue } from './LogContextInternal';
 
 interface LogState {
   entries: LogEntry[];
+  incidents: Incident[];
 }
 
 type LogAction =
   | { type: 'ADD'; entry: LogEntry }
+  | { type: 'ADD_INCIDENT'; incident: Incident }
+  | { type: 'SET_INCIDENTS'; incidents: Incident[] }
   | { type: 'CLEAR' };
 
 const MAX_ENTRIES = 100;
+
+const INCIDENT_TTL_MS = 2 * 60 * 1000;
 
 function logReducer(state: LogState, action: LogAction): LogState {
   switch (action.type) {
     case 'ADD': {
       const next = [...state.entries, action.entry];
       if (next.length > MAX_ENTRIES) next.splice(0, next.length - MAX_ENTRIES);
-      return { entries: next };
+      return { ...state, entries: next };
+    }
+    case 'ADD_INCIDENT': {
+      return { ...state, incidents: [action.incident, ...state.incidents].slice(0, 5) };
+    }
+    case 'SET_INCIDENTS': {
+      return { ...state, incidents: action.incidents };
     }
     case 'CLEAR':
-      return { entries: [] };
+      return { ...state, entries: [], incidents: [] };
     default:
       return state;
   }
@@ -29,7 +41,19 @@ function logReducer(state: LogState, action: LogAction): LogState {
 let _counter = 0;
 
 export function LogProvider({ children }: { children: React.ReactNode }) {
-  const [state, dispatch] = useReducer(logReducer, { entries: [] });
+  const [state, dispatch] = useReducer(logReducer, { entries: [], incidents: [] });
+
+  // Cleanup expired incidents every second
+  React.useEffect(() => {
+    const t = setInterval(() => {
+      const now = Date.now();
+      const filtered = state.incidents.filter((i) => now - i.startedAt < i.ttl + 5000);
+      if (filtered.length !== state.incidents.length) {
+        dispatch({ type: 'SET_INCIDENTS', incidents: filtered });
+      }
+    }, 1000);
+    return () => clearInterval(t);
+  }, [state.incidents]);
 
   const addEntry = useCallback((level: LogLevel, message: string, requestId?: string) => {
     const entry: LogEntry = {
@@ -40,6 +64,17 @@ export function LogProvider({ children }: { children: React.ReactNode }) {
       requestId,
     };
     dispatch({ type: 'ADD', entry });
+  }, []);
+
+  const addIncident = useCallback((type: string, labelKey: string) => {
+    const incident: Incident = {
+      id: Math.random().toString(36).slice(2),
+      type,
+      labelKey,
+      startedAt: Date.now(),
+      ttl: INCIDENT_TTL_MS,
+    };
+    dispatch({ type: 'ADD_INCIDENT', incident });
   }, []);
 
   // Early feed simulation for a "lived-in" system look
@@ -54,9 +89,17 @@ export function LogProvider({ children }: { children: React.ReactNode }) {
 
   const clear = useCallback(() => dispatch({ type: 'CLEAR' }), []);
 
-  const value: LogContextValue = useMemo(() => ({ entries: state.entries, addEntry, clear }), [
+  const value: LogContextValue = useMemo(() => ({ 
+    entries: state.entries, 
+    incidents: state.incidents,
+    addEntry, 
+    addIncident,
+    clear 
+  }), [
     state.entries,
+    state.incidents,
     addEntry,
+    addIncident,
     clear,
   ]);
 

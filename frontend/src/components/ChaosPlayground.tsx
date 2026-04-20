@@ -26,20 +26,11 @@ interface TerminalEntry {
 
 // Shared trace store moved to src/services/TraceEmitter.ts
 
-interface Incident {
-  id: string;
-  type: string;
-  labelKey: string;
-  startedAt: number; // ms
-  ttl: number;       // ms
-}
-
 function genReqId(): string {
   return Math.random().toString(36).slice(2, 10).toUpperCase();
 }
 
 const COOLDOWN_SECONDS = 30;
-const INCIDENT_TTL_MS = 2 * 60 * 1000; // 2 minutes
 
 // ─── Action Card ─────────────────────────────────────────────────────────────
 
@@ -103,7 +94,7 @@ function ActionCard({
 export default function ChaosPlayground() {
   const { t } = useLanguage();
   const queryClient = useQueryClient();
-  const { addEntry } = useLog();
+  const { addEntry, incidents, addIncident } = useLog();
 
   // Terminal log (local, lightweight)
   const [terminal, setTerminal] = useState<TerminalEntry[]>([]);
@@ -119,28 +110,14 @@ export default function ChaosPlayground() {
   const [failureCooldown, setFailureCooldown] = useState(0);
   const [cacheCooldown, setCacheCooldown] = useState(0);
 
-  // Active incidents
-  const [incidents, setIncidents] = useState<Incident[]>([]);
   const [, setTick] = useState(0); // forces re-render for TTL countdown
 
-  // Tick timer for TTL display
+  // Tick timer for TTL display — only for UI re-renders, state is global
   useEffect(() => {
     const t = setInterval(() => {
       setTick((n) => n + 1);
-      setIncidents((prev) => prev.filter((i) => Date.now() - i.startedAt < i.ttl + 5000));
     }, 1000);
     return () => clearInterval(t);
-  }, []);
-
-  const addIncident = useCallback((type: string, labelKey: string) => {
-    const incident: Incident = {
-      id: Math.random().toString(36).slice(2),
-      type,
-      labelKey,
-      startedAt: Date.now(),
-      ttl: INCIDENT_TTL_MS,
-    };
-    setIncidents((prev) => [incident, ...prev].slice(0, 5));
   }, []);
 
   const startCooldown = useCallback((setter: React.Dispatch<React.SetStateAction<number>>) => {
@@ -344,44 +321,69 @@ export default function ChaosPlayground() {
           {/* Active Incidents panel */}
           <div className="glass rounded-xl p-4 border border-app-border">
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs font-mono uppercase tracking-widest text-app-muted">{t('chaos.incidents.active')}</span>
+              <span className="text-xs font-mono uppercase tracking-widest text-app-muted">Incident History</span>
               {activeIncidents.length > 0 && (
                 <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
               )}
             </div>
-            {activeIncidents.length === 0 ? (
+            
+            {incidents.length === 0 ? (
               <p className="text-xs font-mono text-app-muted/50">{t('chaos.incidents.empty')}</p>
             ) : (
-              <ul className="space-y-2">
-                {activeIncidents.map((inc) => {
-                  const remaining = Math.max(0, Math.ceil((inc.ttl - (Date.now() - inc.startedAt)) / 1000));
-                  return (
-                    <li key={inc.id} className="flex items-center justify-between">
-                      <span className="text-xs font-mono text-amber-400">{t(inc.labelKey)}</span>
-                      <span className="text-[10px] font-mono text-app-muted">{t('chaos.incidents.remaining', { s: remaining })}</span>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
+              <div className="space-y-4">
+                {/* Active/Mitigating */}
+                {activeIncidents.length > 0 && (
+                  <div className="space-y-2">
+                    {activeIncidents.map((inc) => {
+                      const elapsed = Date.now() - inc.startedAt;
+                      const remaining = Math.max(0, Math.ceil((inc.ttl - elapsed) / 1000));
+                      const isInvestigating = elapsed < 5000;
+                      
+                      return (
+                        <div key={inc.id} className="flex flex-col gap-1 border-l-2 border-amber-500/30 pl-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-mono text-amber-400 font-bold uppercase tracking-wider">
+                              {t(inc.labelKey)}
+                            </span>
+                            <span className="text-[10px] font-mono text-app-muted opacity-60">
+                              {remaining}s
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${
+                              isInvestigating 
+                                ? 'bg-amber-500/10 border-amber-500/20 text-amber-200' 
+                                : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200'
+                            }`}>
+                              {isInvestigating ? 'INVESTIGATING' : 'MITIGATING'}
+                            </span>
+                            <div className="flex-grow h-[2px] bg-app-border/30 rounded-full overflow-hidden">
+                              <m.div 
+                                initial={{ width: '100%' }}
+                                animate={{ width: `${(remaining / (inc.ttl/1000)) * 100}%` }}
+                                className="h-full bg-amber-500/40"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
 
-            {resolvedIncidents.length > 0 && (
-              <>
-                <div className="border-t border-app-border mt-3 pt-3">
-                  <span className="text-xs font-mono uppercase tracking-widest text-app-muted">{t('chaos.incidents.resolved')}</span>
-                </div>
-                <ul className="space-y-1 mt-2">
-                  {resolvedIncidents.slice(0, 3).map((inc) => {
-                    const ago = Math.round((Date.now() - inc.startedAt) / 60000);
-                    return (
-                      <li key={inc.id} className="flex items-center justify-between">
-                        <span className="text-xs font-mono text-app-muted/70">{t(inc.labelKey)}</span>
-                        <span className="text-[10px] font-mono text-app-muted/50">{ago}m ago</span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </>
+                {/* Resolved */}
+                {resolvedIncidents.length > 0 && (
+                  <div className="space-y-1 pt-2 border-t border-app-border/20">
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-app-muted/60 block mb-2">Resolved</span>
+                    {resolvedIncidents.slice(0, 3).map((inc) => (
+                      <div key={inc.id} className="flex items-center justify-between opacity-50">
+                        <span className="text-[10px] font-mono text-app-text">{t(inc.labelKey)}</span>
+                        <span className="text-[9px] font-mono text-emerald-500/70">RESOLVED</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
           </div>
 
