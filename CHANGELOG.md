@@ -24,6 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/en/2.0.0/).
 - ✅ **Streamlined Contact UI**: Compacted footer contact cards, removed duplicated GitHub/LinkedIn buttons, added fixed lateral SocialRail component.
 - ✅ **Operational Case Studies**: Rewrote Projects.tsx to render each project as an operational case study (capabilities, engineering notes, runtime, evidence surface) using existing funcionalidades and aprendizados fields.
 - ✅ **Added Missing i18n Keys**: Added missing i18n keys for metrics, failure model, telemetry legend, contact spec fields, and console lines.
+- ✅ **UI Refinements**: Redesigned MetricsSparkline (linear, markers, gradients), obfuscated contact info for privacy, and fixed terminal visibility in light mode.
+- ✅ **Alert Tuning**: Optimized Error Rate thresholds (4.5%) and high-visibility incident animations.
+- ✅ **Bug Fixes**: Resolved LogContext initialization and SVG syntax errors.
 
 #### 🗑️ Removed
 - ✅ **Unused Philosophy Assets**: Deleted unused philosophy assets (frontend/public/philosophy/*.jpg).

@@ -166,7 +166,7 @@ Key tests that demonstrate production-level reliability:
 
 - **🚀 Advanced Simulation**: Transactional flow for a mock "Financial Ledger" (ACID compliance testing)
 - **🔐 Identity Research**: Role-Based Access Control (RBAC) for administrative panels
-- **📊 Real-time Monitoring**: WebSocket-based live dashboard for `/metrics`
+- **📊 Real-time Monitoring**: Transition from polling to WebSocket-based live dashboard for a "Live Operations Console" experience.
 
 ---
 
