@@ -64,7 +64,7 @@ class Configuracoes(BaseSettings):
         alias="RESEND_TO_EMAIL",
     )
     database_url: str = Field(
-        default="sqlite+aiosqlite:///./portfolio.db",
+        default="sqlite+aiosqlite:///./dev.db",
         alias="DATABASE_URL",
     )
     redis_url: str | None = Field(
