@@ -181,3 +181,85 @@ async def trigger_failure(request: Request, response: Response) -> dict:
         "error_triggered": True,
         "timestamp": datetime.now(UTC).isoformat(),
     }
+
+
+@roteador.post(
+    "/drain",
+    summary="Purge/Drain processing queue",
+    description="Purges the current request queue to simulate shedding load during severe backpressure.",
+)
+@limiter.limit("2/minute")
+async def drain_queue(request: Request) -> dict:
+    """
+    Simulates queue drain behavior as defined in the Failure Model.
+    """
+    start = time.time()
+    await asyncio.sleep(0.05)
+    
+    incident = ChaosIncident(
+        type="queue_drain",
+        timestamp=time.time(),
+        requests_dropped=15,
+        recovery_ms=int((time.time() - start) * 1000)
+    )
+    chaos_state.record_incident(incident)
+    
+    return {
+        "status": "queue_drained",
+        "tasks_purged": 15,
+        "incident_type": "queue_drain",
+        "timestamp": datetime.now(UTC).isoformat()
+    }
+
+
+@roteador.post(
+    "/retry",
+    summary="Force manual retry of failed request",
+    description="Forces a manual retry of a dead-lettered request.",
+)
+@limiter.limit("5/minute")
+async def force_retry(request: Request) -> dict:
+    """
+    Simulates forcing a manual retry.
+    """
+    start = time.time()
+    await asyncio.sleep(0.12)
+    
+    chaos_state.record_retries(1)
+    
+    return {
+        "status": "retry_dispatched",
+        "incident_type": "manual_retry",
+        "timestamp": datetime.now(UTC).isoformat()
+    }
+
+
+@roteador.post(
+    "/latency",
+    summary="Inject artificial latency",
+    description="Injects 3000ms latency to simulate DB timeout or network partition.",
+)
+@limiter.limit("2/minute")
+async def inject_latency(request: Request) -> dict:
+    """
+    Simulates severe latency to test circuit breakers and timeout policies.
+    """
+    start = time.time()
+    latency_ms = 3000
+    await asyncio.sleep(latency_ms / 1000.0)
+    
+    incident = ChaosIncident(
+        type="latency_injection",
+        timestamp=time.time(),
+        recovery_ms=int((time.time() - start) * 1000),
+        error_triggered=True
+    )
+    chaos_state.record_incident(incident)
+    chaos_state.record_retries(1)
+    
+    return {
+        "status": "timeout",
+        "latency_ms": latency_ms,
+        "incident_type": "latency_injection",
+        "timestamp": datetime.now(UTC).isoformat()
+    }
