@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/en/2.0.0/).
 #### 🚀 Performance
 - ✅ **Cold Start Optimization**: Removed `alembic upgrade head` from container boot sequence and fixed keep-alive targets for instant wakeups.
 
+#### 🎨 UI Polish & Fixes
+- ✅ **Hero Section**: Elevated layout for immediate visibility.
+- ✅ **Philosophy Layout**: Enlarged right-aligned profile photos for better aesthetic balance.
+- ✅ **Live Metrics Synchronization**: Dynamic banner coloring and precise KPI status alignment across three languages.
+- ✅ **Navigation Stability**: Fixed an issue causing automatic scroll scrolling to underneath sections on initial page load or reloads.
+
 #### 📝 Documentation & Style
 - ✅ **Codebase Translation**: Translated backend roots, infrastructure (`docker-compose`, CI, env files), frontend core API/state logic, and test comments comprehensively to English.
 - ✅ **Linting**: Fixed backend formatting and CI validation issues.

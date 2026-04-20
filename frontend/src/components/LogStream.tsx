@@ -37,7 +37,7 @@ export default function LogStream() {
 
   // Auto-scroll to bottom on new entries
   useEffect(() => {
-    if (typeof bottomRef.current?.scrollIntoView === 'function') {
+    if (entries.length > 0 && typeof bottomRef.current?.scrollIntoView === 'function') {
       bottomRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }, [entries.length]);
