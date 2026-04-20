@@ -37,6 +37,14 @@ const LiveStatusBadge = React.memo(({ status, latencyMs }: { status: SystemStatu
   );
 });
 
+const STATUS_COLORS: Record<SystemStatus, string> = {
+  loading: 'text-app-muted',
+  operational: 'text-emerald-400',
+  warning: 'text-amber-400',
+  degraded: 'text-red-400',
+  down: 'text-red-600',
+};
+
 // ─── KPI Strip ───────────────────────────────────────────────────────────────
 
 interface DeltaBadgeProps {
@@ -73,13 +81,7 @@ interface KpiStripProps {
 
 function KpiStrip({ data, previous, status }: KpiStripProps) {
   const { t } = useLanguage();
-  const statusColor: Record<SystemStatus, string> = {
-    loading: 'text-app-muted',
-    operational: 'text-emerald-400',
-    warning: 'text-amber-400',
-    degraded: 'text-red-400',
-    down: 'text-red-600',
-  };
+
 
   const items = [
     {
@@ -100,7 +102,7 @@ function KpiStrip({ data, previous, status }: KpiStripProps) {
     {
       label: 'Status',
       value: t(`metrics.status.${status}`).toUpperCase(),
-      className: statusColor[status],
+      className: STATUS_COLORS[status],
       delta: null,
     },
   ];
@@ -254,7 +256,7 @@ const Hero = React.memo(() => {
             <div className="space-y-6">
               <div>
                 <div className="text-[10px] font-mono text-app-muted mb-1">GLOBAL_STATUS</div>
-                <div className={`text-2xl font-mono font-black ${statusColor[status]}`}>
+                <div className={`text-2xl font-mono font-black ${STATUS_COLORS[status]}`}>
                   {status.toUpperCase()}
                 </div>
               </div>
@@ -281,7 +283,7 @@ const Hero = React.memo(() => {
                        for now using a descriptive placeholder consistent with the "SRE visual signal" */}
                    <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
                      <svg width="100%" height="100%" viewBox="0 0 200 60" preserveAspectRatio="none">
-                       <path d="M0,45 Q20,35 40,50 T80,30 T120,40 T160,20 T200,35" fill="none" stroke="currentColor" strokeWidth="2" className={statusColor[status]} />
+                       <path d="M0,45 Q20,35 40,50 T80,30 T120,40 T160,20 T200,35" fill="none" stroke="currentColor" strokeWidth="2" className={STATUS_COLORS[status]} />
                      </svg>
                    </div>
                    <span className="text-[10px] font-mono text-app-muted/60 relative z-10 tracking-widest">

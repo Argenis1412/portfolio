@@ -9,8 +9,9 @@ const STATUS_CONFIG: Record<
 > = {
   loading:     { i18nKey: 'metrics.status.loading',     dot: 'bg-app-muted animate-pulse',   text: 'text-app-muted' },
   operational: { i18nKey: 'metrics.status.operational', dot: 'bg-emerald-500 animate-pulse', text: 'text-emerald-500' },
-  degraded:    { i18nKey: 'metrics.status.degraded',    dot: 'bg-amber-400',                 text: 'text-amber-400' },
-  down:        { i18nKey: 'metrics.status.down',        dot: 'bg-red-500',                   text: 'text-red-500' },
+  warning:     { i18nKey: 'metrics.status.warning',     dot: 'bg-amber-400 animate-pulse',   text: 'text-amber-400' },
+  degraded:    { i18nKey: 'metrics.status.degraded',    dot: 'bg-red-400',                   text: 'text-red-400' },
+  down:        { i18nKey: 'metrics.status.down',        dot: 'bg-red-600',                   text: 'text-red-600' },
 };
 
 const tileVariants: Variants = {
