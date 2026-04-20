@@ -92,7 +92,9 @@ async def enviar_contato(
     dedup_reserved = False
     email_adapter = getattr(enviar_contato_uc, "email_adaptador", None)
     downstream = (
-        getattr(email_adapter, "__class__", type("Adapter", (), {})).__name__.replace("EmailAdaptador", "").lower()
+        getattr(email_adapter, "__class__", type("Adapter", (), {}))
+        .__name__.replace("EmailAdaptador", "")
+        .lower()
         or "email_adapter"
     )
 

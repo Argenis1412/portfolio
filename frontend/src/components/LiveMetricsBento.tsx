@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { m, type Variants } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { useLiveMetrics, type SystemStatus } from '../hooks/useLiveMetrics';
+import { useCurrentTime } from '../hooks/useCurrentTime';
 import MetricsSparkline from './ui/MetricsSparkline';
 
 const STATUS_CONFIG: Record<
@@ -76,6 +77,7 @@ export default function LiveMetricsBento() {
     timeoutState,
   } = useLiveMetrics();
   const { t } = useLanguage();
+  const currentTime = useCurrentTime(1000);
 
   if (isLoading) {
     return (
@@ -117,8 +119,8 @@ export default function LiveMetricsBento() {
     : timeoutState === 'risk'
       ? 'text-amber-400 bg-amber-500/10'
       : 'text-emerald-500 bg-emerald-500/10';
-  const latestEventLabel = latestTrace ? t(`metrics.incident.${latestTrace.type}`) : t('metrics.incident.none');
-  const latestEventAgoSeconds = latestTrace ? Math.max(0, Math.floor((Date.now() - latestTrace.timestamp.getTime()) / 1000)) : null;
+   const latestEventLabel = latestTrace ? t(`metrics.incident.${latestTrace.type}`) : t('metrics.incident.none');
+   const latestEventAgoSeconds = latestTrace ? Math.max(0, Math.floor((currentTime - latestTrace.timestamp.getTime()) / 1000)) : null;
 
   return (
     <section id="metrics" aria-label="Live system metrics" className="px-4 max-w-6xl mx-auto py-12">

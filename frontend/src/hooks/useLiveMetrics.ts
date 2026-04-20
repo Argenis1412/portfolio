@@ -13,6 +13,7 @@
  *   previous  — snapshot of the prior fetch for delta calculation
  */
 import { useMemo, useRef, useState, useCallback, useEffect } from 'react';
+import { useCurrentTime } from './useCurrentTime';
 import { useQuery } from '@tanstack/react-query';
 import { fetchMetricsSummary, type MetricsSummary } from '../api';
 import { getRecentTraces, subscribeToTraces, type TraceEntry } from '../services/TraceEmitter';
@@ -103,38 +104,39 @@ export function useLiveMetrics() {
 
   const latestTrace = recentTraces[0] ?? null;
 
-  const baselineP95 = useMemo(() => {
-    if (sampleHistory.length === 0) return null;
-    const avg = sampleHistory.reduce((sum, sample) => sum + sample.value, 0) / sampleHistory.length;
-    return Math.round(avg);
-  }, [sampleHistory]);
+   const baselineP95 = useMemo(() => {
+     if (sampleHistory.length === 0) return null;
+     const avg = sampleHistory.reduce((sum, sample) => sum + sample.value, 0) / sampleHistory.length;
+     return Math.round(avg);
+   }, [sampleHistory]);
 
-  const recoveryState = useMemo(() => {
-    if (!latestTrace || latestTrace.type !== 'forced_failure') return 'closed' as const;
-    const ageMs = Date.now() - latestTrace.timestamp.getTime();
-    if (ageMs < 20_000) return 'open' as const;
-    if (ageMs < 45_000) return 'half_open' as const;
-    return 'closed' as const;
-  }, [latestTrace]);
+    const currentTime = useCurrentTime(1000);
+    const recoveryState = useMemo(() => {
+      if (!latestTrace || latestTrace.type !== 'forced_failure') return 'closed' as const;
+      const ageMs = currentTime - latestTrace.timestamp.getTime();
+      if (ageMs < 20_000) return 'open' as const;
+      if (ageMs < 45_000) return 'half_open' as const;
+      return 'closed' as const;
+    }, [latestTrace, currentTime]);
 
-  const timeoutState = useMemo(() => {
-    const p95 = query.data?.p95_ms ?? 0;
-    if (p95 > LATENCY_DEGRADED_MS) return 'visible' as const;
-    if (p95 > LATENCY_WARNING_MS) return 'risk' as const;
-    return 'within_budget' as const;
-  }, [query.data?.p95_ms]);
+    const timeoutState = useMemo(() => {
+      const p95 = query.data?.p95_ms ?? 0;
+      if (p95 > LATENCY_DEGRADED_MS) return 'visible' as const;
+      if (p95 > LATENCY_WARNING_MS) return 'risk' as const;
+      return 'within_budget' as const;
+    }, [query.data?.p95_ms]);
 
-  return {
-    ...query,
-    status,
-    history,       // number[] — last 20 P95 values
-    sampleHistory,
-    previous,      // MetricsSummary | null — previous snapshot for deltas
-    lastSuccessAt: lastSuccessSnapshot,
-    recentTraces,
-    latestTrace,
-    baselineP95,
-    recoveryState,
-    timeoutState,
-  };
+   return {
+     ...query,
+     status,
+     history,       // number[] — last 20 P95 values
+     sampleHistory,
+     previous,      // MetricsSummary | null — previous snapshot for deltas
+     lastSuccessAt: lastSuccessSnapshot,
+     recentTraces,
+     latestTrace,
+     baselineP95,
+     recoveryState,
+     timeoutState,
+   };
 }
