@@ -30,16 +30,16 @@ export default function LogStream() {
   const { t } = useLanguage();
   const { entries, clear } = useLog();
   const [filter, setFilter] = useState<FilterLevel>('ALL');
-  const bottomRef = useRef<HTMLDivElement | null>(null);
+  const bodyRef = useRef<HTMLDivElement | null>(null);
 
   const filtered = filter === 'ALL'
     ? entries
     : entries.filter((e) => e.level === filter);
 
-  // Auto-scroll to bottom on new entries
+  // Keep the newest visible inside the terminal body without moving the page.
   useEffect(() => {
-    if (entries.length > 0 && typeof bottomRef.current?.scrollIntoView === 'function') {
-      bottomRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (entries.length > 0 && bodyRef.current) {
+      bodyRef.current.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [entries.length]);
 
@@ -56,7 +56,7 @@ export default function LogStream() {
         transition={{ duration: 0.5 }}
       >
         {/* Header */}
-        <div className="flex items-start justify-between mb-4 flex-wrap gap-2">
+        <div className="mb-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h2 className="text-xs font-mono uppercase tracking-[0.2em] text-app-primary mb-1">
               {t('logs.title')}
@@ -66,13 +66,12 @@ export default function LogStream() {
             </p>
           </div>
 
-          {/* Controls */}
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex flex-wrap items-center gap-2 lg:justify-end">
             {FILTER_PILLS.map(({ key, labelKey }) => (
               <button
                 key={key}
                 onClick={() => handleFilter(key)}
-                className={`text-[10px] font-mono px-2.5 py-1 rounded-full border transition-all duration-150 ${
+                className={`min-w-[52px] rounded-full border px-3 py-1.5 text-[10px] font-mono transition-all duration-150 ${
                   filter === key
                     ? 'bg-app-primary text-app-primary-text border-app-primary'
                     : 'border-app-border text-app-muted hover:border-app-primary/50'
@@ -83,7 +82,7 @@ export default function LogStream() {
             ))}
             <button
               onClick={clear}
-              className="text-[10px] font-mono px-2.5 py-1 rounded-full border border-app-border text-app-muted hover:text-red-400 hover:border-red-500/40 transition-all duration-150"
+              className="rounded-full border border-app-border px-3 py-1.5 text-[10px] font-mono text-app-muted transition-all duration-150 hover:border-red-500/40 hover:text-red-400"
             >
               {t('logs.clear')}
             </button>
@@ -106,7 +105,7 @@ export default function LogStream() {
           </div>
 
           {/* Log body */}
-          <div className="p-4 font-mono text-xs h-[280px] overflow-y-auto space-y-1.5">
+          <div ref={bodyRef} className="h-[280px] overflow-y-auto p-4 font-mono text-xs space-y-1.5 scroll-smooth">
             {filtered.length === 0 ? (
               <p className="text-app-muted/30">{'>'} {t('logs.waiting')}</p>
             ) : (
@@ -137,7 +136,6 @@ export default function LogStream() {
                 ))}
               </AnimatePresence>
             )}
-            <div ref={bottomRef} />
           </div>
         </div>
       </m.div>
