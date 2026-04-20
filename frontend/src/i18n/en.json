@@ -65,7 +65,7 @@
   "metrics.system_status": "System Status",
   "metrics.status.operational": "Operational",
   "metrics.status.degraded": "Degraded",
-  "metrics.status.down": "Offline",
+  "metrics.status.down": "Down",
   "metrics.status.loading": "Connecting...",
   "metrics.db_connected": "DB Connected",
   "metrics.requests_24h": "Requests (24h)",

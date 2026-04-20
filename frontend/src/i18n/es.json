@@ -65,7 +65,7 @@
   "metrics.system_status": "Estado del Sistema",
   "metrics.status.operational": "Operativo",
   "metrics.status.degraded": "Degradado",
-  "metrics.status.down": "Fuera de línea",
+  "metrics.status.down": "Caído",
   "metrics.status.loading": "Conectando...",
   "metrics.db_connected": "DB Conectada",
   "metrics.requests_24h": "Peticiones (24h)",

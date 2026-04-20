@@ -96,7 +96,7 @@ function KpiStrip({ data, previous, status }: KpiStripProps) {
     },
     {
       label: 'Status',
-      value: data.system_status.toUpperCase(),
+      value: t(`metrics.status.${status}`).toUpperCase(),
       className: statusColor[status],
       delta: null,
     },
@@ -171,7 +171,11 @@ const Hero = React.memo(() => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          className="mt-3 text-sm font-mono italic text-app-primary/80 max-w-2xl"
+          className={`mt-3 text-sm font-mono italic max-w-2xl transition-colors duration-500 ${
+            status === 'down' ? 'text-red-400' : 
+            status === 'degraded' ? 'text-amber-400' : 
+            'text-app-primary/80'
+          }`}
         >
           {t('hero.differentiator')}
         </m.p>
