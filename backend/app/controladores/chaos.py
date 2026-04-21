@@ -319,7 +319,6 @@ async def force_retry(request: Request) -> dict:
     """
     Simulates forcing a manual retry.
     """
-    start = time.time()
     await asyncio.sleep(0.12)
     
     chaos_state.record_retries(1)

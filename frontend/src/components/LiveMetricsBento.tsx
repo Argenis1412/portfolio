@@ -109,16 +109,6 @@ export default function LiveMetricsBento() {
   const incidentText = hasIncident ? 'text-amber-400' : 'text-emerald-500';
   const latencyDelta = previous ? data.p95_ms - previous.p95_ms : null;
   const baselineDelta = baselineP95 === null ? null : data.p95_ms - baselineP95;
-  const circuitColor = recoveryState === 'open'
-    ? 'text-red-400 bg-red-500/10'
-    : recoveryState === 'half_open'
-      ? 'text-amber-400 bg-amber-500/10'
-      : 'text-emerald-500 bg-emerald-500/10';
-  const timeoutColor = timeoutState === 'visible'
-    ? 'text-red-400 bg-red-500/10'
-    : timeoutState === 'risk'
-      ? 'text-amber-400 bg-amber-500/10'
-      : 'text-emerald-500 bg-emerald-500/10';
    const latestEventLabel = latestTrace ? t(`metrics.incident.${latestTrace.type}`) : t('metrics.incident.none');
    const latestEventAgoSeconds = latestTrace ? Math.max(0, Math.floor((currentTime - latestTrace.timestamp.getTime()) / 1000)) : null;
 

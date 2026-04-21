@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, type ReactNode } from 'react';
 
 export type ChaosPreset = 'off' | 'mild' | 'stress' | 'failure';
 

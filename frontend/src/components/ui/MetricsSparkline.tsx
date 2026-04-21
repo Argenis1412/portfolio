@@ -33,12 +33,13 @@ export default function MetricsSparkline({
   const model = useMemo(() => {
     // Build a flat baseline if there isn't enough real data yet
     const PLACEHOLDER_VALUE = 30; // below 60ms healthy threshold — visually neutral
+    const REFERENCE_TIME = 1713620000000; // Stable reference for placeholders
     const effectiveSamples: MetricSample[] =
       samples.length >= 2
         ? samples
         : Array.from({ length: 10 }, (_, i) => ({
             value: PLACEHOLDER_VALUE,
-            timestamp: Date.now() - (9 - i) * 15_000,
+            timestamp: REFERENCE_TIME - (9 - i) * 15_000,
           }));
 
     const _samples =
