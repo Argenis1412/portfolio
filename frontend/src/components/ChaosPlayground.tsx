@@ -257,6 +257,31 @@ export default function ChaosPlayground() {
                 <button
                   key={p}
                   onClick={() => {
+                    setPreset(p);
+                    addEntry('DECISION', `manual_override chaos_preset=${p.toUpperCase()} status=APPLIED`);
+                  }}
+                  className={`px-3 py-1.5 rounded-md text-[10px] font-mono font-bold transition-all duration-200 ${
+                    preset === p
+                      ? 'bg-violet-500 text-white shadow-lg shadow-violet-500/20'
+                      : 'text-app-muted hover:text-app-text hover:bg-app-surface-hover'
+                  }`}
+                >
+                  {p.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {preset !== 'off' && (
+            <m.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="mt-3 pt-3 border-t border-app-border/40 text-[10px] font-mono text-violet-300/70 italic"
+            >
+              {preset === 'mild' && t('chaos.presets.mild_effect')}
+              {preset === 'stress' && t('chaos.presets.stress_effect')}
+              {preset === 'failure' && t('chaos.presets.failure_effect')}
+            </m.div>
           )}
         </div>
 

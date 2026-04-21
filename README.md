@@ -94,10 +94,15 @@ The system implements a manual ETag generation strategy. Every GET response incl
 - **OpenTelemetry**: Distributed tracing for request lifecycles, enriched with `trace_id` and `request_id` correlation.
 - **[Architecture Decision Record: Observability](docs/architecture/observability.md)**
 
-#### 📊 Enhanced Frontend Telemetry & Degraded Mode
-- **Metrics Sparkline**: Real-time P95 latency sparkline with baseline deltas, threshold lines, and vertical incident markers.
-- **Circuit Breaker / Degraded Mode**: When systemic failure occurs, the backend emits `ui_directives` triggering "Survival Mode", dynamically disabling heavy animations and secondary polling streams.
-- **Chaos Playground**: Emits `trace_id` and includes richer log fields (retry_triggered, circuit_breaker, timeout_ms) for experimental failure injection.
+#### 📊 Operational Chaos Control & Decision Engine
+- **Stateful Decision Engine**: Implements hysteresis-based threshold monitoring (`NORMAL` → `DEGRADED` → `STABLE`) via `useDecisionEngine.ts`.
+- **Deterministic Chaos Presets**: Global simulation modes (`MILD`, `STRESS`, `FAILURE`) injected via headers for reproducible failure analysis.
+- **Metrics Sparkline**: Real-time P95 latency visualization with baseline deltas and vertical incident markers.
+- **Circuit Breaker / Degraded Mode**: Automatic shift to `async` fallback or `serving` cache mode during infrastructure saturation.
+- **Operational Documentation**: 
+  - **Case Study #0042**: Detailed post-mortem analysis of archived Redis leaks.
+  - **Architecture Trade-offs**: Multi-language evidence showing compromises (Sync vs. Async, Latency vs. Consistency).
+- **Chaos Playground**: Full-stack experiment console with trace correlation and multi-language logging.
 - **[Architecture Decision Record: Logging & Degradation](docs/architecture/LOGGING_AND_DEGRADATION.md)**
 
 #### 📊 Chaos Engineering Quantified Impact

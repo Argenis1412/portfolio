@@ -65,7 +65,10 @@ const projectFixture = {
 // ─── fetchAbout ────────────────────────────────────────────────────────────────
 
 describe('fetchAbout', () => {
-  beforeEach(() => vi.restoreAllMocks());
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.clearAllMocks();
+  });
 
   it('returns profile data when response is OK', async () => {
     mockFetchOk(aboutFixture);
@@ -85,14 +88,17 @@ describe('fetchAbout', () => {
     mockFetchOk(aboutFixture);
     const spy = vi.spyOn(globalThis, 'fetch');
     await fetchAbout();
-    expect(spy).toHaveBeenCalledWith(expect.stringContaining('/sobre'));
+    expect(spy).toHaveBeenCalledWith(expect.stringContaining('/sobre'), expect.any(Object));
   });
 });
 
 // ─── fetchProjects ─────────────────────────────────────────────────────────────
 
 describe('fetchProjects', () => {
-  beforeEach(() => vi.restoreAllMocks());
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    vi.clearAllMocks();
+  });
 
   it('returns projects list', async () => {
     mockFetchOk({ projetos: [projectFixture], total: 1 });
@@ -255,6 +261,6 @@ describe('fetchPhilosophy', () => {
     mockFetchOk({ inspirations: [], total: 0 });
     const spy = vi.spyOn(globalThis, 'fetch');
     await fetchPhilosophy();
-    expect(spy).toHaveBeenCalledWith(expect.stringContaining('/philosophy'));
+    expect(spy).toHaveBeenCalledWith(expect.stringContaining('/philosophy'), expect.any(Object));
   });
 });
