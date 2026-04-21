@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/en/2.0.0/).
 
 ---
 
+## [1.5.1] - 2026-04-21
+
+### 🔭 Honest Telemetry and Stronger Narrative Sections
+
+#### ✅ Added
+- ✅ **Synthetic vs Real Telemetry Labels**: The dashboard now labels projected chaos samples separately from backend-confirmed metrics and shows a confidence indicator.
+- ✅ **Adaptive Chaos Posture**: Chaos presets now affect retry posture, cache TTL expectations, and lifecycle presentation in addition to failure visuals.
+- ✅ **Structured Project Stories**: Projects now render from `descricao_completa` as case studies with Problem, Constraint, Decision, Trade-off, Impact, and Stack sections.
+- ✅ **Engineering Journey Timeline**: Experience and education now render as a vertical timeline organized around decision, failure, learning, and impact signals.
+
+#### 🔄 Modified
+- ✅ **Telemetry Sparkline**: Reduced marker weight, shortened the visible window, added an average baseline, and differentiated synthetic telemetry with a dashed violet segment.
+- ✅ **Incident History**: Chaos incidents now show duration, impact percentage, and source metadata.
+- ✅ **Documentation**: Updated README and observability ADR to document synthetic telemetry reconciliation and stronger portfolio storytelling sections.
+
+---
+
 ## [1.5.0] - 2026-04-21
 
 ### 🧨 Deterministic Chaos & Multi-Language Operational Excellence

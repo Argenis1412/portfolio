@@ -97,13 +97,19 @@ The system implements a manual ETag generation strategy. Every GET response incl
 #### 📊 Operational Chaos Control & Decision Engine
 - **Stateful Decision Engine**: Implements hysteresis-based threshold monitoring (`NORMAL` → `DEGRADED` → `STABLE`) via `useDecisionEngine.ts`.
 - **Deterministic Chaos Presets**: Global simulation modes (`MILD`, `STRESS`, `FAILURE`) injected via headers for reproducible failure analysis.
-- **Metrics Sparkline**: Real-time P95 latency visualization with baseline deltas and vertical incident markers.
+- **Honest Telemetry Overlay**: Chaos actions immediately project a synthetic P95 sample, then reconcile with backend polling. The UI labels the source (`real` vs `synthetic`) and exposes a confidence indicator to avoid pretending projections are raw backend facts.
+- **Metrics Sparkline**: Short-window P95 visualization with baseline averaging, lighter incident markers, and a dashed synthetic segment distinct from real backend samples.
 - **Circuit Breaker / Degraded Mode**: Automatic shift to `async` fallback or `serving` cache mode during infrastructure saturation.
+- **Adaptive Chaos Strategy**: Presets now influence retry posture, cache TTL expectations, and lifecycle presentation instead of only toggling a failure banner.
 - **Operational Documentation**: 
   - **Case Study #0042**: Detailed post-mortem analysis of archived Redis leaks.
   - **Architecture Trade-offs**: Multi-language evidence showing compromises (Sync vs. Async, Latency vs. Consistency).
 - **Chaos Playground**: Full-stack experiment console with trace correlation and multi-language logging.
 - **[Architecture Decision Record: Logging & Degradation](docs/architecture/LOGGING_AND_DEGRADATION.md)**
+
+#### 🧱 Portfolio Narrative Structure
+- **Projects** now render as compact backend case studies with `Problem`, `Constraint`, `Decision`, `Trade-off`, `Impact`, and `Stack` sections sourced from `descricao_completa`.
+- **Journey / Experience** is no longer a CV tabset. It is a vertical engineering timeline organized around decisions, failures, learning, and operational impact.
 
 #### 📊 Chaos Engineering Quantified Impact
 *Results from destructive stress testing phase:*
