@@ -245,10 +245,10 @@ export default function ChaosPlayground() {
                   <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${preset !== 'off' ? 'bg-violet-400' : 'bg-emerald-400'}`}></span>
                   <span className={`relative inline-flex rounded-full h-2 w-2 ${preset !== 'off' ? 'bg-violet-500' : 'bg-emerald-500'}`}></span>
                 </span>
-                Chaos Execution Mode
+                {t('chaos.presets.title')}
               </h3>
               <p className="text-[10px] font-mono text-app-muted">
-                {preset === 'off' ? 'System running in NORMAL production mode.' : `Simulating ${preset.toUpperCase()} industrial stress conditions.`}
+                {preset === 'off' ? t('chaos.presets.desc_off') : t('chaos.presets.desc_active', { p: preset.toUpperCase() })}
               </p>
             </div>
 
@@ -257,31 +257,6 @@ export default function ChaosPlayground() {
                 <button
                   key={p}
                   onClick={() => {
-                    setPreset(p);
-                    addEntry('DECISION', `manual_override chaos_preset=${p.toUpperCase()} status=APPLIED`);
-                  }}
-                  className={`px-3 py-1.5 rounded-md text-[10px] font-mono font-bold transition-all duration-200 ${
-                    preset === p
-                      ? 'bg-violet-500 text-white shadow-lg shadow-violet-500/20'
-                      : 'text-app-muted hover:text-app-text hover:bg-app-surface-hover'
-                  }`}
-                >
-                  {p.toUpperCase()}
-                </button>
-              ))}
-            </div>
-          </div>
-          
-          {preset !== 'off' && (
-            <m.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              className="mt-3 pt-3 border-t border-app-border/40 text-[10px] font-mono text-violet-300/70 italic"
-            >
-              {preset === 'mild' && '→ Effect: sporadic 100ms latency spikes added to telemetry burst.'}
-              {preset === 'stress' && '→ Effect: +1 extra retry requirement · 15% request failure probability.'}
-              {preset === 'failure' && '→ Effect: Critical degradation · backoff x2 · forced fallback activation.'}
-            </m.div>
           )}
         </div>
 

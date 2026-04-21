@@ -1,38 +1,41 @@
 import { m } from 'framer-motion';
-
-const TRADE_OFFS = [
-  {
-    title: 'Latency vs. Consistency',
-    desc: 'Using stale-while-revalidate for metrics dashboard to prioritize UI smooth interaction over real-time accuracy during burst traffic.',
-    status: 'ACTIVE',
-    impact: 'Low variance in UI latency'
-  },
-  {
-    title: 'Sync vs. Async Processing',
-    desc: 'Chaos actions are processed synchronously in the control panel but reflected asynchronously in the observability stream to mimic real-world distributed system behavior.',
-    status: 'OPTIMIZED',
-    impact: 'Reliable event capture'
-  },
-  {
-    title: 'Structured vs. Text Logging',
-    desc: 'Sacrificing human readability in raw streams for key=value formatting to ensure O(1) parsing by automated SRE tools.',
-    status: 'ENFORCED',
-    impact: 'High signal-to-noise ratio'
-  }
-];
+import { useLanguage } from '../context/LanguageContext';
 
 export default function ArchitectureTradeoffs() {
+  const { t } = useLanguage();
+
+  const tradeOffs = [
+    {
+      title: t('tradeoffs.latency.title'),
+      desc: t('tradeoffs.latency.desc'),
+      status: t('tradeoffs.status.active'),
+      impact: t('tradeoffs.latency.impact')
+    },
+    {
+      title: t('tradeoffs.sync.title'),
+      desc: t('tradeoffs.sync.desc'),
+      status: t('tradeoffs.status.optimized'),
+      impact: t('tradeoffs.sync.impact')
+    },
+    {
+      title: t('tradeoffs.logging.title'),
+      desc: t('tradeoffs.logging.desc'),
+      status: t('tradeoffs.status.enforced'),
+      impact: t('tradeoffs.logging.impact')
+    }
+  ];
+
   return (
     <section id="tradeoffs" className="px-4 max-w-6xl mx-auto py-12">
       <div className="mb-8">
         <h2 className="text-xs font-mono uppercase tracking-[0.2em] text-app-primary mb-1">
-          Architecture Trade-offs
+          {t('tradeoffs.title')}
         </h2>
-        <p className="text-sm text-app-muted">Engineering isn't about choices; it's about compromises.</p>
+        <p className="text-sm text-app-muted">{t('tradeoffs.subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {TRADE_OFFS.map((item, i) => (
+        {tradeOffs.map((item, i) => (
           <m.div
             key={item.title}
             initial={{ opacity: 0, y: 16 }}
@@ -51,7 +54,7 @@ export default function ArchitectureTradeoffs() {
             </p>
             
             <div className="pt-4 border-t border-app-border/20">
-              <div className="text-[9px] font-mono text-app-muted uppercase tracking-wider mb-1">Operational Impact</div>
+              <div className="text-[9px] font-mono text-app-muted uppercase tracking-wider mb-1">{t('tradeoffs.impact_label')}</div>
               <div className="text-[11px] font-mono text-app-primary font-bold">
                 {'>'} {item.impact}
               </div>
@@ -62,8 +65,7 @@ export default function ArchitectureTradeoffs() {
       
       <div className="mt-8 p-4 bg-app-primary/5 border border-app-primary/10 rounded-xl">
         <p className="text-[11px] font-mono text-app-muted leading-relaxed">
-          <span className="text-app-primary font-bold">PRO-TIP:</span> Toggle [STRESS] or [FAILURE] mode below to see these trade-offs in action. 
-          When latency exceeds 100ms, the system automatically prioritizes availability by switching to the async fallback path.
+          <span className="text-app-primary font-bold">PRO-TIP:</span> {t('tradeoffs.protip')}
         </p>
       </div>
     </section>

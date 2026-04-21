@@ -1,8 +1,10 @@
 import { m, AnimatePresence } from 'framer-motion';
 import { useChaosMode } from '../context/ChaosContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function ChaosModeBanner() {
   const { preset } = useChaosMode();
+  const { t } = useLanguage();
 
   return (
     <AnimatePresence>
@@ -19,10 +21,10 @@ export default function ChaosModeBanner() {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
             </span>
             <span className="text-[10px] sm:text-xs font-mono font-bold text-white uppercase tracking-[0.2em]">
-              Chaos Simulation Active: <span className="underline decoration-white/40">{preset.toUpperCase()}</span> Mode Engaged
+              {t('chaos.banner.active')}: <span className="underline decoration-white/40">{t('chaos.banner.mode', { p: preset.toUpperCase() })}</span>
             </span>
             <span className="hidden md:inline-block text-[9px] font-mono text-white/60">
-              (latency injection and jitter enabled)
+              {t('chaos.banner.hint')}
             </span>
           </div>
           
