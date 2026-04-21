@@ -10,6 +10,8 @@ export interface TraceEntry {
   dbMs: number;
   cacheMs: number;
   timestamp: Date;
+  impactPct?: string; // e.g. "15%"
+  latencyDelta?: string; // e.g. "+1.2s"
 }
 
 type TraceListener = (entry: TraceEntry) => void;

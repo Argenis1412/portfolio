@@ -31,17 +31,29 @@ export default function MetricsSparkline({
   compact = false,
 }: MetricsSparklineProps) {
   const model = useMemo(() => {
-    if (samples.length === 0) return null;
+    // Build a flat baseline if there isn't enough real data yet
+    const PLACEHOLDER_VALUE = 30; // below 60ms healthy threshold — visually neutral
+    const effectiveSamples: MetricSample[] =
+      samples.length >= 2
+        ? samples
+        : Array.from({ length: 10 }, (_, i) => ({
+            value: PLACEHOLDER_VALUE,
+            timestamp: Date.now() - (9 - i) * 15_000,
+          }));
 
-    const _samples = samples.length === 1 
-      ? [{ value: samples[0].value, timestamp: samples[0].timestamp - 15000 }, samples[0]]
-      : samples;
+    const _samples =
+      effectiveSamples.length === 1
+        ? [
+            { value: effectiveSamples[0].value, timestamp: effectiveSamples[0].timestamp - 15000 },
+            effectiveSamples[0],
+          ]
+        : effectiveSamples;
 
     const paddingX = compact ? 4 : 8;
     const paddingY = compact ? 6 : 10;
     const innerW = width - paddingX * 2;
     const innerH = height - paddingY * 2;
-    const values = samples.map((sample) => sample.value);
+    const values = effectiveSamples.map((sample) => sample.value);
     const min = Math.min(...values, 0, 40);
     const max = Math.max(...values, 120);
     const range = max - min || 1;
@@ -159,6 +171,17 @@ export default function MetricsSparkline({
                 <text x="2" y="1" fontSize="9" fontWeight="bold" fill="#000" fontFamily="monospace">
                   {isSpike ? 'SPIKE' : style.label}
                 </text>
+                {(trace.impactPct || trace.latencyDelta) && (
+                  <g transform="translate(0, 14)">
+                    <rect 
+                      x="-2" y="0" width={trace.type.length * 5 + 10} height="12" 
+                      fill="#000" fillOpacity="0.6" rx="2" 
+                    />
+                    <text x="2" y="9" fontSize="7" fill="#fff" fontFamily="monospace opacity-80">
+                      {trace.impactPct && `aff:${trace.impactPct}`} {trace.latencyDelta && `Δ:${trace.latencyDelta}`}
+                    </text>
+                  </g>
+                )}
               </g>
             )}
           </g>

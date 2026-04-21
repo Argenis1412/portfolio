@@ -229,6 +229,7 @@
   "logs.filter.info": "INFO",
   "logs.filter.warn": "WARN",
   "logs.filter.error": "ERROR",
+  "logs.filter.decision": "DECISION",
   "stack.section_title": "Technology Stack",
   "stack.section_subtitle": "No marketing. Signal only.",
   "about.title": "Backend Engineering Focus",

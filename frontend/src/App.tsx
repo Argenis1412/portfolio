@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import { ThemeProvider } from './context/ThemeContext';
 import { LogProvider } from './context/LogContext';
+import { ChaosModeProvider } from './context/ChaosContext';
 import { LazyMotion, domAnimation } from 'framer-motion';
 
 // Above-fold critical path (eager)
@@ -11,8 +12,12 @@ const LiveMetricsBento   = React.lazy(() => import('./components/LiveMetricsBent
 
 // Operational sections
 const ChaosPlayground = React.lazy(() => import('./components/ChaosPlayground'));
+const ArchitectureTradeoffs = React.lazy(() => import('./components/ArchitectureTradeoffs'));
 const TraceViewer     = React.lazy(() => import('./components/TraceViewer'));
 const LogStream       = React.lazy(() => import('./components/LogStream'));
+const FeaturedIncident = React.lazy(() => import('./components/FeaturedIncident'));
+const ChaosModeBanner    = React.lazy(() => import('./components/ChaosModeBanner'));
+const DecisionProcessor = React.lazy(() => import('./components/DecisionProcessor'));
 
 // Info sections
 
@@ -35,61 +40,77 @@ function App() {
   return (
     <ThemeProvider>
       <LogProvider>
-        <LazyMotion features={domAnimation}>
-          <div className="min-h-screen flex flex-col pt-16 selection:bg-app-primary/30 selection:text-app-text transition-colors duration-300">
-            <Navbar />
-
-            <Suspense fallback={null}>
-              <SocialRail />
-            </Suspense>
-
-            {/* System Status Banner — appears only when degraded/down */}
-            <Suspense fallback={null}>
-              <SystemStatusBanner />
-            </Suspense>
-
-            <main className="flex-grow">
-              {/* 1 — Hero: KPI strip above the fold */}
-              <Hero />
-
-              <Suspense fallback={<SectionFallback />}>
-
-                {/* 2 — About: bio + photo + links */}
-                <About />
-
-                {/* 3 — Live Metrics: tiles + sparkline */}
-                <LiveMetricsBento />
-
-                {/* 4 — Chaos Playground: control panel */}
-                <ChaosPlayground />
-
-                {/* 5 — Trace Viewer: per-request waterfall */}
-                <TraceViewer />
-
-                {/* 6 — Log Stream: terminal event stream */}
-                <LogStream />
-
-
-                {/* 8 — Experience + Education */}
-                <Experience />
-
-
-                {/* 10 — Projects */}
-                <Projects />
-
-                {/* 11 — Contact */}
-                <Contact />
-
-                {/* Server wakeup notice (cold start UX) */}
-                <ServerWakeupNotice />
+        <ChaosModeProvider>
+          <LazyMotion features={domAnimation}>
+            <div className="min-h-screen flex flex-col pt-16 selection:bg-app-primary/30 selection:text-app-text transition-colors duration-300">
+              <Navbar />
+              
+              <Suspense fallback={null}>
+                <ChaosModeBanner />
               </Suspense>
-            </main>
 
-            <Suspense fallback={null}>
-              <Footer />
-            </Suspense>
-          </div>
-        </LazyMotion>
+              <Suspense fallback={null}>
+                <DecisionProcessor />
+              </Suspense>
+  
+              <Suspense fallback={null}>
+                <SocialRail />
+              </Suspense>
+  
+              {/* System Status Banner — appears only when degraded/down */}
+              <Suspense fallback={null}>
+                <SystemStatusBanner />
+              </Suspense>
+  
+              <main className="flex-grow">
+                {/* 1 — Hero: KPI strip above the fold */}
+                <Hero />
+  
+                <Suspense fallback={<SectionFallback />}>
+  
+                  {/* 2 — About: bio + photo + links */}
+                  <About />
+  
+                  {/* 3 — Live Metrics: tiles + sparkline */}
+                  <LiveMetricsBento />
+
+                  {/* 4 — Architecture Trade-offs: bridge section */}
+                  <ArchitectureTradeoffs />
+
+                  {/* 5 — Chaos Playground: control panel */}
+                  <ChaosPlayground />
+  
+                  {/* 5 — Trace Viewer: per-request waterfall */}
+                  <TraceViewer />
+  
+                  {/* 6 — Log Stream: terminal event stream */}
+                  <LogStream />
+
+                  {/* 7 — Featured Incident: Case Study #0042 */}
+                  <FeaturedIncident />
+  
+  
+                  {/* 8 — Experience + Education */}
+                  <Experience />
+  
+  
+                  {/* 10 — Projects */}
+                  <Projects />
+  
+                  {/* 11 — Contact */}
+                  <Contact />
+  
+                  {/* Server wakeup notice (cold start UX) */}
+                  <ServerWakeupNotice />
+                </Suspense>
+              </main>
+  
+              <Suspense fallback={null}>
+                <Footer />
+              </Suspense>
+            </div>
+          </LazyMotion>
+        </ChaosModeProvider>
       </LogProvider>
     </ThemeProvider>
   );

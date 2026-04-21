@@ -150,8 +150,13 @@ export class ApiError extends Error {
   }
 }
 
-async function apiGet<T>(path: string, schema: z.ZodSchema<T>): Promise<T> {
-  const res = await fetch(buildApiUrl(path));
+async function apiGet<T>(path: string, schema: z.ZodSchema<T>, chaosPreset?: string): Promise<T> {
+  const headers: Record<string, string> = {};
+  if (chaosPreset) {
+    headers['X-Chaos-Preset'] = chaosPreset;
+  }
+
+  const res = await fetch(buildApiUrl(path), { headers });
 
   // Parse body first so we can extract trace_id from it on error
   const rawData = await res.json().catch(() => null);
@@ -186,8 +191,8 @@ async function apiGet<T>(path: string, schema: z.ZodSchema<T>): Promise<T> {
 // Fetch Functions (Strict and Resilient Consumer)
 // ===================================================
 
-export const fetchMetricsSummary = (): Promise<MetricsSummary> =>
-  apiGet('/metrics/summary', MetricsSummarySchema);
+export const fetchMetricsSummary = (chaosPreset?: string): Promise<MetricsSummary> =>
+  apiGet('/metrics/summary', MetricsSummarySchema, chaosPreset);
 
 export const fetchAbout = (): Promise<About> =>
   apiGet<About>('/sobre', AboutSchema);

@@ -230,6 +230,7 @@
   "logs.filter.info": "INFO",
   "logs.filter.warn": "WARN",
   "logs.filter.error": "ERROR",
+  "logs.filter.decision": "DECISIÓN",
   "stack.section_title": "Stack Tecnológico",
   "stack.section_subtitle": "Sin marketing. Solo señal.",
   "about.title": "Enfoque en Backend Engineering",

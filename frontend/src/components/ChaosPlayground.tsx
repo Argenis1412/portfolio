@@ -12,6 +12,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { postChaosDrain, postChaosRetry, postChaosLatency, type ChaosResponse } from '../api';
 import { useLog } from '../hooks/useLog';
+import { useChaosMode, type ChaosPreset } from '../context/ChaosContext';
 import { emitTrace } from '../services/TraceEmitter';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -80,7 +81,7 @@ function ActionCard({
             {t(loadingKey)}
           </>
         ) : cooldown > 0 ? (
-          `Cooldown (${cooldown}s)`
+          t('chaos.cooldown', { s: cooldown })
         ) : (
           t(actionKey)
         )}
@@ -95,6 +96,7 @@ export default function ChaosPlayground() {
   const { t } = useLanguage();
   const queryClient = useQueryClient();
   const { addEntry, incidents, addIncident } = useLog();
+  const { preset, setPreset } = useChaosMode();
 
   // Terminal log (local, lightweight)
   const [terminal, setTerminal] = useState<TerminalEntry[]>([]);
@@ -160,7 +162,7 @@ export default function ChaosPlayground() {
       addTerminalEntry('WARN', `queue.drain completed tasks_purged=${purged} request_id=${rid} trace_id=${traceId}`, rid);
       addEntry('WARN', `queue.drain status=COMPLETED tasks_purged=${purged} trace_id=${traceId}`, rid);
       addIncident('queue_drain', 'chaos.action.drain.title');
-      emitTrace({ id: `trace-${rid}`, traceId, requestId: rid, type: 'queue_drain', endpoint: '/chaos/drain', status: 'ok', totalMs: 50, apiMs: 10, dbMs: 40, cacheMs: 0, timestamp: new Date() });
+      emitTrace({ id: `trace-${rid}`, traceId, requestId: rid, type: 'queue_drain', endpoint: '/chaos/drain', status: 'ok', totalMs: 50, apiMs: 10, dbMs: 40, cacheMs: 0, timestamp: new Date(), impactPct: '0%', latencyDelta: '-40ms' });
       invalidateMetrics();
       startCooldown(setDrainCooldown);
     } catch (err: unknown) {
@@ -182,7 +184,7 @@ export default function ChaosPlayground() {
       addTerminalEntry('INFO', `manual.retry dispatched request_id=${rid} trace_id=${traceId}`, rid);
       addEntry('INFO', `manual.retry status=COMPLETED trace_id=${traceId}`, rid);
       addIncident('manual_retry', 'chaos.action.retry.title');
-      emitTrace({ id: `trace-${rid}`, traceId, requestId: rid, type: 'manual_retry', endpoint: '/chaos/retry', status: 'ok', totalMs: 120, apiMs: 20, dbMs: 100, cacheMs: 0, timestamp: new Date() });
+      emitTrace({ id: `trace-${rid}`, traceId, requestId: rid, type: 'manual_retry', endpoint: '/chaos/retry', status: 'ok', totalMs: 120, apiMs: 20, dbMs: 100, cacheMs: 0, timestamp: new Date(), impactPct: '5%', latencyDelta: '+80ms' });
       invalidateMetrics();
       startCooldown(setRetryCooldown);
     } catch (err: unknown) {
@@ -204,7 +206,7 @@ export default function ChaosPlayground() {
       addTerminalEntry('WARN', `latency.injection status=TIMEOUT latency_ms=${res.latency_ms} circuit_breaker=OPEN request_id=${rid} trace_id=${traceId}`, rid);
       addEntry('WARN', `latency.injection status=TIMEOUT latency_ms=${res.latency_ms} circuit_breaker=OPEN trace_id=${traceId}`, rid);
       addIncident('latency_injection', 'chaos.action.latency.title');
-      emitTrace({ id: `trace-${rid}`, traceId, requestId: rid, type: 'latency_injection', endpoint: '/chaos/latency', status: 'error', totalMs: res.latency_ms || 3000, apiMs: 50, dbMs: (res.latency_ms || 3000) - 50, cacheMs: 0, timestamp: new Date() });
+      emitTrace({ id: `trace-${rid}`, traceId, requestId: rid, type: 'latency_injection', endpoint: '/chaos/latency', status: 'error', totalMs: res.latency_ms || 3000, apiMs: 50, dbMs: (res.latency_ms || 3000) - 50, cacheMs: 0, timestamp: new Date(), impactPct: '100%', latencyDelta: `+${((res.latency_ms || 3000)/1000).toFixed(1)}s` });
       invalidateMetrics();
       startCooldown(setLatencyCooldown);
     } catch (err: unknown) {
@@ -234,8 +236,57 @@ export default function ChaosPlayground() {
           <p className="text-xs font-mono text-app-primary/70 mt-1">{t('chaos.note')}</p>
         </div>
 
+        {/* Chaos Preset Selector */}
+        <div className="glass rounded-xl p-4 border border-app-border mt-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-1">
+              <h3 className="text-xs font-mono font-bold text-app-text uppercase tracking-widest flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${preset !== 'off' ? 'bg-violet-400' : 'bg-emerald-400'}`}></span>
+                  <span className={`relative inline-flex rounded-full h-2 w-2 ${preset !== 'off' ? 'bg-violet-500' : 'bg-emerald-500'}`}></span>
+                </span>
+                Chaos Execution Mode
+              </h3>
+              <p className="text-[10px] font-mono text-app-muted">
+                {preset === 'off' ? 'System running in NORMAL production mode.' : `Simulating ${preset.toUpperCase()} industrial stress conditions.`}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-1 bg-app-surface p-1 rounded-lg border border-app-border">
+              {(['off', 'mild', 'stress', 'failure'] as ChaosPreset[]).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => {
+                    setPreset(p);
+                    addEntry('DECISION', `manual_override chaos_preset=${p.toUpperCase()} status=APPLIED`);
+                  }}
+                  className={`px-3 py-1.5 rounded-md text-[10px] font-mono font-bold transition-all duration-200 ${
+                    preset === p
+                      ? 'bg-violet-500 text-white shadow-lg shadow-violet-500/20'
+                      : 'text-app-muted hover:text-app-text hover:bg-app-surface-hover'
+                  }`}
+                >
+                  {p.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {preset !== 'off' && (
+            <m.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="mt-3 pt-3 border-t border-app-border/40 text-[10px] font-mono text-violet-300/70 italic"
+            >
+              {preset === 'mild' && '→ Effect: sporadic 100ms latency spikes added to telemetry burst.'}
+              {preset === 'stress' && '→ Effect: +1 extra retry requirement · 15% request failure probability.'}
+              {preset === 'failure' && '→ Effect: Critical degradation · backoff x2 · forced fallback activation.'}
+            </m.div>
+          )}
+        </div>
+
         {/* Action cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
           <ActionCard
             icon="🌬️"
             titleKey="chaos.action.drain.title"
@@ -284,7 +335,7 @@ export default function ChaosPlayground() {
           {/* Active Incidents panel */}
           <div className="glass rounded-xl p-4 border border-app-border">
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs font-mono uppercase tracking-widest text-app-muted">Incident History</span>
+            <span className="text-xs font-mono uppercase tracking-widest text-app-muted">{t('chaos.incidents.history')}</span>
               {activeIncidents.length > 0 && (
                 <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
               )}
@@ -337,7 +388,7 @@ export default function ChaosPlayground() {
                 {/* Resolved */}
                 {resolvedIncidents.length > 0 && (
                   <div className="space-y-1 pt-2 border-t border-app-border/20">
-                    <span className="text-[10px] font-mono uppercase tracking-widest text-app-muted/60 block mb-2">Resolved</span>
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-app-muted/60 block mb-2">{t('chaos.incidents.resolved_section')}</span>
                     {resolvedIncidents.slice(0, 3).map((inc) => (
                       <div key={inc.id} className="flex items-center justify-between opacity-50">
                         <span className="text-[10px] font-mono text-app-text">{t(inc.labelKey)}</span>
