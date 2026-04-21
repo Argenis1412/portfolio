@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
+import { createContext, useState, type ReactNode } from 'react';
 
 export type ChaosPreset = 'off' | 'mild' | 'stress' | 'failure';
 
@@ -7,7 +7,7 @@ interface ChaosContextValue {
   setPreset: (preset: ChaosPreset) => void;
 }
 
-const ChaosContext = createContext<ChaosContextValue | undefined>(undefined);
+export const ChaosContext = createContext<ChaosContextValue | undefined>(undefined);
 
 export function ChaosModeProvider({ children }: { children: ReactNode }) {
   const [preset, setPreset] = useState<ChaosPreset>('off');
@@ -18,12 +18,4 @@ export function ChaosModeProvider({ children }: { children: ReactNode }) {
   };
 
   return <ChaosContext.Provider value={value}>{children}</ChaosContext.Provider>;
-}
-
-export function useChaosMode() {
-  const context = useContext(ChaosContext);
-  if (!context) {
-    throw new Error('useChaosMode must be used within a ChaosModeProvider');
-  }
-  return context;
 }

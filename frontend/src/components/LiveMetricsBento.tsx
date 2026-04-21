@@ -73,8 +73,6 @@ export default function LiveMetricsBento() {
     baselineP95,
     latestTrace,
     recentTraces,
-    recoveryState,
-    timeoutState,
   } = useLiveMetrics();
   const { t } = useLanguage();
   const currentTime = useCurrentTime(1000);

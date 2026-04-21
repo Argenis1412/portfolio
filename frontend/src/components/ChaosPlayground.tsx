@@ -12,7 +12,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { postChaosDrain, postChaosRetry, postChaosLatency, type ChaosResponse } from '../api';
 import { useLog } from '../hooks/useLog';
-import { useChaosMode, type ChaosPreset } from '../context/ChaosContext';
+import { useChaosMode, type ChaosPreset } from '../hooks/useChaosMode';
 import { emitTrace } from '../services/TraceEmitter';
 
 // ─── Types ────────────────────────────────────────────────────────────────────

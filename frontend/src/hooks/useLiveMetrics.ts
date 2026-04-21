@@ -16,7 +16,7 @@ import { useMemo, useRef, useState, useCallback, useEffect } from 'react';
 import { useCurrentTime } from './useCurrentTime';
 import { useQuery } from '@tanstack/react-query';
 import { fetchMetricsSummary, type MetricsSummary } from '../api';
-import { useChaosMode } from '../context/ChaosContext';
+import { useChaosMode } from './useChaosMode';
 import { getRecentTraces, subscribeToTraces, type TraceEntry } from '../services/TraceEmitter';
 
 // Named thresholds — visible numbers = engineering confidence

@@ -126,4 +126,3 @@ class ResumoMetricas(BaseModel):
         examples=["NORMAL", "DEGRADED", "RECOVERING", "STABLE"],
         description="Current state machine position based on time-since-last-incident",
     )
-

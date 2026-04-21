@@ -1,5 +1,5 @@
 import { m, AnimatePresence } from 'framer-motion';
-import { useChaosMode } from '../context/ChaosContext';
+import { useChaosMode } from '../hooks/useChaosMode';
 import { useLanguage } from '../context/LanguageContext';
 
 export default function ChaosModeBanner() {

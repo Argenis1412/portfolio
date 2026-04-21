@@ -39,12 +39,12 @@ class ChaosIncident:
     recovery_ms: int = 0
     error_triggered: bool = False
     # ── Sub-system fields (Epic 1) ───────────────────────────────────
-    queue_backlog: int = 0          # tasks left in queue after incident
+    queue_backlog: int = 0  # tasks left in queue after incident
     cache_ttl_remaining_s: int = 0  # seconds until cached fallback expires
-    worker_delayed: bool = False    # True when worker is processing slower than SLA
+    worker_delayed: bool = False  # True when worker is processing slower than SLA
     # ── Impact fields (Epic 2 / Round-2 quantification) ───────────────────
-    pct_affected: float = 0.0       # % of requests impacted (0.0–1.0)
-    latency_increase_ms: int = 0    # observed extra latency during the incident
+    pct_affected: float = 0.0  # % of requests impacted (0.0–1.0)
+    latency_increase_ms: int = 0  # observed extra latency during the incident
 
 
 @dataclass
@@ -141,8 +141,10 @@ class ChaosState:
             "cache": "serving" if cache_remaining > 0 else "direct",
             "cache_ttl_s": cache_remaining,
             "active_path": (
-                "fallback" if cache_remaining > 0
-                else "async" if last.worker_delayed
+                "fallback"
+                if cache_remaining > 0
+                else "async"
+                if last.worker_delayed
                 else "sync"
             ),
             "system_lifecycle": self.system_lifecycle,
@@ -153,7 +155,9 @@ class ChaosState:
 chaos_state = ChaosState()
 
 
-async def _persistir_incidente(incident: ChaosIncident, repo: RepositorioPortfolio) -> None:
+async def _persistir_incidente(
+    incident: ChaosIncident, repo: RepositorioPortfolio
+) -> None:
     """Saves the chaos incident to Postgres via SQLAlchemy."""
     if hasattr(repo, "session_factory"):
         async with repo.session_factory() as session:
@@ -163,7 +167,7 @@ async def _persistir_incidente(incident: ChaosIncident, repo: RepositorioPortfol
                 requests_sent=incident.requests_sent,
                 requests_dropped=incident.requests_dropped,
                 recovery_ms=incident.recovery_ms,
-                error_triggered=incident.error_triggered
+                error_triggered=incident.error_triggered,
             )
             session.add(incidente_db)
             await session.commit()
@@ -178,7 +182,9 @@ async def _persistir_incidente(incident: ChaosIncident, repo: RepositorioPortfol
     ),
 )
 @limiter.limit("2/minute")
-async def simulate_spike(request: Request, repo: RepositorioPortfolio = Depends(obter_repositorio)) -> dict:
+async def simulate_spike(
+    request: Request, repo: RepositorioPortfolio = Depends(obter_repositorio)
+) -> dict:
     """
     Simulates a burst of concurrent requests.
     The system handles them through its normal rate-limiting and
@@ -241,7 +247,11 @@ async def simulate_spike(request: Request, repo: RepositorioPortfolio = Depends(
     ),
 )
 @limiter.limit("2/minute")
-async def trigger_failure(request: Request, response: Response, repo: RepositorioPortfolio = Depends(obter_repositorio)) -> dict:
+async def trigger_failure(
+    request: Request,
+    response: Response,
+    repo: RepositorioPortfolio = Depends(obter_repositorio),
+) -> dict:
     """
     Forces a 503 condition and records the recovery time.
     The incident is visible in /metrics/summary immediately.
@@ -280,7 +290,9 @@ async def trigger_failure(request: Request, response: Response, repo: Repositori
     description="Purges the current request queue to simulate shedding load during severe backpressure.",
 )
 @limiter.limit("2/minute")
-async def drain_queue(request: Request, repo: RepositorioPortfolio = Depends(obter_repositorio)) -> dict:
+async def drain_queue(
+    request: Request, repo: RepositorioPortfolio = Depends(obter_repositorio)
+) -> dict:
     """
     Simulates queue drain behavior as defined in the Failure Model.
     Sets worker_delayed=True and queue_backlog=132 for 120s.
@@ -305,7 +317,7 @@ async def drain_queue(request: Request, repo: RepositorioPortfolio = Depends(obt
         "status": "queue_drained",
         "tasks_purged": 15,
         "incident_type": "queue_drain",
-        "timestamp": datetime.now(UTC).isoformat()
+        "timestamp": datetime.now(UTC).isoformat(),
     }
 
 
@@ -320,13 +332,13 @@ async def force_retry(request: Request) -> dict:
     Simulates forcing a manual retry.
     """
     await asyncio.sleep(0.12)
-    
+
     chaos_state.record_retries(1)
-    
+
     return {
         "status": "retry_dispatched",
         "incident_type": "manual_retry",
-        "timestamp": datetime.now(UTC).isoformat()
+        "timestamp": datetime.now(UTC).isoformat(),
     }
 
 
@@ -336,7 +348,9 @@ async def force_retry(request: Request) -> dict:
     description="Injects 3000ms latency to simulate DB timeout or network partition.",
 )
 @limiter.limit("2/minute")
-async def inject_latency(request: Request, repo: RepositorioPortfolio = Depends(obter_repositorio)) -> dict:
+async def inject_latency(
+    request: Request, repo: RepositorioPortfolio = Depends(obter_repositorio)
+) -> dict:
     """
     Simulates severe latency to test circuit breakers and timeout policies.
     Sets worker_delayed=True and cache fallback serving for 45s.
@@ -363,5 +377,5 @@ async def inject_latency(request: Request, repo: RepositorioPortfolio = Depends(
         "status": "timeout",
         "latency_ms": latency_ms,
         "incident_type": "latency_injection",
-        "timestamp": datetime.now(UTC).isoformat()
+        "timestamp": datetime.now(UTC).isoformat(),
     }
