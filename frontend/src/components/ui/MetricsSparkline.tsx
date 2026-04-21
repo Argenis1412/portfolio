@@ -19,6 +19,12 @@ const TRACE_STYLE: Record<TraceEntry['type'], { stroke: string; fill: string; la
   latency_injection: { stroke: '#f59e0b', fill: '#f59e0b', label: 'LATENCY' },
 };
 
+function annotationWidth(label: string, meta?: string) {
+  const base = Math.max(40, label.length * 6 + 12);
+  const metaWidth = meta ? Math.max(base, meta.length * 5 + 12) : base;
+  return metaWidth;
+}
+
 export default function MetricsSparkline({
   samples,
   traces = [],
@@ -215,6 +221,11 @@ export default function MetricsSparkline({
         const style = TRACE_STYLE[trace.type];
         const isSpike = trace.type === 'traffic_spike';
         const markerColor = isSpike ? '#ef4444' : style.stroke;
+        const metaText = `${trace.impactPct ? `aff:${trace.impactPct}` : ''}${trace.impactPct && trace.latencyDelta ? ' ' : ''}${trace.latencyDelta ? `Δ:${trace.latencyDelta}` : ''}`.trim();
+        const boxWidth = annotationWidth(isSpike ? 'SPIKE' : style.label, metaText || undefined);
+        const desiredX = point.x + 4;
+        const labelX = Math.min(desiredX, width - boxWidth - 6);
+        const labelY = Math.max(16, Math.min(18, point.y - 14));
         
         return (
           <g key={trace.id}>
@@ -229,25 +240,25 @@ export default function MetricsSparkline({
               strokeOpacity={0.45}
             />
             {!compact && (
-              <g transform={`translate(${point.x + 4}, 12)`}>
-                <rect 
-                   x="-2" y="-10" width={trace.type.length * 5 + 10} height="14" 
+              <g transform={`translate(${labelX}, ${labelY})`}>
+                 <rect 
+                    x="-2" y="-10" width={boxWidth} height="14" 
                     fill={markerColor} rx="2" fillOpacity="0.82"
                  />
-                <text x="2" y="1" fontSize="9" fontWeight="bold" fill="#000" fontFamily="monospace">
-                  {isSpike ? 'SPIKE' : style.label}
-                </text>
-                {(trace.impactPct || trace.latencyDelta) && (
-                  <g transform="translate(0, 14)">
-                    <rect 
-                      x="-2" y="0" width={trace.type.length * 5 + 10} height="12" 
-                      fill="#000" fillOpacity="0.6" rx="2" 
-                    />
-                    <text x="2" y="9" fontSize="7" fill="#fff" fontFamily="monospace opacity-80">
-                      {trace.impactPct && `aff:${trace.impactPct}`} {trace.latencyDelta && `Δ:${trace.latencyDelta}`}
-                    </text>
-                  </g>
-                )}
+                 <text x="2" y="1" fontSize="9" fontWeight="bold" fill="#000" fontFamily="monospace">
+                   {isSpike ? 'SPIKE' : style.label}
+                 </text>
+                {metaText && (
+                   <g transform="translate(0, 14)">
+                     <rect 
+                       x="-2" y="0" width={boxWidth} height="12" 
+                       fill="#000" fillOpacity="0.6" rx="2" 
+                     />
+                     <text x="2" y="9" fontSize="7" fill="#fff" fontFamily="monospace opacity-80">
+                       {metaText}
+                     </text>
+                   </g>
+                 )}
               </g>
             )}
           </g>
