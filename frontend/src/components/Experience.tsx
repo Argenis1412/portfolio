@@ -1,5 +1,5 @@
 import { m } from 'framer-motion';
-import { MapPin } from 'lucide-react';
+import { BookOpen, BriefcaseBusiness, MapPin } from 'lucide-react';
 import Skeleton from './ui/Skeleton';
 import { useExperience, useFormacao } from '../hooks/useApi';
 import type { Experience as ExperienceType, Formacao, LocalizedString } from '../api';
@@ -15,6 +15,13 @@ type SignalTone = 'decision' | 'failure' | 'learning' | 'impact';
 interface ParsedSignal {
   tone: SignalTone;
   text: string;
+}
+
+interface SignalSummary {
+  decision: number;
+  failure: number;
+  learning: number;
+  impact: number;
 }
 
 const SIGNAL_STYLE: Record<SignalTone, string> = {
@@ -43,6 +50,13 @@ function parseSignals(description: string): ParsedSignal[] {
     });
 }
 
+function summarizeSignals(signals: ParsedSignal[]): SignalSummary {
+  return signals.reduce<SignalSummary>((acc, signal) => {
+    acc[signal.tone] += 1;
+    return acc;
+  }, { decision: 0, failure: 0, learning: 0, impact: 0 });
+}
+
 export default function Experience() {
   const { data: experiences = [], isLoading: loadingExp, isError: errorExp } = useExperience();
   const { data: formacoes = [], isLoading: loadingFmc, isError: errorFmc } = useFormacao();
@@ -60,6 +74,9 @@ export default function Experience() {
   });
 
   const lang = language as keyof LocalizedString;
+  const educationCount = entries.filter((entry) => entry.kind === 'education').length;
+  const experienceCount = entries.filter((entry) => entry.kind === 'experience').length;
+  const activeCount = entries.filter((entry) => entry.atual).length;
 
   const formatDate = (date: string | null, isActual: boolean) => {
     if (!date) return isActual ? t('experience.label.present') : '?';
@@ -112,6 +129,23 @@ export default function Experience() {
             <p className="mt-4 text-sm md:text-base text-app-muted leading-relaxed">
               {t('experience.timeline_subtitle')}
             </p>
+            <div className="mt-5 grid gap-3 md:grid-cols-3">
+              <div className="rounded-2xl border border-app-border/60 bg-app-surface/25 p-4">
+                <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-app-muted">{t('experience.summary.academic')}</div>
+                <div className="mt-2 text-2xl font-mono font-bold text-blue-300">{educationCount}</div>
+                <div className="mt-1 text-xs text-app-muted">{t('experience.summary.academic_desc')}</div>
+              </div>
+              <div className="rounded-2xl border border-app-border/60 bg-app-surface/25 p-4">
+                <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-app-muted">{t('experience.summary.professional')}</div>
+                <div className="mt-2 text-2xl font-mono font-bold text-app-primary">{experienceCount}</div>
+                <div className="mt-1 text-xs text-app-muted">{t('experience.summary.professional_desc')}</div>
+              </div>
+              <div className="rounded-2xl border border-app-border/60 bg-app-surface/25 p-4">
+                <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-app-muted">{t('experience.summary.current')}</div>
+                <div className="mt-2 text-2xl font-mono font-bold text-emerald-300">{activeCount}</div>
+                <div className="mt-1 text-xs text-app-muted">{t('experience.summary.current_desc')}</div>
+              </div>
+            </div>
           </div>
 
           <div className="relative space-y-6 before:absolute before:left-[11px] before:top-3 before:bottom-3 before:w-px before:bg-app-border/50">
@@ -120,6 +154,7 @@ export default function Experience() {
               const title = isEducation ? (entry as Formacao).curso[lang] : (entry as ExperienceType).cargo[lang];
               const subtitle = isEducation ? (entry as Formacao).instituicao : (entry as ExperienceType).empresa;
               const signals = parseSignals(entry.descricao[lang as keyof typeof entry.descricao] || '');
+              const summary = summarizeSignals(signals);
               const technologies = isEducation ? [] : (entry as ExperienceType).tecnologias;
 
               return (
@@ -133,8 +168,8 @@ export default function Experience() {
                 >
                   <span className={`absolute left-0 top-3 h-[22px] w-[22px] rounded-full border-4 ${isEducation ? 'border-blue-400 bg-[#0f172a]' : 'border-app-primary bg-[#1a1510]'}`} />
 
-                  <div className="glass rounded-2xl border border-app-border p-6 md:p-7">
-                    <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                  <div className={`glass rounded-2xl border p-6 md:p-7 ${isEducation ? 'border-blue-400/15 shadow-[0_0_0_1px_rgba(96,165,250,0.04)]' : 'border-app-border'}`}>
+                    <div className="flex flex-col gap-5 xl:grid xl:grid-cols-[1.4fr_0.7fr] xl:items-start">
                       <div>
                         <div className="flex flex-wrap items-center gap-2 mb-3 text-[10px] font-mono uppercase tracking-[0.22em] text-app-muted">
                           <span className={`rounded-full border px-2.5 py-1 ${isEducation ? 'border-blue-400/20 bg-blue-500/10 text-blue-200' : 'border-app-primary/20 bg-app-primary/10 text-app-primary'}`}>
@@ -150,12 +185,24 @@ export default function Experience() {
                         <h3 className="text-xl md:text-2xl font-bold text-app-text leading-snug">
                           {title}
                         </h3>
-                        <p className="mt-1 text-sm md:text-base text-app-primary">{subtitle}</p>
+                        <p className={`mt-1 text-sm md:text-base ${isEducation ? 'text-blue-300' : 'text-app-primary'}`}>{subtitle}</p>
+                        <p className="mt-4 max-w-2xl text-sm leading-relaxed text-app-muted">
+                          {isEducation ? t('experience.entry.academic_note') : t('experience.entry.professional_note')}
+                        </p>
                       </div>
 
-                      <div className="text-sm font-mono text-app-muted md:text-right">
+                      <div className="rounded-2xl border border-app-border/50 bg-app-surface/20 p-4 text-sm font-mono text-app-muted xl:justify-self-end xl:min-w-[220px]">
+                        <div className="flex items-center gap-2 text-app-text mb-3">
+                          {isEducation ? <BookOpen className="h-4 w-4 text-blue-300" /> : <BriefcaseBusiness className="h-4 w-4 text-app-primary" />}
+                          <span className="text-[10px] uppercase tracking-[0.22em]">{isEducation ? t('experience.entry.track_academic') : t('experience.entry.track_professional')}</span>
+                        </div>
                         <div>{formatDate(entry.data_inicio, false)} - {formatDate(entry.data_fim, entry.atual)}</div>
-                        <div className="mt-1 inline-flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{entry.localizacao}</div>
+                        <div className="mt-2 inline-flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{entry.localizacao}</div>
+                        <div className="mt-4 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.18em]">
+                          {summary.decision > 0 && <span className="rounded-full border border-blue-400/20 bg-blue-500/10 px-2 py-1 text-blue-200">{summary.decision} {t('experience.signal.decision')}</span>}
+                          {summary.learning > 0 && <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-2 py-1 text-amber-200">{summary.learning} {t('experience.signal.learning')}</span>}
+                          {summary.impact > 0 && <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2 py-1 text-emerald-200">{summary.impact} {t('experience.signal.impact')}</span>}
+                        </div>
                       </div>
                     </div>
 
