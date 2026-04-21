@@ -98,6 +98,14 @@ export const MetricsSummarySchema = z.object({
   retries_1h: z.number().int().default(0),
   last_incident: z.string().default('none'),
   last_incident_ago: z.string().default('none'),
+  // Epic 1: sub-system status
+  worker_status: z.enum(['ok', 'delayed']).default('ok'),
+  queue_backlog: z.number().int().default(0),
+  cache_status: z.enum(['direct', 'serving']).default('direct'),
+  cache_ttl_s: z.number().int().default(0),
+  active_path: z.enum(['sync', 'async', 'fallback']).default('sync'),
+  // Round-2: state machine lifecycle
+  system_lifecycle: z.enum(['NORMAL', 'DEGRADED', 'RECOVERING', 'STABLE']).default('NORMAL'),
 });
 
 export type MetricsSummary = z.infer<typeof MetricsSummarySchema>;
