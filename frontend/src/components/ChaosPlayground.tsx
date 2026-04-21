@@ -10,8 +10,9 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { useQueryClient } from '@tanstack/react-query';
-import { postChaosSpike, postChaosFailure, postChaosCache, type ChaosResponse } from '../api';
+import { postChaosDrain, postChaosRetry, postChaosLatency, type ChaosResponse } from '../api';
 import { useLog } from '../hooks/useLog';
+import { useChaosMode, type ChaosPreset } from '../hooks/useChaosMode';
 import { emitTrace } from '../services/TraceEmitter';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -80,7 +81,7 @@ function ActionCard({
             {t(loadingKey)}
           </>
         ) : cooldown > 0 ? (
-          `Cooldown (${cooldown}s)`
+          t('chaos.cooldown', { s: cooldown })
         ) : (
           t(actionKey)
         )}
@@ -95,20 +96,21 @@ export default function ChaosPlayground() {
   const { t } = useLanguage();
   const queryClient = useQueryClient();
   const { addEntry, incidents, addIncident } = useLog();
+  const { preset, setPreset } = useChaosMode();
 
   // Terminal log (local, lightweight)
   const [terminal, setTerminal] = useState<TerminalEntry[]>([]);
   const termIdRef = useRef(0);
 
   // Loading states
-  const [spikeLoading, setSpikeLoading] = useState(false);
-  const [failureLoading, setFailureLoading] = useState(false);
-  const [cacheLoading, setCacheLoading] = useState(false);
+  const [drainLoading, setDrainLoading] = useState(false);
+  const [retryLoading, setRetryLoading] = useState(false);
+  const [latencyLoading, setLatencyLoading] = useState(false);
 
   // Cooldowns
-  const [spikeCooldown, setSpikeCooldown] = useState(0);
-  const [failureCooldown, setFailureCooldown] = useState(0);
-  const [cacheCooldown, setCacheCooldown] = useState(0);
+  const [drainCooldown, setDrainCooldown] = useState(0);
+  const [retryCooldown, setRetryCooldown] = useState(0);
+  const [latencyCooldown, setLatencyCooldown] = useState(0);
 
   const [, setTick] = useState(0); // forces re-render for TTL countdown
 
@@ -147,114 +149,72 @@ export default function ChaosPlayground() {
 
   // ─── Handlers ──────────────────────────────────────────────────────────────
 
-  const handleSpike = useCallback(async () => {
-    if (spikeLoading || spikeCooldown > 0) return;
-    setSpikeLoading(true);
+  const handleDrain = useCallback(async () => {
+    if (drainLoading || drainCooldown > 0) return;
+    setDrainLoading(true);
     const rid = genReqId();
     const traceId = `trace-${rid}`;
-    addTerminalEntry('INFO', `chaos.spike triggered request_id=${rid} trace_id=${traceId}`, rid);
-    addEntry('INFO', `chaos.spike status=TRIGGERED type=TRAFFIC_SPIKE trace_id=${traceId}`, rid);
+    addTerminalEntry('INFO', `chaos.drain triggered request_id=${rid} trace_id=${traceId}`, rid);
+    addEntry('INFO', `chaos.drain status=TRIGGERED type=QUEUE_DRAIN trace_id=${traceId}`, rid);
     try {
-      const res: ChaosResponse = await postChaosSpike();
-      const elapsed = res.elapsed_ms ?? 0;
-      addTerminalEntry('WARN', `traffic.spike completed requests=${res.requests_sent ?? 0} dropped=${res.requests_dropped ?? 0} elapsed_ms=${elapsed} retry_triggered=${res.requests_dropped ?? 0 ? 'true' : 'false'} request_id=${rid} trace_id=${traceId}`, rid);
-      addEntry('WARN', `traffic.spike status=COMPLETED elapsed_ms=${elapsed} dropped=${res.requests_dropped ?? 0} retry_triggered=${res.requests_dropped ?? 0 ? 'true' : 'false'} trace_id=${traceId}`, rid);
-      addIncident('traffic_spike', 'chaos.action.spike.title');
-      emitTrace({
-        id: `trace-${rid}`,
-        traceId,
-        requestId: rid,
-        type: 'traffic_spike',
-        endpoint: '/chaos/spike',
-        status: 'ok',
-        totalMs: elapsed,
-        apiMs: Math.round(elapsed * 0.15),
-        dbMs: Math.round(elapsed * 0.70),
-        cacheMs: Math.round(elapsed * 0.15),
-        timestamp: new Date(),
-      });
+      const res: ChaosResponse = await postChaosDrain();
+      const purged = res.tasks_purged ?? 0;
+      addTerminalEntry('WARN', `queue.drain completed tasks_purged=${purged} request_id=${rid} trace_id=${traceId}`, rid);
+      addEntry('WARN', `queue.drain status=COMPLETED tasks_purged=${purged} trace_id=${traceId}`, rid);
+      addIncident('queue_drain', 'chaos.action.drain.title');
+      emitTrace({ id: `trace-${rid}`, traceId, requestId: rid, type: 'queue_drain', endpoint: '/chaos/drain', status: 'ok', totalMs: 50, apiMs: 10, dbMs: 40, cacheMs: 0, timestamp: new Date(), impactPct: '0%', latencyDelta: '-40ms' });
       invalidateMetrics();
-      startCooldown(setSpikeCooldown);
+      startCooldown(setDrainCooldown);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
-      addTerminalEntry('ERROR', `chaos.spike failed error="${msg}" request_id=${rid} trace_id=${traceId}`, rid);
-      addEntry('ERROR', `chaos.spike status=FAILED error="${msg}" trace_id=${traceId}`, rid);
-    } finally {
-      setSpikeLoading(false);
-    }
-  }, [spikeLoading, spikeCooldown, addTerminalEntry, addEntry, addIncident, invalidateMetrics, startCooldown]);
+      addTerminalEntry('ERROR', `chaos.drain failed error="${msg}" request_id=${rid} trace_id=${traceId}`, rid);
+      addEntry('ERROR', `chaos.drain status=FAILED error="${msg}" trace_id=${traceId}`, rid);
+    } finally { setDrainLoading(false); }
+  }, [drainLoading, drainCooldown, addTerminalEntry, addEntry, addIncident, invalidateMetrics, startCooldown]);
 
-  const handleFailure = useCallback(async () => {
-    if (failureLoading || failureCooldown > 0) return;
-    setFailureLoading(true);
+  const handleRetry = useCallback(async () => {
+    if (retryLoading || retryCooldown > 0) return;
+    setRetryLoading(true);
     const rid = genReqId();
     const traceId = `trace-${rid}`;
-    addTerminalEntry('INFO', `chaos.failure triggered request_id=${rid} trace_id=${traceId}`, rid);
-    addEntry('INFO', `chaos.failure status=TRIGGERED type=FORCED_503 trace_id=${traceId}`, rid);
+    addTerminalEntry('INFO', `chaos.retry triggered request_id=${rid} trace_id=${traceId}`, rid);
+    addEntry('INFO', `chaos.retry status=TRIGGERED type=MANUAL_RETRY trace_id=${traceId}`, rid);
     try {
-      const res: ChaosResponse = await postChaosFailure();
-      const recovery = res.recovery_ms ?? 0;
-      addTerminalEntry('WARN', `forced.failure status=503 recovery_ms=${recovery} circuit_breaker=OPEN timeout_ms=${recovery} request_id=${rid} trace_id=${traceId}`, rid);
-      addEntry('WARN', `forced.failure status=503 recovery_ms=${recovery} circuit_breaker=OPEN timeout_ms=${recovery} trace_id=${traceId}`, rid);
-      addIncident('forced_failure', 'chaos.action.failure.title');
-      emitTrace({
-        id: `trace-${rid}`,
-        traceId,
-        requestId: rid,
-        type: 'forced_failure',
-        endpoint: '/chaos/failure',
-        status: 'error',
-        totalMs: recovery,
-        apiMs: Math.round(recovery * 0.10),
-        dbMs: Math.round(recovery * 0.80),
-        cacheMs: Math.round(recovery * 0.10),
-        timestamp: new Date(),
-      });
+      await postChaosRetry();
+      addTerminalEntry('INFO', `manual.retry dispatched request_id=${rid} trace_id=${traceId}`, rid);
+      addEntry('INFO', `manual.retry status=COMPLETED trace_id=${traceId}`, rid);
+      addIncident('manual_retry', 'chaos.action.retry.title');
+      emitTrace({ id: `trace-${rid}`, traceId, requestId: rid, type: 'manual_retry', endpoint: '/chaos/retry', status: 'ok', totalMs: 120, apiMs: 20, dbMs: 100, cacheMs: 0, timestamp: new Date(), impactPct: '5%', latencyDelta: '+80ms' });
       invalidateMetrics();
-      startCooldown(setFailureCooldown);
+      startCooldown(setRetryCooldown);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
-      addTerminalEntry('ERROR', `chaos.failure error="${msg}" request_id=${rid} trace_id=${traceId}`, rid);
-      addEntry('ERROR', `chaos.failure status=FAILED error="${msg}" trace_id=${traceId}`, rid);
-    } finally {
-      setFailureLoading(false);
-    }
-  }, [failureLoading, failureCooldown, addTerminalEntry, addEntry, addIncident, invalidateMetrics, startCooldown]);
+      addTerminalEntry('ERROR', `chaos.retry failed error="${msg}" request_id=${rid} trace_id=${traceId}`, rid);
+      addEntry('ERROR', `chaos.retry status=FAILED error="${msg}" trace_id=${traceId}`, rid);
+    } finally { setRetryLoading(false); }
+  }, [retryLoading, retryCooldown, addTerminalEntry, addEntry, addIncident, invalidateMetrics, startCooldown]);
 
-  const handleCache = useCallback(async () => {
-    if (cacheLoading || cacheCooldown > 0) return;
-    setCacheLoading(true);
+  const handleLatency = useCallback(async () => {
+    if (latencyLoading || latencyCooldown > 0) return;
+    setLatencyLoading(true);
     const rid = genReqId();
     const traceId = `trace-${rid}`;
-    addTerminalEntry('INFO', `cache.stress triggered requests=10 request_id=${rid} trace_id=${traceId}`, rid);
-    addEntry('INFO', `cache.stress status=TRIGGERED type=CACHE_STRESS trace_id=${traceId}`, rid);
+    addTerminalEntry('INFO', `chaos.latency triggered request_id=${rid} trace_id=${traceId}`, rid);
+    addEntry('INFO', `chaos.latency status=TRIGGERED type=LATENCY_INJECTION trace_id=${traceId}`, rid);
     try {
-      const res = await postChaosCache();
-      addTerminalEntry('INFO', `cache.stress completed requests_sent=${res.requests_sent} elapsed_ms=${res.elapsed_ms} request_id=${rid} trace_id=${traceId}`, rid);
-      addEntry('INFO', `cache.stress status=DONE requests=${res.requests_sent} elapsed_ms=${res.elapsed_ms} trace_id=${traceId}`, rid);
-      addIncident('cache_stress', 'chaos.action.cache.title');
-      emitTrace({
-        id: `trace-${rid}`,
-        traceId,
-        requestId: rid,
-        type: 'cache_stress',
-        endpoint: '/sobre, /stack, /projetos×3',
-        status: 'ok',
-        totalMs: res.elapsed_ms,
-        apiMs: Math.round(res.elapsed_ms * 0.20),
-        dbMs: Math.round(res.elapsed_ms * 0.30),
-        cacheMs: Math.round(res.elapsed_ms * 0.50),
-        timestamp: new Date(),
-      });
-      startCooldown(setCacheCooldown);
+      const res: ChaosResponse = await postChaosLatency();
+      addTerminalEntry('WARN', `latency.injection status=TIMEOUT latency_ms=${res.latency_ms} circuit_breaker=OPEN request_id=${rid} trace_id=${traceId}`, rid);
+      addEntry('WARN', `latency.injection status=TIMEOUT latency_ms=${res.latency_ms} circuit_breaker=OPEN trace_id=${traceId}`, rid);
+      addIncident('latency_injection', 'chaos.action.latency.title');
+      emitTrace({ id: `trace-${rid}`, traceId, requestId: rid, type: 'latency_injection', endpoint: '/chaos/latency', status: 'error', totalMs: res.latency_ms || 3000, apiMs: 50, dbMs: (res.latency_ms || 3000) - 50, cacheMs: 0, timestamp: new Date(), impactPct: '100%', latencyDelta: `+${((res.latency_ms || 3000)/1000).toFixed(1)}s` });
+      invalidateMetrics();
+      startCooldown(setLatencyCooldown);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
-      addTerminalEntry('ERROR', `cache.stress failed error="${msg}" request_id=${rid} trace_id=${traceId}`, rid);
-      addEntry('ERROR', `cache.stress status=FAILED error="${msg}" trace_id=${traceId}`, rid);
-    } finally {
-      setCacheLoading(false);
-    }
-  }, [cacheLoading, cacheCooldown, addTerminalEntry, addEntry, addIncident, startCooldown]);
+      addTerminalEntry('ERROR', `chaos.latency error="${msg}" request_id=${rid} trace_id=${traceId}`, rid);
+      addEntry('ERROR', `chaos.latency status=FAILED error="${msg}" trace_id=${traceId}`, rid);
+    } finally { setLatencyLoading(false); }
+  }, [latencyLoading, latencyCooldown, addTerminalEntry, addEntry, addIncident, invalidateMetrics, startCooldown]);
 
   const activeIncidents = incidents.filter((i) => Date.now() - i.startedAt < i.ttl);
   const resolvedIncidents = incidents.filter((i) => Date.now() - i.startedAt >= i.ttl);
@@ -276,50 +236,98 @@ export default function ChaosPlayground() {
           <p className="text-xs font-mono text-app-primary/70 mt-1">{t('chaos.note')}</p>
         </div>
 
+        {/* Chaos Preset Selector */}
+        <div className="glass rounded-xl p-4 border border-app-border mt-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-1">
+              <h3 className="text-xs font-mono font-bold text-app-text uppercase tracking-widest flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${preset !== 'off' ? 'bg-violet-400' : 'bg-emerald-400'}`}></span>
+                  <span className={`relative inline-flex rounded-full h-2 w-2 ${preset !== 'off' ? 'bg-violet-500' : 'bg-emerald-500'}`}></span>
+                </span>
+                {t('chaos.presets.title')}
+              </h3>
+              <p className="text-[10px] font-mono text-app-muted">
+                {preset === 'off' ? t('chaos.presets.desc_off') : t('chaos.presets.desc_active', { p: preset.toUpperCase() })}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-1 bg-app-surface p-1 rounded-lg border border-app-border">
+              {(['off', 'mild', 'stress', 'failure'] as ChaosPreset[]).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => {
+                    setPreset(p);
+                    addEntry('DECISION', `manual_override chaos_preset=${p.toUpperCase()} status=APPLIED`);
+                  }}
+                  className={`px-3 py-1.5 rounded-md text-[10px] font-mono font-bold transition-all duration-200 ${
+                    preset === p
+                      ? 'bg-violet-500 text-white shadow-lg shadow-violet-500/20'
+                      : 'text-app-muted hover:text-app-text hover:bg-app-surface-hover'
+                  }`}
+                >
+                  {p.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+          
+          {preset !== 'off' && (
+            <m.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="mt-3 pt-3 border-t border-app-border/40 text-[10px] font-mono text-violet-300/70 italic"
+            >
+              {preset === 'mild' && t('chaos.presets.mild_effect')}
+              {preset === 'stress' && t('chaos.presets.stress_effect')}
+              {preset === 'failure' && t('chaos.presets.failure_effect')}
+            </m.div>
+          )}
+        </div>
+
         {/* Action cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
           <ActionCard
-            icon="⚡"
-            titleKey="chaos.action.spike.title"
-            descKey="chaos.action.spike.desc"
+            icon="🌬️"
+            titleKey="chaos.action.drain.title"
+            descKey="chaos.action.drain.desc"
+            accentClass="text-emerald-400"
+            borderClass="border-emerald-500/20"
+            hoverClass="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
+            loading={drainLoading}
+            cooldown={drainCooldown}
+            loadingKey="chaos.action.drain.running"
+            actionKey="chaos.action.drain.action"
+            disabled={drainLoading || drainCooldown > 0}
+            onClick={handleDrain}
+          />
+          <ActionCard
+            icon="⏳"
+            titleKey="chaos.action.latency.title"
+            descKey="chaos.action.latency.desc"
             accentClass="text-amber-400"
             borderClass="border-amber-500/20"
             hoverClass="bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
-            loading={spikeLoading}
-            cooldown={spikeCooldown}
-            loadingKey="chaos.spike_running"
-            actionKey="chaos.action.spike.title"
-            disabled={spikeLoading || spikeCooldown > 0}
-            onClick={handleSpike}
+            loading={latencyLoading}
+            cooldown={latencyCooldown}
+            loadingKey="chaos.action.latency.running"
+            actionKey="chaos.action.latency.action"
+            disabled={latencyLoading || latencyCooldown > 0}
+            onClick={handleLatency}
           />
           <ActionCard
-            icon="💥"
-            titleKey="chaos.action.failure.title"
-            descKey="chaos.action.failure.desc"
-            accentClass="text-red-400"
-            borderClass="border-red-500/20"
-            hoverClass="bg-red-500/10 text-red-400 hover:bg-red-500/20"
-            loading={failureLoading}
-            cooldown={failureCooldown}
-            loadingKey="chaos.failure_running"
-            actionKey="chaos.action.failure.title"
-            disabled={failureLoading || failureCooldown > 0}
-            onClick={handleFailure}
-          />
-          <ActionCard
-            icon="🗄"
-            titleKey="chaos.action.cache.title"
-            descKey="chaos.action.cache.desc"
+            icon="🔄"
+            titleKey="chaos.action.retry.title"
+            descKey="chaos.action.retry.desc"
             accentClass="text-blue-400"
             borderClass="border-blue-500/20"
             hoverClass="bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
-            loading={cacheLoading}
-            cooldown={cacheCooldown}
-            loadingKey="chaos.action.cache.running"
-            actionKey="chaos.action.cache.title"
-            disabled={cacheLoading || cacheCooldown > 0}
-            onClick={handleCache}
-            disclaimer={t('chaos.action.cache.disclaimer')}
+            loading={retryLoading}
+            cooldown={retryCooldown}
+            loadingKey="chaos.action.retry.running"
+            actionKey="chaos.action.retry.action"
+            disabled={retryLoading || retryCooldown > 0}
+            onClick={handleRetry}
           />
         </div>
 
@@ -327,7 +335,7 @@ export default function ChaosPlayground() {
           {/* Active Incidents panel */}
           <div className="glass rounded-xl p-4 border border-app-border">
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs font-mono uppercase tracking-widest text-app-muted">Incident History</span>
+            <span className="text-xs font-mono uppercase tracking-widest text-app-muted">{t('chaos.incidents.history')}</span>
               {activeIncidents.length > 0 && (
                 <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
               )}
@@ -380,7 +388,7 @@ export default function ChaosPlayground() {
                 {/* Resolved */}
                 {resolvedIncidents.length > 0 && (
                   <div className="space-y-1 pt-2 border-t border-app-border/20">
-                    <span className="text-[10px] font-mono uppercase tracking-widest text-app-muted/60 block mb-2">Resolved</span>
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-app-muted/60 block mb-2">{t('chaos.incidents.resolved_section')}</span>
                     {resolvedIncidents.slice(0, 3).map((inc) => (
                       <div key={inc.id} className="flex items-center justify-between opacity-50">
                         <span className="text-[10px] font-mono text-app-text">{t(inc.labelKey)}</span>

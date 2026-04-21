@@ -73,8 +73,6 @@ export default function LiveMetricsBento() {
     baselineP95,
     latestTrace,
     recentTraces,
-    recoveryState,
-    timeoutState,
   } = useLiveMetrics();
   const { t } = useLanguage();
   const currentTime = useCurrentTime(1000);
@@ -109,16 +107,6 @@ export default function LiveMetricsBento() {
   const incidentText = hasIncident ? 'text-amber-400' : 'text-emerald-500';
   const latencyDelta = previous ? data.p95_ms - previous.p95_ms : null;
   const baselineDelta = baselineP95 === null ? null : data.p95_ms - baselineP95;
-  const circuitColor = recoveryState === 'open'
-    ? 'text-red-400 bg-red-500/10'
-    : recoveryState === 'half_open'
-      ? 'text-amber-400 bg-amber-500/10'
-      : 'text-emerald-500 bg-emerald-500/10';
-  const timeoutColor = timeoutState === 'visible'
-    ? 'text-red-400 bg-red-500/10'
-    : timeoutState === 'risk'
-      ? 'text-amber-400 bg-amber-500/10'
-      : 'text-emerald-500 bg-emerald-500/10';
    const latestEventLabel = latestTrace ? t(`metrics.incident.${latestTrace.type}`) : t('metrics.incident.none');
    const latestEventAgoSeconds = latestTrace ? Math.max(0, Math.floor((currentTime - latestTrace.timestamp.getTime()) / 1000)) : null;
 
@@ -153,9 +141,13 @@ export default function LiveMetricsBento() {
               </div>
               {baselineP95 !== null && <span className="text-[10px] font-mono text-app-muted">baseline {baselineP95}ms</span>}
             </div>
-            {sampleHistory.length >= 2 && (
+            {sampleHistory.length >= 2 ? (
               <div className="rounded-xl border border-app-border/40 bg-app-surface/30 px-2 py-2 overflow-hidden">
                 <MetricsSparkline samples={sampleHistory} traces={recentTraces} width={248} height={72} compact />
+              </div>
+            ) : (
+              <div className="rounded-xl border border-app-border/40 bg-app-surface/30 px-2 py-2 overflow-hidden">
+                <MetricsSparkline samples={[]} traces={recentTraces} width={248} height={72} compact />
               </div>
             )}
             <div className="flex flex-wrap gap-2">
@@ -242,7 +234,7 @@ export default function LiveMetricsBento() {
         <div className="glass rounded-2xl border border-app-border p-5 overflow-hidden">
           <div className="mb-3 flex items-center justify-between gap-3">
             <span className="text-xs font-mono uppercase tracking-widest text-app-muted">{t('metrics.telemetry.title')}</span>
-            <span className="text-[10px] font-mono text-app-muted">p95 timeline</span>
+            <span className="text-[10px] font-mono text-app-muted">{t('metrics.telemetry.p95_label')}</span>
           </div>
           <div className="overflow-x-auto">
             <div className="min-w-[520px]">
@@ -257,20 +249,42 @@ export default function LiveMetricsBento() {
         </div>
 
         <div className="glass rounded-2xl border border-app-border p-5">
-          <div className="mb-4 text-xs font-mono uppercase tracking-widest text-app-muted">{t('metrics.failure_model.title')}</div>
+          <div className="mb-4 text-xs font-mono uppercase tracking-widest text-app-muted">{t('metrics.system_model.title')}</div>
           <div className="grid gap-3">
+            {/* Execution paths */}
+            <div className="rounded-xl border border-app-border/50 bg-app-surface/30 p-3 space-y-2">
+              <div className="text-[10px] font-mono uppercase tracking-widest text-app-muted mb-1">{t('metrics.system_model.paths')}</div>
+              {[
+                { pathKey: 'sync',     labelKey: 'metrics.system_model.sync',     color: 'text-emerald-400' },
+                { pathKey: 'async',    labelKey: 'metrics.system_model.async',    color: 'text-amber-400' },
+                { pathKey: 'fallback', labelKey: 'metrics.system_model.fallback', color: 'text-blue-400' },
+              ].map(({ pathKey, labelKey, color }) => {
+                const active = (data.active_path ?? 'sync') === pathKey;
+                return (
+                  <div key={pathKey} className="flex items-center justify-between">
+                    <span className={`text-xs font-mono ${active ? color : 'text-app-muted/50'}`}>{t(labelKey)}</span>
+                    <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${active ? `${color} border-current/20 bg-current/5` : 'text-app-muted/30 border-app-border/20'}`}>
+                      {active ? 'ACTIVE' : 'standby'}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Lifecycle state */}
             <div className="rounded-xl border border-app-border/50 bg-app-surface/30 p-3">
-              <div className="text-[10px] font-mono uppercase tracking-widest text-app-muted">{t('metrics.failure_model.circuit')}</div>
-              <div className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-mono ${circuitColor}`}>
-                {t(`metrics.failure_model.circuit_state.${recoveryState}`)}
+              <div className="text-[10px] font-mono uppercase tracking-widest text-app-muted">{t('metrics.system_model.lifecycle')}</div>
+              <div className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-mono ${
+                data.system_lifecycle === 'DEGRADED'   ? 'bg-red-500/10 text-red-400' :
+                data.system_lifecycle === 'RECOVERING' ? 'bg-amber-500/10 text-amber-400' :
+                data.system_lifecycle === 'STABLE'     ? 'bg-emerald-500/10 text-emerald-400' :
+                'bg-emerald-500/10 text-emerald-500'
+              }`}>
+                {data.system_lifecycle ?? 'NORMAL'}
               </div>
             </div>
-            <div className="rounded-xl border border-app-border/50 bg-app-surface/30 p-3">
-              <div className="text-[10px] font-mono uppercase tracking-widest text-app-muted">{t('metrics.failure_model.timeout')}</div>
-              <div className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-mono ${timeoutColor}`}>
-                {t(`metrics.failure_model.timeout_state.${timeoutState}`)}
-              </div>
-            </div>
+
+            {/* Latest event */}
             <div className="rounded-xl border border-app-border/50 bg-app-surface/30 p-3">
               <div className="text-[10px] font-mono uppercase tracking-widest text-app-muted">{t('metrics.failure_model.latest_event')}</div>
               <div className="mt-2 text-sm font-mono text-app-text break-all">{latestEventLabel}</div>

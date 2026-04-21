@@ -147,6 +147,9 @@ async def obter_resumo_metricas(response: Response) -> ResumoMetricas:
         last_incident_ago = "none"
         last_incident_type = "none"
 
+    # Sub-system status — computed from live chaos_state, single source of truth
+    subsys = chaos_state.subsystem_status
+
     return ResumoMetricas(
         p95_ms=int(p95),  # Less visual noise, int is enough for ms
         p95_status=p95_status,
@@ -161,6 +164,14 @@ async def obter_resumo_metricas(response: Response) -> ResumoMetricas:
         retries_1h=retries_1h,
         last_incident=last_incident_type,
         last_incident_ago=last_incident_ago,
+        # Epic 1: sub-system fields
+        worker_status=subsys.get("worker", "ok"),
+        queue_backlog=subsys.get("queue_backlog", 0),
+        cache_status=subsys.get("cache", "direct"),
+        cache_ttl_s=subsys.get("cache_ttl_s", 0),
+        active_path=subsys.get("active_path", "sync"),
+        # Round-2: state machine lifecycle
+        system_lifecycle=subsys.get("system_lifecycle", "NORMAL"),
     )
 
 

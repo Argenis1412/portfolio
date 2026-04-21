@@ -14,16 +14,18 @@ import { type LogLevel } from '../types/logs';
 type FilterLevel = 'ALL' | LogLevel;
 
 const LEVEL_COLOR: Record<LogLevel, string> = {
-  INFO:  'text-emerald-400/70',
-  WARN:  'text-amber-400',
-  ERROR: 'text-red-400',
+  INFO:     'text-emerald-400/70',
+  WARN:     'text-amber-400',
+  ERROR:    'text-red-400',
+  DECISION: 'text-violet-400 font-bold',
 };
 
 const FILTER_PILLS: { key: FilterLevel; labelKey: string }[] = [
-  { key: 'ALL',   labelKey: 'logs.filter.all' },
-  { key: 'INFO',  labelKey: 'logs.filter.info' },
-  { key: 'WARN',  labelKey: 'logs.filter.warn' },
-  { key: 'ERROR', labelKey: 'logs.filter.error' },
+  { key: 'ALL',      labelKey: 'logs.filter.all' },
+  { key: 'INFO',     labelKey: 'logs.filter.info' },
+  { key: 'WARN',     labelKey: 'logs.filter.warn' },
+  { key: 'ERROR',    labelKey: 'logs.filter.error' },
+  { key: 'DECISION', labelKey: 'logs.filter.decision' },
 ];
 
 export default function LogStream() {

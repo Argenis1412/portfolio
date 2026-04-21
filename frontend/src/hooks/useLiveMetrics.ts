@@ -16,6 +16,7 @@ import { useMemo, useRef, useState, useCallback, useEffect } from 'react';
 import { useCurrentTime } from './useCurrentTime';
 import { useQuery } from '@tanstack/react-query';
 import { fetchMetricsSummary, type MetricsSummary } from '../api';
+import { useChaosMode } from './useChaosMode';
 import { getRecentTraces, subscribeToTraces, type TraceEntry } from '../services/TraceEmitter';
 
 // Named thresholds — visible numbers = engineering confidence
@@ -75,10 +76,12 @@ export function useLiveMetrics() {
     });
   }, []);
 
+  const { preset } = useChaosMode();
+
   const query = useQuery({
-    queryKey: ['metrics-summary'],
+    queryKey: ['metrics-summary', preset],
     queryFn: async () => {
-      const data = await fetchMetricsSummary();
+      const data = await fetchMetricsSummary(preset);
       onSuccess(data);
       return data;
     },

@@ -14,12 +14,18 @@ const TYPE_COLOR: Record<TraceEntry['type'], string> = {
   traffic_spike: 'text-amber-400 border-amber-500/40 bg-amber-500/10',
   forced_failure: 'text-red-400 border-red-500/40 bg-red-500/10',
   cache_stress: 'text-blue-400 border-blue-500/40 bg-blue-500/10',
+  queue_drain: 'text-emerald-400 border-emerald-500/40 bg-emerald-500/10',
+  manual_retry: 'text-blue-400 border-blue-500/40 bg-blue-500/10',
+  latency_injection: 'text-amber-400 border-amber-500/40 bg-amber-500/10'
 };
 
 const TYPE_LABEL: Record<TraceEntry['type'], string> = {
   traffic_spike: 'SPIKE',
   forced_failure: 'FAILURE',
   cache_stress: 'CACHE',
+  queue_drain: 'DRAIN',
+  manual_retry: 'RETRY',
+  latency_injection: 'LATENCY',
 };
 
 // ─── Waterfall bar ───────────────────────────────────────────────────────────

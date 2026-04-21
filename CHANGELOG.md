@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/en/2.0.0/).
 
 ---
 
+## [1.5.0] - 2026-04-21
+
+### 🧨 Deterministic Chaos & Multi-Language Operational Excellence
+
+#### ✅ Added
+- ✅ **Stateful Decision Engine**: Implemented a robust React-side decision logic (`useDecisionEngine.ts`) with hysteresis thresholds to manage system lifecycle state transitions (`NORMAL` → `DEGRADED` → `RECOVERING` → `STABLE`).
+- ✅ **Deterministic Chaos Presets**: Added global Chaos Control (`off`, `mild`, `stress`, `failure`) injected into backend requests via `X-Chaos-Preset` headers for reproducible failure scenarios.
+- ✅ **Infrastructure Trade-offs**: New `ArchitectureTradeoffs` section documenting engineering compromises (Latency vs. Consistency, Sync vs. Async) with real-world operational impacts.
+- ✅ **Operational Post-Mortem**: Added Case Study #0042 (Redis Connection Leak) as a featured archived incident, demonstrating MTTR and technical debt resolution.
+- ✅ **Full Multi-Language Support (OPS)**: Completed 100% localization for all new operational sections across English, Spanish, and Portuguese.
+- ✅ **Interactive Chaos Banner**: Real-time adaptive banner showing the active simulation mode and technical hints.
+
+#### 🔄 Modified
+- ✅ **Backend Resilience**: Hardened `api.py` and `chaos.py` with defensive field access to prevent `KeyError` during rapid state transitions.
+- ✅ **Telemetry Quantifiers**: Enhanced `TraceEntry` with `impactPct` and `latencyDelta` for measurable failure analysis.
+- ✅ **Zod Schema Evolution**: Updated `MetricsSummarySchema` to include `system_lifecycle` and sub-system health statuses.
+- ✅ **Fixed Documentation**: Summarized README and ARCHITECTURE to reflect the new maturity levels of the SRE-lite dashboard.
+
+#### 🐛 Fixed
+- ✅ **Frontend Test Stability**: Resolved `fetch` mock leaks and argument mismatches in `api.test.ts`.
+- ✅ **i18n Grammar Pass**: Standardized technical terminology and fixed verb errors in localized strings (e.g., "Fuga de Conexiones").
+
+---
+
 ## [1.4.2] - 2026-04-20
 
 ### 🔧 Observability & Engineering Rigor

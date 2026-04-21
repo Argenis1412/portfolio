@@ -95,3 +95,34 @@ class ResumoMetricas(BaseModel):
         examples=["12m ago", "none"],
         description="Time since last incident (human-readable)",
     )
+    # ── Sub-system status fields (Epic 1: degraded state detail) ──────────────
+    worker_status: str = Field(
+        default="ok",
+        examples=["ok", "delayed"],
+        description="Worker/queue processor status",
+    )
+    queue_backlog: int = Field(
+        default=0,
+        examples=[132, 0],
+        description="Number of tasks currently in the queue backlog",
+    )
+    cache_status: str = Field(
+        default="direct",
+        examples=["direct", "serving"],
+        description="Cache serving mode: 'direct' (passthrough) or 'serving' (cached fallback)",
+    )
+    cache_ttl_s: int = Field(
+        default=0,
+        examples=[45, 0],
+        description="Remaining TTL in seconds when cache is serving",
+    )
+    active_path: str = Field(
+        default="sync",
+        examples=["sync", "async", "fallback"],
+        description="Active execution path: sync (FastAPI direct), async (Queue+Worker), fallback (Cache)",
+    )
+    system_lifecycle: str = Field(
+        default="NORMAL",
+        examples=["NORMAL", "DEGRADED", "RECOVERING", "STABLE"],
+        description="Current state machine position based on time-since-last-incident",
+    )

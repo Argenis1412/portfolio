@@ -2,7 +2,7 @@ export interface TraceEntry {
   id: string;
   traceId: string;
   requestId: string;
-  type: 'traffic_spike' | 'forced_failure' | 'cache_stress';
+  type: 'traffic_spike' | 'forced_failure' | 'cache_stress' | 'queue_drain' | 'manual_retry' | 'latency_injection';
   endpoint: string;
   status: 'ok' | 'error';
   totalMs: number;
@@ -10,6 +10,8 @@ export interface TraceEntry {
   dbMs: number;
   cacheMs: number;
   timestamp: Date;
+  impactPct?: string; // e.g. "15%"
+  latencyDelta?: string; // e.g. "+1.2s"
 }
 
 type TraceListener = (entry: TraceEntry) => void;

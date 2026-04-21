@@ -18,6 +18,9 @@ const TRACE_STYLE: Record<TraceEntry['type'], { stroke: string; fill: string; la
   traffic_spike: { stroke: '#fbbf24', fill: '#fbbf24', label: 'SPIKE' },
   forced_failure: { stroke: '#f87171', fill: '#f87171', label: '503' },
   cache_stress: { stroke: '#60a5fa', fill: '#60a5fa', label: 'CACHE' },
+  queue_drain: { stroke: '#10b981', fill: '#10b981', label: 'DRAIN' },
+  manual_retry: { stroke: '#3b82f6', fill: '#3b82f6', label: 'RETRY' },
+  latency_injection: { stroke: '#f59e0b', fill: '#f59e0b', label: 'LATENCY' },
 };
 
 export default function MetricsSparkline({
@@ -28,24 +31,41 @@ export default function MetricsSparkline({
   compact = false,
 }: MetricsSparklineProps) {
   const model = useMemo(() => {
-    if (samples.length < 2) return null;
+    // Build a flat baseline if there isn't enough real data yet
+    const PLACEHOLDER_VALUE = 30; // below 60ms healthy threshold — visually neutral
+    const REFERENCE_TIME = 1713620000000; // Stable reference for placeholders
+    const effectiveSamples: MetricSample[] =
+      samples.length >= 2
+        ? samples
+        : Array.from({ length: 10 }, (_, i) => ({
+            value: PLACEHOLDER_VALUE,
+            timestamp: REFERENCE_TIME - (9 - i) * 15_000,
+          }));
+
+    const _samples =
+      effectiveSamples.length === 1
+        ? [
+            { value: effectiveSamples[0].value, timestamp: effectiveSamples[0].timestamp - 15000 },
+            effectiveSamples[0],
+          ]
+        : effectiveSamples;
 
     const paddingX = compact ? 4 : 8;
     const paddingY = compact ? 6 : 10;
     const innerW = width - paddingX * 2;
     const innerH = height - paddingY * 2;
-    const values = samples.map((sample) => sample.value);
+    const values = effectiveSamples.map((sample) => sample.value);
     const min = Math.min(...values, 0, 40);
     const max = Math.max(...values, 120);
     const range = max - min || 1;
 
     const pointAt = (sample: MetricSample, index: number) => {
-      const x = paddingX + (index / (samples.length - 1)) * innerW;
+      const x = paddingX + (index / (_samples.length - 1)) * innerW;
       const y = paddingY + innerH - ((sample.value - min) / range) * innerH;
       return { x, y };
     };
 
-    const points = samples.map(pointAt);
+    const points = _samples.map(pointAt);
     const polyline = points.map((point) => `${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(' ');
 
     const annotations = traces
@@ -54,7 +74,7 @@ export default function MetricsSparkline({
         let closestIndex = 0;
         let closestDistance = Number.POSITIVE_INFINITY;
 
-        samples.forEach((sample, index) => {
+        _samples.forEach((sample, index) => {
           const distance = Math.abs(sample.timestamp - trace.timestamp.getTime());
           if (distance < closestDistance) {
             closestDistance = distance;
@@ -152,6 +172,17 @@ export default function MetricsSparkline({
                 <text x="2" y="1" fontSize="9" fontWeight="bold" fill="#000" fontFamily="monospace">
                   {isSpike ? 'SPIKE' : style.label}
                 </text>
+                {(trace.impactPct || trace.latencyDelta) && (
+                  <g transform="translate(0, 14)">
+                    <rect 
+                      x="-2" y="0" width={trace.type.length * 5 + 10} height="12" 
+                      fill="#000" fillOpacity="0.6" rx="2" 
+                    />
+                    <text x="2" y="9" fontSize="7" fill="#fff" fontFamily="monospace opacity-80">
+                      {trace.impactPct && `aff:${trace.impactPct}`} {trace.latencyDelta && `Δ:${trace.latencyDelta}`}
+                    </text>
+                  </g>
+                )}
               </g>
             )}
           </g>

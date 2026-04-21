@@ -98,6 +98,14 @@ export const MetricsSummarySchema = z.object({
   retries_1h: z.number().int().default(0),
   last_incident: z.string().default('none'),
   last_incident_ago: z.string().default('none'),
+  // Epic 1: sub-system status
+  worker_status: z.enum(['ok', 'delayed']).default('ok'),
+  queue_backlog: z.number().int().default(0),
+  cache_status: z.enum(['direct', 'serving']).default('direct'),
+  cache_ttl_s: z.number().int().default(0),
+  active_path: z.enum(['sync', 'async', 'fallback']).default('sync'),
+  // Round-2: state machine lifecycle
+  system_lifecycle: z.enum(['NORMAL', 'DEGRADED', 'RECOVERING', 'STABLE']).default('NORMAL'),
 });
 
 export type MetricsSummary = z.infer<typeof MetricsSummarySchema>;
@@ -142,8 +150,13 @@ export class ApiError extends Error {
   }
 }
 
-async function apiGet<T>(path: string, schema: z.ZodSchema<T>): Promise<T> {
-  const res = await fetch(buildApiUrl(path));
+async function apiGet<T>(path: string, schema: z.ZodSchema<T>, chaosPreset?: string): Promise<T> {
+  const headers: Record<string, string> = {};
+  if (chaosPreset) {
+    headers['X-Chaos-Preset'] = chaosPreset;
+  }
+
+  const res = await fetch(buildApiUrl(path), { headers });
 
   // Parse body first so we can extract trace_id from it on error
   const rawData = await res.json().catch(() => null);
@@ -178,8 +191,8 @@ async function apiGet<T>(path: string, schema: z.ZodSchema<T>): Promise<T> {
 // Fetch Functions (Strict and Resilient Consumer)
 // ===================================================
 
-export const fetchMetricsSummary = (): Promise<MetricsSummary> =>
-  apiGet('/metrics/summary', MetricsSummarySchema);
+export const fetchMetricsSummary = (chaosPreset?: string): Promise<MetricsSummary> =>
+  apiGet('/metrics/summary', MetricsSummarySchema, chaosPreset);
 
 export const fetchAbout = (): Promise<About> =>
   apiGet<About>('/sobre', AboutSchema);
@@ -290,6 +303,8 @@ export interface ChaosResponse {
   requests_dropped?: number;
   error_triggered?: boolean;
   timestamp: string;
+  latency_ms?: number;
+  tasks_purged?: number;
 }
 
 export async function postChaosSpike(): Promise<ChaosResponse> {
@@ -300,10 +315,26 @@ export async function postChaosSpike(): Promise<ChaosResponse> {
   return res.json();
 }
 
-export async function postChaosFailure(): Promise<ChaosResponse> {
-  const res = await fetch(buildApiUrl('/chaos/failure'), { method: 'POST' });
+export async function postChaosDrain(): Promise<ChaosResponse> {
+  const res = await fetch(buildApiUrl('/chaos/drain'), { method: 'POST' });
   if (!res.ok) {
-    throw new ApiError(res.status, `Chaos failure failed: ${res.status}`);
+    throw new ApiError(res.status, `Chaos drain failed: ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function postChaosRetry(): Promise<ChaosResponse> {
+  const res = await fetch(buildApiUrl('/chaos/retry'), { method: 'POST' });
+  if (!res.ok) {
+    throw new ApiError(res.status, `Chaos retry failed: ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function postChaosLatency(): Promise<ChaosResponse> {
+  const res = await fetch(buildApiUrl('/chaos/latency'), { method: 'POST' });
+  if (!res.ok) {
+    throw new ApiError(res.status, `Chaos latency failed: ${res.status}`);
   }
   return res.json();
 }
