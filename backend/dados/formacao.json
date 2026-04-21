@@ -11,9 +11,9 @@
     "data_inicio": "2026-02-01",
     "data_fim": "2029-03-06",
     "descricao": {
-      "pt": "[Decision] Formalizei a base teórica para sustentar decisões de arquitetura e engenharia de software no longo prazo.\n[Learning] Estruturas de dados, redes e modelagem ampliaram meu repertório para além da implementação imediata.\n[Impact] A formação reforça a prática com fundamentos que sustentam backend, observabilidade e desenho de sistemas.",
-      "en": "[Decision] I formalized the theoretical base needed to support long-term architecture and software engineering decisions.\n[Learning] Data structures, networking, and modeling expanded my toolkit beyond immediate implementation.\n[Impact] The degree reinforces hands-on work with fundamentals that support backend, observability, and system design.",
-      "es": "[Decision] Formalicé la base teórica necesaria para sostener decisiones de arquitectura e ingeniería de software a largo plazo.\n[Learning] Estructuras de datos, redes y modelado ampliaron mi repertorio más allá de la implementación inmediata.\n[Impact] La formación refuerza la práctica con fundamentos que sostienen backend, observabilidad y diseño de sistemas."
+      "pt": "[Decision] Formação superior em andamento com foco acadêmico em fundamentos de computação, engenharia de software e desenvolvimento de sistemas.\n[Learning] A universidade amplia a base teórica em algoritmos, modelagem, arquitetura de software, redes e estruturas de dados.\n[Impact] O percurso acadêmico complementa a prática profissional com rigor metodológico e visão de longo prazo para sistemas backend.",
+      "en": "[Decision] Ongoing university degree focused on computer science fundamentals, software engineering, and systems development.\n[Learning] The program expands the theoretical base in algorithms, modeling, software architecture, networking, and data structures.\n[Impact] The academic path complements professional practice with methodological rigor and long-term systems thinking for backend engineering.",
+      "es": "[Decision] Formación universitaria en curso con enfoque académico en fundamentos de computación, ingeniería de software y desarrollo de sistemas.\n[Learning] La universidad amplía la base teórica en algoritmos, modelado, arquitectura de software, redes y estructuras de datos.\n[Impact] El recorrido académico complementa la práctica profesional con rigor metodológico y visión de largo plazo para sistemas backend."
     },
     "atual": true
   }
