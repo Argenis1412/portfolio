@@ -36,7 +36,7 @@ function causeKey(lastIncident: string): string {
 
 const SystemStatusBanner = React.memo(() => {
   const { t } = useLanguage();
-  const { data, status } = useLiveMetrics();
+  const { data, status, displayLifecycle, latestSample } = useLiveMetrics();
 
   const isVisible = status === 'degraded' || status === 'down';
 
@@ -45,7 +45,7 @@ const SystemStatusBanner = React.memo(() => {
       ? 'bg-red-900/80 border-red-700'
       : 'bg-amber-900/70 border-amber-700';
 
-  const lifecycle     = data?.system_lifecycle ?? 'NORMAL';
+  const lifecycle     = displayLifecycle ?? data?.system_lifecycle ?? 'NORMAL';
   const lifecycleCfg  = LIFECYCLE_CONFIG[lifecycle] ?? LIFECYCLE_CONFIG['NORMAL'];
   const workerStatus  = data?.worker_status  ?? 'ok';
   const queueBacklog  = data?.queue_backlog  ?? 0;
@@ -81,6 +81,11 @@ const SystemStatusBanner = React.memo(() => {
                 <span className="text-white/40">{t('banner.cause')}: </span>
                 {cause}
               </span>
+              {latestSample && (
+                <span className={`px-2 py-0.5 rounded border text-[10px] ${latestSample.source === 'synthetic' ? 'border-violet-400/30 bg-violet-500/10 text-violet-200' : 'border-emerald-400/30 bg-emerald-500/10 text-emerald-200'}`}>
+                  {t(`metrics.origin.${latestSample.source}`)}
+                </span>
+              )}
               <span className="text-white/40 italic ml-auto">{t('banner.recovery')}</span>
             </div>
 

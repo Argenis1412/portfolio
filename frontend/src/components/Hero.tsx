@@ -5,6 +5,7 @@ import { scrollToSection } from '../utils/scrollToSection';
 import { useLiveMetrics, type SystemStatus } from '../hooks/useLiveMetrics';
 import type { MetricsSummary } from '../api';
 import MetricsSparkline from './ui/MetricsSparkline';
+import { type MetricSampleSource } from '../types/metrics';
 
 // ─── LiveStatusBadge ─────────────────────────────────────────────────────────
 
@@ -19,7 +20,7 @@ const BADGE_CONFIG: Record<
   down:        { dot: 'bg-red-600',                   text: 'text-red-600',     i18nKey: 'metrics.status.down' },
 };
 
-const LiveStatusBadge = React.memo(({ status, latencyMs }: { status: SystemStatus; latencyMs?: number }) => {
+const LiveStatusBadge = React.memo(({ status, latencyMs, source }: { status: SystemStatus; latencyMs?: number; source?: MetricSampleSource }) => {
   const { t } = useLanguage();
   const cfg = BADGE_CONFIG[status];
   return (
@@ -34,6 +35,11 @@ const LiveStatusBadge = React.memo(({ status, latencyMs }: { status: SystemStatu
           <span className="text-app-muted ml-1">· {latencyMs}ms</span>
         )}
       </span>
+      {source && (
+        <span className={`rounded-full px-1.5 py-0.5 text-[9px] ${source === 'synthetic' ? 'bg-violet-500/10 text-violet-300' : 'bg-emerald-500/10 text-emerald-300'}`}>
+          {t(`metrics.origin.${source}`)}
+        </span>
+      )}
     </span>
   );
 });
@@ -78,17 +84,20 @@ interface KpiStripProps {
   data: MetricsSummary;
   previous: MetricsSummary | null;
   status: SystemStatus;
+  effectiveP95: number;
+  confidenceScore: number;
+  confidenceLabel: string;
 }
 
-function KpiStrip({ data, previous, status }: KpiStripProps) {
+function KpiStrip({ data, previous, status, effectiveP95, confidenceScore, confidenceLabel }: KpiStripProps) {
   const { t } = useLanguage();
 
 
   const items = [
     {
       label: 'P95',
-      value: `${data.p95_ms}ms`,
-      delta: <DeltaBadge current={data.p95_ms} previous={previous?.p95_ms ?? null} unit="ms" />,
+      value: `${effectiveP95}ms`,
+      delta: <DeltaBadge current={effectiveP95} previous={previous?.p95_ms ?? null} unit="ms" />,
     },
     {
       label: 'Error Rate',
@@ -102,7 +111,13 @@ function KpiStrip({ data, previous, status }: KpiStripProps) {
       delta: null,
     },
     {
-      label: 'Status',
+      label: 'Confidence',
+      value: `${confidenceScore}%`,
+      className: confidenceLabel === 'estimated' ? 'text-violet-300' : 'text-emerald-400',
+      delta: null,
+    },
+    {
+      label: 'State',
       value: t(`metrics.status.${status}`).toUpperCase(),
       className: STATUS_COLORS[status],
       delta: null,
@@ -130,7 +145,7 @@ function KpiStrip({ data, previous, status }: KpiStripProps) {
 
 const Hero = React.memo(() => {
   const { t } = useLanguage();
-  const { status, data, previous, sampleHistory, recentTraces, latestTrace, recoveryState } = useLiveMetrics();
+  const { status, data, previous, sampleHistory, recentTraces, latestTrace, latestSample, effectiveP95, confidenceScore, confidenceLabel, recoveryState } = useLiveMetrics();
 
   return (
     <section id="hero" className="pt-12 pb-12 md:pt-16 md:pb-20 px-4 max-w-6xl mx-auto relative min-h-[85vh] flex items-center">
@@ -151,7 +166,7 @@ const Hero = React.memo(() => {
             transition={{ duration: 0.4 }}
             className="mb-4"
           >
-            <LiveStatusBadge status={status} latencyMs={data?.p95_ms} />
+            <LiveStatusBadge status={status} latencyMs={effectiveP95} source={latestSample?.source} />
           </m.div>
 
           {/* H1 */}
@@ -196,7 +211,7 @@ const Hero = React.memo(() => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.35 }}
             >
-              <KpiStrip data={data} previous={previous} status={status} />
+              <KpiStrip data={data} previous={previous} status={status} effectiveP95={effectiveP95} confidenceScore={confidenceScore} confidenceLabel={confidenceLabel} />
             </m.div>
           )}
 
@@ -258,10 +273,20 @@ const Hero = React.memo(() => {
             <div className="space-y-6">
               <div>
                 <div className="text-[10px] font-mono text-app-muted mb-1">GLOBAL_STATUS</div>
-                <div className={`text-2xl font-mono font-black ${STATUS_COLORS[status]}`}>
-                  {status.toUpperCase()}
+                  <div className={`text-2xl font-mono font-black ${STATUS_COLORS[status]}`}>
+                    {status.toUpperCase()}
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono">
+                    <span className={`rounded-full px-2 py-0.5 ${confidenceLabel === 'estimated' ? 'bg-violet-500/10 text-violet-300' : 'bg-emerald-500/10 text-emerald-300'}`}>
+                      {t(`metrics.confidence.${confidenceLabel}`)} {confidenceScore}%
+                    </span>
+                    {latestSample && (
+                      <span className="rounded-full bg-app-surface/40 px-2 py-0.5 text-app-muted">
+                        {t(`metrics.origin.${latestSample.source}`)}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -270,13 +295,13 @@ const Hero = React.memo(() => {
                     {latestTrace ? latestTrace.requestId : data?.last_incident === 'none' ? 'NONE' : data?.last_incident_ago || 'N/A'}
                   </div>
                 </div>
-                <div>
-                  <div className="text-[10px] font-mono text-app-muted mb-1">RECOVERY_TIME</div>
-                  <div className="text-sm font-mono text-app-text">
-                    {latestTrace ? `${latestTrace.totalMs}ms` : data?.last_incident === 'none' ? '0ms' : '229ms'}
+                  <div>
+                    <div className="text-[10px] font-mono text-app-muted mb-1">RECOVERY_TIME</div>
+                    <div className="text-sm font-mono text-app-text">
+                      {latestTrace ? `${latestTrace.totalMs}ms` : data?.last_incident === 'none' ? '0ms' : `${effectiveP95}ms`}
+                    </div>
                   </div>
                 </div>
-              </div>
 
               <div>
                 <div className="text-[10px] font-mono text-app-muted mb-2">P95_LATENCY_HISTORY</div>

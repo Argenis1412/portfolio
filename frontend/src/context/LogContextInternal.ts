@@ -6,7 +6,7 @@ export interface LogContextValue {
   entries: LogEntry[];
   incidents: Incident[];
   addEntry: (level: LogLevel, message: string, requestId?: string) => void;
-  addIncident: (type: string, labelKey: string) => void;
+  addIncident: (type: string, labelKey: string, details?: Pick<Incident, 'impactPct' | 'durationMs' | 'origin'>) => void;
   clear: () => void;
 }
 

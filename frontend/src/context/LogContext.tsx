@@ -66,13 +66,16 @@ export function LogProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'ADD', entry });
   }, []);
 
-  const addIncident = useCallback((type: string, labelKey: string) => {
+  const addIncident = useCallback((type: string, labelKey: string, details?: Pick<Incident, 'impactPct' | 'durationMs' | 'origin'>) => {
     const incident: Incident = {
       id: Math.random().toString(36).slice(2),
       type,
       labelKey,
       startedAt: Date.now(),
       ttl: INCIDENT_TTL_MS,
+      impactPct: details?.impactPct,
+      durationMs: details?.durationMs,
+      origin: details?.origin ?? 'synthetic',
     };
     dispatch({ type: 'ADD_INCIDENT', incident });
   }, []);
