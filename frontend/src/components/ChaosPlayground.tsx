@@ -161,8 +161,12 @@ export default function ChaosPlayground() {
       const purged = res.tasks_purged ?? 0;
       addTerminalEntry('WARN', `queue.drain completed tasks_purged=${purged} request_id=${rid} trace_id=${traceId}`, rid);
       addEntry('WARN', `queue.drain status=COMPLETED tasks_purged=${purged} trace_id=${traceId}`, rid);
-      addIncident('queue_drain', 'chaos.action.drain.title');
-      emitTrace({ id: `trace-${rid}`, traceId, requestId: rid, type: 'queue_drain', endpoint: '/chaos/drain', status: 'ok', totalMs: 50, apiMs: 10, dbMs: 40, cacheMs: 0, timestamp: new Date(), impactPct: '0%', latencyDelta: '-40ms' });
+      addIncident('queue_drain', 'chaos.action.drain.title', {
+        impactPct: '0%',
+        durationMs: res.elapsed_ms ?? 50,
+        origin: 'synthetic',
+      });
+      emitTrace({ id: `trace-${rid}`, traceId, requestId: rid, type: 'queue_drain', origin: 'synthetic', endpoint: '/chaos/drain', status: 'ok', totalMs: 50, apiMs: 10, dbMs: 40, cacheMs: 0, timestamp: new Date(), impactPct: '0%', latencyDelta: '-40ms', durationMs: res.elapsed_ms ?? 50 });
       invalidateMetrics();
       startCooldown(setDrainCooldown);
     } catch (err: unknown) {
@@ -183,8 +187,12 @@ export default function ChaosPlayground() {
       await postChaosRetry();
       addTerminalEntry('INFO', `manual.retry dispatched request_id=${rid} trace_id=${traceId}`, rid);
       addEntry('INFO', `manual.retry status=COMPLETED trace_id=${traceId}`, rid);
-      addIncident('manual_retry', 'chaos.action.retry.title');
-      emitTrace({ id: `trace-${rid}`, traceId, requestId: rid, type: 'manual_retry', endpoint: '/chaos/retry', status: 'ok', totalMs: 120, apiMs: 20, dbMs: 100, cacheMs: 0, timestamp: new Date(), impactPct: '5%', latencyDelta: '+80ms' });
+      addIncident('manual_retry', 'chaos.action.retry.title', {
+        impactPct: '5%',
+        durationMs: 120,
+        origin: 'synthetic',
+      });
+      emitTrace({ id: `trace-${rid}`, traceId, requestId: rid, type: 'manual_retry', origin: 'synthetic', endpoint: '/chaos/retry', status: 'ok', totalMs: 120, apiMs: 20, dbMs: 100, cacheMs: 0, timestamp: new Date(), impactPct: '5%', latencyDelta: '+80ms', durationMs: 120 });
       invalidateMetrics();
       startCooldown(setRetryCooldown);
     } catch (err: unknown) {
@@ -205,8 +213,12 @@ export default function ChaosPlayground() {
       const res: ChaosResponse = await postChaosLatency();
       addTerminalEntry('WARN', `latency.injection status=TIMEOUT latency_ms=${res.latency_ms} circuit_breaker=OPEN request_id=${rid} trace_id=${traceId}`, rid);
       addEntry('WARN', `latency.injection status=TIMEOUT latency_ms=${res.latency_ms} circuit_breaker=OPEN trace_id=${traceId}`, rid);
-      addIncident('latency_injection', 'chaos.action.latency.title');
-      emitTrace({ id: `trace-${rid}`, traceId, requestId: rid, type: 'latency_injection', endpoint: '/chaos/latency', status: 'error', totalMs: res.latency_ms || 3000, apiMs: 50, dbMs: (res.latency_ms || 3000) - 50, cacheMs: 0, timestamp: new Date(), impactPct: '100%', latencyDelta: `+${((res.latency_ms || 3000)/1000).toFixed(1)}s` });
+      addIncident('latency_injection', 'chaos.action.latency.title', {
+        impactPct: '100%',
+        durationMs: res.latency_ms ?? 3000,
+        origin: 'synthetic',
+      });
+      emitTrace({ id: `trace-${rid}`, traceId, requestId: rid, type: 'latency_injection', origin: 'synthetic', endpoint: '/chaos/latency', status: 'error', totalMs: res.latency_ms || 3000, apiMs: 50, dbMs: (res.latency_ms || 3000) - 50, cacheMs: 0, timestamp: new Date(), impactPct: '100%', latencyDelta: `+${((res.latency_ms || 3000)/1000).toFixed(1)}s`, durationMs: res.latency_ms ?? 3000 });
       invalidateMetrics();
       startCooldown(setLatencyCooldown);
     } catch (err: unknown) {
@@ -363,7 +375,7 @@ export default function ChaosPlayground() {
                               {remaining}s
                             </span>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${
                               isInvestigating 
                                 ? 'bg-amber-500/10 border-amber-500/20 text-amber-200' 
@@ -371,6 +383,21 @@ export default function ChaosPlayground() {
                             }`}>
                               {isInvestigating ? 'INVESTIGATING' : 'MITIGATING'}
                             </span>
+                            {inc.origin && (
+                              <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${inc.origin === 'synthetic' ? 'bg-violet-500/10 border-violet-500/20 text-violet-200' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200'}`}>
+                                {inc.origin}
+                              </span>
+                            )}
+                            {inc.impactPct && (
+                              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-red-500/20 bg-red-500/10 text-red-200">
+                                impact {inc.impactPct}
+                              </span>
+                            )}
+                            {inc.durationMs !== undefined && (
+                              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-app-border/30 bg-app-surface/40 text-app-muted">
+                                duration {inc.durationMs}ms
+                              </span>
+                            )}
                             <div className="flex-grow h-[2px] bg-app-border/30 rounded-full overflow-hidden">
                               <m.div 
                                 initial={{ width: '100%' }}

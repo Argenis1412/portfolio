@@ -1,13 +1,56 @@
 import { motion } from 'framer-motion';
+import { useMemo } from 'react';
 import Skeleton from './ui/Skeleton';
 import { Github, ExternalLink } from 'lucide-react';
 import { useProjects } from '../hooks/useApi';
 import { useLanguage } from '../context/LanguageContext';
 import { ServerWakeupError } from './ServerWakeupNotice';
 
+interface StorySections {
+  problem: string;
+  constraint: string;
+  decision: string;
+  tradeoff: string;
+  impact: string;
+}
+
+function parseProjectStory(raw: string | undefined): StorySections {
+  if (!raw) {
+    return { problem: '', constraint: '', decision: '', tradeoff: '', impact: '' };
+  }
+
+  const paragraphs = (() => {
+    if (typeof DOMParser !== 'undefined') {
+      const doc = new DOMParser().parseFromString(raw, 'text/html');
+      return Array.from(doc.querySelectorAll('.project-story p'))
+        .map((node) => node.textContent?.trim() ?? '')
+        .filter(Boolean);
+    }
+
+    return Array.from(raw.matchAll(/<p>(.*?)<\/p>/g))
+      .map((match) => match[1].replace(/<[^>]+>/g, '').trim())
+      .filter(Boolean);
+  })();
+
+  return {
+    problem: paragraphs[0] ?? '',
+    constraint: paragraphs[1] ?? '',
+    decision: paragraphs[2] ?? '',
+    tradeoff: paragraphs[3] ?? '',
+    impact: paragraphs[4] ?? '',
+  };
+}
+
 export default function Projects() {
   const { data: projects, isLoading, isError } = useProjects();
   const { language, t } = useLanguage();
+  const labels = useMemo(() => ([
+    { key: 'problem', label: t('projects.problem') },
+    { key: 'constraint', label: t('projects.constraint') },
+    { key: 'decision', label: t('projects.decision') },
+    { key: 'tradeoff', label: t('projects.tradeoff') },
+    { key: 'impact', label: t('projects.impact') },
+  ]), [t]);
 
   if (isLoading) {
     return (
@@ -72,8 +115,7 @@ export default function Projects() {
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           {projects.map((project, index) => {
             const shortDescription = project.descricao_curta[language as keyof typeof project.descricao_curta];
-            const capabilities = project.funcionalidades ?? [];
-            const learnings = project.aprendizados ?? [];
+            const story = parseProjectStory(project.descricao_completa?.[language as keyof typeof project.descricao_completa]);
 
             return (
               <motion.article
@@ -102,37 +144,22 @@ export default function Projects() {
                   {shortDescription}
                 </p>
 
-                <div className="grid gap-4 md:grid-cols-2 mb-5">
-                  <div className="rounded-xl border border-app-border/60 bg-app-surface/35 p-4">
-                    <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-app-muted mb-3">
-                      {t('projects.capabilities')}
-                    </div>
-                    <ul className="space-y-2">
-                      {capabilities.slice(0, 5).map((item) => (
-                        <li key={item} className="flex gap-2 text-sm text-app-text/85">
-                          <span className="text-app-primary">▸</span>
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="rounded-xl border border-app-border/60 bg-app-surface/35 p-4">
-                    <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-app-muted mb-3">
-                      {t('projects.learning')}
-                    </div>
-                    <ul className="space-y-2">
-                      {learnings.slice(0, 5).map((item) => (
-                        <li key={item} className="flex gap-2 text-sm text-app-text/85">
-                          <span className="text-app-primary">▸</span>
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                <div className="grid gap-3 md:grid-cols-2 mb-5">
+                  {labels.map(({ key, label }) => {
+                    const value = story[key as keyof StorySections];
+                    return (
+                      <div key={key} className="rounded-xl border border-app-border/60 bg-app-surface/35 p-4">
+                        <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-app-muted mb-2">
+                          {label}
+                        </div>
+                        <p className="text-sm leading-relaxed text-app-text/85">{value}</p>
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <div className="rounded-xl border border-app-border/60 bg-[#0F141A] p-4 mb-5 font-mono text-xs text-slate-300">
+                  <div className="text-[10px] uppercase tracking-[0.22em] text-slate-500 mb-3">{t('projects.stack')}</div>
                   <div className="flex flex-wrap gap-x-6 gap-y-2">
                     <div>
                       <span className="text-slate-400">{t('projects.runtime')}:</span>
@@ -140,7 +167,7 @@ export default function Projects() {
                     </div>
                     <div>
                       <span className="text-slate-400">{t('projects.surface')}:</span>
-                      <span className="ml-2 text-slate-100">{capabilities.length} checks</span>
+                      <span className="ml-2 text-slate-100">{project.funcionalidades?.length ?? 0} signals</span>
                     </div>
                   </div>
                 </div>

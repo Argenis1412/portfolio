@@ -1,10 +1,6 @@
 import { useMemo } from 'react';
 import type { TraceEntry } from '../../services/TraceEmitter';
-
-export interface MetricSample {
-  value: number;
-  timestamp: number;
-}
+import { type MetricSample } from '../../types/metrics';
 
 interface MetricsSparklineProps {
   samples: MetricSample[];
@@ -23,6 +19,12 @@ const TRACE_STYLE: Record<TraceEntry['type'], { stroke: string; fill: string; la
   latency_injection: { stroke: '#f59e0b', fill: '#f59e0b', label: 'LATENCY' },
 };
 
+function annotationWidth(label: string, meta?: string) {
+  const base = Math.max(40, label.length * 6 + 12);
+  const metaWidth = meta ? Math.max(base, meta.length * 5 + 12) : base;
+  return metaWidth;
+}
+
 export default function MetricsSparkline({
   samples,
   traces = [],
@@ -40,24 +42,30 @@ export default function MetricsSparkline({
         : Array.from({ length: 10 }, (_, i) => ({
             value: PLACEHOLDER_VALUE,
             timestamp: REFERENCE_TIME - (9 - i) * 15_000,
+            source: 'real',
+            confidence: 98,
           }));
 
     const _samples =
       effectiveSamples.length === 1
         ? [
-            { value: effectiveSamples[0].value, timestamp: effectiveSamples[0].timestamp - 15000 },
-            effectiveSamples[0],
-          ]
-        : effectiveSamples;
+             { ...effectiveSamples[0], timestamp: effectiveSamples[0].timestamp - 15000 },
+             effectiveSamples[0],
+           ]
+         : effectiveSamples;
 
     const paddingX = compact ? 4 : 8;
     const paddingY = compact ? 6 : 10;
     const innerW = width - paddingX * 2;
     const innerH = height - paddingY * 2;
     const values = effectiveSamples.map((sample) => sample.value);
-    const min = Math.min(...values, 0, 40);
-    const max = Math.max(...values, 120);
+    const sampleMin = Math.min(...values);
+    const sampleMax = Math.max(...values);
+    const padding = Math.max(10, Math.round((sampleMax - sampleMin || 20) * 0.2));
+    const min = Math.max(0, sampleMin - padding);
+    const max = sampleMax + padding;
     const range = max - min || 1;
+    const baseline = Math.round(values.reduce((sum, value) => sum + value, 0) / values.length);
 
     const pointAt = (sample: MetricSample, index: number) => {
       const x = paddingX + (index / (_samples.length - 1)) * innerW;
@@ -67,6 +75,15 @@ export default function MetricsSparkline({
 
     const points = _samples.map(pointAt);
     const polyline = points.map((point) => `${point.x.toFixed(1)},${point.y.toFixed(1)}`).join(' ');
+
+    const segmentPathForSource = (source: MetricSample['source']) => {
+      const segmentPoints = _samples
+        .map((sample, index) => ({ sample, point: points[index] }))
+        .filter(({ sample }) => sample.source === source)
+        .map(({ point }) => `${point.x.toFixed(1)},${point.y.toFixed(1)}`)
+        .join(' ');
+      return segmentPoints;
+    };
 
     const annotations = traces
       .filter((trace) => trace.timestamp instanceof Date)
@@ -89,7 +106,17 @@ export default function MetricsSparkline({
       })
       .slice(0, compact ? 2 : 4);
 
-    return { min, max, points, polyline, annotations };
+    return {
+      min,
+      max,
+      baseline,
+      points,
+      polyline,
+      syntheticPolyline: segmentPathForSource('synthetic'),
+      realPolyline: segmentPathForSource('real'),
+      annotations,
+      samples: _samples,
+    };
   }, [compact, height, samples, traces, width]);
 
   if (!model) return null;
@@ -99,7 +126,10 @@ export default function MetricsSparkline({
     return { threshold, y };
   });
 
-  const recentPoints = model.points.slice(-3);
+  const baselineY = 6 + (height - 12) - ((model.baseline - model.min) / ((model.max - model.min) || 1)) * (height - 12);
+
+  const latestPoint = model.points.at(-1);
+  const latestSample = model.samples.at(-1);
 
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden>
@@ -130,6 +160,22 @@ export default function MetricsSparkline({
         </g>
       ))}
 
+      <line
+        x1="0"
+        y1={baselineY}
+        x2={width}
+        y2={baselineY}
+        stroke="#94a3b8"
+        strokeOpacity={compact ? 0.18 : 0.28}
+        strokeDasharray="4 3"
+        strokeWidth="1"
+      />
+      {!compact && (
+        <text x="6" y={baselineY - 4} fontSize="8" fontFamily="monospace" fill="#94a3b8" opacity="0.75">
+          avg {model.baseline}ms
+        </text>
+      )}
+
       {/* Area under the curve */}
       <path
         d={`M ${model.points[0].x},${height} L ${model.points.map(p => `${p.x},${p.y}`).join(' L ')} L ${model.points[model.points.length - 1].x},${height} Z`}
@@ -140,16 +186,51 @@ export default function MetricsSparkline({
       <polyline
         fill="none"
         stroke="#14d3a5"
-        strokeWidth={compact ? '1.5' : '1.8'}
+        strokeWidth={compact ? '1.5' : '2'}
         strokeLinejoin="round"
         strokeLinecap="round"
         points={model.polyline}
+        strokeOpacity="0.18"
       />
 
-      {model.annotations.map(({ trace, point }) => {
+      {model.realPolyline && (
+        <polyline
+          fill="none"
+          stroke="#14d3a5"
+          strokeWidth={compact ? '1.5' : '2'}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          points={model.realPolyline}
+        />
+      )}
+
+      {model.syntheticPolyline && (
+        <polyline
+          fill="none"
+          stroke="#a855f7"
+          strokeWidth={compact ? '1.5' : '2'}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          strokeDasharray="5 3"
+          points={model.syntheticPolyline}
+          strokeOpacity="0.95"
+        />
+      )}
+
+      {model.annotations.map(({ trace, point }, index, annotations) => {
         const style = TRACE_STYLE[trace.type];
         const isSpike = trace.type === 'traffic_spike';
         const markerColor = isSpike ? '#ef4444' : style.stroke;
+        const metaText = `${trace.impactPct ? `aff:${trace.impactPct}` : ''}${trace.impactPct && trace.latencyDelta ? ' ' : ''}${trace.latencyDelta ? `Δ:${trace.latencyDelta}` : ''}`.trim();
+        const boxWidth = annotationWidth(isSpike ? 'SPIKE' : style.label, metaText || undefined);
+        const desiredX = point.x + 4;
+        const clampedX = Math.min(desiredX, width - boxWidth - 6);
+        const previous = annotations[index - 1];
+        const isCrowded = previous ? Math.abs(previous.point.x - point.x) < boxWidth * 0.9 : false;
+        const lane = isCrowded ? index % 3 : index % 2;
+        const laneHeights = [18, 38, 58];
+        const labelX = previous && isCrowded && clampedX <= previous.point.x ? Math.max(6, clampedX - 20) : clampedX;
+        const labelY = Math.max(16, Math.min(laneHeights[lane], height - (metaText ? 34 : 20)));
         
         return (
           <g key={trace.id}>
@@ -159,47 +240,46 @@ export default function MetricsSparkline({
               x2={point.x}
               y2={height}
               stroke={markerColor}
-              strokeWidth="1.2"
+              strokeWidth="1"
               strokeDasharray={isSpike ? "none" : "3 2"}
-              strokeOpacity={0.8}
+              strokeOpacity={0.45}
             />
             {!compact && (
-              <g transform={`translate(${point.x + 4}, 12)`}>
-                <rect 
-                   x="-2" y="-10" width={trace.type.length * 5 + 10} height="14" 
-                   fill={markerColor} rx="2" 
-                />
-                <text x="2" y="1" fontSize="9" fontWeight="bold" fill="#000" fontFamily="monospace">
-                  {isSpike ? 'SPIKE' : style.label}
-                </text>
-                {(trace.impactPct || trace.latencyDelta) && (
-                  <g transform="translate(0, 14)">
-                    <rect 
-                      x="-2" y="0" width={trace.type.length * 5 + 10} height="12" 
-                      fill="#000" fillOpacity="0.6" rx="2" 
-                    />
-                    <text x="2" y="9" fontSize="7" fill="#fff" fontFamily="monospace opacity-80">
-                      {trace.impactPct && `aff:${trace.impactPct}`} {trace.latencyDelta && `Δ:${trace.latencyDelta}`}
-                    </text>
-                  </g>
-                )}
+              <g transform={`translate(${labelX}, ${labelY})`}>
+                 <rect 
+                    x="-2" y="-10" width={boxWidth} height="14" 
+                    fill={markerColor} rx="2" fillOpacity="0.82"
+                 />
+                 <text x="2" y="1" fontSize="9" fontWeight="bold" fill="#000" fontFamily="monospace">
+                   {isSpike ? 'SPIKE' : style.label}
+                 </text>
+                {metaText && (
+                   <g transform="translate(0, 14)">
+                     <rect 
+                       x="-2" y="0" width={boxWidth} height="12" 
+                       fill="#000" fillOpacity="0.6" rx="2" 
+                     />
+                     <text x="2" y="9" fontSize="7" fill="#fff" fontFamily="monospace opacity-80">
+                       {metaText}
+                     </text>
+                   </g>
+                 )}
               </g>
             )}
           </g>
         );
       })}
 
-      {recentPoints.map((point, index) => (
+      {latestPoint && latestSample && (
         <circle
-          key={`${point.x}-${index}`}
-          cx={point.x}
-          cy={point.y}
-          r={index === recentPoints.length - 1 ? '3' : '2'}
-          fill="#14d3a5"
-          stroke="#000"
-          strokeWidth="0.5"
+          cx={latestPoint.x}
+          cy={latestPoint.y}
+          r={compact ? '2.5' : '3'}
+          fill={latestSample.source === 'synthetic' ? '#a855f7' : '#14d3a5'}
+          stroke="#020617"
+          strokeWidth="0.7"
         />
-      ))}
+      )}
     </svg>
   );
 }

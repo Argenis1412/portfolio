@@ -11,9 +11,9 @@
     "data_inicio": "2025-12-20",
     "data_fim": "2026-03-06",
     "descricao": {
-      "pt": "Designed REST APIs with FastAPI\nImplemented structured logging and Hexagonal Architecture\nBuilt metrics collection (p95, error rate)",
-      "en": "Designed REST APIs with FastAPI\nImplemented structured logging and Hexagonal Architecture\nBuilt metrics collection (p95, error rate)",
-      "es": "Diseñé APIs REST con FastAPI\nImplementé logging estructurado y Arquitectura Hexagonal\nConstruí recolección de métricas (p95, tasa de error)"
+      "pt": "[Decision] Estruturei o projeto como um laboratório de lógica de pagamentos, com foco em cálculos financeiros determinísticos e fronteiras limpas entre domínio, API e persistência.\n[Learning] Consolidei regras explícitas para dinheiro, débito, crédito em 2-6x sem juros e crédito em 12-24x com juros de 10%, mantendo o backend como única fonte de verdade.\n[Impact] A última parcela absorve qualquer deriva de arredondamento, garantindo totais matematicamente exatos e regras desacopladas de FastAPI e SQLAlchemy.\n[Impact] Stack aplicada: FastAPI, PostgreSQL, SQLAlchemy, Pytest, React e TypeScript.",
+      "en": "[Decision] I structured the project as a payment logic laboratory focused on deterministic financial calculations and clean boundaries between domain, API, and persistence.\n[Learning] I consolidated explicit rules for cash, debit, credit in 2-6 installments with 0% interest, and credit in 12-24 installments with 10% interest while keeping the backend as the single source of truth.\n[Impact] The final installment absorbs any rounding drift, guaranteeing mathematically exact totals and rules fully decoupled from FastAPI and SQLAlchemy.\n[Impact] Applied stack: FastAPI, PostgreSQL, SQLAlchemy, Pytest, React, and TypeScript.",
+      "es": "[Decision] Estructuré el proyecto como un laboratorio de lógica de pagos enfocado en cálculos financieros deterministas y fronteras limpias entre dominio, API y persistencia.\n[Learning] Consolidé reglas explícitas para dinero, débito, crédito en 2-6 cuotas sin interés y crédito en 12-24 cuotas con 10% de interés, manteniendo el backend como única fuente de verdad.\n[Impact] La última cuota absorbe cualquier deriva de redondeo, garantizando totales matemáticamente exactos y reglas desacopladas de FastAPI y SQLAlchemy.\n[Impact] Stack aplicada: FastAPI, PostgreSQL, SQLAlchemy, Pytest, React y TypeScript."
     },
     "tecnologias": [
       "Python",
@@ -42,9 +42,9 @@
     "data_inicio": "2025-06-01",
     "data_fim": "2025-10-31",
     "descricao": {
-      "pt": "Operated regulated onboarding and contract workflows\nValidated proposal and customer data across internal systems\nSupported financial operations under compliance constraints",
-      "en": "Operated regulated onboarding and contract workflows\nValidated proposal and customer data across internal systems\nSupported financial operations under compliance constraints",
-      "es": "Operé flujos regulados de onboarding y contratos\nValidé propuestas y datos de clientes en sistemas internos\nDi soporte a operaciones financieras bajo restricciones de cumplimiento"
+      "pt": "[Decision] Atuei como consultor de negócios em consórcio, crédito imobiliário e crédito veicular, combinando prospecção ativa, reuniões comerciais e entendimento das necessidades do cliente.\n[Learning] Desenvolvi comunicação consultiva, qualificação de oportunidades e condução de negociações orientadas a relacionamento e confiança.\n[Impact] A experiência ampliou minha visão de produto, contexto financeiro e leitura prática das dores do usuário antes da solução técnica.",
+      "en": "[Decision] I worked as a business consultant in consortium sales, real estate credit, and vehicle credit, combining active prospecting, commercial meetings, and customer needs assessment.\n[Learning] I developed consultative communication, opportunity qualification, and negotiation skills guided by relationship-building and trust.\n[Impact] The experience expanded my product awareness, financial context, and practical understanding of user pain points before the technical solution.",
+      "es": "[Decision] Trabajé como consultor de negocios en consorcio, crédito inmobiliario y crédito vehicular, combinando prospección activa, reuniones comerciales y comprensión de las necesidades del cliente.\n[Learning] Desarrollé comunicación consultiva, calificación de oportunidades y habilidades de negociación guiadas por relación y confianza.\n[Impact] La experiencia amplió mi visión de producto, contexto financiero y comprensión práctica de los dolores del usuario antes de la solución técnica."
     },
     "tecnologias": [],
     "atual": false

@@ -4,4 +4,7 @@ export interface Incident {
   labelKey: string;
   startedAt: number; // ms
   ttl: number;       // ms
+  impactPct?: string;
+  durationMs?: number;
+  origin?: 'synthetic' | 'real';
 }

@@ -20,7 +20,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 w-full z-50 glass">
+    <nav className="fixed top-0 w-full z-50 glass border-b border-app-border/70">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex-shrink-0 hidden md:block">
@@ -70,7 +70,7 @@ export default function Navbar() {
           <div className="flex items-center gap-4">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-full hover:bg-app-surface-hover transition-colors text-app-text"
+              className="p-2 rounded-full border border-app-border/50 bg-app-surface/60 hover:bg-app-surface-hover transition-colors text-app-text"
               aria-label="Toggle Theme"
             >
               {theme === 'dark' ? (

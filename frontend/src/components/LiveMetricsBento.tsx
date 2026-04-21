@@ -70,9 +70,15 @@ export default function LiveMetricsBento() {
     isLoading,
     previous,
     sampleHistory,
+    latestSample,
+    effectiveP95,
+    confidenceScore,
+    confidenceLabel,
     baselineP95,
     latestTrace,
     recentTraces,
+    displayLifecycle,
+    strategyProfile,
   } = useLiveMetrics();
   const { t } = useLanguage();
   const currentTime = useCurrentTime(1000);
@@ -105,38 +111,57 @@ export default function LiveMetricsBento() {
   const hasIncident = data.last_incident !== 'none';
   const incidentDot = hasIncident ? 'bg-amber-400' : 'bg-emerald-500';
   const incidentText = hasIncident ? 'text-amber-400' : 'text-emerald-500';
-  const latencyDelta = previous ? data.p95_ms - previous.p95_ms : null;
-  const baselineDelta = baselineP95 === null ? null : data.p95_ms - baselineP95;
-   const latestEventLabel = latestTrace ? t(`metrics.incident.${latestTrace.type}`) : t('metrics.incident.none');
-   const latestEventAgoSeconds = latestTrace ? Math.max(0, Math.floor((currentTime - latestTrace.timestamp.getTime()) / 1000)) : null;
+  const latencyDelta = previous ? effectiveP95 - previous.p95_ms : null;
+  const baselineDelta = baselineP95 === null ? null : effectiveP95 - baselineP95;
+  const latestEventLabel = latestTrace ? t(`metrics.incident.${latestTrace.type}`) : t('metrics.incident.none');
+  const latestEventAgoSeconds = latestTrace ? Math.max(0, Math.floor((currentTime - latestTrace.timestamp.getTime()) / 1000)) : null;
+  const confidenceTone = confidenceLabel === 'estimated' ? 'bg-violet-500/10 text-violet-700 border-violet-500/20 dark:text-violet-300' : 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:text-emerald-300';
+  const activePath = strategyProfile.activePath;
 
   return (
     <section id="metrics" aria-label="Live system metrics" className="px-4 max-w-6xl mx-auto py-12">
-      <div className="mb-6">
+      <div className="mb-6 text-center lg:text-left">
         <h2 className="text-xs font-mono uppercase tracking-[0.2em] text-app-primary mb-1">
           {t('metrics.system_status').toUpperCase()}
         </h2>
-        <p className="text-xs font-mono text-app-muted max-w-lg">
+        <p className="text-xs font-mono text-app-muted max-w-lg mx-auto lg:mx-0">
           {t('metrics.section_subtitle')}
         </p>
+        <div className="mt-3 flex flex-wrap items-center justify-center lg:justify-start gap-2 text-[10px] font-mono">
+          <span className={`rounded-full border px-2 py-1 ${confidenceTone}`}>
+            {t(`metrics.confidence.${confidenceLabel}`)} {confidenceScore}%
+          </span>
+          {latestSample && (
+            <span className="rounded-full border border-app-border/40 bg-app-surface/30 px-2 py-1 text-app-muted">
+              {t(`metrics.origin.${latestSample.source}`)}
+            </span>
+          )}
+          <span className="rounded-full border border-app-border/40 bg-app-surface/30 px-2 py-1 text-app-muted">
+            {t(`metrics.lifecycle.${displayLifecycle}`)}
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
         <Tile index={0} label={t('metrics.system_status')}>
           <div className="flex items-center gap-2 mt-1">
             <span className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${statusCfg.dot}`} />
-            <span className={`font-mono text-lg font-bold ${statusCfg.text}`}>
-              {t(statusCfg.i18nKey)}
-            </span>
-          </div>
-          <UpdatedAgo timestamp={data.timestamp} />
+                <span className={`font-mono text-lg font-bold ${statusCfg.text}`}>
+                  {t(statusCfg.i18nKey)}
+                </span>
+              </div>
+              <UpdatedAgo timestamp={data.timestamp} />
+              <div className="flex flex-wrap gap-2 text-[10px] font-mono">
+                <span className={`rounded-full px-2 py-0.5 ${confidenceTone}`}>{t(`metrics.confidence.${confidenceLabel}`)} {confidenceScore}%</span>
+                <span className="rounded-full border border-app-border/40 bg-app-surface/40 px-2 py-0.5 text-app-muted">{t(`metrics.origin.${latestSample?.source ?? 'real'}`)}</span>
+              </div>
         </Tile>
 
         <Tile index={1} label={t('metrics.latency')}>
           <div className="mt-1 flex flex-col gap-3">
             <div className="flex items-end justify-between gap-4">
               <div className="flex items-end gap-1">
-                <span className="font-mono text-2xl font-bold text-app-text">{data.p95_ms}</span>
+                <span className="font-mono text-2xl font-bold text-app-text">{effectiveP95}</span>
                 <span className="text-sm font-normal text-app-muted mb-1">ms</span>
               </div>
               {baselineP95 !== null && <span className="text-[10px] font-mono text-app-muted">baseline {baselineP95}ms</span>}
@@ -161,10 +186,15 @@ export default function LiveMetricsBento() {
                   {t('metrics.delta.baseline')} {baselineDelta > 0 ? '+' : ''}{baselineDelta}ms
                 </span>
               )}
+              {latestSample && (
+                <span className={`rounded-full px-2 py-0.5 text-[10px] font-mono ${latestSample.source === 'synthetic' ? 'bg-violet-500/10 text-violet-700 dark:text-violet-300' : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'}`}>
+                  {t(`metrics.origin.${latestSample.source}`)}
+                </span>
+              )}
             </div>
           </div>
-          <span className={`text-xs font-mono px-2 py-0.5 rounded-full w-fit ${data.p95_status === 'healthy' ? 'bg-emerald-500/15 text-emerald-500' : 'bg-amber-400/15 text-amber-400'}`}>
-            {t(`metrics.health.${data.p95_status}`)}
+          <span className={`text-xs font-mono px-2 py-0.5 rounded-full w-fit ${effectiveP95 <= 60 ? 'bg-emerald-500/15 text-emerald-500' : effectiveP95 <= 100 ? 'bg-amber-400/15 text-amber-400' : 'bg-red-500/15 text-red-400'}`}>
+            {effectiveP95 <= 60 ? t('metrics.health.healthy') : effectiveP95 <= 100 ? t('metrics.health.warning') : t('metrics.status.degraded')}
           </span>
         </Tile>
 
@@ -204,14 +234,15 @@ export default function LiveMetricsBento() {
 
         <Tile index={4} label={t('metrics.retries_1h')}>
           <div className="flex items-center gap-2 mt-1">
-            {data.retries_1h > 5 && <span className="text-red-400 text-lg">⚠</span>}
-            <span className={`font-mono text-2xl font-bold ${data.retries_1h > 10 ? 'text-red-400' : data.retries_1h > 0 ? 'text-amber-400' : 'text-app-text'}`}>
-              {data.retries_1h}
+            {strategyProfile.retryBudget > 5 && <span className="text-red-400 text-lg">⚠</span>}
+            <span className={`font-mono text-2xl font-bold ${strategyProfile.retryBudget > 10 ? 'text-red-400' : strategyProfile.retryBudget > 0 ? 'text-amber-400' : 'text-app-text'}`}>
+              {strategyProfile.retryBudget}
             </span>
           </div>
-          <span className={`text-xs font-mono px-2 py-0.5 rounded-full w-fit ${data.retries_1h > 10 ? 'bg-red-500/15 text-red-400' : data.retries_1h > 0 ? 'bg-amber-400/15 text-amber-400' : 'bg-emerald-500/15 text-emerald-500'}`}>
-            {data.retries_1h > 10 ? t('metrics.health.investigating') : data.retries_1h > 0 ? t('metrics.health.warning') : t('metrics.health.stable')}
+          <span className={`text-xs font-mono px-2 py-0.5 rounded-full w-fit ${strategyProfile.retryBudget > 10 ? 'bg-red-500/15 text-red-400' : strategyProfile.retryBudget > 0 ? 'bg-amber-400/15 text-amber-400' : 'bg-emerald-500/15 text-emerald-500'}`}>
+            {strategyProfile.retryBudget > 10 ? t('metrics.health.investigating') : strategyProfile.retryBudget > 0 ? t('metrics.health.warning') : t('metrics.health.stable')}
           </span>
+          <span className="text-[10px] font-mono text-app-muted">{t('metrics.strategy.retry')} {strategyProfile.source === 'synthetic' ? t('metrics.strategy.synthetic') : t('metrics.strategy.backend')}</span>
         </Tile>
 
         <Tile index={5} label={t('metrics.last_incident')}>
@@ -245,6 +276,8 @@ export default function LiveMetricsBento() {
             <span>{t('metrics.legend.healthy')}</span>
             <span>{t('metrics.legend.warning')}</span>
             <span>{t('metrics.legend.degraded')}</span>
+            <span>{t('metrics.legend.real')}</span>
+            <span>{t('metrics.legend.synthetic')}</span>
           </div>
         </div>
 
@@ -259,7 +292,7 @@ export default function LiveMetricsBento() {
                 { pathKey: 'async',    labelKey: 'metrics.system_model.async',    color: 'text-amber-400' },
                 { pathKey: 'fallback', labelKey: 'metrics.system_model.fallback', color: 'text-blue-400' },
               ].map(({ pathKey, labelKey, color }) => {
-                const active = (data.active_path ?? 'sync') === pathKey;
+                const active = activePath === pathKey;
                 return (
                   <div key={pathKey} className="flex items-center justify-between">
                     <span className={`text-xs font-mono ${active ? color : 'text-app-muted/50'}`}>{t(labelKey)}</span>
@@ -275,12 +308,31 @@ export default function LiveMetricsBento() {
             <div className="rounded-xl border border-app-border/50 bg-app-surface/30 p-3">
               <div className="text-[10px] font-mono uppercase tracking-widest text-app-muted">{t('metrics.system_model.lifecycle')}</div>
               <div className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-mono ${
-                data.system_lifecycle === 'DEGRADED'   ? 'bg-red-500/10 text-red-400' :
-                data.system_lifecycle === 'RECOVERING' ? 'bg-amber-500/10 text-amber-400' :
-                data.system_lifecycle === 'STABLE'     ? 'bg-emerald-500/10 text-emerald-400' :
+                displayLifecycle === 'DEGRADED'   ? 'bg-red-500/10 text-red-400' :
+                displayLifecycle === 'RECOVERING' ? 'bg-amber-500/10 text-amber-400' :
+                displayLifecycle === 'STABLE'     ? 'bg-emerald-500/10 text-emerald-400' :
                 'bg-emerald-500/10 text-emerald-500'
               }`}>
-                {data.system_lifecycle ?? 'NORMAL'}
+                {displayLifecycle}
+              </div>
+              <div className="mt-2 text-[10px] font-mono text-app-muted">{t(`metrics.origin.${strategyProfile.source}`)}</div>
+            </div>
+
+            <div className="rounded-xl border border-app-border/50 bg-app-surface/30 p-3">
+              <div className="text-[10px] font-mono uppercase tracking-widest text-app-muted">{t('metrics.strategy.title')}</div>
+              <div className="mt-2 grid gap-2 text-xs font-mono text-app-text">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-app-muted">{t('metrics.strategy.retry')}</span>
+                  <span>{strategyProfile.retryBudget}x</span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-app-muted">{t('metrics.strategy.cache')}</span>
+                  <span>TTL {strategyProfile.cacheTtlSeconds}s</span>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-app-muted">{t('metrics.strategy.source')}</span>
+                  <span>{t(`metrics.origin.${strategyProfile.source}`)}</span>
+                </div>
               </div>
             </div>
 

@@ -26,6 +26,11 @@ Selected **Sentry**, **Prometheus**, and **OpenTelemetry** as the observability 
 - **Implementation**: `/metrics` endpoint provided via slowapi/pydantic middleware.
 - **Result**: Live tracking of request counts, error rates, and latency buckets.
 
+### 4. Frontend Telemetry Reconciliation Layer
+- **Why**: Chaos controls must visibly affect the dashboard immediately, but the UI must not misrepresent synthetic projections as backend truth.
+- **Implementation**: The frontend now appends a short-lived synthetic P95 sample whenever a chaos trace is emitted, marks it as `synthetic`, and reconciles it with the next successful `/metrics/summary` poll marked as `real`.
+- **Result**: Operators see coherent telemetry during manual chaos actions, along with confidence and source metadata that prevent misleading "instant backend" claims.
+
 ### 3. OpenTelemetry (Tracing)
 - **Why**: Vendor-neutral standard for distributed tracing.
 - **Implementation**: Instrumented FastAPI middleware to generate Span IDs.
@@ -34,6 +39,11 @@ Selected **Sentry**, **Prometheus**, and **OpenTelemetry** as the observability 
 ## Pros and Cons
 - **Pros**: Production-ready visibility, easier debugging, better scalability.
 - **Cons**: Small overhead in response time and complexity in initialization.
+
+## Consequences
+- The telemetry sparkline intentionally shows two classes of data: backend-confirmed samples and synthetic projections.
+- UI state such as lifecycle (`NORMAL`, `DEGRADED`, `RECOVERING`) may temporarily reflect synthetic chaos projections before the backend poll catches up.
+- Confidence indicators are required anywhere synthetic data can temporarily influence user-facing metrics.
 
 ## Next Steps
 - Integrate Grafana dashboards to visualize Prometheus metrics.
