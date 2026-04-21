@@ -217,15 +217,20 @@ export default function MetricsSparkline({
         />
       )}
 
-      {model.annotations.map(({ trace, point }) => {
+      {model.annotations.map(({ trace, point }, index, annotations) => {
         const style = TRACE_STYLE[trace.type];
         const isSpike = trace.type === 'traffic_spike';
         const markerColor = isSpike ? '#ef4444' : style.stroke;
         const metaText = `${trace.impactPct ? `aff:${trace.impactPct}` : ''}${trace.impactPct && trace.latencyDelta ? ' ' : ''}${trace.latencyDelta ? `Δ:${trace.latencyDelta}` : ''}`.trim();
         const boxWidth = annotationWidth(isSpike ? 'SPIKE' : style.label, metaText || undefined);
         const desiredX = point.x + 4;
-        const labelX = Math.min(desiredX, width - boxWidth - 6);
-        const labelY = Math.max(16, Math.min(18, point.y - 14));
+        const clampedX = Math.min(desiredX, width - boxWidth - 6);
+        const previous = annotations[index - 1];
+        const isCrowded = previous ? Math.abs(previous.point.x - point.x) < boxWidth * 0.9 : false;
+        const lane = isCrowded ? index % 3 : index % 2;
+        const laneHeights = [18, 38, 58];
+        const labelX = previous && isCrowded && clampedX <= previous.point.x ? Math.max(6, clampedX - 20) : clampedX;
+        const labelY = Math.max(16, Math.min(laneHeights[lane], height - (metaText ? 34 : 20)));
         
         return (
           <g key={trace.id}>
