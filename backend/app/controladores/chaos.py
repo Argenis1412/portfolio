@@ -129,6 +129,7 @@ class ChaosState:
                 "cache": "direct",
                 "cache_ttl_s": 0,
                 "active_path": "sync",
+                "system_lifecycle": "NORMAL",
             }
 
         age_s = int(time.time() - last.timestamp)

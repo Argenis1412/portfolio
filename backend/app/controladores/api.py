@@ -165,13 +165,13 @@ async def obter_resumo_metricas(response: Response) -> ResumoMetricas:
         last_incident=last_incident_type,
         last_incident_ago=last_incident_ago,
         # Epic 1: sub-system fields
-        worker_status=subsys["worker"],
-        queue_backlog=subsys["queue_backlog"],
-        cache_status=subsys["cache"],
-        cache_ttl_s=subsys["cache_ttl_s"],
-        active_path=subsys["active_path"],
+        worker_status=subsys.get("worker", "ok"),
+        queue_backlog=subsys.get("queue_backlog", 0),
+        cache_status=subsys.get("cache", "direct"),
+        cache_ttl_s=subsys.get("cache_ttl_s", 0),
+        active_path=subsys.get("active_path", "sync"),
         # Round-2: state machine lifecycle
-        system_lifecycle=subsys["system_lifecycle"],
+        system_lifecycle=subsys.get("system_lifecycle", "NORMAL"),
     )
 
 
