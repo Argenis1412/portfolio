@@ -36,7 +36,7 @@ const LiveStatusBadge = React.memo(({ status, latencyMs, source }: { status: Sys
         )}
       </span>
       {source && (
-        <span className={`rounded-full px-1.5 py-0.5 text-[9px] ${source === 'synthetic' ? 'bg-violet-500/10 text-violet-300' : 'bg-emerald-500/10 text-emerald-300'}`}>
+        <span className={`rounded-full px-1.5 py-0.5 text-[9px] ${source === 'synthetic' ? 'bg-violet-500/10 text-violet-700 dark:text-violet-300' : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'}`}>
           {t(`metrics.origin.${source}`)}
         </span>
       )}
@@ -113,7 +113,7 @@ function KpiStrip({ data, previous, status, effectiveP95, confidenceScore, confi
     {
       label: 'Confidence',
       value: `${confidenceScore}%`,
-      className: confidenceLabel === 'estimated' ? 'text-violet-300' : 'text-emerald-400',
+      className: confidenceLabel === 'estimated' ? 'text-violet-700 dark:text-violet-300' : 'text-emerald-700 dark:text-emerald-400',
       delta: null,
     },
     {
@@ -125,7 +125,7 @@ function KpiStrip({ data, previous, status, effectiveP95, confidenceScore, confi
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-8 max-w-xl">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-8 max-w-xl mx-auto md:mx-0">
       {items.map((item) => (
         <div key={item.label} className="glass rounded-xl px-4 py-3 flex flex-col gap-1">
           <span className="text-[10px] font-mono uppercase tracking-widest text-app-muted">{item.label}</span>
@@ -158,13 +158,14 @@ const Hero = React.memo(() => {
           initial={window.innerWidth > 768 ? { x: -20, opacity: 0 } : false}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 0.6 }}
+          className="max-w-xl text-center md:text-left mx-auto md:mx-0"
         >
           {/* Status badge */}
           <m.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
-            className="mb-4"
+            className="mb-4 flex justify-center md:justify-start"
           >
             <LiveStatusBadge status={status} latencyMs={effectiveP95} source={latestSample?.source} />
           </m.div>
@@ -184,7 +185,7 @@ const Hero = React.memo(() => {
             initial={window.innerWidth > 768 ? { opacity: 0, x: -10 } : { opacity: 1, x: 0 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-lg md:text-xl text-app-muted max-w-2xl"
+            className="text-lg md:text-xl text-app-muted max-w-2xl mx-auto md:mx-0"
           >
             {t('hero.subtitle')}
           </m.p>
@@ -194,7 +195,7 @@ const Hero = React.memo(() => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className={`mt-3 text-sm font-mono italic max-w-2xl transition-colors duration-500 ${
+            className={`mt-3 text-sm font-mono italic max-w-2xl mx-auto md:mx-0 transition-colors duration-500 ${
               status === 'down' ? 'text-red-500' : 
               status === 'degraded' ? 'text-red-400' : 
               status === 'warning' ? 'text-amber-400' : 
@@ -220,7 +221,7 @@ const Hero = React.memo(() => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.45 }}
-            className="flex flex-col sm:flex-row gap-3 mt-8"
+            className="flex flex-col sm:flex-row gap-3 mt-8 justify-center md:justify-start"
           >
             <button
               onClick={() => scrollToSection('metrics')}
@@ -241,7 +242,7 @@ const Hero = React.memo(() => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.6 }}
-            className="flex gap-4 mt-4"
+            className="flex gap-4 mt-4 justify-center md:justify-start"
           >
             <a
               href="https://github.com/Argenis1412/portfolio/blob/main/ARCHITECTURE.md"
@@ -277,11 +278,11 @@ const Hero = React.memo(() => {
                     {status.toUpperCase()}
                   </div>
                   <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono">
-                    <span className={`rounded-full px-2 py-0.5 ${confidenceLabel === 'estimated' ? 'bg-violet-500/10 text-violet-300' : 'bg-emerald-500/10 text-emerald-300'}`}>
+                    <span className={`rounded-full px-2 py-0.5 ${confidenceLabel === 'estimated' ? 'bg-violet-500/10 text-violet-700 dark:text-violet-300' : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'}`}>
                       {t(`metrics.confidence.${confidenceLabel}`)} {confidenceScore}%
                     </span>
                     {latestSample && (
-                      <span className="rounded-full bg-app-surface/40 px-2 py-0.5 text-app-muted">
+                      <span className="rounded-full border border-app-border/40 bg-app-surface/40 px-2 py-0.5 text-app-muted">
                         {t(`metrics.origin.${latestSample.source}`)}
                       </span>
                     )}

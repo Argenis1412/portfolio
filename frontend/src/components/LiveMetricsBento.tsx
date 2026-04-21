@@ -115,19 +115,19 @@ export default function LiveMetricsBento() {
   const baselineDelta = baselineP95 === null ? null : effectiveP95 - baselineP95;
   const latestEventLabel = latestTrace ? t(`metrics.incident.${latestTrace.type}`) : t('metrics.incident.none');
   const latestEventAgoSeconds = latestTrace ? Math.max(0, Math.floor((currentTime - latestTrace.timestamp.getTime()) / 1000)) : null;
-  const confidenceTone = confidenceLabel === 'estimated' ? 'bg-violet-500/10 text-violet-300 border-violet-500/20' : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20';
+  const confidenceTone = confidenceLabel === 'estimated' ? 'bg-violet-500/10 text-violet-700 border-violet-500/20 dark:text-violet-300' : 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:text-emerald-300';
   const activePath = strategyProfile.activePath;
 
   return (
     <section id="metrics" aria-label="Live system metrics" className="px-4 max-w-6xl mx-auto py-12">
-      <div className="mb-6">
+      <div className="mb-6 text-center lg:text-left">
         <h2 className="text-xs font-mono uppercase tracking-[0.2em] text-app-primary mb-1">
           {t('metrics.system_status').toUpperCase()}
         </h2>
-        <p className="text-xs font-mono text-app-muted max-w-lg">
+        <p className="text-xs font-mono text-app-muted max-w-lg mx-auto lg:mx-0">
           {t('metrics.section_subtitle')}
         </p>
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] font-mono">
+        <div className="mt-3 flex flex-wrap items-center justify-center lg:justify-start gap-2 text-[10px] font-mono">
           <span className={`rounded-full border px-2 py-1 ${confidenceTone}`}>
             {t(`metrics.confidence.${confidenceLabel}`)} {confidenceScore}%
           </span>
@@ -153,7 +153,7 @@ export default function LiveMetricsBento() {
               <UpdatedAgo timestamp={data.timestamp} />
               <div className="flex flex-wrap gap-2 text-[10px] font-mono">
                 <span className={`rounded-full px-2 py-0.5 ${confidenceTone}`}>{t(`metrics.confidence.${confidenceLabel}`)} {confidenceScore}%</span>
-                <span className="rounded-full bg-app-surface/40 px-2 py-0.5 text-app-muted">{t(`metrics.origin.${latestSample?.source ?? 'real'}`)}</span>
+                <span className="rounded-full border border-app-border/40 bg-app-surface/40 px-2 py-0.5 text-app-muted">{t(`metrics.origin.${latestSample?.source ?? 'real'}`)}</span>
               </div>
         </Tile>
 
@@ -187,7 +187,7 @@ export default function LiveMetricsBento() {
                 </span>
               )}
               {latestSample && (
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-mono ${latestSample.source === 'synthetic' ? 'bg-violet-500/10 text-violet-300' : 'bg-emerald-500/10 text-emerald-400'}`}>
+                <span className={`rounded-full px-2 py-0.5 text-[10px] font-mono ${latestSample.source === 'synthetic' ? 'bg-violet-500/10 text-violet-700 dark:text-violet-300' : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'}`}>
                   {t(`metrics.origin.${latestSample.source}`)}
                 </span>
               )}
