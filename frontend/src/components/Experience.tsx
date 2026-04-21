@@ -122,14 +122,14 @@ export default function Experience() {
           viewport={{ once: true, amount: 0.1 }}
           transition={{ duration: 0.8 }}
         >
-          <div className="mb-12 max-w-3xl">
+          <div className="mb-12 max-w-3xl mx-auto text-center">
             <h2 className="text-2xl md:text-4xl font-bold text-app-text tracking-widest">
               {t('nav.journey')}
             </h2>
-            <p className="mt-4 text-sm md:text-base text-app-muted leading-relaxed">
+            <p className="mt-4 text-sm md:text-base text-app-muted leading-relaxed mx-auto max-w-2xl">
               {t('experience.timeline_subtitle')}
             </p>
-            <div className="mt-5 grid gap-3 md:grid-cols-3">
+            <div className="mt-8 grid gap-4 md:grid-cols-3">
               <div className="rounded-2xl border border-app-border/60 bg-app-surface/25 p-4">
                 <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-app-muted">{t('experience.summary.academic')}</div>
                 <div className="mt-2 text-2xl font-mono font-bold text-blue-300">{educationCount}</div>
