@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { ChaosContext, type ChaosPreset } from '../context/ChaosContext';
+import { ChaosContext, type ChaosPreset } from '../context/ChaosContextCore';
 
 export function useChaosMode() {
   const context = useContext(ChaosContext);

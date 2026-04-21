@@ -1,13 +1,5 @@
-import { createContext, useState, type ReactNode } from 'react';
-
-export type ChaosPreset = 'off' | 'mild' | 'stress' | 'failure';
-
-interface ChaosContextValue {
-  preset: ChaosPreset;
-  setPreset: (preset: ChaosPreset) => void;
-}
-
-export const ChaosContext = createContext<ChaosContextValue | undefined>(undefined);
+import { useState, type ReactNode } from 'react';
+import { ChaosContext, type ChaosPreset } from './ChaosContextCore';
 
 export function ChaosModeProvider({ children }: { children: ReactNode }) {
   const [preset, setPreset] = useState<ChaosPreset>('off');
