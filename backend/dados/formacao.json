@@ -11,9 +11,9 @@
     "data_inicio": "2026-02-01",
     "data_fim": "2029-03-06",
     "descricao": {
-      "pt": "Curso superior de Tecnologia em Análise e Desenvolvimento de Sistemas na Universidade Federal do Paraná (UFPR). Em curso.",
-      "en": "Associate's degree in Systems Analysis and Development at the Federal University of Paraná (UFPR). In progress.",
-      "es": "Tecnólogo en Análisis y Desarrollo de Sistemas en la Universidad Federal de Paraná (UFPR). En curso."
+      "pt": "[Decision] Formalizei a base teórica para sustentar decisões de arquitetura e engenharia de software no longo prazo.\n[Learning] Estruturas de dados, redes e modelagem ampliaram meu repertório para além da implementação imediata.\n[Impact] A formação reforça a prática com fundamentos que sustentam backend, observabilidade e desenho de sistemas.",
+      "en": "[Decision] I formalized the theoretical base needed to support long-term architecture and software engineering decisions.\n[Learning] Data structures, networking, and modeling expanded my toolkit beyond immediate implementation.\n[Impact] The degree reinforces hands-on work with fundamentals that support backend, observability, and system design.",
+      "es": "[Decision] Formalicé la base teórica necesaria para sostener decisiones de arquitectura e ingeniería de software a largo plazo.\n[Learning] Estructuras de datos, redes y modelado ampliaron mi repertorio más allá de la implementación inmediata.\n[Impact] La formación refuerza la práctica con fundamentos que sostienen backend, observabilidad y diseño de sistemas."
     },
     "atual": true
   }

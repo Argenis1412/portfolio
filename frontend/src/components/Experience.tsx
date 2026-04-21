@@ -1,7 +1,6 @@
-import { useState } from 'react';
-import { m, AnimatePresence } from 'framer-motion';
-import Skeleton from './ui/Skeleton';
+import { m } from 'framer-motion';
 import { MapPin } from 'lucide-react';
+import Skeleton from './ui/Skeleton';
 import { useExperience, useFormacao } from '../hooks/useApi';
 import type { Experience as ExperienceType, Formacao, LocalizedString } from '../api';
 import { useLanguage } from '../context/LanguageContext';
@@ -10,6 +9,39 @@ import { ServerWakeupError } from './ServerWakeupNotice';
 type TimelineEntry =
   | ({ kind: 'experience' } & ExperienceType)
   | ({ kind: 'education' } & Formacao);
+
+type SignalTone = 'decision' | 'failure' | 'learning' | 'impact';
+
+interface ParsedSignal {
+  tone: SignalTone;
+  text: string;
+}
+
+const SIGNAL_STYLE: Record<SignalTone, string> = {
+  decision: 'border-blue-400/20 bg-blue-500/10 text-blue-200',
+  failure: 'border-red-400/20 bg-red-500/10 text-red-200',
+  learning: 'border-amber-400/20 bg-amber-500/10 text-amber-200',
+  impact: 'border-emerald-400/20 bg-emerald-500/10 text-emerald-200',
+};
+
+function parseSignals(description: string): ParsedSignal[] {
+  return description
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const match = line.match(/^\[(Decision|Failure|Learning|Impact)\]\s*(.*)$/);
+      if (!match) {
+        return { tone: 'learning' as const, text: line };
+      }
+
+      const [, tag, text] = match;
+      return {
+        tone: tag.toLowerCase() as SignalTone,
+        text,
+      };
+    });
+}
 
 export default function Experience() {
   const { data: experiences = [], isLoading: loadingExp, isError: errorExp } = useExperience();
@@ -20,15 +52,14 @@ export default function Experience() {
   const isError = errorExp || errorFmc;
 
   const entries: TimelineEntry[] = [
-    ...experiences.map(e => ({ kind: 'experience' as const, ...e })),
-    ...formacoes.map(f => ({ kind: 'education' as const, ...f })),
+    ...experiences.map((entry) => ({ kind: 'experience' as const, ...entry })),
+    ...formacoes.map((entry) => ({ kind: 'education' as const, ...entry })),
   ].sort((a, b) => {
     if (a.atual !== b.atual) return a.atual ? -1 : 1;
     return b.data_inicio.localeCompare(a.data_inicio);
   });
 
-  const [activeId, setActiveId] = useState<string | null>(null);
-  const effectiveActiveId = activeId || (entries.length > 0 ? entries[0].id.toString() : null);
+  const lang = language as keyof LocalizedString;
 
   const formatDate = (date: string | null, isActual: boolean) => {
     if (!date) return isActual ? t('experience.label.present') : '?';
@@ -39,19 +70,18 @@ export default function Experience() {
   if (loading) {
     return (
       <section id="experience" className="py-16 section-alt">
-        <div className="max-w-4xl mx-auto px-4">
-          <Skeleton className="h-10 w-48 mx-auto mb-16" />
-          <div className="flex flex-col md:flex-row gap-8">
-            <div className="md:w-1/4 flex flex-col gap-2">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-            <div className="md:w-3/4">
-              <Skeleton className="h-8 w-3/4 mb-4" />
-              <Skeleton className="h-4 w-1/4 mb-8" />
-              <Skeleton className="h-20 w-full" />
-            </div>
+        <div className="max-w-5xl mx-auto px-4">
+          <Skeleton className="h-10 w-48 mb-12" />
+          <div className="space-y-6">
+            {[0, 1, 2].map((index) => (
+              <div key={index} className="rounded-2xl border border-app-border p-6">
+                <Skeleton className="h-6 w-48 mb-4" />
+                <Skeleton className="h-4 w-56 mb-6" />
+                <div className="grid gap-3 md:grid-cols-2">
+                  {[0, 1, 2, 3].map((item) => <Skeleton key={item} className="h-20 w-full rounded-xl" />)}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -66,112 +96,93 @@ export default function Experience() {
     );
   }
 
-  const activeEntry = entries.find(e => e.id.toString() === effectiveActiveId) || entries[0];
-  if (!activeEntry) return null;
-
-  const lang = language as keyof LocalizedString;
-
   return (
-    <section id="experience" className="py-24 section-alt transition-colors duration-300 relative group overflow-hidden">
-      <div className="max-w-4xl mx-auto px-4">
-        <m.div 
+    <section id="experience" className="py-24 section-alt transition-colors duration-300 relative overflow-hidden">
+      <div className="max-w-5xl mx-auto px-4">
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.1 }}
           transition={{ duration: 0.8 }}
         >
-          {/* Header */}
-          <div className="flex items-center gap-4 mb-12">
+          <div className="mb-12 max-w-3xl">
             <h2 className="text-2xl md:text-4xl font-bold text-app-text tracking-widest">
               {t('nav.journey')}
             </h2>
-            <div className="hidden md:block h-px flex-grow bg-app-border opacity-50 ml-4 max-w-xs" />
+            <p className="mt-4 text-sm md:text-base text-app-muted leading-relaxed">
+              {t('experience.timeline_subtitle')}
+            </p>
           </div>
 
-          <div className="flex flex-col md:flex-row gap-8 min-h-[400px]">
-            {/* Tabs List */}
-            <div className="flex md:flex-col overflow-x-auto md:overflow-x-visible no-scrollbar border-b md:border-b-0 md:border-l border-app-border w-full md:w-1/4 flex-shrink-0">
-              {entries.map((entry) => {
-                const isEducation = entry.kind === 'education';
-                const subtitle = isEducation ? (entry as Formacao).instituicao : (entry as ExperienceType).empresa;
-                const isActive = effectiveActiveId === entry.id.toString();
+          <div className="relative space-y-6 before:absolute before:left-[11px] before:top-3 before:bottom-3 before:w-px before:bg-app-border/50">
+            {entries.map((entry, index) => {
+              const isEducation = entry.kind === 'education';
+              const title = isEducation ? (entry as Formacao).curso[lang] : (entry as ExperienceType).cargo[lang];
+              const subtitle = isEducation ? (entry as Formacao).instituicao : (entry as ExperienceType).empresa;
+              const signals = parseSignals(entry.descricao[lang as keyof typeof entry.descricao] || '');
+              const technologies = isEducation ? [] : (entry as ExperienceType).tecnologias;
 
-                return (
-                  <button
-                    key={entry.id}
-                    onClick={() => setActiveId(entry.id.toString())}
-                    className={`
-                      px-4 py-3 md:py-4 text-sm font-mono text-left whitespace-nowrap md:whitespace-normal transition-all duration-300 border-b-2 md:border-b-0 md:border-l-2 -mb-[2px] md:-mb-0 md:-ml-[1px]
-                      ${isActive 
-                        ? 'text-app-primary bg-app-primary/5 border-app-primary' 
-                        : 'text-app-muted hover:text-app-text hover:bg-app-surface-hover border-transparent'}
-                    `}
-                  >
-                    {subtitle}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Tab Panel */}
-            <div className="w-full md:w-3/4 md:pl-4">
-              <AnimatePresence mode="wait">
-                <m.div
-                  key={activeEntry.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.2 }}
+              return (
+                <m.article
+                  key={entry.id}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.15 }}
+                  transition={{ duration: 0.4, delay: index * 0.06 }}
+                  className="relative pl-10"
                 >
-                  {(() => {
-                    const isEducation = activeEntry.kind === 'education';
-                    const title = isEducation
-                      ? (activeEntry as { kind: 'education' } & Formacao).curso[lang]
-                      : (activeEntry as ExperienceType).cargo[lang];
-                    const subtitle = isEducation
-                      ? (activeEntry as Formacao).instituicao
-                      : (activeEntry as ExperienceType).empresa;
-                    const description = activeEntry.descricao[lang as keyof typeof activeEntry.descricao] || '';
-                    const techs = isEducation ? [] : (activeEntry as ExperienceType).tecnologias;
-                    
-                    // Split description by newlines to form list items loosely
-                    const bullets = description.split('\n').filter(s => s.trim().length > 0);
+                  <span className={`absolute left-0 top-3 h-[22px] w-[22px] rounded-full border-4 ${isEducation ? 'border-blue-400 bg-[#0f172a]' : 'border-app-primary bg-[#1a1510]'}`} />
 
-                    return (
+                  <div className="glass rounded-2xl border border-app-border p-6 md:p-7">
+                    <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                       <div>
-                        <h3 className="text-xl md:text-2xl font-bold text-app-text leading-snug mb-2">
-                          {title} <span className="text-app-primary">@ {subtitle}</span>
-                        </h3>
-                        
-                        <div className="text-sm font-mono text-app-muted mb-6 flex items-center gap-4">
-                          <span>{formatDate(activeEntry.data_inicio, false)} — {formatDate(activeEntry.data_fim, activeEntry.atual)}</span>
-                          <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{activeEntry.localizacao}</span>
+                        <div className="flex flex-wrap items-center gap-2 mb-3 text-[10px] font-mono uppercase tracking-[0.22em] text-app-muted">
+                          <span className={`rounded-full border px-2.5 py-1 ${isEducation ? 'border-blue-400/20 bg-blue-500/10 text-blue-200' : 'border-app-primary/20 bg-app-primary/10 text-app-primary'}`}>
+                            {isEducation ? t('experience.label.education') : t('experience.label.experience')}
+                          </span>
+                          {entry.atual && (
+                            <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-emerald-300">
+                              {t('experience.label.present')}
+                            </span>
+                          )}
                         </div>
 
-                        <ul className="space-y-4 mb-8">
-                          {bullets.map((bullet, i) => (
-                            <li key={i} className="flex items-start gap-4 text-app-muted hover:text-app-text transition-colors">
-                              <span className="text-app-primary mt-1.5 flex-shrink-0 text-[10px]">▶</span>
-                              <span className="leading-relaxed">{bullet}</span>
-                            </li>
-                          ))}
-                        </ul>
-
-                        {techs.length > 0 && (
-                          <div className="flex flex-wrap gap-2 text-xs font-mono">
-                            {techs.map(tech => (
-                              <span key={tech} className="text-app-primary/80 border border-app-primary/20 bg-app-primary/5 px-2 py-1 rounded">
-                                {tech}
-                              </span>
-                            ))}
-                          </div>
-                        )}
+                        <h3 className="text-xl md:text-2xl font-bold text-app-text leading-snug">
+                          {title}
+                        </h3>
+                        <p className="mt-1 text-sm md:text-base text-app-primary">{subtitle}</p>
                       </div>
-                    );
-                  })()}
-                </m.div>
-              </AnimatePresence>
-            </div>
+
+                      <div className="text-sm font-mono text-app-muted md:text-right">
+                        <div>{formatDate(entry.data_inicio, false)} - {formatDate(entry.data_fim, entry.atual)}</div>
+                        <div className="mt-1 inline-flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{entry.localizacao}</div>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 grid gap-3 md:grid-cols-2">
+                      {signals.map((signal) => (
+                        <div key={`${entry.id}-${signal.tone}-${signal.text}`} className={`rounded-xl border p-4 ${SIGNAL_STYLE[signal.tone]}`}>
+                          <div className="text-[10px] font-mono uppercase tracking-[0.22em] opacity-80 mb-2">
+                            {t(`experience.signal.${signal.tone}`)}
+                          </div>
+                          <p className="text-sm leading-relaxed text-current">{signal.text}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {technologies.length > 0 && (
+                      <div className="mt-5 flex flex-wrap gap-2 text-xs font-mono">
+                        {technologies.map((tech) => (
+                          <span key={tech} className="text-app-primary/80 border border-app-primary/20 bg-app-primary/5 px-2 py-1 rounded">
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </m.article>
+              );
+            })}
           </div>
         </m.div>
       </div>

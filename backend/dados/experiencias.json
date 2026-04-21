@@ -11,9 +11,9 @@
     "data_inicio": "2025-12-20",
     "data_fim": "2026-03-06",
     "descricao": {
-      "pt": "Designed REST APIs with FastAPI\nImplemented structured logging and Hexagonal Architecture\nBuilt metrics collection (p95, error rate)",
-      "en": "Designed REST APIs with FastAPI\nImplemented structured logging and Hexagonal Architecture\nBuilt metrics collection (p95, error rate)",
-      "es": "Diseñé APIs REST con FastAPI\nImplementé logging estructurado y Arquitectura Hexagonal\nConstruí recolección de métricas (p95, tasa de error)"
+      "pt": "[Decision] Modelei APIs REST e regras de domínio no backend antes de tocar UI ou automações.\n[Failure] A primeira iteração misturava regra de negócio com infraestrutura, dificultando testes e rastreabilidade.\n[Learning] Reorganizei o projeto em portas, casos de uso e logs estruturados para ganhar clareza operacional.\n[Impact] P95, taxa de erro e sinais de recuperação passaram a ser observáveis como parte do fluxo normal.",
+      "en": "[Decision] I modeled REST APIs and domain rules in the backend before touching UI or automation layers.\n[Failure] The first iteration mixed business rules with infrastructure, making tests and traceability harder.\n[Learning] I reorganized the project into ports, use cases, and structured logs to gain operational clarity.\n[Impact] P95, error rate, and recovery signals became observable as part of the normal system flow.",
+      "es": "[Decision] Modelé APIs REST y reglas de dominio en backend antes de tocar UI o automatizaciones.\n[Failure] La primera iteración mezclaba reglas de negocio con infraestructura y volvía más difícil probar y trazar.\n[Learning] Reorganicé el proyecto en puertos, casos de uso y logs estructurados para ganar claridad operativa.\n[Impact] P95, tasa de error y señales de recuperación pasaron a ser observables dentro del flujo normal."
     },
     "tecnologias": [
       "Python",
@@ -42,9 +42,9 @@
     "data_inicio": "2025-06-01",
     "data_fim": "2025-10-31",
     "descricao": {
-      "pt": "Operated regulated onboarding and contract workflows\nValidated proposal and customer data across internal systems\nSupported financial operations under compliance constraints",
-      "en": "Operated regulated onboarding and contract workflows\nValidated proposal and customer data across internal systems\nSupported financial operations under compliance constraints",
-      "es": "Operé flujos regulados de onboarding y contratos\nValidé propuestas y datos de clientes en sistemas internos\nDi soporte a operaciones financieras bajo restricciones de cumplimiento"
+      "pt": "[Decision] Priorizei consistência operacional e conferência manual quando o risco regulatório era maior que a pressa comercial.\n[Failure] Pequenas divergências entre sistemas internos geravam retrabalho e expunham gargalos de processo.\n[Learning] Entendi na prática como compliance, validação e throughput disputam a mesma decisão operacional.\n[Impact] Essa experiência fortaleceu meu foco atual em backend defensivo, idempotência e fluxos auditáveis.",
+      "en": "[Decision] I prioritized operational consistency and manual validation whenever regulatory risk outweighed commercial urgency.\n[Failure] Small divergences between internal systems created rework and exposed process bottlenecks.\n[Learning] I learned firsthand how compliance, validation, and throughput compete inside the same operational decision.\n[Impact] That experience reinforced my current focus on defensive backend design, idempotency, and auditable flows.",
+      "es": "[Decision] Priorizé consistencia operativa y validación manual cuando el riesgo regulatorio superaba la urgencia comercial.\n[Failure] Pequeñas divergencias entre sistemas internos generaban retrabajo y exponían cuellos de botella.\n[Learning] Aprendí de primera mano cómo compliance, validación y throughput compiten dentro de la misma decisión operativa.\n[Impact] Esa experiencia reforzó mi enfoque actual en backend defensivo, idempotencia y flujos auditables."
     },
     "tecnologias": [],
     "atual": false
