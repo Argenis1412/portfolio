@@ -97,7 +97,7 @@ pip install -r requirements.txt
 python -m alembic upgrade head
 
 # 2. Seed data from JSON to SQL
-python ./scripts/migrar_dados.py
+python ./scripts/migrate_data.py
 ```
 
 ### 3. Execution
