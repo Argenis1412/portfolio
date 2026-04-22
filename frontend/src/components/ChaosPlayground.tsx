@@ -6,131 +6,28 @@
  * Terminal-style log with request_id and structured format.
  * Writes events to shared LogContext.
  */
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
-import { useQueryClient } from '@tanstack/react-query';
-import { postChaosDrain, postChaosRetry, postChaosLatency, type ChaosResponse } from '../api/chaosService';
 import { useLog } from '../hooks/useLog';
 import { useChaosMode, type ChaosPreset } from '../hooks/useChaosMode';
-import { emitTrace } from '../services/TraceEmitter';
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface TerminalEntry {
-  id: number;
-  level: 'INFO' | 'WARN' | 'ERROR';
-  message: string;
-  requestId: string;
-  timestamp: string;
-}
+import { useChaosActions, type TerminalEntry } from '../hooks/useChaosActions';
+import ChaosActionCard from './chaos/ChaosActionCard';
 
 // Shared trace store moved to src/services/TraceEmitter.ts
 
-function genReqId(): string {
-  return Math.random().toString(36).slice(2, 10).toUpperCase();
-}
-
-const COOLDOWN_SECONDS = 30;
-
-// ─── Action Card ─────────────────────────────────────────────────────────────
-
-interface ActionCardProps {
-  icon: string;
-  titleKey: string;
-  descKey: string;
-  accentClass: string;
-  borderClass: string;
-  hoverClass: string;
-  loading: boolean;
-  cooldown: number;
-  loadingKey: string;
-  actionKey: string;
-  disabled: boolean;
-  onClick: () => void;
-  disclaimer?: string;
-}
-
-function ActionCard({
-  icon, titleKey, descKey, accentClass, borderClass, hoverClass,
-  loading, cooldown, loadingKey, actionKey, disabled, onClick, disclaimer,
-}: ActionCardProps) {
-  const { t } = useLanguage();
-  return (
-    <div className={`glass rounded-xl p-4 flex flex-col gap-3 border ${borderClass} transition-all duration-200`}>
-      <div className="flex items-center gap-2">
-        <span className="text-lg">{icon}</span>
-        <span className={`font-mono text-sm font-bold ${accentClass}`}>{t(titleKey)}</span>
-      </div>
-      <p className="text-xs text-app-muted leading-relaxed">{t(descKey)}</p>
-      {disclaimer && (
-        <p className="text-[10px] font-mono text-app-muted/60 italic">{disclaimer}</p>
-      )}
-      <button
-        onClick={onClick}
-        disabled={disabled}
-        className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-mono text-xs font-semibold transition-all duration-200 mt-auto ${
-          disabled
-            ? 'bg-app-surface-hover text-app-muted cursor-not-allowed opacity-60'
-            : `${hoverClass} border ${borderClass} active:scale-[0.97]`
-        }`}
-      >
-        {loading ? (
-          <>
-            <span className={`w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin`} />
-            {t(loadingKey)}
-          </>
-        ) : cooldown > 0 ? (
-          t('chaos.cooldown', { s: cooldown })
-        ) : (
-          t(actionKey)
-        )}
-      </button>
-    </div>
-  );
-}
+// ─── ActionCard extracted → src/components/chaos/ChaosActionCard.tsx ──────────
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export default function ChaosPlayground() {
   const { t } = useLanguage();
-  const queryClient = useQueryClient();
   const { addEntry, incidents, addIncident } = useLog();
   const { preset, setPreset } = useChaosMode();
 
   // Terminal log (local, lightweight)
   const [terminal, setTerminal] = useState<TerminalEntry[]>([]);
   const termIdRef = useRef(0);
-
-  // Loading states
-  const [drainLoading, setDrainLoading] = useState(false);
-  const [retryLoading, setRetryLoading] = useState(false);
-  const [latencyLoading, setLatencyLoading] = useState(false);
-
-  // Cooldowns
-  const [drainCooldown, setDrainCooldown] = useState(0);
-  const [retryCooldown, setRetryCooldown] = useState(0);
-  const [latencyCooldown, setLatencyCooldown] = useState(0);
-
-  const [, setTick] = useState(0); // forces re-render for TTL countdown
-
-  // Tick timer for TTL display — only for UI re-renders, state is global
-  useEffect(() => {
-    const t = setInterval(() => {
-      setTick((n) => n + 1);
-    }, 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  const startCooldown = useCallback((setter: React.Dispatch<React.SetStateAction<number>>) => {
-    setter(COOLDOWN_SECONDS);
-    const iv = setInterval(() => {
-      setter((prev) => {
-        if (prev <= 1) { clearInterval(iv); return 0; }
-        return prev - 1;
-      });
-    }, 1000);
-  }, []);
 
   const addTerminalEntry = useCallback((level: TerminalEntry['level'], message: string, requestId: string) => {
     const entry: TerminalEntry = {
@@ -143,90 +40,25 @@ export default function ChaosPlayground() {
     setTerminal((prev) => [entry, ...prev].slice(0, 12));
   }, []);
 
-  const invalidateMetrics = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ['metrics-summary'] });
-  }, [queryClient]);
+  const {
+    handleDrain, handleRetry, handleLatency,
+    drainLoading, retryLoading, latencyLoading,
+    drainCooldown, retryCooldown, latencyCooldown,
+  } = useChaosActions({
+    addTerminalEntry,
+    addEntry,
+    addIncident,
+  });
 
-  // ─── Handlers ──────────────────────────────────────────────────────────────
+  const [, setTick] = useState(0); // forces re-render for TTL countdown
 
-  const handleDrain = useCallback(async () => {
-    if (drainLoading || drainCooldown > 0) return;
-    setDrainLoading(true);
-    const rid = genReqId();
-    const traceId = `trace-${rid}`;
-    addTerminalEntry('INFO', `chaos.drain triggered request_id=${rid} trace_id=${traceId}`, rid);
-    addEntry('INFO', `chaos.drain status=TRIGGERED type=QUEUE_DRAIN trace_id=${traceId}`, rid);
-    try {
-      const res: ChaosResponse = await postChaosDrain();
-      const purged = res.tasks_purged ?? 0;
-      addTerminalEntry('WARN', `queue.drain completed tasks_purged=${purged} request_id=${rid} trace_id=${traceId}`, rid);
-      addEntry('WARN', `queue.drain status=COMPLETED tasks_purged=${purged} trace_id=${traceId}`, rid);
-      addIncident('queue_drain', 'chaos.action.drain.title', {
-        impactPct: '0%',
-        durationMs: res.elapsed_ms ?? 50,
-        origin: 'synthetic',
-      });
-      emitTrace({ id: `trace-${rid}`, traceId, requestId: rid, type: 'queue_drain', origin: 'synthetic', endpoint: '/chaos/drain', status: 'ok', totalMs: 50, apiMs: 10, dbMs: 40, cacheMs: 0, timestamp: new Date(), impactPct: '0%', latencyDelta: '-40ms', durationMs: res.elapsed_ms ?? 50 });
-      invalidateMetrics();
-      startCooldown(setDrainCooldown);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Unknown error';
-      addTerminalEntry('ERROR', `chaos.drain failed error="${msg}" request_id=${rid} trace_id=${traceId}`, rid);
-      addEntry('ERROR', `chaos.drain status=FAILED error="${msg}" trace_id=${traceId}`, rid);
-    } finally { setDrainLoading(false); }
-  }, [drainLoading, drainCooldown, addTerminalEntry, addEntry, addIncident, invalidateMetrics, startCooldown]);
-
-  const handleRetry = useCallback(async () => {
-    if (retryLoading || retryCooldown > 0) return;
-    setRetryLoading(true);
-    const rid = genReqId();
-    const traceId = `trace-${rid}`;
-    addTerminalEntry('INFO', `chaos.retry triggered request_id=${rid} trace_id=${traceId}`, rid);
-    addEntry('INFO', `chaos.retry status=TRIGGERED type=MANUAL_RETRY trace_id=${traceId}`, rid);
-    try {
-      await postChaosRetry();
-      addTerminalEntry('INFO', `manual.retry dispatched request_id=${rid} trace_id=${traceId}`, rid);
-      addEntry('INFO', `manual.retry status=COMPLETED trace_id=${traceId}`, rid);
-      addIncident('manual_retry', 'chaos.action.retry.title', {
-        impactPct: '5%',
-        durationMs: 120,
-        origin: 'synthetic',
-      });
-      emitTrace({ id: `trace-${rid}`, traceId, requestId: rid, type: 'manual_retry', origin: 'synthetic', endpoint: '/chaos/retry', status: 'ok', totalMs: 120, apiMs: 20, dbMs: 100, cacheMs: 0, timestamp: new Date(), impactPct: '5%', latencyDelta: '+80ms', durationMs: 120 });
-      invalidateMetrics();
-      startCooldown(setRetryCooldown);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Unknown error';
-      addTerminalEntry('ERROR', `chaos.retry failed error="${msg}" request_id=${rid} trace_id=${traceId}`, rid);
-      addEntry('ERROR', `chaos.retry status=FAILED error="${msg}" trace_id=${traceId}`, rid);
-    } finally { setRetryLoading(false); }
-  }, [retryLoading, retryCooldown, addTerminalEntry, addEntry, addIncident, invalidateMetrics, startCooldown]);
-
-  const handleLatency = useCallback(async () => {
-    if (latencyLoading || latencyCooldown > 0) return;
-    setLatencyLoading(true);
-    const rid = genReqId();
-    const traceId = `trace-${rid}`;
-    addTerminalEntry('INFO', `chaos.latency triggered request_id=${rid} trace_id=${traceId}`, rid);
-    addEntry('INFO', `chaos.latency status=TRIGGERED type=LATENCY_INJECTION trace_id=${traceId}`, rid);
-    try {
-      const res: ChaosResponse = await postChaosLatency();
-      addTerminalEntry('WARN', `latency.injection status=TIMEOUT latency_ms=${res.latency_ms} circuit_breaker=OPEN request_id=${rid} trace_id=${traceId}`, rid);
-      addEntry('WARN', `latency.injection status=TIMEOUT latency_ms=${res.latency_ms} circuit_breaker=OPEN trace_id=${traceId}`, rid);
-      addIncident('latency_injection', 'chaos.action.latency.title', {
-        impactPct: '100%',
-        durationMs: res.latency_ms ?? 3000,
-        origin: 'synthetic',
-      });
-      emitTrace({ id: `trace-${rid}`, traceId, requestId: rid, type: 'latency_injection', origin: 'synthetic', endpoint: '/chaos/latency', status: 'error', totalMs: res.latency_ms || 3000, apiMs: 50, dbMs: (res.latency_ms || 3000) - 50, cacheMs: 0, timestamp: new Date(), impactPct: '100%', latencyDelta: `+${((res.latency_ms || 3000)/1000).toFixed(1)}s`, durationMs: res.latency_ms ?? 3000 });
-      invalidateMetrics();
-      startCooldown(setLatencyCooldown);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Unknown error';
-      addTerminalEntry('ERROR', `chaos.latency error="${msg}" request_id=${rid} trace_id=${traceId}`, rid);
-      addEntry('ERROR', `chaos.latency status=FAILED error="${msg}" trace_id=${traceId}`, rid);
-    } finally { setLatencyLoading(false); }
-  }, [latencyLoading, latencyCooldown, addTerminalEntry, addEntry, addIncident, invalidateMetrics, startCooldown]);
+  // Tick timer for TTL display — only for UI re-renders, state is global
+  useEffect(() => {
+    const t = setInterval(() => {
+      setTick((n) => n + 1);
+    }, 1000);
+    return () => clearInterval(t);
+  }, []);
 
   const activeIncidents = incidents.filter((i) => Date.now() - i.startedAt < i.ttl);
   const resolvedIncidents = incidents.filter((i) => Date.now() - i.startedAt >= i.ttl);
@@ -299,7 +131,7 @@ export default function ChaosPlayground() {
 
         {/* Action cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
-          <ActionCard
+          <ChaosActionCard
             icon="🌬️"
             titleKey="chaos.action.drain.title"
             descKey="chaos.action.drain.desc"
@@ -313,7 +145,7 @@ export default function ChaosPlayground() {
             disabled={drainLoading || drainCooldown > 0}
             onClick={handleDrain}
           />
-          <ActionCard
+          <ChaosActionCard
             icon="⏳"
             titleKey="chaos.action.latency.title"
             descKey="chaos.action.latency.desc"
@@ -327,7 +159,7 @@ export default function ChaosPlayground() {
             disabled={latencyLoading || latencyCooldown > 0}
             onClick={handleLatency}
           />
-          <ActionCard
+          <ChaosActionCard
             icon="🔄"
             titleKey="chaos.action.retry.title"
             descKey="chaos.action.retry.desc"
