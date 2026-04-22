@@ -38,7 +38,7 @@ export const fetchProject = (id: string): Promise<ProjectDetailed> =>
 
 export const fetchSkills = async (): Promise<Skill[]> => {
   const schema = z.object({
-    by_category: z.record(z.array(SkillSchema)).nullable().catch({}),
+    by_category: z.record(z.string(), z.array(SkillSchema)).nullable().catch({}),
     stack: z.array(SkillSchema).nullable().catch([]),
   });
   const data = await apiGet('/stack', schema);

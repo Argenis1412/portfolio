@@ -1,5 +1,4 @@
 import os
-import re
 
 mappings = {
     "app.adaptadores": "app.adapters",
@@ -60,7 +59,6 @@ mappings = {
     "FormacaoModelo": "FormationModel",
     "ProjectModelo": "ProjectModel",
     "AboutModelo": "AboutModel",
-    "StackModelo": "StackModel",
     "ExperienceModelo": "ExperienceModel",
     "FormationModelo": "FormationModel",
     "ObterSobreUseCase": "GetAboutUseCase",
