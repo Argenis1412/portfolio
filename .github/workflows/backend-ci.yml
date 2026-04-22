@@ -85,7 +85,7 @@ jobs:
         run: |
           cd backend
           # Gradual: core + use cases + controllers + adapters
-          mypy app/core app/casos_uso app/controladores app/adaptadores \
+          mypy app/core app/use_cases app/controllers app/adapters \
             --ignore-missing-imports --explicit-package-bases
 
       - name: 🔒 Check hardcoded placeholders
