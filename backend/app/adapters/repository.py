@@ -195,9 +195,19 @@ class JsonRepository(PortfolioRepository):
         Gets tech stack list.
 
         Returns:
-            list[dict]: List of technologies.
+            list[dict]: List of technologies with English keys.
         """
-        return await self._read_json("stack.json")
+        data = await self._read_json("stack.json")
+        # Ensure we return English keys even if reading legacy JSON
+        return [
+            {
+                "name": item.get("name", item.get("nome")),
+                "category": item.get("category", item.get("categoria")),
+                "level": item.get("level", item.get("nivel")),
+                "icon": item.get("icon", item.get("icone")),
+            }
+            for item in data
+        ]
 
     async def get_experiences(self) -> list[ProfessionalExperience]:
         """

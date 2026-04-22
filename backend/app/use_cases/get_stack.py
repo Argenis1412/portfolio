@@ -51,7 +51,10 @@ class GetStackUseCase:
         # Group by category
         by_category: dict[str, list[dict]] = {}
         for item in stack:
-            category = item["category"]
+            # Support both English and legacy Portuguese keys during transition
+            category = item.get("category", item.get("categoria"))
+            if not category:
+                continue
             if category not in by_category:
                 by_category[category] = []
             by_category[category].append(item)
