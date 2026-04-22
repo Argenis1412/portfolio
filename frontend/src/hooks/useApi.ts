@@ -8,10 +8,10 @@ import {
   fetchProjects,
   fetchSkills,
   fetchExperience,
-  fetchFormacao,
-  postContact,
+  fetchFormation,
   fetchPhilosophy,
-} from '../api';
+} from '../api/portfolioService';
+import { postContact } from '../api/chaosService';
 
 
 // Centralized query keys to avoid typos
@@ -20,7 +20,7 @@ export const queryKeys = {
   projects: ['projects'] as const,
   skills: ['skills'] as const,
   experience: ['experience'] as const,
-  formacao: ['formacao'] as const,
+  formation: ['formation'] as const,
   philosophy: ['philosophy'] as const,
 };
 
@@ -56,10 +56,10 @@ export function useExperience() {
   });
 }
 
-export function useFormacao() {
+export function useFormation() {
   return useQuery({
-    queryKey: queryKeys.formacao,
-    queryFn: fetchFormacao,
+    queryKey: queryKeys.formation,
+    queryFn: fetchFormation,
     staleTime: 10 * 60 * 1000,
   });
 }

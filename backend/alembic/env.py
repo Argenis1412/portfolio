@@ -16,22 +16,22 @@ from sqlmodel import SQLModel  # noqa: E402
 from alembic import context  # noqa: E402
 
 # Import models so they are registered in SQLModel.metadata
-from app.adaptadores.modelos_sql import (  # noqa: E402
-    ExperienciaModelo,  # noqa: F401
-    FormacaoModelo,  # noqa: F401
-    ProjetoModelo,  # noqa: F401
-    SobreModelo,  # noqa: F401
-    StackModelo,  # noqa: F401
+from app.adapters.sql_models import (  # noqa: E402
+    ExperienceModel,  # noqa: F401
+    FormationModel,  # noqa: F401
+    ProjectModel,  # noqa: F401
+    AboutModel,  # noqa: F401
+    StackModel,  # noqa: F401
     ChaosIncidentModelo,  # noqa: F401
 )
-from app.configuracao import configuracoes  # noqa: E402
+from app.settings import settings  # noqa: E402
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
 # Override database URL with application config
-config.set_main_option("sqlalchemy.url", configuracoes.database_url)
+config.set_main_option("sqlalchemy.url", settings.database_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

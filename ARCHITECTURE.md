@@ -17,16 +17,16 @@ This document details the reasoning behind the architectural choices found in th
 **Why?** While the metrics are intentionally accessible to reviewers, exposing a public `/metrics` endpoint on the open internet (even for a portfolio) is a non-standard practice that could be seen as a security oversight. Adding `METRICS_BASIC_AUTH` ensures that only authorized clients (or reviewers with the provided credentials) can see the live stack's health, throughput, and latencies.
 
 ## 5. Performance: JSON-First Read Path
-**Decision**: Prioritizing `RepositorioJSON` for all portfolio-related reads (about, projects, stack, etc.) in production.
+**Decision**: Prioritizing `JSONRepository` for all portfolio-related reads (about, projects, stack, etc.) in production.
 **Why?** Using a managed PostgreSQL database for static data in a serverless/ephemeral environment adds significant cold-start latency and increases the risk of transient connection failures. By serving the portfolio data directly from memory-cached JSON files (Clean Architecture allows swapping adapters seamlessly), we achieve P95 latencies < 50ms and eliminate PostgreSQL as a single point of failure for the main application view. PostgreSQL remains reserved for transactional or future dynamic needs.
 
 ## 6. Security Regex over Allow-Lists
 **Decision**: The CORS Policy uses a regex rule (`^https://argenisbackend\.com|https://portfolio.*-argenis1412s-projects\.vercel\.app$`) instead of exact strings or `*`.
 **Why?** Vercel creates dynamic preview domains per PR. Doing hardcoded allowed lists blocks PR testing. Using a wide open `*` disables secure credential-passing. The precise regex allows only our generated subdomains to seamlessly interact with the API, blocking impersonation from other `*.vercel.app` sites.
 
-## 7. Language for Health Checks
-**Decision**: Keeping `/saude` as the endpoint instead of `/health`.
-**Why?** Although the architecture documentation has migrated to English to target a wider audience, the domain core model started in Portuguese. To avoid breaking monitoring probes and infrastructure expectations already tracking `/saude`, the endpoint name was consciously retained.
+## 7. Global Consistency: Unified English Codebase
+**Decision**: Migrating all remaining Portuguese identifiers, including the `/saude` endpoint, to English (`/health`).
+**Why?** Although the project started with some Portuguese core models, maintaining a bilingual codebase creates cognitive load and technical debt. By finally migrating `/saude` to `/health` and renaming all backend directories (`controladores` → `controllers`, etc.), we ensure the repository is 100% accessible to the global engineering community and adheres to international industry standards for RESTful APIs.
 
 ## 8. Frontend State Architecture
 **Decision**: React + TanStack Query instead of Redux/Zustand for most data mapping.
@@ -64,3 +64,7 @@ If Go is integrated in the future, it will only be under real necessity signals 
 - Enhanced TraceViewer and LogStream to display both request_id and trace_id for end-to-end correlation.
 - Fixed LogStream auto-scroll to stay inside the terminal and removed global window.scrollTo in App.tsx.
 - Added missing i18n keys for metrics, failure model, and telemetry legend.
+
+## 14. Modular Frontend API & Component Decomposition
+**Decision**: Restructuring the monolithic `api.ts` into a layered `src/api/` directory and decomposing large UI components into focused hooks and sub-components.
+**Why?** As the frontend complexity grew, the single `api.ts` file became a bottleneck for readability and type safety. Moving to a modular structure (`client`, `schemas`, `services`) ensures better separation of concerns. Similarly, extracting logic into custom hooks (`useChaosActions`, `useContactForm`) and UI into atomic components (`ChaosTerminal`, `ChaosActionCard`) improves testability and adheres to the Single Responsibility Principle.

@@ -3,8 +3,8 @@ param (
 )
 
 $commands = @{
-    "dev"         = "Start-Process powershell -ArgumentList '-NoExit', '-Command', 'cd backend; .venv\Scripts\activate; python -m uvicorn app.principal:app --host localhost --port 8000 --reload'; cd frontend; npm run dev"
-    "dev-back"    = "cd backend; .venv\Scripts\activate; python -m uvicorn app.principal:app --host localhost --port 8000 --reload"
+    "dev"         = "Start-Process powershell -ArgumentList '-NoExit', '-Command', 'cd backend; .venv\Scripts\activate; python -m uvicorn app.main:app --host localhost --port 8000 --reload'; cd frontend; npm run dev"
+    "dev-back"    = "cd backend; .venv\Scripts\activate; python -m uvicorn app.main:app --host localhost --port 8000 --reload"
     "dev-front"   = "cd frontend; npm run dev"
     "test-back"   = "cd backend; .venv\Scripts\activate; python -m pytest"
     "test-front"  = "cd frontend; npm run test"

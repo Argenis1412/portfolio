@@ -1,0 +1,80 @@
+[
+  {
+    "name": "Python 3",
+    "category": "backend",
+    "level": 3,
+    "icon": "python"
+  },
+  {
+    "name": "FastAPI",
+    "category": "backend",
+    "level": 3,
+    "icon": "fastapi"
+  },
+  {
+    "name": "Pydantic",
+    "category": "backend",
+    "level": 3,
+    "icon": null
+  },
+  {
+    "name": "Pytest",
+    "category": "backend",
+    "level": 3,
+    "icon": "pytest"
+  },
+  {
+    "name": "PostgreSQL",
+    "category": "database",
+    "level": 3,
+    "icon": "postgresql"
+  },
+  {
+    "name": "SQLAlchemy ORM",
+    "category": "database",
+    "level": 3,
+    "icon": null
+  },
+  {
+    "name": "Alembic",
+    "category": "database",
+    "level": 2,
+    "icon": null
+  },
+  {
+    "name": "React",
+    "category": "frontend",
+    "level": 2,
+    "icon": "react"
+  },
+  {
+    "name": "TypeScript",
+    "category": "frontend",
+    "level": 2,
+    "icon": "typescript"
+  },
+  {
+    "name": "Fetch API",
+    "category": "frontend",
+    "level": 2,
+    "icon": null
+  },
+  {
+    "name": "Tailwind CSS",
+    "category": "frontend",
+    "level": 2,
+    "icon": "tailwindcss"
+  },
+  {
+    "name": "Git/GitHub",
+    "category": "devops",
+    "level": 3,
+    "icon": "git"
+  },
+  {
+    "name": "GitHub Actions",
+    "category": "devops",
+    "level": 2,
+    "icon": "github"
+  }
+]

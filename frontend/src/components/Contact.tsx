@@ -1,9 +1,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Loader2, AlertCircle, Terminal, ShieldCheck, Clock3 } from 'lucide-react';
-import { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { useAbout, useContactMutation } from '../hooks/useApi';
-import { ApiError } from '../api';
+import { useAbout } from '../hooks/useApi';
+import { useContactForm } from '../hooks/useContactForm';
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -14,93 +13,16 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 export default function Contact() {
   const { t, language } = useLanguage();
   const { data: about } = useAbout();
-  const { mutate, isPending: isMutating, isSuccess: mutationSuccess, error: mutationError, reset } = useContactMutation();
+  const {
+    formData, errors, traceResult, idempotencyKey,
+    status, submitError, responseStatusCode, responseTraceId,
+    queueStatus, deliveryMode, downstream, responseTone,
+    handleChange, handleSubmit
+  } = useContactForm();
   
-  const [formData, setFormData] = useState({
-    nome: '',
-    email: '',
-    assunto: '',
-    mensagem: '',
-  });
-  
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [traceResult, setTraceResult] = useState<{ traceId?: string; durationMs: number; queueStatus?: string; deliveryMode?: string; downstream?: string; message?: string } | null>(null);
-  
-  const getNewKey = () => {
-    return typeof crypto !== 'undefined' && crypto.randomUUID 
-      ? crypto.randomUUID() 
-      : `key-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-  };
- 
-  const [idempotencyKey, setIdempotencyKey] = useState<string>(getNewKey);
- 
-  const generateNewKey = () => {
-    setIdempotencyKey(getNewKey());
-  };
- 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-    if (!formData.nome.trim()) newErrors.nome = 'name_required';
-    if (!formData.email.trim()) {
-      newErrors.email = 'email_required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'email_invalid';
-    }
-    if (!formData.mensagem.trim()) {
-      newErrors.mensagem = 'message_required';
-    } else if (formData.mensagem.length < 10) {
-      newErrors.mensagem = 'message_too_short';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-    
-    setErrors({});
-    
-    const dataToSend = {
-      ...formData,
-      assunto: formData.assunto.trim() || t('contact.subject_default') || 'Contato via Portfólio',
-      website: (document.getElementById('hp_website') as HTMLInputElement)?.value || '',
-      fax: (document.getElementById('hp_fax') as HTMLInputElement)?.value || ''
-    };
-    
-    mutate(
-      { data: dataToSend, idempotencyKey },
-      {
-        onSuccess: (result) => {
-          setTraceResult(result);
-          setFormData({ nome: '', email: '', assunto: '', mensagem: '' });
-          generateNewKey();
-          // We intentionally leave the form disabled and show the trace result
-          // so the user can observe the engineering evidence.
-        },
-        onError: (error: unknown) => {
-          // We do not setTraceResult(null) here, so the old trace stays visible if wanted.
-          // But technically if an error occurs, they just see the error snippet.
-          if (error instanceof ApiError) {
-            if (error.status === 429) {
-              setErrors({ submit: 'contact.error.rate_limit' });
-            } else if (error.message.includes('DUPLICATE') || error.status === 409 || error.status === 400) {
-              setErrors({ submit: 'contact.error.duplicate' });
-            } else {
-              setErrors({ submit: 'contact.error.generic' });
-            }
-          } else {
-            setErrors({ submit: 'contact.error.generic' });
-          }
-          generateNewKey();
-        }
-      }
-    );
-  };
-
   const handleWhatsApp = () => {
-    if (!about?.telefone) return;
-    const cleanNumber = about.telefone.replace(/\D/g, '');
+    if (!about?.phone) return;
+    const cleanNumber = about.phone.replace(/\D/g, '');
     const finalNumber = cleanNumber.startsWith('55') ? cleanNumber : `55${cleanNumber}`;
     const message = language === 'es' 
       ? '¡Hola Argenis! Vi tu portafolio y me gustaría hablar contigo.'
@@ -114,39 +36,7 @@ export default function Contact() {
     );
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    
-    // Reset success/error state when user starts typing again
-    if (mutationSuccess || mutationError || errors.submit) {
-      reset();
-    }
-    
-    if (errors[name]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
-    }
-  };
-
-  const status = isMutating ? 'loading' : (mutationSuccess ? 'success' : (mutationError || errors.submit ? 'error' : 'idle'));
-  const availability = about?.disponibilidade?.[language as 'pt' | 'en' | 'es'] ?? '...';
-  const submitError = errors.submit ? t(errors.submit) : t('contact.error.generic');
-  const responseStatusCode = mutationError instanceof ApiError ? mutationError.status : null;
-  const responseTraceId = traceResult?.traceId || (mutationError instanceof ApiError ? mutationError.traceId : undefined);
-  const queueStatus = traceResult?.queueStatus ?? 'idle';
-  const deliveryMode = traceResult?.deliveryMode ?? 'background';
-  const downstream = traceResult?.downstream ?? 'email_adapter';
-  const responseTone = status === 'success'
-    ? 'text-emerald-400'
-    : status === 'error'
-      ? 'text-red-400'
-      : status === 'loading'
-        ? 'text-amber-400'
-        : 'text-slate-400';
+  const availability = about?.availability?.[language as 'pt' | 'en' | 'es'] ?? '...';
   const specRows = [
     { label: t('contact.spec.endpoint'), value: 'POST /api/v1/contact' },
     { label: t('contact.spec.idempotency'), value: 'Idempotency-Key header' },
@@ -258,21 +148,21 @@ export default function Contact() {
 
               <div className="grid gap-5 md:grid-cols-2">
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="nome" className="text-[11px] font-mono uppercase tracking-[0.25em] text-slate-500">{t('contact.name')}</label>
+                  <label htmlFor="name" className="text-[11px] font-mono uppercase tracking-[0.25em] text-slate-500">{t('contact.name')}</label>
                   <input
                     type="text"
-                    id="nome"
-                    name="nome"
+                    id="name"
+                    name="name"
                     placeholder={t('contact.placeholder.name')}
-                    value={formData.nome}
+                    value={formData.name}
                     onChange={handleChange}
-                    className={`rounded-xl border bg-[#11161D] px-4 py-3 text-sm text-slate-100 outline-none transition-all placeholder:text-slate-500 ${errors.nome ? 'border-red-500/60 focus:ring-2 focus:ring-red-500/20' : 'border-[#20262D] focus:border-app-primary/60 focus:ring-2 focus:ring-app-primary/20'}`}
+                    className={`rounded-xl border bg-[#11161D] px-4 py-3 text-sm text-slate-100 outline-none transition-all placeholder:text-slate-500 ${errors.name ? 'border-red-500/60 focus:ring-2 focus:ring-red-500/20' : 'border-[#20262D] focus:border-app-primary/60 focus:ring-2 focus:ring-app-primary/20'}`}
                   />
                   <AnimatePresence>
-                    {errors.nome && (
+                    {errors.name && (
                       <motion.p initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="flex items-center gap-1 text-[11px] text-red-400">
                         <AlertCircle className="h-3.5 w-3.5" />
-                        {t(`contact.error.${errors.nome}`)}
+                        {t(`contact.error.${errors.name}`)}
                       </motion.p>
                     )}
                   </AnimatePresence>
@@ -301,34 +191,34 @@ export default function Contact() {
               </div>
 
               <div className="mt-5 flex flex-col gap-2">
-                <label htmlFor="assunto" className="text-[11px] font-mono uppercase tracking-[0.25em] text-slate-500">{t('contact.subject')}</label>
+                <label htmlFor="subject" className="text-[11px] font-mono uppercase tracking-[0.25em] text-slate-500">{t('contact.subject')}</label>
                 <input
                   type="text"
-                  id="assunto"
-                  name="assunto"
+                  id="subject"
+                  name="subject"
                   placeholder={t('contact.placeholder.subject')}
-                  value={formData.assunto}
+                  value={formData.subject}
                   onChange={handleChange}
                   className="rounded-xl border border-[#20262D] bg-[#11161D] px-4 py-3 text-sm text-slate-100 outline-none transition-all placeholder:text-slate-500 focus:border-app-primary/60 focus:ring-2 focus:ring-app-primary/20"
                 />
               </div>
 
               <div className="mt-5 flex flex-col gap-2">
-                <label htmlFor="mensagem" className="text-[11px] font-mono uppercase tracking-[0.25em] text-slate-500">{t('contact.message')}</label>
+                <label htmlFor="message" className="text-[11px] font-mono uppercase tracking-[0.25em] text-slate-500">{t('contact.message')}</label>
                 <textarea
-                  id="mensagem"
-                  name="mensagem"
+                  id="message"
+                  name="message"
                   rows={6}
                   placeholder={t('contact.placeholder.message')}
-                  value={formData.mensagem}
+                  value={formData.message}
                   onChange={handleChange}
-                  className={`resize-none rounded-xl border bg-[#11161D] px-4 py-3 text-sm text-slate-100 outline-none transition-all placeholder:text-slate-500 ${errors.mensagem ? 'border-red-500/60 focus:ring-2 focus:ring-red-500/20' : 'border-[#20262D] focus:border-app-primary/60 focus:ring-2 focus:ring-app-primary/20'}`}
+                  className={`resize-none rounded-xl border bg-[#11161D] px-4 py-3 text-sm text-slate-100 outline-none transition-all placeholder:text-slate-500 ${errors.message ? 'border-red-500/60 focus:ring-2 focus:ring-red-500/20' : 'border-[#20262D] focus:border-app-primary/60 focus:ring-2 focus:ring-app-primary/20'}`}
                 />
                 <AnimatePresence>
-                  {errors.mensagem && (
+                  {errors.message && (
                     <motion.p initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="flex items-center gap-1 text-[11px] text-red-400">
                       <AlertCircle className="h-3.5 w-3.5" />
-                      {t(`contact.error.${errors.mensagem}`)}
+                      {t(`contact.error.${errors.message}`)}
                     </motion.p>
                   )}
                 </AnimatePresence>

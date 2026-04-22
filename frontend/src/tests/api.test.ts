@@ -1,5 +1,5 @@
 /**
- * Quality tests for API functions (`api.ts`).
+ * Quality tests for the portfolio API service layer.
  *
  * Verifies that each fetch function:
  * - Uses the correct URL
@@ -13,9 +13,9 @@ import {
   fetchProjects,
   fetchSkills,
   fetchExperience,
-  fetchFormacao,
+  fetchFormation,
   fetchPhilosophy,
-} from '../api';
+} from '../api/index';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -37,29 +37,29 @@ const mockFetchError = (status = 500) => {
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
 const aboutFixture = {
-  nome: 'Argenis Lopez',
-  titulo: 'Backend Developer',
-  localizacao: 'Curitiba, PR',
+  name: 'Argenis Lopez',
+  title: 'Backend Developer',
+  location: 'Curitiba, PR',
   email: 'test@example.com',
-  telefone: '(41) 99999-9999',
+  phone: '(41) 99999-9999',
   github: 'https://github.com/test',
   linkedin: 'https://linkedin.com/in/test',
-  descricao: { pt: 'PT', en: 'EN', es: 'ES' },
-  disponibilidade: { pt: 'Remoto', en: 'Remote', es: 'Remoto' },
+  description: { pt: 'PT', en: 'EN', es: 'ES' },
+  availability: { pt: 'Remoto', en: 'Remote', es: 'Remoto' },
 };
 
 const projectFixture = {
   id: 'proj-1',
-  nome: 'Projeto Teste',
-  descricao_curta: { pt: 'PT', en: 'EN', es: 'ES' },
-  descricao_completa: { pt: 'PT', en: 'EN', es: 'ES' },
-  tecnologias: ['Python', 'FastAPI'],
-  funcionalidades: ['Feature A'],
-  aprendizados: ['Lesson A'],
-  repositorio: 'https://github.com/test/repo',
+  name: 'Projeto Teste',
+  short_description: { pt: 'PT', en: 'EN', es: 'ES' },
+  full_description: { pt: 'PT', en: 'EN', es: 'ES' },
+  technologies: ['Python', 'FastAPI'],
+  features: ['Feature A'],
+  learnings: ['Lesson A'],
+  repository: 'https://github.com/test/repo',
   demo: null,
-  destaque: true,
-  imagem: null,
+  highlighted: true,
+  image: null,
 };
 
 // ─── fetchAbout ────────────────────────────────────────────────────────────────
@@ -73,8 +73,8 @@ describe('fetchAbout', () => {
   it('returns profile data when response is OK', async () => {
     mockFetchOk(aboutFixture);
     const about = await fetchAbout();
-    expect(about.nome).toBe('Argenis Lopez');
-    expect(about.descricao).toEqual({ pt: 'PT', en: 'EN', es: 'ES' });
+    expect(about.name).toBe('Argenis Lopez');
+    expect(about.description).toEqual({ pt: 'PT', en: 'EN', es: 'ES' });
   });
 
   it('throws error when response is not OK', async () => {
@@ -84,11 +84,11 @@ describe('fetchAbout', () => {
     spy.mockRestore();
   });
 
-  it('calls correct URL (/sobre)', async () => {
+  it('calls correct URL (/about)', async () => {
     mockFetchOk(aboutFixture);
     const spy = vi.spyOn(globalThis, 'fetch');
     await fetchAbout();
-    expect(spy).toHaveBeenCalledWith(expect.stringContaining('/sobre'), expect.any(Object));
+    expect(spy).toHaveBeenCalledWith(expect.stringContaining('/about'), expect.any(Object));
   });
 });
 
@@ -101,7 +101,7 @@ describe('fetchProjects', () => {
   });
 
   it('returns projects list', async () => {
-    mockFetchOk({ projetos: [projectFixture], total: 1 });
+    mockFetchOk({ projects: [projectFixture], total: 1 });
     const projects = await fetchProjects();
     expect(Array.isArray(projects)).toBe(true);
     expect(projects.length).toBe(1);
@@ -109,7 +109,7 @@ describe('fetchProjects', () => {
   });
 
   it('returns empty list if projects is not an array (Resilience / Hardening)', async () => {
-    mockFetchOk({ projetos: null, total: 0 });
+    mockFetchOk({ projects: null, total: 0 });
     // Now the system is robust: it detects the error but defaults to [] to avoid breaking the site
     const projects = await fetchProjects();
     expect(projects).toEqual([]);
@@ -131,15 +131,15 @@ describe('fetchSkills', () => {
   it('returns skills list', async () => {
     mockFetchOk({
       stack: [
-        { nome: 'Python', categoria: 'backend', nivel: 5, icone: 'python' },
+        { name: 'Python', category: 'backend', level: 5, icon: 'python' },
       ],
-      por_categoria: {},
+      by_category: {},
     });
 
     const skills = await fetchSkills();
     expect(Array.isArray(skills)).toBe(true);
-    expect(skills[0].nome).toBe('Python');
-    expect(skills[0].nivel).toBe(5);
+    expect(skills[0].name).toBe('Python');
+    expect(skills[0].level).toBe(5);
   });
 
   it('throws error when server returns error', async () => {
@@ -157,17 +157,17 @@ describe('fetchExperience', () => {
 
   it('returns experience list', async () => {
     mockFetchOk({
-      experiencias: [
+      experiences: [
         {
           id: 'exp-1',
-          cargo: { pt: 'Dev', en: 'Dev', es: 'Dev' },
-          empresa: 'Empresa A',
-          localizacao: 'Remoto',
-          data_inicio: '2024-01-01',
-          data_fim: null,
-          descricao: { pt: 'PT', en: 'EN', es: 'ES' },
-          tecnologias: ['Python'],
-          atual: true,
+          role: { pt: 'Dev', en: 'Dev', es: 'Dev' },
+          company: 'Empresa A',
+          location: 'Remoto',
+          start_date: '2024-01-01',
+          end_date: null,
+          description: { pt: 'PT', en: 'EN', es: 'ES' },
+          technologies: ['Python'],
+          current: true,
         },
       ],
       total: 1,
@@ -175,8 +175,8 @@ describe('fetchExperience', () => {
 
     const exp = await fetchExperience();
     expect(exp.length).toBe(1);
-    expect(exp[0].empresa).toBe('Empresa A');
-    expect(exp[0].atual).toBe(true);
+    expect(exp[0].company).toBe('Empresa A');
+    expect(exp[0].current).toBe(true);
   });
 
   it('throws error when response is not OK', async () => {
@@ -187,37 +187,37 @@ describe('fetchExperience', () => {
   });
 });
 
-// ─── fetchFormacao ─────────────────────────────────────────────────────────────
+// ─── fetchFormation ────────────────────────────────────────────────────────────
 
-describe('fetchFormacao', () => {
+describe('fetchFormation', () => {
   beforeEach(() => vi.restoreAllMocks());
 
   it('returns education list', async () => {
     mockFetchOk({
-      formacoes: [
+      formations: [
         {
           id: 'edu-1',
-          curso: { pt: 'ADS', en: 'Systems Analysis', es: 'Sistemas' },
-          instituicao: 'UFPR',
-          localizacao: 'Curitiba, PR',
-          data_inicio: '2024-02-01',
-          data_fim: null,
-          descricao: { pt: 'Em andamento', en: 'In progress', es: 'En progreso' },
-          atual: true,
+          course: { pt: 'ADS', en: 'Systems Analysis', es: 'Sistemas' },
+          institution: 'UFPR',
+          location: 'Curitiba, PR',
+          start_date: '2024-02-01',
+          end_date: null,
+          description: { pt: 'Em andamento', en: 'In progress', es: 'En progreso' },
+          current: true,
         },
       ],
       total: 1,
     });
 
-    const formacao = await fetchFormacao();
-    expect(formacao.length).toBe(1);
-    expect(formacao[0].instituicao).toBe('UFPR');
+    const formation = await fetchFormation();
+    expect(formation.length).toBe(1);
+    expect(formation[0].institution).toBe('UFPR');
   });
 
   it('throws error when response is not OK', async () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockFetchError(500);
-    await expect(fetchFormacao()).rejects.toThrow(/API request failed: 500/);
+    await expect(fetchFormation()).rejects.toThrow(/API request failed: 500/);
     spy.mockRestore();
   });
 });

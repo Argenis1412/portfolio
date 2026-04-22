@@ -1,52 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { m, AnimatePresence, type Variants } from 'framer-motion';
+import { m, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
-import { useLiveMetrics, type SystemStatus } from '../hooks/useLiveMetrics';
-import { useCurrentTime } from '../hooks/useCurrentTime';
+import { useMetricsDisplay } from '../hooks/useMetricsDisplay';
+import { Tile, TileSkeleton } from './ui/Tile';
 import MetricsSparkline from './ui/MetricsSparkline';
 
-const STATUS_CONFIG: Record<
-  SystemStatus,
-  { i18nKey: string; dot: string; text: string }
-> = {
-  loading: { i18nKey: 'metrics.status.loading', dot: 'bg-app-muted animate-pulse', text: 'text-app-muted' },
-  operational: { i18nKey: 'metrics.status.operational', dot: 'bg-emerald-500 animate-pulse', text: 'text-emerald-500' },
-  warning: { i18nKey: 'metrics.status.warning', dot: 'bg-amber-400 animate-pulse', text: 'text-amber-400' },
-  degraded: { i18nKey: 'metrics.status.degraded', dot: 'bg-red-400', text: 'text-red-400' },
-  down: { i18nKey: 'metrics.status.down', dot: 'bg-red-600', text: 'text-red-600' },
-};
-
-const tileVariants: Variants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.45, delay: i * 0.08, ease: 'easeOut' as const },
-  }),
-};
-
-function Tile({ index, label, children }: { index: number; label: string; children: React.ReactNode }) {
-  return (
-    <m.div
-      custom={index}
-      variants={tileVariants}
-      initial="hidden"
-      animate="visible"
-      className="glass min-h-[120px] rounded-2xl p-5 flex flex-col gap-3"
-    >
-      <span className="text-xs font-mono uppercase tracking-widest text-app-muted">{label}</span>
-      {children}
-    </m.div>
-  );
-}
-
-function TileSkeleton({ index }: { index: number }) {
-  return (
-    <Tile index={index} label="—">
-      <div className="h-7 w-20 rounded bg-app-border animate-pulse" />
-    </Tile>
-  );
-}
 
 const UpdatedAgo = React.memo(({ timestamp }: { timestamp: string }) => {
   const { t } = useLanguage();
@@ -64,26 +22,10 @@ const UpdatedAgo = React.memo(({ timestamp }: { timestamp: string }) => {
 });
 
 export default function LiveMetricsBento() {
-  const {
-    data,
-    status,
-    isLoading,
-    previous,
-    sampleHistory,
-    latestSample,
-    effectiveP95,
-    confidenceScore,
-    confidenceLabel,
-    baselineP95,
-    latestTrace,
-    recentTraces,
-    displayLifecycle,
-    strategyProfile,
-  } = useLiveMetrics();
-  const { t } = useLanguage();
-  const currentTime = useCurrentTime(1000);
+  const displayContext = useMetricsDisplay();
+  const { isLoading, t } = displayContext;
 
-  if (isLoading) {
+  if (isLoading || !displayContext.data) {
     return (
       <section id="metrics" className="px-4 max-w-6xl mx-auto py-12">
         <div className="mb-6">
@@ -97,25 +39,34 @@ export default function LiveMetricsBento() {
     );
   }
 
-  if (!data) return null;
+  const {
+    data,
+    statusCfg,
+    errorIsElevated,
+    errorRateColor,
+    errorNumberColor,
+    hasIncident,
+    incidentDot,
+    incidentText,
+    latencyDelta,
+    baselineDelta,
+    latestEventLabel,
+    latestEventAgoSeconds,
+    confidenceTone,
+    metrics: {
+      sampleHistory,
+      latestSample,
+      effectiveP95,
+      confidenceScore,
+      confidenceLabel,
+      baselineP95,
+      latestTrace,
+      recentTraces,
+      displayLifecycle,
+      strategyProfile,
+    }
+  } = displayContext;
 
-  const statusCfg = STATUS_CONFIG[status];
-  const errorIsElevated = data.error_rate_status !== 'stable' || data.error_rate > 0.045;
-  const errorRateColor =
-    (data.error_rate_status === 'investigating' || data.error_rate > 0.08)
-      ? 'bg-red-500/15 text-red-500'
-      : (data.error_rate_status === 'warning' || data.error_rate > 0.045)
-        ? 'bg-red-500/15 text-red-400'
-        : 'bg-emerald-500/15 text-emerald-500';
-  const errorNumberColor = errorIsElevated ? 'text-red-400' : 'text-app-text';
-  const hasIncident = data.last_incident !== 'none';
-  const incidentDot = hasIncident ? 'bg-amber-400' : 'bg-emerald-500';
-  const incidentText = hasIncident ? 'text-amber-400' : 'text-emerald-500';
-  const latencyDelta = previous ? effectiveP95 - previous.p95_ms : null;
-  const baselineDelta = baselineP95 === null ? null : effectiveP95 - baselineP95;
-  const latestEventLabel = latestTrace ? t(`metrics.incident.${latestTrace.type}`) : t('metrics.incident.none');
-  const latestEventAgoSeconds = latestTrace ? Math.max(0, Math.floor((currentTime - latestTrace.timestamp.getTime()) / 1000)) : null;
-  const confidenceTone = confidenceLabel === 'estimated' ? 'bg-violet-500/10 text-violet-700 border-violet-500/20 dark:text-violet-300' : 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:text-emerald-300';
   const activePath = strategyProfile.activePath;
 
   return (
@@ -146,7 +97,7 @@ export default function LiveMetricsBento() {
         <Tile index={0} label={t('metrics.system_status')}>
           <div className="flex items-center gap-2 mt-1">
             <span className={`h-2.5 w-2.5 rounded-full flex-shrink-0 ${statusCfg.dot}`} />
-                <span className={`font-mono text-lg font-bold ${statusCfg.text}`}>
+                <span className={`font-mono text-lg font-bold uppercase tracking-tight ${statusCfg.text}`}>
                   {t(statusCfg.i18nKey)}
                 </span>
               </div>

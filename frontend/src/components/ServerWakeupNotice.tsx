@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useLiveMetrics } from '../hooks/useLiveMetrics';
 import ErrorNotification from './ui/ErrorNotification';
-import { ApiError } from '../api';
+import { ApiError } from '../api/client';
 
 /**
  * ServerWakeupNotice — driven by useLiveMetrics as the single source of truth.

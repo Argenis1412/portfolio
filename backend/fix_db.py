@@ -1,10 +1,10 @@
 import asyncio
-from app.adaptadores.repositorio_sql import RepositorioSQL
-from app.adaptadores.modelos_sql import SQLModel
+from app.adapters.sql_repository import SqlRepository
+from app.adapters.sql_models import SQLModel
 
 
 async def init_db():
-    repo = RepositorioSQL()
+    repo = SqlRepository()
     async with repo.engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
 

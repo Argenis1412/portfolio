@@ -57,13 +57,13 @@ TEMP_EMAIL_DOMAINS = [
 
 
 # Regexes previously in the schema, now used for scoring
-NOME_REGEX = re.compile(r"^[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ .,'-]{1,79}$")
-ASSUNTO_REGEX = re.compile(r"^[A-Za-zÀ-ÿ0-9 .,:;!?()/#&+@'\-]{0,120}$")
+NAME_REGEX = re.compile(r"^[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ .,'-]{1,79}$")
+SUBJECT_REGEX = re.compile(r"^[A-Za-zÀ-ÿ0-9 .,:;!?()/#&+@'\-]{0,120}$")
 EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 
 
 def calculate_spam_score(
-    message: str, email: str, nome: str = "", assunto: str = ""
+    message: str, email: str, name: str = "", subject: str = ""
 ) -> int:
     """
     Calculates a spam score based on message content, email, name and subject.
@@ -81,10 +81,10 @@ def calculate_spam_score(
     if not EMAIL_REGEX.match(email):
         return 100
 
-    if nome and not NOME_REGEX.fullmatch(nome):
+    if name and not NAME_REGEX.fullmatch(name):
         return 100
 
-    if assunto and not ASSUNTO_REGEX.fullmatch(assunto):
+    if subject and not SUBJECT_REGEX.fullmatch(subject):
         return 100
 
     # Rule 1: Message too short

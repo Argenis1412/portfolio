@@ -7,7 +7,7 @@ import time
 
 from redis.asyncio import Redis
 
-from app.configuracao import configuracoes
+from app.settings import settings
 
 
 class SpamDedupStore:
@@ -19,8 +19,8 @@ class SpamDedupStore:
                 redis_url,
                 decode_responses=True,
                 health_check_interval=30,
-                socket_timeout=configuracoes.redis_socket_timeout_seconds,
-                socket_connect_timeout=configuracoes.redis_connect_timeout_seconds,
+                socket_timeout=settings.redis_socket_timeout_seconds,
+                socket_connect_timeout=settings.redis_connect_timeout_seconds,
             )
             if redis_url
             else None
@@ -86,4 +86,4 @@ class SpamDedupStore:
             self._memory_store.clear()
 
 
-spam_dedup_store = SpamDedupStore(configuracoes.redis_url)
+spam_dedup_store = SpamDedupStore(settings.redis_url)

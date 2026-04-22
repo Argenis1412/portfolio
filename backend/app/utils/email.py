@@ -1,13 +1,13 @@
 """
-Utilitários para manipulação de emails.
+Utilities for email manipulation.
 """
 
 
-def mascarar_email(valor: str) -> str:
-    """Masca o email (ex: jo***@example.com) para logging seguro."""
-    if "@" not in valor:
+def mask_email(value: str) -> str:
+    """Masks an email (e.g., jo***@example.com) for safe logging."""
+    if "@" not in value:
         return "invalid-email"
 
-    usuario, dominio = valor.split("@", 1)
-    prefixo = usuario[:2] if len(usuario) >= 2 else usuario[:1]
-    return f"{prefixo}***@{dominio.lower()}"
+    user, domain = value.split("@", 1)
+    prefix = user[:2] if len(user) >= 2 else user[:1]
+    return f"{prefix}***@{domain.lower()}"

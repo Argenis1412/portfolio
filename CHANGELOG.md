@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/en/2.0.0/).
 
 ---
 
+## [1.6.0] - 2026-04-22
+
+### 🏗️ Full Structural Refactor & Global Localization
+
+#### ✅ Added
+- ✅ **Layered Frontend API**: Completely restructured the frontend API layer into a modular `src/api/` directory with dedicated services for `portfolio` and `chaos` domains.
+- ✅ **Sub-component Decomposition**: Extracted `ChaosTerminal` and `ChaosActionCard` sub-components to reduce monolith sizes and improve maintainability.
+- ✅ **New Performance Hooks**: Implemented `useCurrentTime` for stable, reactive time management across the dashboard.
+
+#### 🔄 Modified
+- ✅ **100% English Backend Migration**: Fully migrated the backend from Portuguese to English-first. This includes:
+  - Renaming all core directories (`adaptadores` → `adapters`, `controladores` → `controllers`, `entidades` → `entities`, etc.).
+  - Translating all internal symbols, function names, Pydantic models, and SQLModel entities.
+  - Standardizing all inline `# comments` and documentation strings to English.
+- ✅ **Unified Data Schemas**: Updated all frontend Zod schemas and TypeScript interfaces to synchronize with the new English backend property names.
+- ✅ **Refactored Monolithic Components**: Decomposed `ChaosPlayground`, `Contact`, and `LiveMetricsBento` into reusable logic hooks (`useChaosActions`, `useContactForm`, `useMetricsDisplay`).
+
+#### 🐛 Fixed
+- ✅ **React Hook Purity Violation**: Resolved a critical ESLint error in `ChaosPlayground.tsx` caused by direct `Date.now()` calls during the render cycle.
+- ✅ **Obsolete Code Cleanup**: Deleted the deprecated `frontend/src/api.ts` shim.
+- ✅ **Gitignore Artifact Guard**: Updated `.gitignore` in both frontend and backend to exclude temporary test artifacts (`test_output.txt`, `test_out.txt`).
+- ✅ **Backend Route Alignment**: Successfully migrated `/saude` to `/health` for global consistency.
+
+---
+
 ## [1.5.1] - 2026-04-21
 
 ### 🔭 Honest Telemetry and Stronger Narrative Sections

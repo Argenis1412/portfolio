@@ -1,24 +1,24 @@
 """
-Ajudantes de cache HTTP — geração de ETags e suporte a 304 Not Modified.
+HTTP cache helpers — ETag generation and 304 Not Modified support.
 
-Uso dentro de uma rota FastAPI::
+Usage within a FastAPI route:
 
     from fastapi import Request, Response
-    from app.core.cache_http import resposta_cacheavel
+    from app.core.cache_http import cacheable_response
 
-    @roteador.get("/sobre")
-    async def obter_sobre(request: Request, response: Response, ...):
-        dados = await uc.executar()
-        return resposta_cacheavel(request, response, dados, max_age=300)
+    @router.get("/about")
+    async def get_about(request: Request, response: Response, ...):
+        data = await uc.execute()
+        return cacheable_response(request, response, data, max_age=300)
 
-Notas de Design
----------------
-- ETag é um SHA-256 do payload serializado em JSON (os primeiros 16 caracteres hex
-  são suficientes para evitar colisões nesta escala).
-- ``stale-while-revalidate=60`` permite que browsers/CDNs sirvam conteúdo antigo
-  por mais 60s enquanto revalidam em background — UX com zero latência.
-- Quando o cliente envia ``If-None-Match`` igual à ETag atual, retornamos
-  um 304 sem corpo, economizando a transferência completa do payload.
+Design Notes
+------------
+- ETag is a SHA-256 of the JSON-serialized payload (the first 16 hex characters
+  are sufficient to avoid collisions at this scale).
+- ``stale-while-revalidate=60`` allows browsers/CDNs to serve old content
+  for another 60s while revalidating in the background — zero-latency UX.
+- When the client sends ``If-None-Match`` equal to the current ETag, we return
+  a 304 without a body, saving the full payload transfer.
 """
 
 import hashlib
@@ -31,14 +31,14 @@ _MAX_AGE_DEFAULT = 300  # 5 min
 _SWR_DEFAULT = 60  # stale-while-revalidate
 
 
-def _etag_de(payload: Any) -> str:
-    """Calcula uma ETag curta para qualquer payload serializável em JSON."""
+def _generate_etag(payload: Any) -> str:
+    """Calculates a short ETag for any JSON-serializable payload."""
     serialised = json.dumps(payload, ensure_ascii=False, sort_keys=True, default=str)
     digest = hashlib.sha256(serialised.encode()).hexdigest()
     return f'"{digest[:16]}"'
 
 
-def resposta_cacheavel(
+def cacheable_response(
     request: Request,
     response: Response,
     payload: Any,
@@ -47,23 +47,23 @@ def resposta_cacheavel(
     swr: int = _SWR_DEFAULT,
 ) -> Any:
     """
-    Anexa headers de cache e lida com GET condicional (If-None-Match → 304).
+    Attaches cache headers and handles conditional GET (If-None-Match → 304).
 
-    Parâmetros
+    Parameters
     ----------
-    request:  Request FastAPI recebida (necessária para ler If-None-Match).
-    response: Objeto Response do FastAPI usado para definir headers em caso de 200 normal.
-    payload:  O corpo da resposta (será serializado para o cálculo da ETag).
-    max_age:  Cache-Control max-age em segundos (padrão 300).
-    swr:      stale-while-revalidate em segundos (padrão 60).
+    request:  Received FastAPI Request (required to read If-None-Match).
+    response: FastAPI Response object used to set headers in case of a normal 200.
+    payload:  The response body (will be serialized for ETag calculation).
+    max_age:  Cache-Control max-age in seconds (default 300).
+    swr:      stale-while-revalidate in seconds (default 60).
 
-    Retorna
+    Returns
     -------
-    - Um ``Response(status_code=304)`` quando o cliente já possui uma cópia atualizada.
-    - O ``payload`` original (sem alterações) para respostas 200 normais.
-      O FastAPI irá serializá-lo como de costume via o ``response_model`` da rota.
+    - A ``Response(status_code=304)`` when the client already has an updated copy.
+    - The original ``payload`` (unchanged) for normal 200 responses.
+      FastAPI will serialize it as usual via the route's ``response_model``.
     """
-    etag = _etag_de(payload)
+    etag = _generate_etag(payload)
     cache_control = f"public, max-age={max_age}, stale-while-revalidate={swr}"
 
     client_etag = request.headers.get("if-none-match")

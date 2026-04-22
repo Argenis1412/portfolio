@@ -114,8 +114,8 @@ export default function Projects() {
 
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           {projects.map((project, index) => {
-            const shortDescription = project.descricao_curta[language as keyof typeof project.descricao_curta];
-            const story = parseProjectStory(project.descricao_completa?.[language as keyof typeof project.descricao_completa]);
+            const shortDescription = project.short_description[language as keyof typeof project.short_description];
+            const story = parseProjectStory(project.full_description?.[language as keyof typeof project.full_description]);
 
             return (
               <motion.article
@@ -131,9 +131,9 @@ export default function Projects() {
                     <div className="text-[10px] font-mono uppercase tracking-[0.25em] text-app-primary mb-2">
                       {t('projects.case_study')}
                     </div>
-                    <h3 className="text-2xl font-bold text-app-text">{project.nome}</h3>
+                    <h3 className="text-2xl font-bold text-app-text">{project.name}</h3>
                   </div>
-                  {project.destaque && (
+                  {project.highlighted && (
                     <span className="rounded-full border border-app-primary/20 bg-app-primary/10 px-3 py-1 text-[10px] font-mono uppercase tracking-[0.2em] text-app-primary">
                       {t('projects.featured')}
                     </span>
@@ -163,31 +163,31 @@ export default function Projects() {
                   <div className="flex flex-wrap gap-x-6 gap-y-2">
                     <div>
                       <span className="text-slate-400">{t('projects.runtime')}:</span>
-                      <span className="ml-2 text-slate-100">{project.tecnologias.slice(0, 3).join(' / ')}</span>
+                      <span className="ml-2 text-slate-100">{project.technologies.slice(0, 3).join(' / ')}</span>
                     </div>
                     <div>
                       <span className="text-slate-400">{t('projects.surface')}:</span>
-                      <span className="ml-2 text-slate-100">{project.funcionalidades?.length ?? 0} signals</span>
+                      <span className="ml-2 text-slate-100">{project.features?.length ?? 0} signals</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap gap-2 mb-6">
-                  {project.tecnologias.slice(0, 10).map((tech) => (
+                  {project.technologies.slice(0, 10).map((tech) => (
                     <span key={tech} className="rounded-full border border-app-primary/10 bg-app-primary/5 px-3 py-1 text-xs font-semibold text-app-primary">
                       {tech}
                     </span>
                   ))}
-                  {project.tecnologias.length > 10 && (
+                  {project.technologies.length > 10 && (
                     <span className="rounded-full border border-app-border bg-app-surface-hover px-3 py-1 text-xs font-medium text-app-muted">
-                      +{project.tecnologias.length - 10}
+                      +{project.technologies.length - 10}
                     </span>
                   )}
                 </div>
 
                 <div className="flex gap-4 mt-auto border-t border-app-border pt-4">
-                  {project.repositorio && (
-                    <a href={project.repositorio} target="_blank" rel="noopener noreferrer" className="flex-1 rounded-xl border border-app-border bg-app-surface px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 transition-colors hover:border-app-primary hover:text-app-primary flex items-center justify-center gap-2">
+                  {project.repository && (
+                    <a href={project.repository} target="_blank" rel="noopener noreferrer" className="flex-1 rounded-xl border border-app-border bg-app-surface px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 transition-colors hover:border-app-primary hover:text-app-primary flex items-center justify-center gap-2">
                       <Github className="w-5 h-5" />
                       {t('projects.source_code')}
                     </a>

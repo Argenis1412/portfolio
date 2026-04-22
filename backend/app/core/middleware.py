@@ -1,11 +1,11 @@
 """
-Middleware de requisições HTTP com logging estruturado.
+HTTP request middleware with structured logging.
 
-Adiciona:
-- Request ID único para rastreamento
-- Logging estruturado com structlog
-- Medição de tempo de resposta
-- Headers customizados de resposta
+Adds:
+- Unique Request ID for tracking
+- Structured logging with structlog
+- Response time measurement
+- Custom response headers
 """
 
 import base64
@@ -20,28 +20,28 @@ from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
-from app.adaptadores.logger_adaptador import configurar_structlog
-from app.configuracao import configuracoes
-from app.core.limite import get_client_ip
-from app.utils.email import mascarar_email
+from app.adapters.logger_adapter import configure_structlog
+from app.settings import settings
+from app.core.rate_limit import get_client_ip
+from app.utils.email import mask_email
 
-# Configurar structlog no módulo
-configurar_structlog()
+# Configure structlog in the module
+configure_structlog()
 logger = structlog.get_logger(__name__)
 
 
-def _identidade_logavel(request: Request) -> str:
-    identidade = getattr(request.state, "identidade", None)
-    if not identidade:
+def _get_loggable_identity(request: Request) -> str:
+    identity = getattr(request.state, "identity", None)
+    if not identity:
         return "ip"
 
-    if identidade.startswith("email:"):
-        return f"email:{mascarar_email(identidade.split(':', 1)[1])}"
+    if identity.startswith("email:"):
+        return f"email:{mask_email(identity.split(':', 1)[1])}"
 
-    return identidade
+    return identity
 
 
-def _credenciais_metrics_validas(authorization_header: str | None) -> bool:
+def _is_metrics_auth_valid(authorization_header: str | None) -> bool:
     if not authorization_header or not authorization_header.startswith("Basic "):
         return False
 
@@ -53,19 +53,19 @@ def _credenciais_metrics_validas(authorization_header: str | None) -> bool:
         return False
 
     return hmac.compare_digest(
-        username, configuracoes.metrics_basic_auth_username
+        username, settings.metrics_basic_auth_username
     ) and hmac.compare_digest(
         password,
-        configuracoes.metrics_basic_auth_password,
+        settings.metrics_basic_auth_password,
     )
 
 
-def _obter_trace_id() -> str:
+def _get_trace_id() -> str:
     """
-    Extrai o trace_id do span ativo no OpenTelemetry.
+    Extracts trace_id from active span in OpenTelemetry.
 
-    Retorna string vazia se OTel não estiver configurado ou se não
-    houver span ativo (ex: durante testes unitários).
+    Returns empty string if OTel is not configured or if there is no active span
+    (e.g., during unit tests).
     """
     try:
         from opentelemetry import trace
@@ -79,16 +79,16 @@ def _obter_trace_id() -> str:
     return ""
 
 
-class MiddlewareRequisicao(BaseHTTPMiddleware):
+class RequestMiddleware(BaseHTTPMiddleware):
     """
-    Middleware para processar todas as requisições HTTP.
+    Middleware to process all HTTP requests.
 
-    Funcionalidades:
-        - Gera request_id único (UUID4)
-        - Adiciona request_id no contexto do structlog
-        - Mede tempo de resposta
-        - Loga método, path, status e duração
-        - Adiciona headers: X-Request-ID, X-Response-Time
+    Features:
+        - Generates unique request_id (UUID4)
+        - Adds request_id to structlog context
+        - Measures response time
+        - Logs method, path, status, and duration
+        - Adds headers: X-Request-ID, X-Response-Time
     """
 
     def __init__(self, app: ASGIApp) -> None:
@@ -100,84 +100,84 @@ class MiddlewareRequisicao(BaseHTTPMiddleware):
         call_next: Callable,
     ) -> Response:
         """
-        Processa requisição e adiciona metadados.
+        Processes request and adds metadata.
 
         Args:
-            request: Requisição HTTP recebida.
-            call_next: Próximo handler na cadeia.
+            request: Received HTTP request.
+            call_next: Next handler in the chain.
 
         Returns:
-            Response: Resposta com headers adicionais.
+            Response: Response with additional headers.
         """
         # Generate unique ID for tracking
         request_id = str(uuid.uuid4())
 
-        # Adicionar request_id no state do request
+        # Add request_id to request state
         request.state.request_id = request_id
 
-        # Adicionar request_id ao contexto do structlog
+        # Add request_id to structlog context
         structlog.contextvars.clear_contextvars()
         structlog.contextvars.bind_contextvars(
             request_id=request_id,
-            metodo=request.method,
+            method=request.method,
             path=request.url.path,
         )
 
-        # Timestamp de início
-        inicio = time.time()
+        # Start timestamp
+        start_time = time.time()
 
-        # Log da requisição recebida
+        # Log received request
         logger.info(
-            "requisicao_recebida",
+            "request_received",
             query=str(request.url.query) if request.url.query else None,
             client_ip=get_client_ip(request),
-            identidade=_identidade_logavel(request),
+            identity=_get_loggable_identity(request),
         )
 
-        # Processar requisição
+        # Process request
         try:
             response = await call_next(request)
         except Exception as exc:
             # Log error and re-raise for handlers to catch
             logger.error(
-                "erro_processamento_requisicao",
-                erro=str(exc),
-                tipo_erro=type(exc).__name__,
+                "request_processing_error",
+                error=str(exc),
+                error_type=type(exc).__name__,
                 exc_info=True,
             )
             raise
 
-        # Calcular tempo de resposta
-        duracao_ms = (time.time() - inicio) * 1000
+        # Calculate response time
+        duration_ms = (time.time() - start_time) * 1000
 
-        # Adicionar headers customizados
+        # Add custom headers
         response.headers["X-Request-ID"] = request_id
-        response.headers["X-Response-Time"] = f"{duracao_ms:.2f}ms"
+        response.headers["X-Response-Time"] = f"{duration_ms:.2f}ms"
 
-        # Propagar trace_id do OpenTelemetry (link com Jaeger/Grafana Tempo)
-        trace_id = _obter_trace_id()
+        # Propagate OpenTelemetry trace_id (link with Jaeger/Grafana Tempo)
+        trace_id = _get_trace_id()
         if trace_id:
             response.headers["X-Trace-ID"] = trace_id
             # Enrich log with trace_id to correlate logs + traces
             structlog.contextvars.bind_contextvars(trace_id=trace_id)
 
-        # Log da resposta enviada
+        # Log sent response
         logger.info(
-            "resposta_enviada",
+            "response_sent",
             status_code=response.status_code,
-            duracao_ms=round(duracao_ms, 2),
+            duration_ms=round(duration_ms, 2),
         )
 
-        # Limpar contexto
+        # Clear context
         structlog.contextvars.clear_contextvars()
 
         return response
 
 
-class SegurancaHeadersMiddleware(BaseHTTPMiddleware):
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     """
-    Middleware para adicionar headers de segurança em todas as respostas.
-    Reflete as proteções configuradas no vercel.json para o backend.
+    Middleware to add security headers to all responses.
+    Reflects protections configured in vercel.json for the backend.
     """
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
@@ -209,10 +209,10 @@ class MetricsAccessMiddleware(BaseHTTPMiddleware):
     """Restricts /metrics in production using basic auth."""
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
-        if request.url.path != "/metrics" or not configuracoes.is_production:
+        if request.url.path != "/metrics" or not settings.is_production:
             return await call_next(request)
 
-        if _credenciais_metrics_validas(request.headers.get("authorization")):
+        if _is_metrics_auth_valid(request.headers.get("authorization")):
             return await call_next(request)
 
         logger.warning(
@@ -227,12 +227,12 @@ class MetricsAccessMiddleware(BaseHTTPMiddleware):
 
 class ChaosMonkeyMiddleware(BaseHTTPMiddleware):
     """
-    Middleware para simular cenários de erro e resiliência.
-    Ativado via header 'X-Debug-Mode'.
+    Middleware to simulate error and resilience scenarios.
+    Activated via 'X-Debug-Mode' header.
     """
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
-        # Simular Rate Limit (429)
+        # Simulate Rate Limit (429)
         if request.headers.get("X-Debug-Mode") == "simulate-429":
             logger.warning(
                 "chaos_monkey_triggered",
@@ -243,10 +243,10 @@ class ChaosMonkeyMiddleware(BaseHTTPMiddleware):
                 status_code=429,
                 content=json.dumps(
                     {
-                        "erro": {
-                            "codigo": "RATE_LIMIT_EXCEEDED",
-                            "mensagem": "Chaos Monkey: Simulated rate limit exceeded",
-                            "detalhes": {"retry_after": 30},
+                        "error": {
+                            "code": "RATE_LIMIT_EXCEEDED",
+                            "message": "Chaos Monkey: Simulated rate limit exceeded",
+                            "details": {"retry_after": 30},
                         }
                     }
                 ),
@@ -254,7 +254,7 @@ class ChaosMonkeyMiddleware(BaseHTTPMiddleware):
                 headers={"Retry-After": "30"},
             )
 
-        # Simular Erro Interno (500)
+        # Simulate Internal Error (500)
         if request.headers.get("X-Debug-Mode") == "simulate-500":
             logger.error(
                 "chaos_monkey_triggered",
@@ -265,9 +265,9 @@ class ChaosMonkeyMiddleware(BaseHTTPMiddleware):
                 status_code=500,
                 content=json.dumps(
                     {
-                        "erro": {
-                            "codigo": "ERRO_INESPERADO",
-                            "mensagem": "Chaos Monkey: Simulated internal server error",
+                        "error": {
+                            "code": "UNEXPECTED_ERROR",
+                            "message": "Chaos Monkey: Simulated internal server error",
                         }
                     }
                 ),

@@ -191,6 +191,8 @@ $RECYCLE.BIN/
 # Scripts de teste local
 testar_producao.py
 test_local.py
+test_output.txt
+test_out.txt
 
 # Documentação gerada
 docs/_build/
