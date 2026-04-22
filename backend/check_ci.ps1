@@ -34,7 +34,7 @@ if (!(Run-Check "Ruff Format Check" { py -3.12 -m ruff format --check . })) {
 }
 
 # 4. Mypy (Typing)
-if (!(Run-Check "Mypy (Typing)" { py -3.12 -m mypy app/core app/use_cases --ignore-missing-imports --explicit-package-bases })) { $AllPassed = $false }
+if (!(Run-Check "Mypy (Typing)" { py -3.12 -m mypy app/core app/use_cases app/controllers app/adapters --ignore-missing-imports --explicit-package-bases })) { $AllPassed = $false }
 
 # 5. Pytest (Tests)
 if (!(Run-Check "Pytest (Tests)" { py -3.12 -m pytest })) { $AllPassed = $false }

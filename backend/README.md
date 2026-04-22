@@ -103,11 +103,11 @@ python ./scripts/migrate_data.py
 ### 3. Execution
 ```bash
 # Start the server
-python -m uvicorn app.principal:app --reload --port 8000
+python -m uvicorn app.main:app --reload --port 8000
 ```
-- **Production Docs**: `https://api.argenisbackend.com/docs` (Now enabled for showcase)
-- **Production Status**: `https://api.argenisbackend.com/health` (Detailed health check)
-- **Production Health**: `https://api.argenisbackend.com/health` (Fast liveness check)
+- **Production Docs**: `https://api.argenisbackend.com/docs`
+- **Production Status**: `https://api.argenisbackend.com/health`
+- **Production Health**: `https://api.argenisbackend.com/health`
 
 ---
 
@@ -143,7 +143,6 @@ Supported metrics:
 
 ### 🔍 Health Check & Observability
 `GET /health`
-*(Note: Named `/health` instead of `/health` to match the Portuguese base domain language of the original project structure, but standard `health` checks apply)*  
 Returns status for:
 - API connectivity
 - **Database connection**
