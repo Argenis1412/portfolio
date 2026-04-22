@@ -214,7 +214,11 @@ def setup_database():
                 phone="(11) 99999-9999",
                 github="https://github.com/test",
                 linkedin="https://linkedin.com/in/test",
-                description={"pt": "Descrição", "en": "Description", "es": "Descripción"},
+                description={
+                    "pt": "Descrição",
+                    "en": "Description",
+                    "es": "Descripción",
+                },
                 availability={"pt": "Remoto", "en": "Remote", "es": "Remoto"},
             )
         )

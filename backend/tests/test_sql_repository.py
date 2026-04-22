@@ -135,17 +135,17 @@ def _popular_banco(session: Session) -> None:
             location="Curitiba, PR",
             start_date=date(2024, 2, 1),
             end_date=date(2026, 12, 1),
-            description={"pt": "Em andamento", "en": "In progress", "es": "En progreso"},
+            description={
+                "pt": "Em andamento",
+                "en": "In progress",
+                "es": "En progreso",
+            },
             current=True,
         )
     )
 
-    session.add(
-        StackModel(name="Python", category="backend", level=5, icon="python")
-    )
-    session.add(
-        StackModel(name="FastAPI", category="backend", level=4, icon="fastapi")
-    )
+    session.add(StackModel(name="Python", category="backend", level=5, icon="python"))
+    session.add(StackModel(name="FastAPI", category="backend", level=4, icon="fastapi"))
     session.add(StackModel(name="React", category="frontend", level=3, icon="react"))
 
 

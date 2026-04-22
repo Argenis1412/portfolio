@@ -92,10 +92,7 @@ def get_send_contact_use_case() -> SendContactUseCase:
             settings.resend_to_email,
         )
     # Priority 2: Console (Local development)
-    elif (
-        settings.environment == "local"
-        and not settings.formspree_form_id.strip()
-    ):
+    elif settings.environment == "local" and not settings.formspree_form_id.strip():
         email_adapter = ConsoleEmailAdapter()
     # Priority 3: Formspree (Legacy/Fallback)
     else:

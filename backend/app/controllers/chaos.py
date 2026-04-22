@@ -155,9 +155,7 @@ class ChaosState:
 chaos_state = ChaosState()
 
 
-async def _persist_incident(
-    incident: ChaosIncident, repo: PortfolioRepository
-) -> None:
+async def _persist_incident(incident: ChaosIncident, repo: PortfolioRepository) -> None:
     """Saves the chaos incident to Postgres via SQLAlchemy."""
     if hasattr(repo, "session_factory"):
         async with repo.session_factory() as session:

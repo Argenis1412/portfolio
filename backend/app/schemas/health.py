@@ -60,12 +60,8 @@ class MetricsSummary(BaseModel):
 
     p95_ms: int = Field(..., examples=[43], description="P95 latency in ms")
     p95_status: str = Field(..., examples=["healthy"], description="Latency status")
-    requests_24h: int = Field(
-        ..., examples=[987], description="Total requests (24h)"
-    )
-    error_rate: float = Field(
-        ..., examples=[0.0131], description="Decimal error rate"
-    )
+    requests_24h: int = Field(..., examples=[987], description="Total requests (24h)")
+    error_rate: float = Field(..., examples=[0.0131], description="Decimal error rate")
     error_rate_pct: str = Field(
         ..., examples=["1.31%"], description="Formatted error rate"
     )
@@ -75,12 +71,8 @@ class MetricsSummary(BaseModel):
     system_status: str = Field(
         ..., examples=["operational"], description="Overall system state"
     )
-    uptime: str = Field(
-        ..., examples=["2h 14m"], description="Formatted activity time"
-    )
-    window: str = Field(
-        ..., examples=["last_24h"], description="Metrics time window"
-    )
+    uptime: str = Field(..., examples=["2h 14m"], description="Formatted activity time")
+    window: str = Field(..., examples=["last_24h"], description="Metrics time window")
     timestamp: str = Field(..., description="ISO 8601 reading timestamp")
     retries_1h: int = Field(
         default=0, examples=[3], description="Retries triggered in the last hour"

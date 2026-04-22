@@ -146,7 +146,7 @@ def _configure_cors(application: FastAPI) -> None:
     # For local development, we allow everything from localhost
     # but still respect the settings list for production-readiness.
     origins = settings.get_allowed_origins()
-    
+
     application.add_middleware(
         CORSMiddleware,
         allow_origins=origins,

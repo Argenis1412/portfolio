@@ -140,9 +140,7 @@ async def test_send_contact_suspeito_recebe_marcacao_visivel(
 
     message_enviada = email_adapter_mock.send_message.call_args.args[0]
     assert message_enviada.subject.startswith("[⚠ POSSIBLE SPAM]")
-    assert (
-        "--- 🛡️ SECURITY WARNING (ANTI-SPAM FILTER) ---" in message_enviada.message
-    )
+    assert "--- 🛡️ SECURITY WARNING (ANTI-SPAM FILTER) ---" in message_enviada.message
     assert "Risk Level: 45/100" in message_enviada.message
 
 

@@ -94,30 +94,43 @@ mappings = {
     "validar_producao": "validate_production",
 }
 
+
 def replace_in_file(file_path):
     if "scratch_rename.py" in file_path:
         return
-    
+
     with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
-    
+
     new_content = content
     for old in sorted(mappings.keys(), key=len, reverse=True):
         new = mappings[old]
         new_content = new_content.replace(old, new)
-    
+
     if new_content != content:
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(new_content)
         print(f"Updated: {file_path}")
 
+
 def walk_and_replace(directory):
     for root, dirs, files in os.walk(directory):
-        if ".venv" in root or ".git" in root or "__pycache__" in root or ".mypy_cache" in root:
+        if (
+            ".venv" in root
+            or ".git" in root
+            or "__pycache__" in root
+            or ".mypy_cache" in root
+        ):
             continue
         for file in files:
-            if file.endswith(".py") or file.endswith(".json") or file.endswith(".ini") or file.endswith(".md"):
+            if (
+                file.endswith(".py")
+                or file.endswith(".json")
+                or file.endswith(".ini")
+                or file.endswith(".md")
+            ):
                 replace_in_file(os.path.join(root, file))
+
 
 if __name__ == "__main__":
     walk_and_replace(".")

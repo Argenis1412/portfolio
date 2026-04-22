@@ -32,12 +32,8 @@ def upgrade() -> None:
         sa.Column("localizacao", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("data_inicio", sa.Date(), nullable=False),
         sa.Column("data_fim", sa.Date(), nullable=True),
-        sa.Column(
-            "descricao", app.adapters.sql_models.JSONEncoded(), nullable=True
-        ),
-        sa.Column(
-            "tecnologias", app.adapters.sql_models.JSONEncoded(), nullable=True
-        ),
+        sa.Column("descricao", app.adapters.sql_models.JSONEncoded(), nullable=True),
+        sa.Column("tecnologias", app.adapters.sql_models.JSONEncoded(), nullable=True),
         sa.Column("atual", sa.Boolean(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
@@ -49,9 +45,7 @@ def upgrade() -> None:
         sa.Column("localizacao", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("data_inicio", sa.Date(), nullable=False),
         sa.Column("data_fim", sa.Date(), nullable=True),
-        sa.Column(
-            "descricao", app.adapters.sql_models.JSONEncoded(), nullable=True
-        ),
+        sa.Column("descricao", app.adapters.sql_models.JSONEncoded(), nullable=True),
         sa.Column("atual", sa.Boolean(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
     )
@@ -67,15 +61,11 @@ def upgrade() -> None:
             app.adapters.sql_models.JSONEncoded(),
             nullable=True,
         ),
-        sa.Column(
-            "tecnologias", app.adapters.sql_models.JSONEncoded(), nullable=True
-        ),
+        sa.Column("tecnologias", app.adapters.sql_models.JSONEncoded(), nullable=True),
         sa.Column(
             "funcionalidades", app.adapters.sql_models.JSONEncoded(), nullable=True
         ),
-        sa.Column(
-            "aprendizados", app.adapters.sql_models.JSONEncoded(), nullable=True
-        ),
+        sa.Column("aprendizados", app.adapters.sql_models.JSONEncoded(), nullable=True),
         sa.Column("repository", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column("demo", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column("destaque", sa.Boolean(), nullable=False),
@@ -92,9 +82,7 @@ def upgrade() -> None:
         sa.Column("telefone", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("github", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("linkedin", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
-        sa.Column(
-            "descricao", app.adapters.sql_models.JSONEncoded(), nullable=True
-        ),
+        sa.Column("descricao", app.adapters.sql_models.JSONEncoded(), nullable=True),
         sa.Column(
             "disponibilidade", app.adapters.sql_models.JSONEncoded(), nullable=True
         ),

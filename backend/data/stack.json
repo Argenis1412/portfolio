@@ -1,80 +1,80 @@
 [
   {
-    "nome": "Python 3",
-    "categoria": "backend",
-    "nivel": 3,
-    "icone": "python"
+    "name": "Python 3",
+    "category": "backend",
+    "level": 3,
+    "icon": "python"
   },
   {
-    "nome": "FastAPI",
-    "categoria": "backend",
-    "nivel": 3,
-    "icone": "fastapi"
+    "name": "FastAPI",
+    "category": "backend",
+    "level": 3,
+    "icon": "fastapi"
   },
   {
-    "nome": "Pydantic",
-    "categoria": "backend",
-    "nivel": 3,
-    "icone": null
+    "name": "Pydantic",
+    "category": "backend",
+    "level": 3,
+    "icon": null
   },
   {
-    "nome": "Pytest",
-    "categoria": "backend",
-    "nivel": 3,
-    "icone": "pytest"
+    "name": "Pytest",
+    "category": "backend",
+    "level": 3,
+    "icon": "pytest"
   },
   {
-    "nome": "PostgreSQL",
-    "categoria": "banco_dados",
-    "nivel": 3,
-    "icone": "postgresql"
+    "name": "PostgreSQL",
+    "category": "database",
+    "level": 3,
+    "icon": "postgresql"
   },
   {
-    "nome": "SQLAlchemy ORM",
-    "categoria": "banco_dados",
-    "nivel": 3,
-    "icone": null
+    "name": "SQLAlchemy ORM",
+    "category": "database",
+    "level": 3,
+    "icon": null
   },
   {
-    "nome": "Alembic",
-    "categoria": "banco_dados",
-    "nivel": 2,
-    "icone": null
+    "name": "Alembic",
+    "category": "database",
+    "level": 2,
+    "icon": null
   },
   {
-    "nome": "React",
-    "categoria": "frontend",
-    "nivel": 2,
-    "icone": "react"
+    "name": "React",
+    "category": "frontend",
+    "level": 2,
+    "icon": "react"
   },
   {
-    "nome": "TypeScript",
-    "categoria": "frontend",
-    "nivel": 2,
-    "icone": "typescript"
+    "name": "TypeScript",
+    "category": "frontend",
+    "level": 2,
+    "icon": "typescript"
   },
   {
-    "nome": "Fetch API",
-    "categoria": "frontend",
-    "nivel": 2,
-    "icone": null
+    "name": "Fetch API",
+    "category": "frontend",
+    "level": 2,
+    "icon": null
   },
   {
-    "nome": "Tailwind CSS",
-    "categoria": "frontend",
-    "nivel": 2,
-    "icone": "tailwindcss"
+    "name": "Tailwind CSS",
+    "category": "frontend",
+    "level": 2,
+    "icon": "tailwindcss"
   },
   {
-    "nome": "Git/GitHub",
-    "categoria": "devops",
-    "nivel": 3,
-    "icone": "git"
+    "name": "Git/GitHub",
+    "category": "devops",
+    "level": 3,
+    "icon": "git"
   },
   {
-    "nome": "GitHub Actions",
-    "categoria": "devops",
-    "nivel": 2,
-    "icone": "github"
+    "name": "GitHub Actions",
+    "category": "devops",
+    "level": 2,
+    "icon": "github"
   }
 ]
