@@ -3,7 +3,7 @@ import { Mail, Loader2, AlertCircle, Terminal, ShieldCheck, Clock3 } from 'lucid
 import { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAbout, useContactMutation } from '../hooks/useApi';
-import { ApiError } from '../api';
+import { ApiError } from '../api/client';
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

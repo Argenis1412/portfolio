@@ -9,9 +9,9 @@ import {
   fetchSkills,
   fetchExperience,
   fetchFormacao,
-  postContact,
   fetchPhilosophy,
-} from '../api';
+} from '../api/portfolioService';
+import { postContact } from '../api/chaosService';
 
 
 // Centralized query keys to avoid typos

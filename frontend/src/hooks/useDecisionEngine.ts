@@ -9,7 +9,7 @@
  */
 import { useEffect, useRef } from 'react';
 import { useLog } from './useLog';
-import { type MetricsSummary } from '../api';
+import { type MetricsSummary } from '../api/types';
 
 // Engineering thresholds with Hysteresis
 const ERROR_SPIKE_ON  = 0.045;

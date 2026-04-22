@@ -15,7 +15,7 @@
 import { useMemo, useRef, useState, useCallback, useEffect } from 'react';
 import { useCurrentTime } from './useCurrentTime';
 import { useQuery } from '@tanstack/react-query';
-import { fetchMetricsSummary, type MetricsSummary } from '../api';
+import { fetchMetricsSummary, type MetricsSummary } from '../api/portfolioService';
 import { useChaosMode } from './useChaosMode';
 import { getRecentTraces, subscribeToTraces, type TraceEntry } from '../services/TraceEmitter';
 import { type MetricSample } from '../types/metrics';

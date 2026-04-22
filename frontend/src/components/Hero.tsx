@@ -3,7 +3,7 @@ import { m } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { scrollToSection } from '../utils/scrollToSection';
 import { useLiveMetrics, type SystemStatus } from '../hooks/useLiveMetrics';
-import type { MetricsSummary } from '../api';
+import type { MetricsSummary } from '../api/types';
 import MetricsSparkline from './ui/MetricsSparkline';
 import { type MetricSampleSource } from '../types/metrics';
 

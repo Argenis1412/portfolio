@@ -1,5 +1,5 @@
 /**
- * Quality tests for API functions (`api.ts`).
+ * Quality tests for the portfolio API service layer.
  *
  * Verifies that each fetch function:
  * - Uses the correct URL
@@ -15,7 +15,7 @@ import {
   fetchExperience,
   fetchFormacao,
   fetchPhilosophy,
-} from '../api';
+} from '../api/index';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

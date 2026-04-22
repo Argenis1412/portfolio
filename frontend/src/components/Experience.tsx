@@ -2,7 +2,7 @@ import { m } from 'framer-motion';
 import { BookOpen, BriefcaseBusiness, MapPin } from 'lucide-react';
 import Skeleton from './ui/Skeleton';
 import { useExperience, useFormacao } from '../hooks/useApi';
-import type { Experience as ExperienceType, Formacao, LocalizedString } from '../api';
+import type { Experience as ExperienceType, Formacao, LocalizedString } from '../api/types';
 import { useLanguage } from '../context/LanguageContext';
 import { ServerWakeupError } from './ServerWakeupNotice';
 

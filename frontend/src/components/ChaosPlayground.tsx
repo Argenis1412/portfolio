@@ -10,7 +10,7 @@ import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { useQueryClient } from '@tanstack/react-query';
-import { postChaosDrain, postChaosRetry, postChaosLatency, type ChaosResponse } from '../api';
+import { postChaosDrain, postChaosRetry, postChaosLatency, type ChaosResponse } from '../api/chaosService';
 import { useLog } from '../hooks/useLog';
 import { useChaosMode, type ChaosPreset } from '../hooks/useChaosMode';
 import { emitTrace } from '../services/TraceEmitter';
