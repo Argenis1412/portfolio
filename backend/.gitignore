@@ -41,3 +41,7 @@ Thumbs.db
 *.db
 *.sqlite
 *.sqlite3
+
+# Test output artifacts
+test_out.txt
+*.test_out.txt
