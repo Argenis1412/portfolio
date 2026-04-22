@@ -1,9 +1,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Loader2, AlertCircle, Terminal, ShieldCheck, Clock3 } from 'lucide-react';
-import { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { useAbout, useContactMutation } from '../hooks/useApi';
-import { ApiError } from '../api/client';
+import { useAbout } from '../hooks/useApi';
+import { useContactForm } from '../hooks/useContactForm';
 
 const WhatsAppIcon = ({ className }: { className?: string }) => (
   <svg className={className} fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -14,90 +13,13 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 export default function Contact() {
   const { t, language } = useLanguage();
   const { data: about } = useAbout();
-  const { mutate, isPending: isMutating, isSuccess: mutationSuccess, error: mutationError, reset } = useContactMutation();
+  const {
+    formData, errors, traceResult, idempotencyKey,
+    status, submitError, responseStatusCode, responseTraceId,
+    queueStatus, deliveryMode, downstream, responseTone,
+    handleChange, handleSubmit
+  } = useContactForm();
   
-  const [formData, setFormData] = useState({
-    nome: '',
-    email: '',
-    assunto: '',
-    mensagem: '',
-  });
-  
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [traceResult, setTraceResult] = useState<{ traceId?: string; durationMs: number; queueStatus?: string; deliveryMode?: string; downstream?: string; message?: string } | null>(null);
-  
-  const getNewKey = () => {
-    return typeof crypto !== 'undefined' && crypto.randomUUID 
-      ? crypto.randomUUID() 
-      : `key-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-  };
- 
-  const [idempotencyKey, setIdempotencyKey] = useState<string>(getNewKey);
- 
-  const generateNewKey = () => {
-    setIdempotencyKey(getNewKey());
-  };
- 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-    if (!formData.nome.trim()) newErrors.nome = 'name_required';
-    if (!formData.email.trim()) {
-      newErrors.email = 'email_required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'email_invalid';
-    }
-    if (!formData.mensagem.trim()) {
-      newErrors.mensagem = 'message_required';
-    } else if (formData.mensagem.length < 10) {
-      newErrors.mensagem = 'message_too_short';
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-    
-    setErrors({});
-    
-    const dataToSend = {
-      ...formData,
-      assunto: formData.assunto.trim() || t('contact.subject_default') || 'Contato via Portfólio',
-      website: (document.getElementById('hp_website') as HTMLInputElement)?.value || '',
-      fax: (document.getElementById('hp_fax') as HTMLInputElement)?.value || ''
-    };
-    
-    mutate(
-      { data: dataToSend, idempotencyKey },
-      {
-        onSuccess: (result) => {
-          setTraceResult(result);
-          setFormData({ nome: '', email: '', assunto: '', mensagem: '' });
-          generateNewKey();
-          // We intentionally leave the form disabled and show the trace result
-          // so the user can observe the engineering evidence.
-        },
-        onError: (error: unknown) => {
-          // We do not setTraceResult(null) here, so the old trace stays visible if wanted.
-          // But technically if an error occurs, they just see the error snippet.
-          if (error instanceof ApiError) {
-            if (error.status === 429) {
-              setErrors({ submit: 'contact.error.rate_limit' });
-            } else if (error.message.includes('DUPLICATE') || error.status === 409 || error.status === 400) {
-              setErrors({ submit: 'contact.error.duplicate' });
-            } else {
-              setErrors({ submit: 'contact.error.generic' });
-            }
-          } else {
-            setErrors({ submit: 'contact.error.generic' });
-          }
-          generateNewKey();
-        }
-      }
-    );
-  };
-
   const handleWhatsApp = () => {
     if (!about?.telefone) return;
     const cleanNumber = about.telefone.replace(/\D/g, '');
@@ -114,39 +36,7 @@ export default function Contact() {
     );
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    
-    // Reset success/error state when user starts typing again
-    if (mutationSuccess || mutationError || errors.submit) {
-      reset();
-    }
-    
-    if (errors[name]) {
-      setErrors(prev => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
-    }
-  };
-
-  const status = isMutating ? 'loading' : (mutationSuccess ? 'success' : (mutationError || errors.submit ? 'error' : 'idle'));
   const availability = about?.disponibilidade?.[language as 'pt' | 'en' | 'es'] ?? '...';
-  const submitError = errors.submit ? t(errors.submit) : t('contact.error.generic');
-  const responseStatusCode = mutationError instanceof ApiError ? mutationError.status : null;
-  const responseTraceId = traceResult?.traceId || (mutationError instanceof ApiError ? mutationError.traceId : undefined);
-  const queueStatus = traceResult?.queueStatus ?? 'idle';
-  const deliveryMode = traceResult?.deliveryMode ?? 'background';
-  const downstream = traceResult?.downstream ?? 'email_adapter';
-  const responseTone = status === 'success'
-    ? 'text-emerald-400'
-    : status === 'error'
-      ? 'text-red-400'
-      : status === 'loading'
-        ? 'text-amber-400'
-        : 'text-slate-400';
   const specRows = [
     { label: t('contact.spec.endpoint'), value: 'POST /api/v1/contact' },
     { label: t('contact.spec.idempotency'), value: 'Idempotency-Key header' },
