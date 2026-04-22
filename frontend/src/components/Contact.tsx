@@ -21,8 +21,8 @@ export default function Contact() {
   } = useContactForm();
   
   const handleWhatsApp = () => {
-    if (!about?.telefone) return;
-    const cleanNumber = about.telefone.replace(/\D/g, '');
+    if (!about?.phone) return;
+    const cleanNumber = about.phone.replace(/\D/g, '');
     const finalNumber = cleanNumber.startsWith('55') ? cleanNumber : `55${cleanNumber}`;
     const message = language === 'es' 
       ? '¡Hola Argenis! Vi tu portafolio y me gustaría hablar contigo.'
@@ -36,7 +36,7 @@ export default function Contact() {
     );
   };
 
-  const availability = about?.disponibilidade?.[language as 'pt' | 'en' | 'es'] ?? '...';
+  const availability = about?.availability?.[language as 'pt' | 'en' | 'es'] ?? '...';
   const specRows = [
     { label: t('contact.spec.endpoint'), value: 'POST /api/v1/contact' },
     { label: t('contact.spec.idempotency'), value: 'Idempotency-Key header' },
@@ -148,21 +148,21 @@ export default function Contact() {
 
               <div className="grid gap-5 md:grid-cols-2">
                 <div className="flex flex-col gap-2">
-                  <label htmlFor="nome" className="text-[11px] font-mono uppercase tracking-[0.25em] text-slate-500">{t('contact.name')}</label>
+                  <label htmlFor="name" className="text-[11px] font-mono uppercase tracking-[0.25em] text-slate-500">{t('contact.name')}</label>
                   <input
                     type="text"
-                    id="nome"
-                    name="nome"
+                    id="name"
+                    name="name"
                     placeholder={t('contact.placeholder.name')}
-                    value={formData.nome}
+                    value={formData.name}
                     onChange={handleChange}
-                    className={`rounded-xl border bg-[#11161D] px-4 py-3 text-sm text-slate-100 outline-none transition-all placeholder:text-slate-500 ${errors.nome ? 'border-red-500/60 focus:ring-2 focus:ring-red-500/20' : 'border-[#20262D] focus:border-app-primary/60 focus:ring-2 focus:ring-app-primary/20'}`}
+                    className={`rounded-xl border bg-[#11161D] px-4 py-3 text-sm text-slate-100 outline-none transition-all placeholder:text-slate-500 ${errors.name ? 'border-red-500/60 focus:ring-2 focus:ring-red-500/20' : 'border-[#20262D] focus:border-app-primary/60 focus:ring-2 focus:ring-app-primary/20'}`}
                   />
                   <AnimatePresence>
-                    {errors.nome && (
+                    {errors.name && (
                       <motion.p initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="flex items-center gap-1 text-[11px] text-red-400">
                         <AlertCircle className="h-3.5 w-3.5" />
-                        {t(`contact.error.${errors.nome}`)}
+                        {t(`contact.error.${errors.name}`)}
                       </motion.p>
                     )}
                   </AnimatePresence>
@@ -191,34 +191,34 @@ export default function Contact() {
               </div>
 
               <div className="mt-5 flex flex-col gap-2">
-                <label htmlFor="assunto" className="text-[11px] font-mono uppercase tracking-[0.25em] text-slate-500">{t('contact.subject')}</label>
+                <label htmlFor="subject" className="text-[11px] font-mono uppercase tracking-[0.25em] text-slate-500">{t('contact.subject')}</label>
                 <input
                   type="text"
-                  id="assunto"
-                  name="assunto"
+                  id="subject"
+                  name="subject"
                   placeholder={t('contact.placeholder.subject')}
-                  value={formData.assunto}
+                  value={formData.subject}
                   onChange={handleChange}
                   className="rounded-xl border border-[#20262D] bg-[#11161D] px-4 py-3 text-sm text-slate-100 outline-none transition-all placeholder:text-slate-500 focus:border-app-primary/60 focus:ring-2 focus:ring-app-primary/20"
                 />
               </div>
 
               <div className="mt-5 flex flex-col gap-2">
-                <label htmlFor="mensagem" className="text-[11px] font-mono uppercase tracking-[0.25em] text-slate-500">{t('contact.message')}</label>
+                <label htmlFor="message" className="text-[11px] font-mono uppercase tracking-[0.25em] text-slate-500">{t('contact.message')}</label>
                 <textarea
-                  id="mensagem"
-                  name="mensagem"
+                  id="message"
+                  name="message"
                   rows={6}
                   placeholder={t('contact.placeholder.message')}
-                  value={formData.mensagem}
+                  value={formData.message}
                   onChange={handleChange}
-                  className={`resize-none rounded-xl border bg-[#11161D] px-4 py-3 text-sm text-slate-100 outline-none transition-all placeholder:text-slate-500 ${errors.mensagem ? 'border-red-500/60 focus:ring-2 focus:ring-red-500/20' : 'border-[#20262D] focus:border-app-primary/60 focus:ring-2 focus:ring-app-primary/20'}`}
+                  className={`resize-none rounded-xl border bg-[#11161D] px-4 py-3 text-sm text-slate-100 outline-none transition-all placeholder:text-slate-500 ${errors.message ? 'border-red-500/60 focus:ring-2 focus:ring-red-500/20' : 'border-[#20262D] focus:border-app-primary/60 focus:ring-2 focus:ring-app-primary/20'}`}
                 />
                 <AnimatePresence>
-                  {errors.mensagem && (
+                  {errors.message && (
                     <motion.p initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="flex items-center gap-1 text-[11px] text-red-400">
                       <AlertCircle className="h-3.5 w-3.5" />
-                      {t(`contact.error.${errors.mensagem}`)}
+                      {t(`contact.error.${errors.message}`)}
                     </motion.p>
                   )}
                 </AnimatePresence>

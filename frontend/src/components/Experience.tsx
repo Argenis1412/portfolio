@@ -1,14 +1,15 @@
+import { useMemo } from 'react';
 import { m } from 'framer-motion';
 import { BookOpen, BriefcaseBusiness, MapPin } from 'lucide-react';
 import Skeleton from './ui/Skeleton';
-import { useExperience, useFormacao } from '../hooks/useApi';
-import type { Experience as ExperienceType, Formacao, LocalizedString } from '../api/types';
+import { useExperience, useFormation } from '../hooks/useApi';
+import type { Experience as ExperienceType, Formation, LocalizedString } from '../api/types';
 import { useLanguage } from '../context/LanguageContext';
 import { ServerWakeupError } from './ServerWakeupNotice';
 
 type TimelineEntry =
   | ({ kind: 'experience' } & ExperienceType)
-  | ({ kind: 'education' } & Formacao);
+  | ({ kind: 'education' } & Formation);
 
 type SignalTone = 'decision' | 'failure' | 'learning' | 'impact';
 
@@ -59,24 +60,27 @@ function summarizeSignals(signals: ParsedSignal[]): SignalSummary {
 
 export default function Experience() {
   const { data: experiences = [], isLoading: loadingExp, isError: errorExp } = useExperience();
-  const { data: formacoes = [], isLoading: loadingFmc, isError: errorFmc } = useFormacao();
+  const { data: formations = [], isLoading: loadingFmc, isError: errorFmc } = useFormation();
   const { language, t } = useLanguage();
 
   const loading = loadingExp || loadingFmc;
   const isError = errorExp || errorFmc;
 
-  const entries: TimelineEntry[] = [
-    ...experiences.map((entry) => ({ kind: 'experience' as const, ...entry })),
-    ...formacoes.map((entry) => ({ kind: 'education' as const, ...entry })),
-  ].sort((a, b) => {
-    if (a.atual !== b.atual) return a.atual ? -1 : 1;
-    return b.data_inicio.localeCompare(a.data_inicio);
-  });
+  const sortedEntries = useMemo(() => {
+    const entries: TimelineEntry[] = [
+      ...experiences.map((entry) => ({ kind: 'experience' as const, ...entry })),
+      ...formations.map((entry) => ({ kind: 'education' as const, ...entry })),
+    ];
+    return entries.sort((a, b) => {
+      if (a.current !== b.current) return a.current ? -1 : 1;
+      return b.start_date.localeCompare(a.start_date);
+    });
+  }, [experiences, formations]);
 
   const lang = language as keyof LocalizedString;
-  const educationCount = entries.filter((entry) => entry.kind === 'education').length;
-  const experienceCount = entries.filter((entry) => entry.kind === 'experience').length;
-  const activeCount = entries.filter((entry) => entry.atual).length;
+  const educationCount = sortedEntries.filter((entry) => entry.kind === 'education').length;
+  const experienceCount = sortedEntries.filter((entry) => entry.kind === 'experience').length;
+  const activeCount = sortedEntries.filter((entry) => entry.current).length;
 
   const formatDate = (date: string | null, isActual: boolean) => {
     if (!date) return isActual ? t('experience.label.present') : '?';
@@ -149,13 +153,13 @@ export default function Experience() {
           </div>
 
           <div className="relative space-y-6 before:absolute before:left-[11px] before:top-3 before:bottom-3 before:w-px before:bg-app-border/50">
-            {entries.map((entry, index) => {
-              const isEducation = entry.kind === 'education';
-              const title = isEducation ? (entry as Formacao).curso[lang] : (entry as ExperienceType).cargo[lang];
-              const subtitle = isEducation ? (entry as Formacao).instituicao : (entry as ExperienceType).empresa;
-              const signals = parseSignals(entry.descricao[lang as keyof typeof entry.descricao] || '');
+            {sortedEntries.map((entry, index) => {
+              const isEducation = 'course' in entry;
+              const title = isEducation ? (entry as Formation).course[lang] : (entry as ExperienceType).role[lang];
+              const subtitle = isEducation ? (entry as Formation).institution : (entry as ExperienceType).company;
+              const signals = parseSignals(entry.description[lang as keyof typeof entry.description] || '');
               const summary = summarizeSignals(signals);
-              const technologies = isEducation ? [] : (entry as ExperienceType).tecnologias;
+              const technologies = isEducation ? [] : (entry as ExperienceType).technologies;
 
               return (
                 <m.article
@@ -175,9 +179,9 @@ export default function Experience() {
                           <span className={`rounded-full border px-2.5 py-1 ${isEducation ? 'border-blue-400/20 bg-blue-500/10 text-blue-700 dark:text-blue-200' : 'border-app-primary/20 bg-app-primary/10 text-app-primary'}`}>
                             {isEducation ? t('experience.label.education') : t('experience.label.experience')}
                           </span>
-                          {entry.atual && (
-                            <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-emerald-700 dark:text-emerald-300">
-                              {t('experience.label.present')}
+                          {entry.current && (
+                            <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-400 border border-emerald-500/20">
+                              {t('experience.status.current')}
                             </span>
                           )}
                         </div>
@@ -196,8 +200,8 @@ export default function Experience() {
                           {isEducation ? <BookOpen className="h-4 w-4 text-blue-700 dark:text-blue-300" /> : <BriefcaseBusiness className="h-4 w-4 text-app-primary" />}
                           <span className="text-[10px] uppercase tracking-[0.22em]">{isEducation ? t('experience.entry.track_academic') : t('experience.entry.track_professional')}</span>
                         </div>
-                        <div>{formatDate(entry.data_inicio, false)} - {formatDate(entry.data_fim, entry.atual)}</div>
-                        <div className="mt-2 inline-flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{entry.localizacao}</div>
+                        <div>{formatDate(entry.start_date, false)} - {formatDate(entry.end_date, entry.current)}</div>
+                        <div className="mt-2 inline-flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{entry.location}</div>
                         <div className="mt-4 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.18em]">
                           {summary.decision > 0 && <span className="rounded-full border border-blue-400/20 bg-blue-500/10 px-2 py-1 text-blue-700 dark:text-blue-200">{summary.decision} {t('experience.signal.decision')}</span>}
                           {summary.learning > 0 && <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-2 py-1 text-amber-700 dark:text-amber-200">{summary.learning} {t('experience.signal.learning')}</span>}

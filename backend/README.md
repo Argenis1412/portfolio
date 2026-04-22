@@ -1,6 +1,6 @@
 # 🎯 Portfolio Backend API
 
-> **Live API Status:** [Healthy (JSON) →](https://api.argenisbackend.com/saude)
+> **Live API Status:** [Healthy (JSON) →](https://api.argenisbackend.com/health)
 
 REST API built with **FastAPI** and **Clean Architecture** — engineered with a **language-agnostic core** so that the system remains portable, testable, and framework-independent.
 
@@ -106,7 +106,7 @@ python ./scripts/migrar_dados.py
 python -m uvicorn app.principal:app --reload --port 8000
 ```
 - **Production Docs**: `https://api.argenisbackend.com/docs` (Now enabled for showcase)
-- **Production Status**: `https://api.argenisbackend.com/saude` (Detailed health check)
+- **Production Status**: `https://api.argenisbackend.com/health` (Detailed health check)
 - **Production Health**: `https://api.argenisbackend.com/health` (Fast liveness check)
 
 ---
@@ -142,8 +142,8 @@ Supported metrics:
 ## 📡 Endpoints
 
 ### 🔍 Health Check & Observability
-`GET /saude`
-*(Note: Named `/saude` instead of `/health` to match the Portuguese base domain language of the original project structure, but standard `health` checks apply)*  
+`GET /health`
+*(Note: Named `/health` instead of `/health` to match the Portuguese base domain language of the original project structure, but standard `health` checks apply)*  
 Returns status for:
 - API connectivity
 - **Database connection**
@@ -151,11 +151,11 @@ Returns status for:
 - **Uptime** and versioning.
 
 ### 📁 Portfolio Data
-- `GET /api/v1/sobre`: Internationalized "About Me" data.
-- `GET /api/v1/projetos`: Projects with tags and links.
+- `GET /api/v1/about`: Internationalized "About Me" data.
+- `GET /api/v1/projects`: Projects with tags and links.
 - `GET /api/v1/stack`: Tech stack by categories.
-- `GET /api/v1/experiencias`: Professional timeline.
-- `GET /api/v1/formacao`: Education history.
+- `GET /api/v1/experiences`: Professional timeline.
+- `GET /api/v1/formation`: Education history.
 
 ### 🧪 Live Refactoring Features
 - `GET /api/v1/metrics/summary`: Consolidated real-time telemetry for frontend evidence dashboard.
@@ -200,4 +200,4 @@ This backend is designed to evolve into a full-scale enterprise system:
 
 ### Why Manual JSON Serialization (SQLite Compatibility)?
 - SQLite doesn't always have native JSON support in all environments.
-- Implemented an adapter layer in `modelos_sql.py` and `RepositorioSQL` to handle internationalization (dicts/lists) as TEXT, ensuring extreme reliability across all platforms.
+- Implemented an adapter layer in `sql_models.py` and `SqlRepository` to handle internationalization (dicts/lists) as TEXT, ensuring extreme reliability across all platforms.

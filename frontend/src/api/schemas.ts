@@ -13,53 +13,53 @@ export const LocalizedStringSchema = z.object({
 // Summary schema (used in list endpoints)
 export const ProjectSchema = z.object({
   id: z.string(),
-  nome: z.string(),
-  descricao_curta: LocalizedStringSchema,
-  descricao_completa: LocalizedStringSchema.optional(),
-  tecnologias: z.array(z.string()),
-  funcionalidades: z.array(z.string()).optional().default([]),
-  aprendizados: z.array(z.string()).optional().default([]),
-  destaque: z.boolean(),
-  repositorio: z.string().nullable(),
+  name: z.string(),
+  short_description: LocalizedStringSchema,
+  full_description: LocalizedStringSchema.optional(),
+  technologies: z.array(z.string()),
+  features: z.array(z.string()).optional().default([]),
+  learnings: z.array(z.string()).optional().default([]),
+  highlighted: z.boolean(),
+  repository: z.string().nullable(),
   demo: z.string().nullable(),
-  imagem: z.string().nullable(),
+  image: z.string().nullable(),
 });
 
 // Detail schema (used in single-project endpoints)
 export const ProjectDetailedSchema = ProjectSchema.extend({
-  descricao_completa: LocalizedStringSchema,
-  funcionalidades: z.array(z.string()),
-  aprendizados: z.array(z.string()),
+  full_description: LocalizedStringSchema,
+  features: z.array(z.string()),
+  learnings: z.array(z.string()),
 });
 
 export const SkillSchema = z.object({
-  nome: z.string(),
-  categoria: z.string(),
-  nivel: z.number(),
-  icone: z.string().nullable(),
+  name: z.string(),
+  category: z.string(),
+  level: z.number(),
+  icon: z.string().nullable(),
 });
 
 export const ExperienceSchema = z.object({
   id: z.string(),
-  cargo: LocalizedStringSchema,
-  empresa: z.string(),
-  localizacao: z.string(),
-  data_inicio: z.string(),
-  data_fim: z.string().nullable(),
-  descricao: LocalizedStringSchema,
-  tecnologias: z.array(z.string()),
-  atual: z.boolean(),
+  role: LocalizedStringSchema,
+  company: z.string(),
+  location: z.string(),
+  start_date: z.string(),
+  end_date: z.string().nullable(),
+  description: LocalizedStringSchema,
+  technologies: z.array(z.string()),
+  current: z.boolean(),
 });
 
-export const FormacaoSchema = z.object({
+export const FormationSchema = z.object({
   id: z.string(),
-  curso: LocalizedStringSchema,
-  instituicao: z.string(),
-  localizacao: z.string(),
-  data_inicio: z.string(),
-  data_fim: z.string().nullable(),
-  descricao: LocalizedStringSchema,
-  atual: z.boolean(),
+  course: LocalizedStringSchema,
+  institution: z.string(),
+  location: z.string(),
+  start_date: z.string(),
+  end_date: z.string().nullable(),
+  description: LocalizedStringSchema,
+  current: z.boolean(),
 });
 
 export const PhilosophyItemSchema = z.object({
@@ -95,13 +95,13 @@ export const MetricsSummarySchema = z.object({
 });
 
 export const AboutSchema = z.object({
-  nome: z.string(),
-  titulo: z.string(),
-  localizacao: z.string(),
+  name: z.string(),
+  title: z.string(),
+  location: z.string(),
   email: z.string(),
-  telefone: z.string(),
+  phone: z.string(),
   github: z.string(),
   linkedin: z.string(),
-  descricao: LocalizedStringSchema,
-  disponibilidade: LocalizedStringSchema,
+  description: LocalizedStringSchema,
+  availability: LocalizedStringSchema,
 });

@@ -13,7 +13,7 @@ export default function About() {
   const [expandedCat, setExpandedCat] = useState<string | null>(null);
 
   // Sort and filter categories based on data
-  const allCats = Array.from(new Set(skills.map((s) => s.categoria)));
+  const allCats = Array.from(new Set(skills.map((s) => s.category)));
   const categories = [
     ...CATEGORY_ORDER.filter((c) => allCats.includes(c)),
     ...allCats.filter((c) => !CATEGORY_ORDER.includes(c)),
@@ -45,7 +45,7 @@ export default function About() {
               <div className="space-y-2">
                 {categories.map((category) => {
                   const isExpanded = expandedCat === category;
-                  const catSkills = skills.filter((s) => s.categoria === category);
+                  const catSkills = skills.filter((s) => s.category === category);
                   
                   return (
                     <div key={category} className="border border-app-border rounded-lg bg-app-surface overflow-hidden">
@@ -71,10 +71,10 @@ export default function About() {
                             <div className="p-3 pt-0 flex flex-wrap gap-1.5 border-t border-app-border/50">
                               {catSkills.map((skill) => (
                                 <span
-                                  key={skill.nome}
+                                  key={skill.name}
                                   className="inline-flex items-center px-2 py-1 rounded text-xs font-mono text-app-muted hover:text-app-primary hover:bg-app-primary/5 transition-colors border border-transparent hover:border-app-primary/10"
                                 >
-                                  ▹ {skill.nome}
+                                  ▹ {skill.name}
                                 </span>
                               ))}
                             </div>

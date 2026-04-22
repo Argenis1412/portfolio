@@ -12,16 +12,16 @@ export type { ChaosResponse, ContactResponse };
 
 export async function postContact(
   data: {
-    nome: string;
+    name: string;
     email: string;
-    assunto: string;
-    mensagem: string;
+    subject: string;
+    message: string;
     website: string; // Honeypot field
     fax: string;     // Honeypot field
   },
   idempotencyKey: string,
 ): Promise<ContactResponse> {
-  const apiUrl = buildApiUrl('/contato');
+  const apiUrl = buildApiUrl('/contact');
 
   const start = performance.now();
   const res = await fetch(apiUrl, {
@@ -55,7 +55,7 @@ export async function postContact(
     queueStatus: (rawData as Record<string, unknown>)?.queue_status as string | undefined,
     deliveryMode: (rawData as Record<string, unknown>)?.delivery_mode as string | undefined,
     downstream: (rawData as Record<string, unknown>)?.downstream as string | undefined,
-    message: (rawData as Record<string, unknown>)?.mensagem as string | undefined,
+    message: (rawData as Record<string, unknown>)?.message as string | undefined,
   };
 }
 

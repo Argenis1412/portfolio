@@ -11,10 +11,10 @@ export function useContactForm() {
   const { mutate, isPending: isMutating, isSuccess: mutationSuccess, error: mutationError, reset } = useContactMutation();
   
   const [formData, setFormData] = useState({
-    nome: '',
+    name: '',
     email: '',
-    assunto: '',
-    mensagem: '',
+    subject: '',
+    message: '',
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -34,16 +34,16 @@ export function useContactForm() {
  
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.nome.trim()) newErrors.nome = 'name_required';
+    if (!formData.name.trim()) newErrors.name = 'name_required';
     if (!formData.email.trim()) {
       newErrors.email = 'email_required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'email_invalid';
     }
-    if (!formData.mensagem.trim()) {
-      newErrors.mensagem = 'message_required';
-    } else if (formData.mensagem.length < 10) {
-      newErrors.mensagem = 'message_too_short';
+    if (!formData.message.trim()) {
+      newErrors.message = 'message_required';
+    } else if (formData.message.length < 10) {
+      newErrors.message = 'message_too_short';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -57,7 +57,7 @@ export function useContactForm() {
     
     const dataToSend = {
       ...formData,
-      assunto: formData.assunto.trim() || t('contact.subject_default') || 'Contato via Portfólio',
+      subject: formData.subject.trim() || t('contact.subject_default') || 'Contact via Portfolio',
       website: (document.getElementById('hp_website') as HTMLInputElement)?.value || '',
       fax: (document.getElementById('hp_fax') as HTMLInputElement)?.value || ''
     };
@@ -67,7 +67,7 @@ export function useContactForm() {
       {
         onSuccess: (result) => {
           setTraceResult(result);
-          setFormData({ nome: '', email: '', assunto: '', mensagem: '' });
+          setFormData({ name: '', email: '', subject: '', message: '' });
           generateNewKey();
         },
         onError: (error: unknown) => {

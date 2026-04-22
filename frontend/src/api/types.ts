@@ -9,7 +9,7 @@ import {
   ProjectDetailedSchema,
   SkillSchema,
   ExperienceSchema,
-  FormacaoSchema,
+  FormationSchema,
   PhilosophyItemSchema,
   MetricsSummarySchema,
   AboutSchema,
@@ -20,7 +20,7 @@ export type Project = z.infer<typeof ProjectSchema>;
 export type ProjectDetailed = z.infer<typeof ProjectDetailedSchema>;
 export type Skill = z.infer<typeof SkillSchema>;
 export type Experience = z.infer<typeof ExperienceSchema>;
-export type Formacao = z.infer<typeof FormacaoSchema>;
+export type Formation = z.infer<typeof FormationSchema>;
 export type PhilosophyItem = z.infer<typeof PhilosophyItemSchema>;
 export type MetricsSummary = z.infer<typeof MetricsSummarySchema>;
 export type About = z.infer<typeof AboutSchema>;

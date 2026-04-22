@@ -1,8 +1,8 @@
 """
-Handlers globais de exceções.
+Global exception handlers.
 
-Converte exceções customizadas em respostas HTTP padronizadas.
-Registrado automaticamente no startup da aplicação.
+Converts custom exceptions into standardized HTTP responses.
+Automatically registered during application startup.
 """
 
 from typing import Any
@@ -14,276 +14,235 @@ from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app.core.excecoes import (
-    ErroDominio,
-    ErroInfraestrutura,
-    ErroRecursoNaoEncontrado,
-    ErroValidacao,
+from app.core.exceptions import (
+    DomainError,
+    InfrastructureError,
+    ResourceNotFoundError,
+    ValidationError,
 )
-from app.core.idempotencia import IdempotencyException
+from app.core.idempotency import IdempotencyException
 
 logger = structlog.get_logger(__name__)
 
 
-def criar_resposta_erro(
-    codigo: str,
-    mensagem: str,
+def create_error_response(
+    code: str,
+    message: str,
     status_code: int,
-    detalhes: Any = None,
+    details: Any = None,
     trace_id: str | None = None,
 ) -> JSONResponse:
     """
-    Cria resposta JSON padronizada para erros.
+    Creates a standardized JSON error response.
 
     Args:
-        codigo: Código interno do erro.
-        mensagem: Mensagem descritiva.
-        status_code: Código HTTP.
-        detalhes: Informações adicionais (opcional).
+        code: Internal error code.
+        message: Descriptive message.
+        status_code: HTTP code.
+        details: Additional information (optional).
+        trace_id: Request ID for tracing.
 
     Returns:
-        JSONResponse: Resposta formatada.
+        JSONResponse: Formatted response.
     """
-    conteudo = {
-        "erro": {
-            "codigo": codigo,
-            "mensagem": mensagem,
+    content = {
+        "error": {
+            "code": code,
+            "message": message,
         }
     }
 
-    if detalhes:
-        conteudo["erro"]["detalhes"] = detalhes
+    if details:
+        content["error"]["details"] = details
 
     if trace_id:
-        conteudo["erro"]["trace_id"] = trace_id
+        content["error"]["trace_id"] = trace_id
 
     return JSONResponse(
         status_code=status_code,
-        content=conteudo,
+        content=content,
     )
 
 
-async def handler_erro_dominio(
+async def domain_error_handler(
     request: Request,
-    exc: ErroDominio,
+    exc: DomainError,
 ) -> JSONResponse:
     """
-    Trata erros de domínio/negócio.
-
-    Args:
-        request: Requisição HTTP.
-        exc: Exceção de domínio.
-
-    Returns:
-        JSONResponse: HTTP 400 com detalhes do erro.
+    Handles domain/business errors.
     """
     logger.warning(
-        "erro_dominio",
-        mensagem=exc.mensagem,
-        codigo=exc.codigo,
+        "domain_error",
+        message=exc.message,
+        code=exc.code,
         path=request.url.path,
     )
 
-    return criar_resposta_erro(
-        codigo=exc.codigo,
-        mensagem=exc.mensagem,
+    return create_error_response(
+        code=exc.code,
+        message=exc.message,
         status_code=status.HTTP_400_BAD_REQUEST,
         trace_id=getattr(request.state, "request_id", None),
     )
 
 
-async def handler_erro_validacao(
+async def validation_error_handler(
     request: Request,
-    exc: ErroValidacao,
+    exc: ValidationError,
 ) -> JSONResponse:
     """
-    Trata erros de validação de negócio.
-
-    Args:
-        request: Requisição HTTP.
-        exc: Exceção de validação.
-
-    Returns:
-        JSONResponse: HTTP 422 com detalhes do erro.
+    Handles business validation errors.
     """
     logger.warning(
-        "erro_validacao_negocio",
-        mensagem=exc.mensagem,
-        codigo=exc.codigo,
+        "business_validation_error",
+        message=exc.message,
+        code=exc.code,
         path=request.url.path,
     )
 
-    return criar_resposta_erro(
-        codigo=exc.codigo,
-        mensagem=exc.mensagem,
+    return create_error_response(
+        code=exc.code,
+        message=exc.message,
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         trace_id=getattr(request.state, "request_id", None),
     )
 
 
-async def handler_erro_infraestrutura(
+async def infrastructure_error_handler(
     request: Request,
-    exc: ErroInfraestrutura,
+    exc: InfrastructureError,
 ) -> JSONResponse:
     """
-    Trata erros de infraestrutura externa.
-
-    Args:
-        request: Requisição HTTP.
-        exc: Exceção de infraestrutura.
-
-    Returns:
-        JSONResponse: HTTP 500 com mensagem genérica.
+    Handles external infrastructure errors.
     """
     logger.error(
-        "erro_infraestrutura",
-        mensagem=exc.mensagem,
-        codigo=exc.codigo,
-        origem=exc.origem,
+        "infrastructure_error",
+        message=exc.message,
+        code=exc.code,
+        origin=exc.origin,
         path=request.url.path,
         exc_info=True,
     )
 
-    # Não expor detalhes internos em produção
-    return criar_resposta_erro(
-        codigo="ERRO_INTERNO",
-        mensagem="Erro interno do servidor. Tente novamente mais tarde.",
+    # Do not expose internal details in production
+    return create_error_response(
+        code="INTERNAL_ERROR",
+        message="Internal server error. Please try again later.",
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         trace_id=getattr(request.state, "request_id", None),
     )
 
 
-async def handler_recurso_nao_encontrado(
+async def resource_not_found_handler(
     request: Request,
-    exc: ErroRecursoNaoEncontrado,
+    exc: ResourceNotFoundError,
 ) -> JSONResponse:
     """
-    Trata erros de recurso não encontrado.
-
-    Args:
-        request: Requisição HTTP.
-        exc: Exceção de recurso não encontrado.
-
-    Returns:
-        JSONResponse: HTTP 404 com mensagem.
+    Handles resource not found errors.
     """
     logger.info(
-        "recurso_nao_encontrado",
-        mensagem=exc.mensagem,
-        codigo=exc.codigo,
+        "resource_not_found",
+        message=exc.message,
+        code=exc.code,
         path=request.url.path,
     )
 
-    return criar_resposta_erro(
-        codigo=exc.codigo,
-        mensagem=exc.mensagem,
+    return create_error_response(
+        code=exc.code,
+        message=exc.message,
         status_code=status.HTTP_404_NOT_FOUND,
         trace_id=getattr(request.state, "request_id", None),
     )
 
 
-async def handler_validacao_pydantic(
+async def pydantic_validation_handler(
     request: Request,
     exc: RequestValidationError,
 ) -> JSONResponse:
     """
-    Trata erros de validação do Pydantic.
-
-    Args:
-        request: Requisição HTTP.
-        exc: Erro de validação do FastAPI/Pydantic.
-
-    Returns:
-        JSONResponse: HTTP 422 com detalhes dos campos inválidos.
+    Handles Pydantic validation errors.
     """
-    erros_formatados = []
+    formatted_errors = []
 
-    for erro in exc.errors():
-        campo = ".".join(str(loc) for loc in erro["loc"])
-        erros_formatados.append(
+    for error in exc.errors():
+        field = ".".join(str(loc) for loc in error["loc"])
+        formatted_errors.append(
             {
-                "campo": campo,
-                "mensagem": erro["msg"],
-                "tipo": erro["type"],
+                "field": field,
+                "message": error["msg"],
+                "type": error["type"],
             }
         )
 
     logger.warning(
-        "erro_validacao_pydantic",
-        total_campos_invalidos=len(erros_formatados),
+        "pydantic_validation_error",
+        total_invalid_fields=len(formatted_errors),
         path=request.url.path,
-        erros=erros_formatados,
+        errors=formatted_errors,
     )
 
-    return criar_resposta_erro(
-        codigo="ERRO_VALIDACAO_ENTRADA",
-        mensagem="Dados de entrada inválidos",
+    return create_error_response(
+        code="INPUT_VALIDATION_ERROR",
+        message="Invalid input data",
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        detalhes=erros_formatados,
+        details=formatted_errors,
         trace_id=getattr(request.state, "request_id", None),
     )
 
 
-async def handler_generico(
+async def generic_handler(
     request: Request,
     exc: Exception,
 ) -> JSONResponse:
     """
-    Fallback para exceções não tratadas.
-
-    Args:
-        request: Requisição HTTP.
-        exc: Exceção não capturada.
-
-    Returns:
-        JSONResponse: HTTP 500 genérico.
+    Fallback for unhandled exceptions.
     """
     logger.error(
-        "excecao_nao_tratada",
-        tipo_erro=type(exc).__name__,
-        erro=str(exc),
+        "unhandled_exception",
+        error_type=type(exc).__name__,
+        error=str(exc),
         path=request.url.path,
         exc_info=True,
     )
 
-    return criar_resposta_erro(
-        codigo="ERRO_INESPERADO",
-        mensagem="Erro inesperado. A equipe foi notificada.",
+    return create_error_response(
+        code="UNEXPECTED_ERROR",
+        message="Unexpected error. The team has been notified.",
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         trace_id=getattr(request.state, "request_id", None),
     )
 
 
-async def handler_rate_limit(
+async def rate_limit_handler(
     request: Request,
     exc: RateLimitExceeded,
 ) -> JSONResponse:
     """
-    Trata erros de rate limit excedido.
+    Handles rate limit exceeded errors.
     """
     logger.warning(
-        "rate_limit_excedido",
+        "rate_limit_exceeded",
         path=request.url.path,
-        detalhes=str(exc),
+        details=str(exc),
     )
 
-    return criar_resposta_erro(
-        codigo="RATE_LIMIT_EXCEEDED",
-        mensagem=f"Rate limit exceeded. {str(exc)}",
+    return create_error_response(
+        code="RATE_LIMIT_EXCEEDED",
+        message=f"Rate limit exceeded. {str(exc)}",
         status_code=status.HTTP_429_TOO_MANY_REQUESTS,
         trace_id=getattr(request.state, "request_id", None),
     )
 
 
-async def handler_idempotencia(
+async def idempotency_handler(
     request: Request,
     exc: IdempotencyException,
 ) -> JSONResponse:
     """
-    Trata exceção de idempotência retornando a resposta cacheada.
+    Handles idempotency exception by returning the cached response.
     """
     logger.info(
-        "idempotencia_cache_hit",
+        "idempotency_cache_hit",
         path=request.url.path,
         status_code=exc.record.status_code,
     )
@@ -295,44 +254,36 @@ async def handler_idempotencia(
     )
 
 
-async def handler_http_starlette(
+async def starlette_http_handler(
     request: Request,
     exc: StarletteHTTPException,
 ) -> JSONResponse:
     """
-    Trata exceções HTTP do Starlette (ex: 404 rota não encontrada).
+    Handles Starlette HTTP exceptions (e.g., 404 route not found).
     """
-    return criar_resposta_erro(
-        codigo="ERRO_HTTP",
-        mensagem=str(exc.detail),
+    return create_error_response(
+        code="HTTP_ERROR",
+        message=str(exc.detail),
         status_code=exc.status_code,
         trace_id=getattr(request.state, "request_id", None),
     )
 
 
-def registrar_handlers_excecao(app: FastAPI) -> None:
+def register_exception_handlers(app: FastAPI) -> None:
     """
-    Registra todos os handlers de exceção na aplicação.
+    Registers all exception handlers in the application.
 
     Args:
-        app: Instância FastAPI.
-
-    Handlers registrados:
-        - ErroDominio → 400
-        - ErroValidacao → 422
-        - ErroInfraestrutura → 500
-        - ErroRecursoNaoEncontrado → 404
-        - RequestValidationError → 422
-        - Exception (fallback) → 500
+        app: FastAPI instance.
     """
-    app.add_exception_handler(ErroDominio, handler_erro_dominio)  # type: ignore
-    app.add_exception_handler(ErroValidacao, handler_erro_validacao)  # type: ignore
-    app.add_exception_handler(ErroInfraestrutura, handler_erro_infraestrutura)  # type: ignore
-    app.add_exception_handler(ErroRecursoNaoEncontrado, handler_recurso_nao_encontrado)  # type: ignore
-    app.add_exception_handler(RequestValidationError, handler_validacao_pydantic)  # type: ignore
-    app.add_exception_handler(IdempotencyException, handler_idempotencia)  # type: ignore
-    app.add_exception_handler(RateLimitExceeded, handler_rate_limit)  # type: ignore
-    app.add_exception_handler(StarletteHTTPException, handler_http_starlette)  # type: ignore
-    app.add_exception_handler(Exception, handler_generico)  # type: ignore
+    app.add_exception_handler(DomainError, domain_error_handler)  # type: ignore
+    app.add_exception_handler(ValidationError, validation_error_handler)  # type: ignore
+    app.add_exception_handler(InfrastructureError, infrastructure_error_handler)  # type: ignore
+    app.add_exception_handler(ResourceNotFoundError, resource_not_found_handler)  # type: ignore
+    app.add_exception_handler(RequestValidationError, pydantic_validation_handler)  # type: ignore
+    app.add_exception_handler(IdempotencyException, idempotency_handler)  # type: ignore
+    app.add_exception_handler(RateLimitExceeded, rate_limit_handler)  # type: ignore
+    app.add_exception_handler(StarletteHTTPException, starlette_http_handler)  # type: ignore
+    app.add_exception_handler(Exception, generic_handler)  # type: ignore
 
-    logger.info("Handlers de exceção registrados com sucesso")
+    logger.info("Exception handlers registered successfully")

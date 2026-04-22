@@ -16,7 +16,7 @@ export default function Footer() {
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [copiedWhatsApp, setCopiedWhatsApp] = useState(false);
   const email = about?.email || 'argenislopez28708256@gmail.com';
-  const phone = about?.telefone || '(41) 9 9510-3364';
+  const phone = about?.phone || '(41) 9 9510-3364';
 
   const handleCopyEmail = (e: React.MouseEvent) => {
     e.stopPropagation();

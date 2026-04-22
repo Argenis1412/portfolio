@@ -1,25 +1,25 @@
 """
-Módulo core da aplicação.
+Core application module.
 
-Contém funcionalidades transversais:
-- Exceções customizadas
-- Handlers de erros
+Contains cross-cutting functionalities:
+- Custom exceptions
+- Error handlers
 - Middleware
-- Utilitários compartilhados
+- Shared utilities
 """
 
-from app.core.excecoes import (
-    ErroDominio,
-    ErroInfraestrutura,
-    ErroRecursoNaoEncontrado,
-    ErroValidacao,
+from app.core.exceptions import (
+    DomainError,
+    InfrastructureError,
+    ResourceNotFoundError,
+    ValidationError,
 )
-from app.core.handlers import registrar_handlers_excecao
+from app.core.handlers import register_exception_handlers
 
 __all__ = [
-    "ErroDominio",
-    "ErroValidacao",
-    "ErroInfraestrutura",
-    "ErroRecursoNaoEncontrado",
-    "registrar_handlers_excecao",
+    "DomainError",
+    "ValidationError",
+    "InfrastructureError",
+    "ResourceNotFoundError",
+    "register_exception_handlers",
 ]

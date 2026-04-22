@@ -1,16 +1,16 @@
 """
-Módulo principal da aplicação FastAPI.
+Main FastAPI application module.
 
-Este módulo configura a aplicação FastAPI com:
-- CORS para desenvolvimento local (localhost:5173)
-- Middleware de requisições (request_id, logging, tempo de resposta)
-- Handlers globais de exceções
-- Endpoint de health check (/saude)
-- Rotas da API versionadas (/api/v1/*)
-- Documentação automática (/docs)
+This module configures the FastAPI application with:
+- CORS for local development (localhost:5173)
+- Request middleware (request_id, logging, response time)
+- Global exception handlers
+- Health check endpoint (/health)
+- Versioned API routes (/api/v1/*)
+- Automatic documentation (/docs)
 
-Arquitetura: Clean Architecture simplificada
-- Controllers (HTTP) → Use Cases (lógica) → Entities (domínio) → Adapters (externos)
+Architecture: Simplified Clean Architecture
+- Controllers (HTTP) → Use Cases (logic) → Entities (domain) → Adapters (external)
 """
 
 from fastapi import FastAPI
@@ -18,70 +18,59 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 
 from app import __version__
-from app.configuracao import configuracoes
-from app.controladores import roteador_saude
-from app.controladores.v1 import roteador_v1
-from app.core.handlers import registrar_handlers_excecao
-from app.core.limite import limiter
+from app.settings import settings
+from app.controllers import health_router
+from app.controllers.v1 import router_v1
+from app.core.handlers import register_exception_handlers
+from app.core.rate_limit import limiter
 from app.core.middleware import (
     ChaosMonkeyMiddleware,
     MetricsAccessMiddleware,
-    MiddlewareRequisicao,
-    SegurancaHeadersMiddleware,
+    RequestMiddleware,
+    SecurityHeadersMiddleware,
 )
-from app.core.observabilidade import configurar_observabilidade
+from app.core.observability import setup_observability
 
 
-def criar_aplicacao() -> FastAPI:
+def create_app() -> FastAPI:
     """
-    Cria e configura a aplicação FastAPI.
+    Creates and configures the FastAPI application.
 
     Returns:
-        FastAPI: Instância configurada da aplicação.
-
-    Configurações aplicadas:
-        - Título e descrição para documentação OpenAPI
-        - CORS para origens permitidas
-        - Middleware de requisições
-        - Handlers de exceções
-        - Rotas versionadas
-        - Logging estruturado
-        - Rate limiting
+        FastAPI: Configured application instance.
     """
-    # Configurar logging antes de criar app
-    # Logging estruturado configurado automaticamente via middleware
-    configuracoes.validar_producao()
+    settings.validate_production()
 
-    aplicacao = FastAPI(
-        title=configuracoes.nome_app,
-        description=_obter_descricao_api(),
+    application = FastAPI(
+        title=settings.app_name,
+        description=_get_api_description(),
         version=__version__,
         docs_url="/docs",
         redoc_url="/redoc",
         openapi_url="/openapi.json",
-        openapi_tags=_obter_tags_openapi(),
-        debug=configuracoes.debug,
+        openapi_tags=_get_openapi_tags(),
+        debug=settings.debug,
     )
 
-    # Observabilidade deve ser inicializada ANTES dos middlewares e rotas
+    # Observability must be initialized BEFORE middlewares and routes
     # to ensure Sentry and Prometheus are active from the beginning.
-    configurar_observabilidade(aplicacao, configuracoes)
+    setup_observability(application, settings)
 
-    _configurar_middleware(aplicacao)
-    _configurar_cors(aplicacao)
-    _registrar_handlers(aplicacao)
-    _registrar_limiter(aplicacao)
-    _registrar_rotas(aplicacao)
+    _configure_middleware(application)
+    _configure_cors(application)
+    _register_handlers(application)
+    _register_limiter(application)
+    _register_routes(application)
 
-    return aplicacao
+    return application
 
 
-def _obter_descricao_api() -> str:
+def _get_api_description() -> str:
     """
-    Retorna descrição markdown para documentação OpenAPI.
+    Returns markdown description for OpenAPI documentation.
 
     Returns:
-        str: Descrição formatada em markdown.
+        str: Formatted markdown description.
     """
     return """
     REST API for a backend developer portfolio.
@@ -101,10 +90,10 @@ def _obter_descricao_api() -> str:
     - **Error**:
       ```json
       {
-        \"erro\": {
-          \"codigo\": \"ERROR_CODE\",
-          \"mensagem\": \"Human-readable description\",
-          \"detalhes\": {...}
+        "error": {
+          "code": "ERROR_CODE",
+          "message": "Human-readable description",
+          "details": {...}
         }
       }
       ```
@@ -123,12 +112,12 @@ def _obter_descricao_api() -> str:
     """
 
 
-def _obter_tags_openapi() -> list[dict]:
+def _get_openapi_tags() -> list[dict]:
     """
-    Define tags para agrupar endpoints na documentação.
+    Defines tags to group endpoints in documentation.
 
     Returns:
-        list[dict]: Lista de tags com descrições.
+        list[dict]: List of tags with descriptions.
     """
     return [
         {
@@ -150,96 +139,75 @@ def _obter_tags_openapi() -> list[dict]:
     ]
 
 
-def _configurar_cors(aplicacao: FastAPI) -> None:
+def _configure_cors(application: FastAPI) -> None:
     """
-    Configura CORS (Cross-Origin Resource Sharing).
-
-    Args:
-        aplicacao: Instância FastAPI para configurar.
-
-    Permite requisições do frontend em localhost:5173 (Vite dev server).
+    Configures CORS (Cross-Origin Resource Sharing).
     """
-    aplicacao.add_middleware(
+    # For local development, we allow everything from localhost
+    # but still respect the settings list for production-readiness.
+    origins = settings.get_allowed_origins()
+    
+    application.add_middleware(
         CORSMiddleware,
-        allow_origins=configuracoes.lista_origens_permitidas(),
-        allow_origin_regex=configuracoes.regex_origens_permitidas,
+        allow_origins=origins,
         allow_credentials=True,
-        allow_methods=["GET", "POST"],
+        allow_methods=["*"],
         allow_headers=["*"],
     )
 
 
-def _configurar_middleware(aplicacao: FastAPI) -> None:
+def _configure_middleware(application: FastAPI) -> None:
     """
-    Configura middleware da aplicação.
-
-    Args:
-        aplicacao: Instância FastAPI.
-
-    Middleware applied:
-        - MiddlewareRequisicao: request_id, logging, response time
+    Configures application middleware.
     """
     # 1. Request ID injection and structured logging
-    aplicacao.add_middleware(MiddlewareRequisicao)
+    application.add_middleware(RequestMiddleware)
 
     # 1.5. Protect the /metrics endpoint in production
-    aplicacao.add_middleware(ChaosMonkeyMiddleware)
-    aplicacao.add_middleware(MetricsAccessMiddleware)
+    application.add_middleware(ChaosMonkeyMiddleware)
+    application.add_middleware(MetricsAccessMiddleware)
 
     # 2. GZip compression (saves bandwidth, only for responses > 1KB)
-    aplicacao.add_middleware(GZipMiddleware, minimum_size=1000)
+    application.add_middleware(GZipMiddleware, minimum_size=1000)
 
     # 3. Security headers (Clickjacking protection, etc.)
-    aplicacao.add_middleware(SegurancaHeadersMiddleware)
+    application.add_middleware(SecurityHeadersMiddleware)
 
 
-def _registrar_handlers(aplicacao: FastAPI) -> None:
+def _register_handlers(application: FastAPI) -> None:
     """
-    Registra handlers globais de exceções.
-
-    Args:
-        aplicacao: Instância FastAPI.
+    Registers global exception handlers.
     """
-    registrar_handlers_excecao(aplicacao)
+    register_exception_handlers(application)
 
 
-def _registrar_limiter(aplicacao: FastAPI) -> None:
+def _register_limiter(application: FastAPI) -> None:
     """
-    Configura o rate limiter na aplicação.
-
-    Args:
-        aplicacao: Instância FastAPI.
+    Configures the rate limiter in the application.
     """
-    aplicacao.state.limiter = limiter
+    application.state.limiter = limiter
 
 
-def _registrar_rotas(aplicacao: FastAPI) -> None:
+def _register_routes(application: FastAPI) -> None:
     """
-    Registra todos os roteadores na aplicação.
-
-    Args:
-        aplicacao: Instância FastAPI para registrar rotas.
-
-    Rotas registradas:
-        - /saude: Health check (sem prefixo)
-        - /api/v1/*: API versionada
+    Registers all routers in the application.
     """
-    # Health check (sem prefixo, usado por probes)
-    aplicacao.include_router(roteador_saude)
+    # Health check (no prefix, used by probes)
+    application.include_router(health_router)
 
     # Root route to avoid 404 (Koyeb/Public)
-    @aplicacao.get("/", tags=["Health"])
+    @application.get("/", tags=["Health"])
     async def root():
         return {
             "status": "ok",
-            "servico": configuracoes.nome_app,
-            "versao": __version__,
+            "service": settings.app_name,
+            "version": __version__,
             "docs": "/docs",
         }
 
-    # API v1 (recomendado)
-    aplicacao.include_router(roteador_v1, prefix="/api")
+    # API v1 (recommended)
+    application.include_router(router_v1, prefix="/api")
 
 
-# Instância global da aplicação (usada pelo uvicorn)
-app = criar_aplicacao()
+# Global application instance (used by uvicorn)
+app = create_app()
