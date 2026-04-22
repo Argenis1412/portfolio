@@ -65,7 +65,7 @@ class SqlRepository(PortfolioRepository):
         """
         try:
             async with self.session_factory() as session:
-                await session.exec(text("SELECT 1"))
+                await session.execute(text("SELECT 1"))
             return {"status": "ok", "details": "SQL database connected"}
         except Exception as e:
             return {"status": "error", "details": f"SQL connection failed: {str(e)}"}

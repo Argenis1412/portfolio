@@ -58,7 +58,9 @@ class GetStackUseCase:
 
             category = item.get("category", item.get("categoria"))
             if not category:
-                logger.warning("stack_item_missing_category", item_name=item.get("name", "unknown"))
+                logger.warning(
+                    "stack_item_missing_category", item_name=item.get("name", "unknown")
+                )
                 continue
 
             if category not in by_category:

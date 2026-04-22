@@ -30,7 +30,7 @@ class ProfessionalExperience:
     """
 
     id: str
-    role: str
+    role: dict
     company: str
     location: str
     start_date: date

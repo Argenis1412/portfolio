@@ -206,12 +206,14 @@ class JsonRepository(PortfolioRepository):
         for item in data:
             if not isinstance(item, dict):
                 continue
-            result.append({
-                "name": item.get("name", item.get("nome")),
-                "category": item.get("category", item.get("categoria")),
-                "level": item.get("level", item.get("nivel")),
-                "icon": item.get("icon", item.get("icone")),
-            })
+            result.append(
+                {
+                    "name": item.get("name", item.get("nome")),
+                    "category": item.get("category", item.get("categoria")),
+                    "level": item.get("level", item.get("nivel")),
+                    "icon": item.get("icon", item.get("icone")),
+                }
+            )
         return result
 
     async def get_experiences(self) -> list[ProfessionalExperience]:
