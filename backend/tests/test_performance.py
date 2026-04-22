@@ -1,4 +1,4 @@
-from app.principal import app
+from app.main import app
 
 
 def test_etag_and_304_not_modified(client):

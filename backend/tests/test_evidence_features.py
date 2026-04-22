@@ -2,7 +2,7 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 from app.controllers.chaos import chaos_state
-from app.principal import app
+from app.main import app
 
 
 @pytest.mark.anyio

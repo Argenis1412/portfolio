@@ -9,7 +9,7 @@ from fastapi.testclient import TestClient
 
 from app.controllers.dependencies import get_send_contact_use_case
 from app.core.honeypot import is_honeypot_triggered
-from app.principal import app
+from app.main import app
 
 client = TestClient(app)
 

@@ -10,7 +10,7 @@ import pytest
 import redis
 
 from app.core.idempotency import IdempotencyRecord, IdempotencyStore
-from app.principal import app
+from app.main import app
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Idempotency Store — Redis failure fallback

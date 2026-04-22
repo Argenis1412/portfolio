@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock
 
 from app.controllers.dependencies import get_send_contact_use_case
 from app.core.idempotency import store
-from app.principal import app
+from app.main import app
 
 # client = TestClient(app) # Removed to use fixture
 

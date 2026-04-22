@@ -16,7 +16,7 @@ from app.adapters.repository import PortfolioRepository
 from app.entities.experience import ProfessionalExperience
 from app.entities.formation import AcademicFormation
 from app.entities.project import Project
-from app.principal import app
+from app.main import app
 
 
 @pytest.fixture
