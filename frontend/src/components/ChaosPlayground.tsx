@@ -6,13 +6,15 @@
  * Terminal-style log with request_id and structured format.
  * Writes events to shared LogContext.
  */
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { m, AnimatePresence } from 'framer-motion';
+import { useState, useCallback, useRef } from 'react';
+import { m } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { useLog } from '../hooks/useLog';
 import { useChaosMode, type ChaosPreset } from '../hooks/useChaosMode';
 import { useChaosActions, type TerminalEntry } from '../hooks/useChaosActions';
+import { useCurrentTime } from '../hooks/useCurrentTime';
 import ChaosActionCard from './chaos/ChaosActionCard';
+import ChaosTerminal from './chaos/ChaosTerminal';
 
 // Shared trace store moved to src/services/TraceEmitter.ts
 
@@ -50,18 +52,10 @@ export default function ChaosPlayground() {
     addIncident,
   });
 
-  const [, setTick] = useState(0); // forces re-render for TTL countdown
+  const now = useCurrentTime(1000);
 
-  // Tick timer for TTL display — only for UI re-renders, state is global
-  useEffect(() => {
-    const t = setInterval(() => {
-      setTick((n) => n + 1);
-    }, 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  const activeIncidents = incidents.filter((i) => Date.now() - i.startedAt < i.ttl);
-  const resolvedIncidents = incidents.filter((i) => Date.now() - i.startedAt >= i.ttl);
+  const activeIncidents = incidents.filter((i) => now - i.startedAt < i.ttl);
+  const resolvedIncidents = incidents.filter((i) => now - i.startedAt >= i.ttl);
 
   return (
     <section id="chaos" aria-label="Chaos Playground" className="px-4 max-w-6xl mx-auto py-12">
@@ -193,7 +187,7 @@ export default function ChaosPlayground() {
                 {activeIncidents.length > 0 && (
                   <div className="space-y-2">
                     {activeIncidents.map((inc) => {
-                      const elapsed = Date.now() - inc.startedAt;
+                      const elapsed = now - inc.startedAt;
                       const remaining = Math.max(0, Math.ceil((inc.ttl - elapsed) / 1000));
                       const isInvestigating = elapsed < 5000;
                       
@@ -261,36 +255,7 @@ export default function ChaosPlayground() {
           </div>
 
           {/* Terminal log */}
-          <AnimatePresence mode="popLayout">
-            <div className="rounded-xl bg-[#0a0a0a] border border-app-border p-4 font-mono text-xs overflow-y-auto max-h-[220px]">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-400/60" />
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/60" />
-                <span className="text-[10px] text-app-muted/50 ml-2 uppercase tracking-widest">chaos-log</span>
-              </div>
-              {terminal.length === 0 ? (
-                <p className="text-white/40">{'>'} {t('logs.waiting')}</p>
-              ) : (
-                terminal.map((entry) => (
-                  <m.div
-                    key={entry.id}
-                    initial={{ opacity: 0, x: -4 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="flex gap-2 mb-1"
-                  >
-                    <span className="text-white/60 flex-shrink-0">[{entry.timestamp}]</span>
-                    <span className={
-                      entry.level === 'ERROR' ? 'text-red-400 flex-shrink-0' :
-                      entry.level === 'WARN' ? 'text-amber-400 flex-shrink-0' :
-                      'text-emerald-400/70 flex-shrink-0'
-                    }>{entry.level.padEnd(5)}</span>
-                    <span className="text-white/90 break-all">{entry.message}</span>
-                  </m.div>
-                ))
-              )}
-            </div>
-          </AnimatePresence>
+          <ChaosTerminal entries={terminal} />
         </div>
       </m.div>
     </section>
