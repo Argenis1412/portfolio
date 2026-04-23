@@ -7,7 +7,9 @@ Scalable Python API hosting.
 
 1.  **Source**: Connect your GitHub repository.
 2.  **Service Configuration**:
-    *   **Root Directory**: `/backend`
+    *   **Root Directory**: `/` (Keep at root for monorepo Docker context)
+    *   **Builder**: Select `Dockerfile`
+    *   **Dockerfile location**: `backend/Dockerfile`
     *   **Instance Type**: `Nano` (512MB RAM - Permanent Free Tier)
     *   **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port 8000`
     *   **Port Visibility**: Expose port `8000` (HTTP)
@@ -36,7 +38,7 @@ Global Edge UI deployment.
     *   **Output Directory**: `dist`
 3.  **Environment Variables**:
     *   `VITE_API_URL`: `https://api.argenisbackend.com/api/v1`
-    *   **Live Status**: `https://selected-fionna-argenis1412-58caae17.koyeb.app/saude` (JSON Health Check)
+    *   **Live Status**: `https://api.argenisbackend.com/saude` (JSON Health Check)
 
 ---
 

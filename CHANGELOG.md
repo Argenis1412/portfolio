@@ -17,18 +17,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/en/2.0.0/).
 - ✅ **New Performance Hooks**: Implemented `useCurrentTime` for stable, reactive time management across the dashboard.
 
 #### 🔄 Modified
-- ✅ **100% English Backend Migration**: Fully migrated the backend from Portuguese to English-first. This includes:
-  - Renaming all core directories (`adaptadores` → `adapters`, `controladores` → `controllers`, `entidades` → `entities`, etc.).
-  - Translating all internal symbols, function names, Pydantic models, and SQLModel entities.
-  - Standardizing all inline `# comments` and documentation strings to English.
-- ✅ **Unified Data Schemas**: Updated all frontend Zod schemas and TypeScript interfaces to synchronize with the new English backend property names.
-- ✅ **Refactored Monolithic Components**: Decomposed `ChaosPlayground`, `Contact`, and `LiveMetricsBento` into reusable logic hooks (`useChaosActions`, `useContactForm`, `useMetricsDisplay`).
+- ✅ **100% English Backend Migration**: Fully migrated the backend from Portuguese to English-first.
+- ✅ **Monorepo Build Context**: Fixed "Dockerfile not found" by unifying build context at the root for Koyeb and GitHub.
+- ✅ **Dockerfile Hardening**: Updated `backend/Dockerfile` to be root-aware for monorepo CI/CD.
+- ✅ **Unified Data Schemas**: Updated all frontend Zod schemas and TypeScript interfaces to sync with English backend property names.
 
 #### 🐛 Fixed
-- ✅ **React Hook Purity Violation**: Resolved a critical ESLint error in `ChaosPlayground.tsx` caused by direct `Date.now()` calls during the render cycle.
-- ✅ **Obsolete Code Cleanup**: Deleted the deprecated `frontend/src/api.ts` shim.
-- ✅ **Gitignore Artifact Guard**: Updated `.gitignore` in both frontend and backend to exclude temporary test artifacts (`test_output.txt`, `test_out.txt`).
-- ✅ **Backend Route Alignment**: Successfully migrated `/saude` to `/health` for global consistency.
+- ✅ **Chaos Persistence Crash**: Implemented fail-silent pattern in `chaos.py` to prevent simulation crashes on DB errors.
+- ✅ **CSP / CORS Domain Sync**: Resolved connectivity issues between Vercel and Koyeb by whitelisting `api.argenisbackend.com`.
+- ✅ **GitHub Actions CI**: Corrected `backend-ci.yml` to build from root context, ensuring production consistency.
+- ✅ **React Hook Purity Violation**: Resolved ESLint error in `ChaosPlayground.tsx` caused by direct `Date.now()` calls.
+- ✅ **Obsolete Code Cleanup**: Deleted deprecated `frontend/src/api.ts` shim.
 
 ---
 

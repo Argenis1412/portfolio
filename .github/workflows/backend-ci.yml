@@ -106,5 +106,4 @@ jobs:
 
       - name: 🐳 Build Docker image
         run: |
-          cd backend
-          docker build -t portafolio-api:${{ github.sha }} .
+          docker build -t portafolio-api:${{ github.sha }} -f backend/Dockerfile .

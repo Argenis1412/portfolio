@@ -68,3 +68,25 @@ If Go is integrated in the future, it will only be under real necessity signals 
 ## 14. Modular Frontend API & Component Decomposition
 **Decision**: Restructuring the monolithic `api.ts` into a layered `src/api/` directory and decomposing large UI components into focused hooks and sub-components.
 **Why?** As the frontend complexity grew, the single `api.ts` file became a bottleneck for readability and type safety. Moving to a modular structure (`client`, `schemas`, `services`) ensures better separation of concerns. Similarly, extracting logic into custom hooks (`useChaosActions`, `useContactForm`) and UI into atomic components (`ChaosTerminal`, `ChaosActionCard`) improves testability and adheres to the Single Responsibility Principle.
+
+## 15. Production Resilience & Infrastructure Hardening
+
+Building for production introduced real-world challenges that were addressed with SRE principles:
+
+### 15.1 Resilient Chaos Persistence
+**Decision**: Chaos actions (latency, spikes) must not depend on database availability to complete their primary task (the simulation).
+**Implementation**: We implemented a "Fail-Silent" pattern in `chaos.py`. If the database fails to record an incident (due to missing tables or connection issues), the system logs the error but continues the chaos simulation. This ensures the playground remains functional even under partial infrastructure failure.
+
+### 15.2 Monorepo Build Standardization
+**Decision**: Unify build context for Docker across all environments (Koyeb, GitHub Actions, Local).
+**Implementation**: The `Dockerfile` is designed to be "Root-Aware". By building from the repository root and using prefixed `COPY` commands (e.g., `COPY backend/requirements.txt`), we eliminate path mismatches between different CI/CD runners.
+
+### 15.3 Security Header & CORS Synchronization
+**Decision**: Use a single source of truth for allowed origins and strictly sync CSP with production subdomains.
+**Implementation**:
+- **CORS**: Managed via Regex in `settings.py` to support dynamic subdomains (api.*, www.*).
+- **CSP**: Implemented in `vercel.json` to explicitly whitelist `api.argenisbackend.com`, preventing browser-level blocks during frontend-backend communication.
+
+## 16. Internationalization (i18n) & API Contracts
+**Decision**: Enforce "English-First" API contracts while maintaining multi-language content.
+**Reasoning**: All internal identifiers, routes, and database keys were migrated from Portuguese to English to ensure the codebase follows global engineering standards, while still serving localized content via the `/api` responses.
