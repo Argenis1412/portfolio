@@ -95,8 +95,8 @@ export async function postChaosCache(): Promise<{
   timestamp: string;
 }> {
   const endpoints = [
-    '/sobre', '/stack', '/projetos', '/experiencias', '/formacao',
-    '/sobre', '/stack', '/projetos', '/experiencias', '/formacao',
+    '/about', '/stack', '/projects', '/experiences', '/formation',
+    '/about', '/stack', '/projects', '/experiences', '/formation',
   ];
   const start = performance.now();
   await Promise.allSettled(endpoints.map((path) => fetch(buildApiUrl(path))));

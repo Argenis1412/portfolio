@@ -9,7 +9,7 @@ Scalable Python API hosting.
 2.  **Service Configuration**:
     *   **Root Directory**: `/backend`
     *   **Instance Type**: `Nano` (512MB RAM - Permanent Free Tier)
-    *   **Start Command**: `uvicorn app.principal:app --host 0.0.0.0 --port 8000`
+    *   **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port 8000`
     *   **Port Visibility**: Expose port `8000` (HTTP)
 3.  **Environment Variables**:
 
@@ -35,7 +35,7 @@ Global Edge UI deployment.
     *   **Build Command**: `npm run build`
     *   **Output Directory**: `dist`
 3.  **Environment Variables**:
-    *   `VITE_API_URL`: `https://selected-fionna-argenis1412-58caae17.koyeb.app/api/v1`
+    *   `VITE_API_URL`: `https://api.argenisbackend.com/api/v1`
     *   **Live Status**: `https://selected-fionna-argenis1412-58caae17.koyeb.app/saude` (JSON Health Check)
 
 ---
@@ -49,7 +49,7 @@ Global Edge UI deployment.
 ### Recommended Koyeb Deploy Flow
 1. **Release task / pre-deploy**: `alembic upgrade head`
 2. **One-off seed (only when static SQL data must be refreshed)**: `python scripts/migrar_dados.py`
-3. **Runtime start command**: `uvicorn app.principal:app --host 0.0.0.0 --port 8000`
+3. **Runtime start command**: `uvicorn app.main:app --host 0.0.0.0 --port 8000`
 
 This avoids running migrations and full reseeds on every cold start.
 
