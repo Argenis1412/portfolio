@@ -16,7 +16,6 @@ router_v1 = APIRouter(
 )
 
 
-
 @router_v1.get("/")
 async def v1_root():
     """
