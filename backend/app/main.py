@@ -209,6 +209,12 @@ def _register_routes(application: FastAPI) -> None:
     # API v1 (recommended)
     application.include_router(router_v1, prefix="/api")
 
+    # Legacy health check aliases (Portuguese/Spanish) for Koyeb compatibility
+    @application.get("/saude", include_in_schema=False)
+    @application.get("/salud", include_in_schema=False)
+    async def legacy_health_alias():
+        return {"status": "ok", "message": "API alive (legacy alias)"}
+
 
 # Global application instance (used by uvicorn)
 app = create_app()
