@@ -13,6 +13,9 @@ from app.controllers import api, chaos, contact
 router_v1 = APIRouter(
     prefix="/v1",
     tags=["API v1"],
+)
+
+
 
 @router_v1.get("/")
 async def v1_root():
