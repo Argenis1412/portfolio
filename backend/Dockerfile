@@ -26,7 +26,7 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy and install Python dependencies
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --user --no-cache-dir --default-timeout=100 -r requirements.txt
 
@@ -61,10 +61,10 @@ COPY --from=builder --chown=appuser:appuser /root/.local /home/appuser/.local
 ENV PATH=/home/appuser/.local/bin:$PATH
 
 # Copy application code
-COPY --chown=appuser:appuser app/ ./app/
-COPY --chown=appuser:appuser data/ ./data/
-COPY --chown=appuser:appuser alembic/ ./alembic/
-COPY --chown=appuser:appuser alembic.ini .
+COPY --chown=appuser:appuser backend/app/ ./app/
+COPY --chown=appuser:appuser backend/data/ ./data/
+COPY --chown=appuser:appuser backend/alembic/ ./alembic/
+COPY --chown=appuser:appuser backend/alembic.ini .
 
 # Switch to non-root user
 USER appuser
