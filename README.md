@@ -1,4 +1,4 @@
-# 🏛️ Graphite & Bronze: Backend-Focused Full-Stack System
+# 🏛️ Backend-Focused Full-Stack System
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-gold.svg)](LICENSE)
 [![Backend CI](https://github.com/Argenis1412/portfolio/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/Argenis1412/portfolio/actions)
@@ -39,16 +39,23 @@ Most portfolios show UI. This one demonstrates **production backend thinking**:
 
 ## 🔄 Evolution: How This System Grew
 
-This project didn't start production-ready. It evolved:
+This project didn't start production-ready. It evolved through real production incidents:
 
-| Version | State | Result |
+| Version | Milestone | Key Change |
 |---|---|---|
-| **v0** | JSON file persistence | Simple, fast to build |
-| **v1** | Migrated to **SQLModel + Alembic** | Persistence, scalability, testability |
-| **v2** | Added persistent anti-spam + observability | Production-grade resilience |
-| **v3** | High-security (Middlewares) + Scalable Persistence | Redis (Upstash) and PostgreSQL (Koyeb DB) |
+| **v1.0.0** | Initial Release | FastAPI + Clean Architecture + JSON persistence |
+| **v1.1.0** | CORS Dynamic Support | Regex-based CORS for Vercel preview URLs (ADR-06) |
+| **v1.2.0** | Observability Stack | Prometheus + Sentry + OpenTelemetry (ADR-04, ADR-09) |
+| **v1.3.0** | Persistent State | Redis-backed rate limiting + PostgreSQL (ADR-11) — fixed INC-001 |
+| **v1.3.1** | Security Hardening | `TRUSTED_PROXY_DEPTH` validation + PII masking |
+| **v1.4.0** | Production Deploy | Custom domain + Resend email + CSP/CORS sync (ADR-15.3) — fixed INC-004 |
+| **v1.4.1** | Cold Start Fix | JSON-First Read Path (ADR-05) — fixed INC-002 |
+| **v1.4.2** | Observability Infra | `trace_id` propagation + MetricsSparkline + enriched contact response |
+| **v1.5.0** | Chaos Engineering | Deterministic chaos presets + stateful decision engine (ADR-14) |
+| **v1.5.1** | Honest Telemetry | Synthetic vs. real labels + confidence indicator (ADR-13) |
+| **v1.6.0** | Build Standardization | Modular API layer + root-context Dockerfile (ADR-15.2) — fixed INC-005 |
 
-The migration from JSON → SQLite → PostgreSQL was a deliberate engineering journey: proving that a well-designed Clean Architecture can swap data adapters without affecting business logic.
+Each version was driven by real production needs, not speculative features. See [CHANGELOG.md](CHANGELOG.md) for full details.
 
 ---
 
@@ -111,16 +118,25 @@ The system implements a manual ETag generation strategy. Every GET response incl
 - **Projects** now render as compact backend case studies with `Problem`, `Constraint`, `Decision`, `Trade-off`, `Impact`, and `Stack` sections sourced from `descricao_completa`.
 - **Journey / Experience** is no longer a CV tabset. It is a vertical engineering timeline organized around decisions, failures, learning, and operational impact.
 
-#### 📊 Chaos Engineering Quantified Impact
-*Results from destructive stress testing phase:*
-- **Error Rate Optimization**: Dropped from **8% to 0.5%** under sustained load (500 req/s) by implementing an **Exponential Backoff** and Jitter retry pattern.
-- **Queue Resilience**: Automatic Queue Drain intervention prevents OOM crashes during sudden +3000ms latency spikes in underlying infrastructure.
+#### 📊 Production Incident Track Record
+*5 real production incidents documented with post-mortems:*
 
-#### 📊 Performance Baseline
-*Based on production monitoring:*
-- **P95 Latency**: <150ms 
-- **Error Rate (Normal Operations)**: <0.1% 
-- **LCP (Full load)**: <1.2s 
+| Incident | Failure | Detection | Resolution |
+|---|---|---|---|
+| **INC-001** | Rate limiter silently disabled (in-memory reset) | Manual discovery | Redis-backed rate limiting (v1.3.0) |
+| **INC-002** | Cold start latency 280-400ms despite keep-alive | Metrics gap | JSON-First Read Path (v1.4.1) |
+| **INC-003** | Chaos Playground crash on DB unavailability | Manual testing | Fail-silent persistence (v1.4.x) |
+| **INC-004** | CSP blocking all API calls in production | Browser console | CSP/CORS synchronization (v1.4.0) |
+| **INC-005** | Docker build context mismatch across environments | CI/CD failure | Root-context standardization (v1.6.0) |
+
+See [FAILURE_MODEL.md](docs/architecture/FAILURE_MODEL.md) for full degradation behaviors and governing ADRs.
+
+#### 📊 Performance Baseline (SLO Targets)
+*From [SLO_DEFINITIONS.md](docs/architecture/SLO_DEFINITIONS.md) — source: ENGINEERING_PLAYBOOK.md section 11:*
+- **Portfolio Data** (`/about`, `/projects`, `/stack`): P95 < 50ms ✅
+- **Contact Endpoint** (`/contact`): P95 < 200ms ✅
+- **Health Check** (`/health`): P99 < 20ms ✅
+- **Error Rate**: < 0.5% (5xx over 15-min window) ✅ 
 
 ### 5. Performance & DX
 - **Predictive Prefetching**: Data pre-loaded on hover for instant transitions.
@@ -189,9 +205,16 @@ Key tests that demonstrate production-level reliability:
 ## 📁 Repository Structure
 ```
 portfolio/
-├── backend/          # FastAPI backend (Clean Architecture)
-├── frontend/         # React 19 + TypeScript frontend
-├── .github/          # GitHub Actions CI/CD workflows
+├── backend/              # FastAPI backend (Clean Architecture)
+├── frontend/             # React 19 + TypeScript frontend
+├── docs/
+│   └── architecture/
+│       ├── SLO_DEFINITIONS.md    # Per-endpoint SLOs with measurement methods
+│       └── FAILURE_MODEL.md      # Production incident failure model (INC-001–INC-005)
+├── .github/              # GitHub Actions CI/CD workflows
+├── ARCHITECTURE.md       # ADR-01 through ADR-16
+├── CHANGELOG.md          # Release history + 5 production incidents
+├── ENGINEERING_PLAYBOOK.md  # SLOs, standards, incident protocol
 └── docker-compose.yml
 ```
 

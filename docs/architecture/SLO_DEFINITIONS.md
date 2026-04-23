@@ -1,29 +1,137 @@
 # Service Level Objectives (SLOs)
 
+> Single source of truth for system performance targets.
+> Values extracted from ENGINEERING_PLAYBOOK.md section 11.
+
+---
+
 ## Overview
-This document defines the realistic Service Level Objectives (SLOs) and internal thresholds for the backend API. These metrics guide the system's "survival mode" and degradation responses.
+
+This document defines the Service Level Objectives (SLOs) for the backend API. Each SLO includes the target value, measurement method, current status based on production incidents, and alert triggers.
 
 ---
 
-## 1. Latency Objectives
+## 1. Static Portfolio Data Endpoints
 
-### Target Latency (p95)
-**Objective:** 95% of all non-administrative requests must complete in under **250ms**.
-**Warning Threshold:** If p95 latency exceeds **400ms** over a 1-minute rolling window, the system enters internal warning state.
-**Critical Threshold:** If p95 latency exceeds **800ms**, the system triggers the Circuit Breaker and sheds load.
+### Endpoints
+- `GET /api/v1/about`
+- `GET /api/v1/projects`
+- `GET /api/v1/stack`
+- `GET /api/v1/experiences`
+
+### Latency Target
+- **SLO:** P95 < 50ms
+
+### Measurement Method
+- **Primary:** Prometheus histograms exposed at `/metrics` endpoint (ADR-04)
+- **Secondary:** Synthetic telemetry from frontend `useLiveMetrics` hook (ADR-13)
+- **Backend Source:** FastAPI middleware records `latency_ms` per request with path label
+
+### Current Status
+- **Status:** ✅ BEING MET
+- **Evidence:** INC-002 resolution (v1.4.1) migrated reads from PostgreSQL to `JSONRepository`. P95 dropped from ~320ms to <50ms.
+- **Baseline:** Files loaded into memory at startup; no database round-trip
+
+### Alert Trigger
+- P95 > 50ms for 5 consecutive minutes
+- OR error rate > 0.5% for 15 minutes
 
 ---
 
-## 2. Error Rate Objectives
+## 2. Contact Submission Endpoint
 
-### Target Error Rate
-**Objective:** We commit to a maximum error rate (5xx responses) of **0.5%** over any 15-minute rolling window during normal operation.
-**Warning Threshold:** If the error rate surpasses **2%**, alert the on-call systems and degrade non-essential features on the frontend.
-**Critical Chaos Threshold:** If the error rate hits **5%** (e.g. during a Chaos Spike), the "Panic Button" state is verified as successfully breached, and emergency queues must drain.
+### Endpoint
+- `POST /api/v1/contact`
+
+### Latency Target
+- **SLO:** P95 < 200ms (includes Redis round-trip for rate limiting)
+
+### Measurement Method
+- **Primary:** Prometheus histograms with `path="/api/v1/contact"` label
+- **Secondary:** Frontend `TraceConsole` records end-to-end latency including network
+- **Components Measured:** Redis rate limit check + PostgreSQL write + Resend API call
+
+### Current Status
+- **Status:** ✅ BEING MET
+- **Evidence:** INC-001 resolution (v1.3.0) migrated rate limiting to Redis (Upstash). Counters survive container restarts.
+- **Note:** Redis is now in the critical path; rate limiter fails open if unavailable (accepted in INC-001)
+
+### Alert Trigger
+- P95 > 200ms for 5 minutes
+- OR 5xx error rate > 0.5% for 15 minutes
+- OR Redis connection failures > 1% for 5 minutes
 
 ---
 
-## 3. Availability
+## 3. Health Check Endpoint
 
-### Overall Uptime
-**Objective:** Provide **99.9%** availability for critical endpoints (data reads, core functionality) by aggressively sacrificing background workers and heavy aggregations during times of stress.
+### Endpoint
+- `GET /health`
+
+### Latency Target
+- **SLO:** P99 < 20ms
+
+### Measurement Method
+- **Primary:** Prometheus histograms (no database dependency)
+- **Secondary:** Keep-alive cron job pings every 14 minutes, logs response time
+- **Chaos Testing:** Chaos Playground includes health check latency in telemetry
+
+### Current Status
+- **Status:** ✅ BEING MET
+- **Evidence:** ADR-05 removed PostgreSQL dependency from `/health`. Keep-alive targets fast endpoint.
+- **Historical Issue:** INC-002 showed keep-alive hitting `/health` was not enough when data endpoints still required DB
+
+### Alert Trigger
+- P99 > 20ms for 3 minutes
+- OR non-200 HTTP response for 2 consecutive checks
+- OR keep-alive cron reports failure
+
+---
+
+## 4. Error Rate Objectives (Global)
+
+### Target
+- **SLO:** Maximum 0.5% 5xx error rate over any 15-minute rolling window
+
+### Measurement Method
+- **Source:** Prometheus counter `http_requests_total{status=~"5.."}` divided by total requests
+- **Recording Rule:** `rate(http_requests_total[15m])` filtered by status code
+
+### Current Status
+- **Status:** ✅ BEING MET
+- **Historical Peak:** INC-001 period had elevated errors due to rate limiter failures; resolved in v1.3.0
+
+### Alert Trigger
+- Error rate > 0.5% for 15 minutes (warning)
+- Error rate > 2% for 5 minutes (critical)
+
+---
+
+## 5. Availability Objectives
+
+### Target
+- **SLO:** 99.9% availability for critical endpoints (data reads, health check)
+- **Excluded:** Chaos Playground synthetic failures (labeled as expected behavior per ADR-13)
+
+### Measurement Method
+- **Source:** Synthetic probe success rate from keep-alive cron + frontend telemetry
+- **Window:** 30-day rolling
+
+### Current Status
+- **Status:** ✅ BEING MET
+- **Downtime Budget:** ~43 minutes/month allowed
+
+### Alert Trigger
+- Availability < 99.9% over 1-hour window
+
+---
+
+## References
+
+- **Source of Truth:** ENGINEERING_PLAYBOOK.md section 11 (Performance)
+- **Incident History:** CHANGELOG.md (INC-001 through INC-005)
+- **Architecture Decisions:**
+  - ADR-04: Protected Prometheus metrics
+  - ADR-05: JSON-First Read Path
+  - ADR-11: External Storage (Redis)
+  - ADR-13: Synthetic vs. Real telemetry labeling
