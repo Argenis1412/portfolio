@@ -156,19 +156,27 @@ chaos_state = ChaosState()
 
 
 async def _persist_incident(incident: ChaosIncident, repo: PortfolioRepository) -> None:
-    """Saves the chaos incident to Postgres via SQLAlchemy."""
-    if hasattr(repo, "session_factory"):
-        async with repo.session_factory() as session:
-            db_incident = ChaosIncidentModel(
-                type=incident.type,
-                timestamp=incident.timestamp,
-                requests_sent=incident.requests_sent,
-                requests_dropped=incident.requests_dropped,
-                recovery_ms=incident.recovery_ms,
-                error_triggered=incident.error_triggered,
-            )
-            session.add(db_incident)
-            await session.commit()
+    """Saves the chaos incident to Postgres via SQLAlchemy.
+    Resilient: if the DB fails, we log and continue to avoid crashing the simulation.
+    """
+    try:
+        if hasattr(repo, "session_factory") and repo.session_factory:
+            async with repo.session_factory() as session:
+                db_incident = ChaosIncidentModel(
+                    type=incident.type,
+                    timestamp=incident.timestamp,
+                    requests_sent=incident.requests_sent,
+                    requests_dropped=incident.requests_dropped,
+                    recovery_ms=incident.recovery_ms,
+                    error_triggered=incident.error_triggered,
+                )
+                session.add(db_incident)
+                await session.commit()
+    except Exception as e:
+        import structlog
+
+        logger = structlog.get_logger(__name__)
+        logger.error("chaos_persistence_failed", error=str(e))
 
 
 @router.post(
