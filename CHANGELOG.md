@@ -102,7 +102,10 @@ CSP in `vercel.json` explicitly whitelists `api.argenisbackend.com`. CORS regex 
 **Affected**: CI/CD Pipeline & Deployment (Koyeb + GitHub Actions)
 
 **What happened**
-Deployments started failing on Koyeb with `file not found` errors for `requirements.txt` and `app/`. The fix for Koyeb (building from root) broke GitHub Actions, which was configured to build from inside the `/backend` directory.
+Deployments started failing on Koyeb with `file not found` errors for `requirements.txt` and `app/`. Fixing it for Koyeb (by building from root) broke GitHub Actions, which was configured to build from inside the `/backend` directory.
+
+**What was tried first (didn't work)**
+We tried to force the "Work Directory" to `/backend` in the Koyeb service configuration. This not only failed to fix the build but **made things worse** by creating an absolute discrepancy between the Dockerfile context and the runner's actual filesystem, making local and CI paths completely incompatible.
 
 **Root cause**
 Inconsistent Docker build contexts across environments. The `Dockerfile` used relative paths that were context-dependent.
@@ -111,7 +114,7 @@ Inconsistent Docker build contexts across environments. The `Dockerfile` used re
 Standardized the build context to the **repository root** for all environments. Updated the `Dockerfile` to use prefixed paths (`COPY backend/requirements.txt`) and modified the GitHub Action to point to the root context with `-f backend/Dockerfile .`.
 
 **Accepted side effect**
-Local builds now also require being run from the root of the project.
+Local builds now also require being run from the repository root.
 
 ---
 
@@ -297,6 +300,12 @@ All frontend Zod schemas and TypeScript interfaces updated to match English back
 
 ---
 
+[1.6.0]: https://github.com/Argenis1412/portfolio/releases/tag/v1.6.0
+[1.5.1]: https://github.com/Argenis1412/portfolio/releases/tag/v1.5.1
+[1.5.0]: https://github.com/Argenis1412/portfolio/releases/tag/v1.5.0
+[1.4.2]: https://github.com/Argenis1412/portfolio/releases/tag/v1.4.2
+[1.4.1]: https://github.com/Argenis1412/portfolio/releases/tag/v1.4.1
+[1.4.0]: https://github.com/Argenis1412/portfolio/releases/tag/v1.4.0
 [1.3.1]: https://github.com/Argenis1412/portfolio/releases/tag/v1.3.1
 [1.3.0]: https://github.com/Argenis1412/portfolio/releases/tag/v1.3.0
 [1.2.0]: https://github.com/Argenis1412/portfolio/releases/tag/v1.2.0
