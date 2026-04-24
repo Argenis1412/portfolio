@@ -95,7 +95,7 @@ export default function Projects() {
 
   return (
     <section id="projects" className="py-16 max-w-6xl mx-auto px-4 relative group overflow-hidden">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-app-primary/5 dark:bg-app-primary/10 rounded-full blur-[120px] -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-[var(--glow-primary)] rounded-full blur-[120px] -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -187,7 +187,7 @@ export default function Projects() {
 
                 <div className="flex gap-4 mt-auto border-t border-app-border pt-4">
                   {project.repository && (
-                    <a href={project.repository} target="_blank" rel="noopener noreferrer" className="flex-1 rounded-xl border border-app-border bg-app-surface px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 transition-colors hover:border-app-primary hover:text-app-primary flex items-center justify-center gap-2">
+                    <a href={project.repository} target="_blank" rel="noopener noreferrer" className="flex-1 rounded-xl border border-app-border bg-app-surface px-4 py-2.5 text-sm font-semibold text-app-text transition-colors hover:border-app-primary hover:text-app-primary flex items-center justify-center gap-2">
                       <Github className="w-5 h-5" />
                       {t('projects.source_code')}
                     </a>
