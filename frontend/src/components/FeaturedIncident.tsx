@@ -13,7 +13,7 @@ export default function FeaturedIncident() {
           {t('chaos.incidents.history')}
         </h2>
         <p className="text-sm text-app-muted max-w-lg">
-          Archived post-mortems from real production incidents. Every failure is a data point.
+          {t('chaos.incidents.history_subtitle')}
         </p>
       </div>
 

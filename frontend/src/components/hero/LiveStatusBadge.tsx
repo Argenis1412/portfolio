@@ -37,7 +37,7 @@ export const LiveStatusBadge = React.memo(({ status, latencyMs, source }: LiveSt
         )}
       </span>
       {source && (
-        <span className={`rounded-full px-1.5 py-0.5 text-[9px] ${source === 'synthetic' ? 'bg-violet-500/10 text-violet-700 dark:text-violet-300' : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'}`}>
+        <span className={`rounded-full px-1.5 py-0.5 text-[9px] ${source === 'synthetic' ? 'bg-[var(--color-status-synthetic-bg)] text-[var(--color-status-synthetic)]' : 'bg-[var(--color-status-ok-bg)] text-[var(--color-status-ok-text)]'}`}>
           {t(`metrics.origin.${source}`)}
         </span>
       )}

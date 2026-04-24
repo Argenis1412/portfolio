@@ -54,8 +54,8 @@ export function useMetricsDisplay() {
   const latestEventAgoSeconds = latestTrace ? Math.max(0, Math.floor((currentTime - latestTrace.timestamp.getTime()) / 1000)) : null;
   
   const confidenceTone = confidenceLabel === 'estimated' 
-    ? 'bg-violet-500/10 text-violet-700 border-violet-500/20 dark:text-violet-300' 
-    : 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:text-emerald-300';
+    ? 'bg-[var(--color-status-synthetic-bg)] text-[var(--color-status-synthetic)] border-[var(--color-status-synthetic-border)]' 
+    : 'bg-[var(--color-status-ok-bg)] text-[var(--color-status-ok-text)] border-[var(--color-status-ok-border)]';
 
   return {
     metrics,

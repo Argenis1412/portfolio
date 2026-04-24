@@ -48,7 +48,7 @@ export const SystemSidecar = React.memo(({
             {status.toUpperCase()}
           </div>
           <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono">
-            <span className={`rounded-full px-2 py-0.5 ${confidenceLabel === 'estimated' ? 'bg-violet-500/10 text-violet-700 dark:text-violet-300' : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'}`}>
+            <span className={`rounded-full px-2 py-0.5 ${confidenceLabel === 'estimated' ? 'bg-[var(--color-status-synthetic-bg)] text-[var(--color-status-synthetic)]' : 'bg-[var(--color-status-ok-bg)] text-[var(--color-status-ok-text)]'}`}>
               {t(`metrics.confidence.${confidenceLabel}`)} {confidenceScore}%
             </span>
             {latestSample && (

@@ -44,7 +44,7 @@ export function KpiStrip({ data, previous, status, effectiveP95, confidenceScore
     {
       label: t('hero.kpi.confidence'),
       value: `${confidenceScore}%`,
-      className: confidenceLabel === 'estimated' ? 'text-violet-700 dark:text-violet-300' : 'text-emerald-700 dark:text-emerald-400',
+      className: confidenceLabel === 'estimated' ? 'text-[var(--color-status-synthetic)]' : 'text-[var(--color-status-ok-text)]',
       delta: null,
     },
     {

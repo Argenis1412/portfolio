@@ -86,7 +86,7 @@ function App() {
                   {/* 6 — Log Stream: terminal event stream */}
                   <LogStream />
 
-                  {/* 7 — Featured Incident: Case Study #0042 */}
+                  {/* 7 — Featured Incident: Production Post-Mortems (INC-001, INC-002, INC-005) */}
                   <FeaturedIncident />
   
   

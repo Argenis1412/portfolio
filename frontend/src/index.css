@@ -14,6 +14,17 @@
   --color-app-primary-hover: var(--theme-primary-hover);
   --color-app-secondary: var(--theme-secondary);
   --color-app-section-alt: var(--theme-section-alt);
+
+  /* Signal colors */
+  --color-signal-decision: var(--color-signal-decision);
+  --color-signal-failure: var(--color-signal-failure);
+  --color-signal-learning: var(--color-signal-learning);
+  --color-signal-impact: var(--color-signal-impact);
+
+  /* Status colors */
+  --color-status-degraded: var(--color-status-degraded);
+  --color-status-recovering: var(--color-status-recovering);
+  --color-status-stable: var(--color-status-stable);
 }
 
 :root {
@@ -23,6 +34,43 @@
   --theme-primary-hover:  #8F5620;
   --theme-secondary:      #C07A3A;
   --theme-section-alt:    #E9DDD0;
+
+  /* Semantic signal colors - light mode */
+  --color-signal-decision:        #1D4ED8;
+  --color-signal-decision-bg:     rgba(59, 130, 246, 0.10);
+  --color-signal-decision-border: rgba(96, 165, 250, 0.25);
+  --color-signal-failure:         #DC2626;
+  --color-signal-failure-bg:      rgba(239, 68, 68, 0.10);
+  --color-signal-failure-border:  rgba(248, 113, 113, 0.25);
+  --color-signal-learning:        #D97706;
+  --color-signal-learning-bg:     rgba(245, 158, 11, 0.10);
+  --color-signal-learning-border: rgba(251, 191, 36, 0.25);
+  --color-signal-impact:          #059669;
+  --color-signal-impact-bg:       rgba(16, 185, 129, 0.10);
+  --color-signal-impact-border:   rgba(52, 211, 153, 0.25);
+
+  /* Status colors - light mode */
+  --color-status-degraded:        #DC2626;
+  --color-status-degraded-bg:     rgba(254, 202, 202, 0.90);
+  --color-status-degraded-border: #FCA5A5;
+  --color-status-degraded-text:   #7F1D1D;
+  --color-status-recovering:      #D97706;
+  --color-status-recovering-bg:   rgba(254, 243, 199, 0.90);
+  --color-status-recovering-border: #FCD34D;
+  --color-status-recovering-text: #92400E;
+  --color-status-stable:          #059669;
+  --color-status-ok-bg:           rgba(209, 250, 229, 0.10);
+  --color-status-ok-border:       rgba(16, 185, 129, 0.30);
+  --color-status-ok-text:         #047857;
+  --color-status-info-bg:         rgba(191, 219, 254, 0.10);
+  --color-status-info-border:     rgba(96, 165, 250, 0.30);
+  --color-status-info-text:       #1D4ED8;
+  --color-status-synthetic:       #7C3AED;
+  --color-status-synthetic-bg:    rgba(221, 214, 254, 0.10);
+  --color-status-synthetic-border: rgba(167, 139, 250, 0.30);
+
+  /* Ambient glow effects */
+  --glow-primary: rgba(168, 105, 46, 0.05);
 }
 
 .dark {
@@ -31,6 +79,33 @@
   --theme-primary-hover:  #E2B68A;
   --theme-secondary:      #BC8E5B;
   --theme-section-alt:    #1A1815;
+
+  /* Semantic signal colors - dark mode */
+  --color-signal-decision:        #93C5FD;
+  --color-signal-decision-bg:     rgba(59, 130, 246, 0.15);
+  --color-signal-failure:         #FCA5A5;
+  --color-signal-failure-bg:      rgba(239, 68, 68, 0.15);
+  --color-signal-learning:        #FCD34D;
+  --color-signal-learning-bg:     rgba(245, 158, 11, 0.15);
+  --color-signal-impact:          #6EE7B7;
+  --color-signal-impact-bg:       rgba(16, 185, 129, 0.15);
+
+  /* Status colors - dark mode */
+  --color-status-degraded:        #FCA5A5;
+  --color-status-degraded-bg:     rgba(127, 29, 29, 0.80);
+  --color-status-degraded-border: #B91C1C;
+  --color-status-degraded-text:   #FEE2E2;
+  --color-status-recovering:      #FCD34D;
+  --color-status-recovering-bg:   rgba(146, 64, 14, 0.70);
+  --color-status-recovering-border: #D97706;
+  --color-status-recovering-text: #FEF3C7;
+  --color-status-stable:          #6EE7B7;
+  --color-status-ok-text:         #6EE7B7;
+  --color-status-info-text:       #93C5FD;
+  --color-status-synthetic-text:  #C4B5FD;
+
+  /* Ambient glow effects - dark mode */
+  --glow-primary: rgba(212, 163, 115, 0.10);
 }
 
 body {
