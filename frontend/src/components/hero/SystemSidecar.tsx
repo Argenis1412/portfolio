@@ -2,6 +2,8 @@ import React from 'react';
 import { useLanguage } from '../../context/LanguageContext';
 import { type SystemStatus } from '../../hooks/useLiveMetrics';
 import { type MetricsSummary } from '../../api/types';
+import { type MetricSample } from '../../types/metrics';
+import { type TraceEntry } from '../../services/TraceEmitter';
 import MetricsSparkline from '../ui/MetricsSparkline';
 
 const STATUS_COLORS: Record<SystemStatus, string> = {
@@ -15,10 +17,10 @@ const STATUS_COLORS: Record<SystemStatus, string> = {
 interface SystemSidecarProps {
   status: SystemStatus;
   data: MetricsSummary | null | undefined;
-  sampleHistory: any[];
-  recentTraces: any[];
-  latestTrace: any | null;
-  latestSample: any | null;
+  sampleHistory: MetricSample[];
+  recentTraces: TraceEntry[];
+  latestTrace: TraceEntry | null;
+  latestSample: MetricSample | null;
   effectiveP95: number;
   confidenceScore: number;
   confidenceLabel: string;
