@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import Navbar from './components/Navbar';
-import Hero from './components/Hero';
+import Hero from './components/hero/Hero';
 import { ThemeProvider } from './context/ThemeContext';
 import { LogProvider } from './context/LogContext';
 import { ChaosModeProvider } from './context/ChaosContext';
