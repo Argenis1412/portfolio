@@ -26,10 +26,10 @@ interface SignalSummary {
 }
 
 const SIGNAL_STYLE: Record<SignalTone, string> = {
-  decision: 'border-blue-400/25 bg-blue-500/10 text-blue-700 dark:text-blue-200',
-  failure: 'border-red-400/25 bg-red-500/10 text-red-700 dark:text-red-200',
-  learning: 'border-amber-400/25 bg-amber-500/10 text-amber-700 dark:text-amber-200',
-  impact: 'border-emerald-400/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200',
+  decision: 'border-[var(--color-signal-decision-border)] bg-[var(--color-signal-decision-bg)] text-[var(--color-signal-decision)]',
+  failure: 'border-[var(--color-signal-failure-border)] bg-[var(--color-signal-failure-bg)] text-[var(--color-signal-failure)]',
+  learning: 'border-[var(--color-signal-learning-border)] bg-[var(--color-signal-learning-bg)] text-[var(--color-signal-learning)]',
+  impact: 'border-[var(--color-signal-impact-border)] bg-[var(--color-signal-impact-bg)] text-[var(--color-signal-impact)]',
 };
 
 function parseSignals(description: string): ParsedSignal[] {
@@ -136,7 +136,7 @@ export default function Experience() {
             <div className="mt-8 grid gap-4 md:grid-cols-3">
               <div className="rounded-2xl border border-app-border/60 bg-app-surface/25 p-4 text-center md:text-left">
                 <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-app-muted">{t('experience.summary.academic')}</div>
-                <div className="mt-2 text-2xl font-mono font-bold text-blue-700 dark:text-blue-300">{educationCount}</div>
+                <div className="mt-2 text-2xl font-mono font-bold text-[var(--color-signal-decision)]">{educationCount}</div>
                 <div className="mt-1 text-xs text-app-muted">{t('experience.summary.academic_desc')}</div>
               </div>
               <div className="rounded-2xl border border-app-border/60 bg-app-surface/25 p-4 text-center md:text-left">
@@ -146,7 +146,7 @@ export default function Experience() {
               </div>
               <div className="rounded-2xl border border-app-border/60 bg-app-surface/25 p-4 text-center md:text-left">
                 <div className="text-[10px] font-mono uppercase tracking-[0.22em] text-app-muted">{t('experience.summary.current')}</div>
-                <div className="mt-2 text-2xl font-mono font-bold text-emerald-700 dark:text-emerald-300">{activeCount}</div>
+                <div className="mt-2 text-2xl font-mono font-bold text-[var(--color-signal-impact)]">{activeCount}</div>
                 <div className="mt-1 text-xs text-app-muted">{t('experience.summary.current_desc')}</div>
               </div>
             </div>
@@ -176,7 +176,7 @@ export default function Experience() {
                     <div className="flex flex-col gap-5 xl:grid xl:grid-cols-[1.4fr_0.7fr] xl:items-start">
                       <div>
                         <div className="flex flex-wrap items-center gap-2 mb-3 text-[10px] font-mono uppercase tracking-[0.22em] text-app-muted">
-                          <span className={`rounded-full border px-2.5 py-1 ${isEducation ? 'border-blue-400/20 bg-blue-500/10 text-blue-700 dark:text-blue-200' : 'border-app-primary/20 bg-app-primary/10 text-app-primary'}`}>
+                          <span className={`rounded-full border px-2.5 py-1 ${isEducation ? 'border-[var(--color-signal-decision-border)] bg-[var(--color-signal-decision-bg)] text-[var(--color-signal-decision)]' : 'border-app-primary/20 bg-app-primary/10 text-app-primary'}`}>
                             {isEducation ? t('experience.label.education') : t('experience.label.experience')}
                           </span>
                           {entry.current && (
@@ -189,7 +189,7 @@ export default function Experience() {
                         <h3 className="text-xl md:text-2xl font-bold text-app-text leading-snug">
                           {title}
                         </h3>
-                        <p className={`mt-1 text-sm md:text-base ${isEducation ? 'text-blue-700 dark:text-blue-300' : 'text-app-primary'}`}>{subtitle}</p>
+                        <p className={`mt-1 text-sm md:text-base ${isEducation ? 'text-[var(--color-signal-decision)]' : 'text-app-primary'}`}>{subtitle}</p>
                         <p className="mt-4 max-w-2xl text-sm leading-relaxed text-app-muted">
                           {isEducation ? t('experience.entry.academic_note') : t('experience.entry.professional_note')}
                         </p>
@@ -197,15 +197,15 @@ export default function Experience() {
 
                       <div className="rounded-2xl border border-app-border/50 bg-app-surface/20 p-4 text-sm font-mono text-app-muted xl:justify-self-end xl:min-w-[220px]">
                         <div className="flex items-center gap-2 text-app-text mb-3">
-                          {isEducation ? <BookOpen className="h-4 w-4 text-blue-700 dark:text-blue-300" /> : <BriefcaseBusiness className="h-4 w-4 text-app-primary" />}
+                          {isEducation ? <BookOpen className="h-4 w-4 text-[var(--color-signal-decision)]" /> : <BriefcaseBusiness className="h-4 w-4 text-app-primary" />}
                           <span className="text-[10px] uppercase tracking-[0.22em]">{isEducation ? t('experience.entry.track_academic') : t('experience.entry.track_professional')}</span>
                         </div>
                         <div>{formatDate(entry.start_date, false)} - {formatDate(entry.end_date, entry.current)}</div>
                         <div className="mt-2 inline-flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{entry.location}</div>
                         <div className="mt-4 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.18em]">
-                          {summary.decision > 0 && <span className="rounded-full border border-blue-400/20 bg-blue-500/10 px-2 py-1 text-blue-700 dark:text-blue-200">{summary.decision} {t('experience.signal.decision')}</span>}
-                          {summary.learning > 0 && <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-2 py-1 text-amber-700 dark:text-amber-200">{summary.learning} {t('experience.signal.learning')}</span>}
-                          {summary.impact > 0 && <span className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2 py-1 text-emerald-700 dark:text-emerald-200">{summary.impact} {t('experience.signal.impact')}</span>}
+                          {summary.decision > 0 && <span className="rounded-full border border-[var(--color-signal-decision-border)] bg-[var(--color-signal-decision-bg)] px-2 py-1 text-[var(--color-signal-decision)]">{summary.decision} {t('experience.signal.decision')}</span>}
+                          {summary.learning > 0 && <span className="rounded-full border border-[var(--color-signal-learning-border)] bg-[var(--color-signal-learning-bg)] px-2 py-1 text-[var(--color-signal-learning)]">{summary.learning} {t('experience.signal.learning')}</span>}
+                          {summary.impact > 0 && <span className="rounded-full border border-[var(--color-signal-impact-border)] bg-[var(--color-signal-impact-bg)] px-2 py-1 text-[var(--color-signal-impact)]">{summary.impact} {t('experience.signal.impact')}</span>}
                         </div>
                       </div>
                     </div>

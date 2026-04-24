@@ -214,7 +214,7 @@ Accepted side effects: what the fix broke or constrained
 
 ## 14. Documentation
 
-**Language**: All `.md` files, commit messages, PR descriptions, and branch names are in English. Internal identifiers (routes, field names, directory names) are in English. User-facing content supports EN/ES/PT via i18n — this is separate from codebase language.
+**Language**: All `.md` files, commit messages, PR descriptions, and branch names are in English. Internal identifiers (routes, field names, directory names) are in English. User-facing content supports EN/ES/PT via i18n — this is separate from codebase language. **Incident post-mortems** specifically stay in English across all locales (en/es/pt): they are professional engineering artifacts where translation adds maintenance overhead without meaningful benefit.
 
 **ADRs**: Any non-obvious architectural decision goes in `ARCHITECTURE.md` with context, decision, and consequences. "Non-obvious" means: if you'd have to explain it in a code review, it needs an ADR.
 

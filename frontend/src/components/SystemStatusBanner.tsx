@@ -16,10 +16,10 @@ const LIFECYCLE_CONFIG: Record<
   string,
   { label: string; dot: string; labelClass: string }
 > = {
-  DEGRADED:   { label: 'DEGRADED',   dot: 'bg-red-500 animate-pulse',    labelClass: 'text-red-700 dark:text-red-300' },
-  RECOVERING: { label: 'RECOVERING', dot: 'bg-amber-400 animate-pulse',  labelClass: 'text-amber-700 dark:text-amber-300' },
-  STABLE:     { label: 'STABLE',     dot: 'bg-emerald-400',              labelClass: 'text-emerald-700 dark:text-emerald-300' },
-  NORMAL:     { label: 'NORMAL',     dot: 'bg-emerald-500',              labelClass: 'text-emerald-700 dark:text-emerald-400' },
+  DEGRADED:   { label: 'DEGRADED',   dot: 'bg-red-500 animate-pulse',    labelClass: 'text-[var(--color-status-degraded)]' },
+  RECOVERING: { label: 'RECOVERING', dot: 'bg-amber-400 animate-pulse',  labelClass: 'text-[var(--color-status-recovering)]' },
+  STABLE:     { label: 'STABLE',     dot: 'bg-emerald-400',              labelClass: 'text-[var(--color-status-stable)]' },
+  NORMAL:     { label: 'NORMAL',     dot: 'bg-emerald-500',              labelClass: 'text-[var(--color-status-stable)]' },
 };
 
 function causeKey(lastIncident: string): string {
@@ -42,8 +42,8 @@ const SystemStatusBanner = React.memo(() => {
 
   const outerColor =
     status === 'down'
-      ? 'bg-red-200/90 border-red-300 text-red-950 dark:bg-red-900/80 dark:border-red-700 dark:text-red-50'
-      : 'bg-amber-200/90 border-amber-300 text-amber-950 dark:bg-amber-900/70 dark:border-amber-700 dark:text-amber-50';
+      ? 'bg-[var(--color-status-degraded-bg)] border-[var(--color-status-degraded-border)] text-[var(--color-status-degraded-text)]'
+      : 'bg-[var(--color-status-recovering-bg)] border-[var(--color-status-recovering-border)] text-[var(--color-status-recovering-text)]';
 
   const lifecycle     = displayLifecycle ?? data?.system_lifecycle ?? 'NORMAL';
   const lifecycleCfg  = LIFECYCLE_CONFIG[lifecycle] ?? LIFECYCLE_CONFIG['NORMAL'];
@@ -82,7 +82,7 @@ const SystemStatusBanner = React.memo(() => {
                 {cause}
               </span>
               {latestSample && (
-                <span className={`px-2 py-0.5 rounded border text-[10px] ${latestSample.source === 'synthetic' ? 'border-violet-400/30 bg-violet-500/10 text-violet-800 dark:text-violet-200' : 'border-emerald-400/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200'}`}>
+                <span className={`px-2 py-0.5 rounded border text-[10px] ${latestSample.source === 'synthetic' ? 'border-[var(--color-status-synthetic-border)] bg-[var(--color-status-synthetic-bg)] text-[var(--color-status-synthetic)]' : 'border-[var(--color-status-ok-border)] bg-[var(--color-status-ok-bg)] text-[var(--color-status-ok-text)]'}`}>
                   {t(`metrics.origin.${latestSample.source}`)}
                 </span>
               )}
@@ -92,28 +92,28 @@ const SystemStatusBanner = React.memo(() => {
             {/* Row 2: sub-system status pills */}
             <div className="flex flex-wrap items-center gap-2">
               {/* API — always OK in this path (banner only shows when metrics respond) */}
-              <span className="px-2 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300">
+              <span className="px-2 py-0.5 rounded border border-[var(--color-status-ok-border)] bg-[var(--color-status-ok-bg)] text-[var(--color-status-ok-text)]">
                 {t('banner.subsystem.api.ok')}
               </span>
 
               {/* Worker */}
               {workerStatus === 'delayed' ? (
-                <span className="px-2 py-0.5 rounded border border-amber-400/30 bg-amber-400/10 text-amber-800 dark:text-amber-300">
+                <span className="px-2 py-0.5 rounded border border-[var(--color-status-recovering-border)] bg-[var(--color-status-recovering-bg)] text-[var(--color-status-recovering-text)]">
                   {t('banner.subsystem.worker.delayed', { n: queueBacklog })}
                 </span>
               ) : (
-                <span className="px-2 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300">
+                <span className="px-2 py-0.5 rounded border border-[var(--color-status-ok-border)] bg-[var(--color-status-ok-bg)] text-[var(--color-status-ok-text)]">
                   {t('banner.subsystem.worker.ok')}
                 </span>
               )}
 
               {/* Cache */}
               {cacheStatus === 'serving' ? (
-                <span className="px-2 py-0.5 rounded border border-blue-400/30 bg-blue-400/10 text-blue-800 dark:text-blue-300">
+                <span className="px-2 py-0.5 rounded border border-[var(--color-status-info-border)] bg-[var(--color-status-info-bg)] text-[var(--color-status-info-text)]">
                   {t('banner.subsystem.cache.serving', { s: cacheTtl })}
                 </span>
               ) : (
-                <span className="px-2 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-300">
+                <span className="px-2 py-0.5 rounded border border-[var(--color-status-ok-border)] bg-[var(--color-status-ok-bg)] text-[var(--color-status-ok-text)]">
                   {t('banner.subsystem.cache.direct')}
                 </span>
               )}

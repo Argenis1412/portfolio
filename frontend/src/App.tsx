@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import Navbar from './components/Navbar';
-import Hero from './components/Hero';
+import Hero from './components/hero/Hero';
 import { ThemeProvider } from './context/ThemeContext';
 import { LogProvider } from './context/LogContext';
 import { ChaosModeProvider } from './context/ChaosContext';
@@ -86,7 +86,7 @@ function App() {
                   {/* 6 — Log Stream: terminal event stream */}
                   <LogStream />
 
-                  {/* 7 — Featured Incident: Case Study #0042 */}
+                  {/* 7 — Featured Incident: Production Post-Mortems (INC-001, INC-002, INC-005) */}
                   <FeaturedIncident />
   
   
