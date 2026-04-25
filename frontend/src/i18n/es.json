@@ -116,8 +116,8 @@
   "metrics.section_subtitle": "Las métricas combinan telemetría backend con proyecciones sintéticas claramente etiquetadas durante eventos de caos activos.",
   "metrics.latency": "Latencia P95",
    "metrics.error_rate": "Tasa de Error",
-   "metrics.error_rate_slo_context": "SLO < 0.5% (5xx / 15min) · incluye 4xx",
-   "hero.sidecar.uptime_note": "keep-alive cron activo"
+    "metrics.error_rate_slo_context": "SLO < 0.5% (5xx / 15min) · incluye 4xx",
+    "hero.sidecar.uptime_note": "keep-alive cron activo",
   "metrics.uptime": "Uptime",
   "metrics.system_status": "Estado del Sistema",
   "metrics.status.operational": "Operational",
