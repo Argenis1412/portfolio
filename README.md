@@ -12,7 +12,7 @@
 ---
 
 ## ⚡ TL;DR
-A **production-grade backend system** disguised as a portfolio. Not a CRUD demo — a system built to simulate real-world backend challenges:
+A **production-grade backend system** disguised as a portfolio — a system built to simulate real-world backend challenges:
 
 - ✅ **JSON-First Read Path** — eliminates Database cold-starts for portfolio data
 - ✅ **React 19 + TanStack Query** — Optimized caching (15min) and zero-refetch on mount
@@ -23,39 +23,19 @@ A **production-grade backend system** disguised as a portfolio. Not a CRUD demo 
 
 ---
 
-## 💡 Why This Project Stands Out
-
-Most portfolios show UI. This one demonstrates **production backend thinking**:
-
-| What | Why It Matters |
-|---|---|
-| **JSON-First Arch** | Eliminates DB dependency for reads. P95 latency <50ms. |
-| **ETag Support** | Browser caching with 304 status. Zero-payload on repeat visits. |
-| **Protected metrics** | Prometheus endpoint secured with Basic Auth in production. |
-| **80% Coverage Gate** | CI pipeline automatically rejects code that lowers coverage. |
-| **Resilient Core** | Fallback mechanisms for Redis/External API failures. |
-
----
-
 ## 🔄 Evolution: How This System Grew
 
 This project didn't start production-ready. It evolved through real production incidents:
 
 | Version | Milestone | Key Change |
 |---|---|---|
-| **v1.0.0** | Initial Release | FastAPI + Clean Architecture + JSON persistence |
-| **v1.1.0** | CORS Dynamic Support | Regex-based CORS for Vercel preview URLs (ADR-06) |
-| **v1.2.0** | Observability Stack | Prometheus + Sentry + OpenTelemetry (ADR-04, ADR-09) |
-| **v1.3.0** | Persistent State | Redis-backed rate limiting + PostgreSQL (ADR-11) — fixed INC-001 |
-| **v1.3.1** | Security Hardening | `TRUSTED_PROXY_DEPTH` validation + PII masking |
 | **v1.4.0** | Production Deploy | Custom domain + Resend email + CSP/CORS sync (ADR-15.3) — fixed INC-004 |
 | **v1.4.1** | Cold Start Fix | JSON-First Read Path (ADR-05) — fixed INC-002 |
-| **v1.4.2** | Observability Infra | `trace_id` propagation + MetricsSparkline + enriched contact response |
 | **v1.5.0** | Chaos Engineering | Deterministic chaos presets + stateful decision engine (ADR-14) |
 | **v1.5.1** | Honest Telemetry | Synthetic vs. real labels + confidence indicator (ADR-13) |
 | **v1.6.0** | Build Standardization | Modular API layer + root-context Dockerfile (ADR-15.2) — fixed INC-005 |
 
-Each version was driven by real production needs, not speculative features. See [CHANGELOG.md](CHANGELOG.md) for full details.
+See [CHANGELOG.md](CHANGELOG.md) for full details.
 
 ---
 
@@ -69,16 +49,17 @@ Each version was driven by real production needs, not speculative features. See 
 | **CI/CD** | GitHub Actions (Lint + Test + Build) |
 | **Data** | **JSON/Memory** (Read Path) · **PostgreSQL** (DB) · **Redis** (Upstash) |
 | **Deployment** | Koyeb (Backend via Dockerfile) · Vercel (Frontend) |
+| **Performance & DX** | Predictive prefetching, background sync, scalable i18n (PT/EN/ES) |
 
 ---
 
 ## 🧠 Engineering Highlights
 
 ### 1. JSON-First & Scalable Persistence
-While PostgreSQL is used for persistence, the **primary read path** for portfolio sections (About, Stack, Projects) uses a memory-cached JSON adapter. This ensures instant loads even on server cold-starts, while the `RepositorioSQL` adapter remains available for transactional needs.
+[Architecture Decision Record: JSON-First Read Path](docs/architecture/JSON_FIRST_READ_PATH.md)
 
 ### 2. HTTP Caching Strategy
-The system implements a manual ETag generation strategy. Every GET response includes an ETag hash of its payload. If the client sends an `If-None-Match` header, the backend returns a **304 Not Modified** with zero body, optimizing bandwidth for returning visitors.
+[Architecture Decision Record: HTTP Caching](docs/architecture/HTTP_CACHING.md)
 
 ### 3. Automated Quality Gate
 - **Static Analysis**: `ruff` for linting/formatting and `mypy` for gradual typing.
@@ -86,39 +67,19 @@ The system implements a manual ETag generation strategy. Every GET response incl
 - **Dockerized Builds**: Verified in CI, not just locally.
 
 ### 4. Security & Performance (Hardening)
-- **Protected Metrics**: The `/metrics` endpoint is protected via Basic Auth in production.
-- **Middleware Optimization**: Minimal body parsing in global middleware to reduce overhead.
-- **Distributed State**: Redis-backed rate limiting, idempotency, and contact deduplication for cross-instance coordination.
-  - Rate limiting: 10/day per email, 20/min per email, 30/hour per IP + fingerprint
-  - Idempotency: `Idempotency-Key` header prevents duplicate submissions
-  - Dedup: 30-minute content-hash window via `SpamDedupStore` (Redis → in-memory fallback)
-- **ContactGuard**: Dedicated orchestration service isolating all validation rules from the HTTP controller.
-- **[Architecture Decision Record: Security Hardening](docs/architecture/security-hardening.md)**
+[Architecture Decision Record: Security Hardening](docs/architecture/security-hardening.md)
 
 ### 5. Observability
-- **Sentry**: Error tracking and performance tracing (Full-stack).
-- **Prometheus**: Metrics endpoint at `/metrics` (protected with Basic Auth in production).
-- **OpenTelemetry**: Distributed tracing for request lifecycles, enriched with `trace_id` and `request_id` correlation.
-- **[Architecture Decision Record: Observability](docs/architecture/observability.md)**
+[Architecture Decision Record: Observability](docs/architecture/observability.md)
 
 #### 📊 Operational Chaos Control & Decision Engine
-- **Stateful Decision Engine**: Implements hysteresis-based threshold monitoring (`NORMAL` → `DEGRADED` → `STABLE`) via `useDecisionEngine.ts`.
-- **Deterministic Chaos Presets**: Global simulation modes (`MILD`, `STRESS`, `FAILURE`) injected via headers for reproducible failure analysis.
-- **Honest Telemetry Overlay**: Chaos actions immediately project a synthetic P95 sample, then reconcile with backend polling. The UI labels the source (`real` vs `synthetic`) and exposes a confidence indicator to avoid pretending projections are raw backend facts.
-- **Metrics Sparkline**: Short-window P95 visualization with baseline averaging, lighter incident markers, and a dashed synthetic segment distinct from real backend samples.
-- **Circuit Breaker / Degraded Mode**: Automatic shift to `async` fallback or `serving` cache mode during infrastructure saturation.
-- **Adaptive Chaos Strategy**: Presets now influence retry posture, cache TTL expectations, and lifecycle presentation instead of only toggling a failure banner.
-- **Operational Documentation**: 
-  - **Case Study #0042**: Detailed post-mortem analysis of archived Redis leaks.
-  - **Architecture Trade-offs**: Multi-language evidence showing compromises (Sync vs. Async, Latency vs. Consistency).
-- **Chaos Playground**: Full-stack experiment console with trace correlation and multi-language logging.
-- **[Architecture Decision Record: Logging & Degradation](docs/architecture/LOGGING_AND_DEGRADATION.md)**
+- Stateful decision engine with hysteresis-based threshold monitoring
+- Deterministic chaos presets (MILD, STRESS, FAILURE) for reproducible failure analysis
+- Honest telemetry overlay distinguishing synthetic vs. real samples with confidence indicator
 
-#### 🧱 Portfolio Narrative Structure
-- **Projects** now render as compact backend case studies with `Problem`, `Constraint`, `Decision`, `Trade-off`, `Impact`, and `Stack` sections sourced from `descricao_completa`.
-- **Journey / Experience** is no longer a CV tabset. It is a vertical engineering timeline organized around decisions, failures, learning, and operational impact.
+---
 
-#### 📊 Production Incident Track Record
+## 📊 Production Incident Track Record
 *5 real production incidents documented with post-mortems:*
 
 | Incident | Failure | Detection | Resolution |
@@ -131,17 +92,14 @@ The system implements a manual ETag generation strategy. Every GET response incl
 
 See [FAILURE_MODEL.md](docs/architecture/FAILURE_MODEL.md) for full degradation behaviors and governing ADRs.
 
-#### 📊 Performance Baseline (SLO Targets)
+---
+
+## 📊 Performance Baseline (SLO Targets)
 *From [SLO_DEFINITIONS.md](docs/architecture/SLO_DEFINITIONS.md) — source: ENGINEERING_PLAYBOOK.md section 11:*
 - **Portfolio Data** (`/about`, `/projects`, `/stack`): P95 < 50ms ✅
 - **Contact Endpoint** (`/contact`): P95 < 200ms ✅
 - **Health Check** (`/health`): P99 < 20ms ✅
 - **Error Rate**: < 0.5% (5xx over 15-min window) ✅ 
-
-### 5. Performance & DX
-- **Predictive Prefetching**: Data pre-loaded on hover for instant transitions.
-- **Background Sync**: Silent refresh on window focus.
-- **Scalable i18n**: JSON-driven translations (PT/EN/ES) with zero-recompile.
 
 ---
 
@@ -195,10 +153,9 @@ Key tests that demonstrate production-level reliability:
 ---
 
 ## 🗺️ Roadmap: Next Big Step
-
-- **🚀 Advanced Simulation**: Transactional flow for a mock "Financial Ledger" (ACID compliance testing)
-- **🔐 Identity Research**: Role-Based Access Control (RBAC) for administrative panels
-- **📊 Real-time Monitoring**: Transition from polling to WebSocket-based live dashboard for a "Live Operations Console" experience.
+- 🚀 Advanced Simulation: Transactional flow for a mock "Financial Ledger" (ACID compliance testing)
+- 🔐 Identity Research: Role-Based Access Control (RBAC) for administrative panels
+- 📊 Real-time Monitoring: Transition from polling to WebSocket-based live dashboard for a "Live Operations Console" experience.
 
 ---
 
@@ -227,4 +184,6 @@ For more details: [`backend/README.md`](backend/README.md) · [`frontend/README.
 **Argenis Lopez** — Backend Developer · [LinkedIn](https://www.linkedin.com/in/argenis1412/) · [GitHub](https://github.com/Argenis1412)
 
 ---
-*Licensed under the [MIT License](LICENSE).*
+
+## 📜 License
+Licensed under the [MIT License](LICENSE).

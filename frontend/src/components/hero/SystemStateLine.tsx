@@ -54,10 +54,10 @@ export const SystemStateLine = React.memo(({ status, effectiveP95, recoveryState
   }, [status, effectiveP95, recoveryState, lastIncident, t]);
 
   const colorClass =
-    status === 'down' ? 'text-red-500' :
-    status === 'degraded' ? 'text-red-400' :
-    status === 'warning' ? 'text-amber-400' :
-    recoveryState === 'half_open' ? 'text-amber-300' :
+    status === 'down' ? 'text-status-error' :
+    status === 'degraded' ? 'text-status-error' :
+    status === 'warning' ? 'text-status-warn' :
+    recoveryState === 'half_open' ? 'text-status-warn' :
     'text-app-primary/80';
 
   return (

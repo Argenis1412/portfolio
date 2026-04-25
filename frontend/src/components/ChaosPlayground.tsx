@@ -80,8 +80,8 @@ export default function ChaosPlayground() {
             <div className="space-y-1">
               <h3 className="text-xs font-mono font-bold text-app-text uppercase tracking-widest flex items-center gap-2">
                 <span className="relative flex h-2 w-2">
-                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${preset !== 'off' ? 'bg-violet-400' : 'bg-emerald-400'}`}></span>
-                  <span className={`relative inline-flex rounded-full h-2 w-2 ${preset !== 'off' ? 'bg-violet-500' : 'bg-emerald-500'}`}></span>
+                  <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${preset !== 'off' ? 'bg-violet-400' : 'bg-status-ok'}`}></span>
+                  <span className={`relative inline-flex rounded-full h-2 w-2 ${preset !== 'off' ? 'bg-violet-500' : 'bg-status-ok'}`}></span>
                 </span>
                 {t('chaos.presets.title')}
               </h3>
@@ -129,9 +129,9 @@ export default function ChaosPlayground() {
             icon="🌬️"
             titleKey="chaos.action.drain.title"
             descKey="chaos.action.drain.desc"
-            accentClass="text-emerald-400"
-            borderClass="border-emerald-500/20"
-            hoverClass="bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20"
+            accentClass="text-status-ok"
+            borderClass="border-status-ok/20"
+            hoverClass="bg-status-ok-soft text-status-ok hover:bg-status-ok-soft"
             loading={drainLoading}
             cooldown={drainCooldown}
             loadingKey="chaos.action.drain.running"
@@ -143,9 +143,9 @@ export default function ChaosPlayground() {
             icon="⏳"
             titleKey="chaos.action.latency.title"
             descKey="chaos.action.latency.desc"
-            accentClass="text-amber-400"
-            borderClass="border-amber-500/20"
-            hoverClass="bg-amber-500/10 text-amber-400 hover:bg-amber-500/20"
+            accentClass="text-status-warn"
+            borderClass="border-status-warn/20"
+            hoverClass="bg-status-warn-soft text-status-warn hover:bg-status-warn-soft"
             loading={latencyLoading}
             cooldown={latencyCooldown}
             loadingKey="chaos.action.latency.running"
@@ -157,9 +157,9 @@ export default function ChaosPlayground() {
             icon="🔄"
             titleKey="chaos.action.retry.title"
             descKey="chaos.action.retry.desc"
-            accentClass="text-blue-400"
-            borderClass="border-blue-500/20"
-            hoverClass="bg-blue-500/10 text-blue-400 hover:bg-blue-500/20"
+            accentClass="text-status-info"
+            borderClass="border-status-info/20"
+            hoverClass="bg-status-info-soft text-status-info hover:bg-status-info-soft"
             loading={retryLoading}
             cooldown={retryCooldown}
             loadingKey="chaos.action.retry.running"
@@ -175,7 +175,7 @@ export default function ChaosPlayground() {
             <div className="flex items-center gap-2 mb-3">
             <span className="text-xs font-mono uppercase tracking-widest text-app-muted">{t('chaos.incidents.history')}</span>
               {activeIncidents.length > 0 && (
-                <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-status-warn animate-pulse" />
               )}
             </div>
             
@@ -192,9 +192,9 @@ export default function ChaosPlayground() {
                       const isInvestigating = elapsed < 5000;
                       
                       return (
-                        <div key={inc.id} className="flex flex-col gap-1 border-l-2 border-amber-500/30 pl-3">
+                        <div key={inc.id} className="flex flex-col gap-1 border-l-2 border-status-warn/30 pl-3">
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-mono text-amber-400 font-bold uppercase tracking-wider">
+                            <span className="text-xs font-mono text-status-warn font-bold uppercase tracking-wider">
                               {t(inc.labelKey)}
                             </span>
                             <span className="text-[10px] font-mono text-app-muted opacity-60">
@@ -204,18 +204,18 @@ export default function ChaosPlayground() {
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${
                               isInvestigating 
-                                ? 'bg-amber-500/10 border-amber-500/20 text-amber-200' 
-                                : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200'
+                                ? 'bg-status-warn-soft border-status-warn/20 text-status-warn' 
+                                : 'bg-status-ok-soft border-status-ok/20 text-status-ok'
                             }`}>
                               {isInvestigating ? 'INVESTIGATING' : 'MITIGATING'}
                             </span>
                             {inc.origin && (
-                              <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${inc.origin === 'synthetic' ? 'bg-violet-500/10 border-violet-500/20 text-violet-200' : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200'}`}>
+                              <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${inc.origin === 'synthetic' ? 'bg-violet-500/10 border-violet-500/20 text-violet-200' : 'bg-status-ok-soft border-status-ok/20 text-status-ok'}`}>
                                 {inc.origin}
                               </span>
                             )}
                             {inc.impactPct && (
-                              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-red-500/20 bg-red-500/10 text-red-200">
+                              <span className="text-[9px] font-mono px-1.5 py-0.5 rounded border border-status-error/20 bg-status-error-soft text-status-error">
                                 impact {inc.impactPct}
                               </span>
                             )}
@@ -228,7 +228,7 @@ export default function ChaosPlayground() {
                               <m.div 
                                 initial={{ width: '100%' }}
                                 animate={{ width: `${(remaining / (inc.ttl/1000)) * 100}%` }}
-                                className="h-full bg-amber-500/40"
+                                className="h-full bg-status-warn/40"
                               />
                             </div>
                           </div>
@@ -245,7 +245,7 @@ export default function ChaosPlayground() {
                     {resolvedIncidents.slice(0, 3).map((inc) => (
                       <div key={inc.id} className="flex items-center justify-between opacity-50">
                         <span className="text-[10px] font-mono text-app-text">{t(inc.labelKey)}</span>
-                        <span className="text-[9px] font-mono text-emerald-500/70">RESOLVED</span>
+                        <span className="text-[9px] font-mono text-status-ok/70">RESOLVED</span>
                       </div>
                     ))}
                   </div>

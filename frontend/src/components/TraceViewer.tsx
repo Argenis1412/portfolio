@@ -11,12 +11,12 @@ import { useLanguage } from '../context/LanguageContext';
 import { subscribeToTraces, type TraceEntry } from '../services/TraceEmitter';
 
 const TYPE_COLOR: Record<TraceEntry['type'], string> = {
-  traffic_spike: 'text-amber-400 border-amber-500/40 bg-amber-500/10',
-  forced_failure: 'text-red-400 border-red-500/40 bg-red-500/10',
-  cache_stress: 'text-blue-400 border-blue-500/40 bg-blue-500/10',
-  queue_drain: 'text-emerald-400 border-emerald-500/40 bg-emerald-500/10',
-  manual_retry: 'text-blue-400 border-blue-500/40 bg-blue-500/10',
-  latency_injection: 'text-amber-400 border-amber-500/40 bg-amber-500/10'
+  traffic_spike: 'text-status-warn border-status-warn/40 bg-status-warn-soft',
+  forced_failure: 'text-status-error border-status-error/40 bg-status-error-soft',
+  cache_stress: 'text-status-info border-status-info/40 bg-status-info-soft',
+  queue_drain: 'text-status-ok border-status-ok/40 bg-status-ok-soft',
+  manual_retry: 'text-status-info border-status-info/40 bg-status-info-soft',
+  latency_injection: 'text-status-warn border-status-warn/40 bg-status-warn-soft'
 };
 
 const TYPE_LABEL: Record<TraceEntry['type'], string> = {
@@ -57,9 +57,9 @@ function WaterfallRow({
           className={`h-full rounded-full ${color}`}
         />
       </div>
-      <span className={`font-mono text-xs w-14 text-right flex-shrink-0 ${isBottleneck ? 'text-red-400 font-bold' : 'text-app-muted'}`}>
+      <span className={`font-mono text-xs w-14 text-right flex-shrink-0 ${isBottleneck ? 'text-status-error font-bold' : 'text-app-muted'}`}>
         {ms}ms
-        {isBottleneck && <span className="ml-1 text-[9px] text-red-400 opacity-80">← {bottleneckLabel}</span>}
+        {isBottleneck && <span className="ml-1 text-[9px] text-status-error opacity-80">← {bottleneckLabel}</span>}
       </span>
     </div>
   );
@@ -78,13 +78,13 @@ function TraceRow({ entry }: { entry: TraceEntry }) {
 
   const steps = [
     { label: 'API', ms: entry.apiMs, color: 'bg-app-primary' },
-    { label: 'DB', ms: entry.dbMs, color: 'bg-amber-400' },
-    { label: 'Cache', ms: entry.cacheMs, color: 'bg-blue-400' },
+    { label: 'DB', ms: entry.dbMs, color: 'bg-status-warn' },
+    { label: 'Cache', ms: entry.cacheMs, color: 'bg-status-info' },
   ];
 
   const maxMs = Math.max(entry.apiMs, entry.dbMs, entry.cacheMs);
 
-  const statusColor = entry.status === 'ok' ? 'text-emerald-400' : 'text-red-400';
+  const statusColor = entry.status === 'ok' ? 'text-status-ok' : 'text-status-error';
   const statusLabel = entry.status === 'ok' ? '200 OK' : '503 ERR';
 
   return (

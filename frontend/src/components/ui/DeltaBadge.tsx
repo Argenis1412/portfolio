@@ -15,7 +15,7 @@ export function DeltaBadge({ current, previous, unit = '', invertColor = true, d
 
   const isUp = diff > 0;
   const isBad = invertColor ? isUp : !isUp;
-  const color = isBad ? 'text-red-400' : 'text-emerald-400';
+  const color = isBad ? 'text-status-error' : 'text-status-ok';
   const sign = isUp ? '+' : '';
   const val = decimals > 0 ? Math.abs(diff).toFixed(decimals) : Math.abs(Math.round(diff)).toString();
 

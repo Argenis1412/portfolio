@@ -118,11 +118,11 @@ export default function Contact() {
           >
             <div className="flex items-center justify-between border-b border-[#20262D] bg-[#11161D] px-4 py-3 font-mono text-[11px] text-slate-400">
               <div className="flex items-center gap-3">
-                <div className="flex gap-1.5">
-                  <div className="h-2.5 w-2.5 rounded-full bg-red-500" />
-                  <div className="h-2.5 w-2.5 rounded-full bg-yellow-500" />
-                  <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
-                </div>
+              <div className="flex gap-1.5">
+                <div className="h-2.5 w-2.5 rounded-full bg-status-error" />
+                <div className="h-2.5 w-2.5 rounded-full bg-status-warn" />
+                <div className="h-2.5 w-2.5 rounded-full bg-status-ok" />
+              </div>
                 <span>{t('contact.form.title')}</span>
               </div>
               <div className={`inline-flex items-center gap-2 uppercase tracking-[0.2em] ${responseTone}`}>
@@ -149,44 +149,44 @@ export default function Contact() {
               <div className="grid gap-5 md:grid-cols-2">
                 <div className="flex flex-col gap-2">
                   <label htmlFor="name" className="text-[11px] font-mono uppercase tracking-[0.25em] text-slate-500">{t('contact.name')}</label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    placeholder={t('contact.placeholder.name')}
-                    value={formData.name}
-                    onChange={handleChange}
-                    className={`rounded-xl border bg-[#11161D] px-4 py-3 text-sm text-slate-100 outline-none transition-all placeholder:text-slate-500 ${errors.name ? 'border-red-500/60 focus:ring-2 focus:ring-red-500/20' : 'border-[#20262D] focus:border-app-primary/60 focus:ring-2 focus:ring-app-primary/20'}`}
-                  />
-                  <AnimatePresence>
-                    {errors.name && (
-                      <motion.p initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="flex items-center gap-1 text-[11px] text-red-400">
-                        <AlertCircle className="h-3.5 w-3.5" />
-                        {t(`contact.error.${errors.name}`)}
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
+                   <input
+                     type="text"
+                     id="name"
+                     name="name"
+                     placeholder={t('contact.placeholder.name')}
+                     value={formData.name}
+                     onChange={handleChange}
+                     className={`rounded-xl border bg-[#11161D] px-4 py-3 text-sm text-slate-100 outline-none transition-all placeholder:text-slate-500 ${errors.name ? 'border-status-error/60 focus:ring-2 focus:ring-status-error/20' : 'border-[#20262D] focus:border-app-primary/60 focus:ring-2 focus:ring-app-primary/20'}`}
+                   />
+                   <AnimatePresence>
+                     {errors.name && (
+                       <motion.p initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="flex items-center gap-1 text-[11px] text-status-error">
+                         <AlertCircle className="h-3.5 w-3.5" />
+                         {t(`contact.error.${errors.name}`)}
+                       </motion.p>
+                     )}
+                   </AnimatePresence>
                 </div>
 
                 <div className="flex flex-col gap-2">
                   <label htmlFor="email" className="text-[11px] font-mono uppercase tracking-[0.25em] text-slate-500">{t('contact.email')}</label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder={t('contact.placeholder.email')}
-                    value={formData.email}
-                    onChange={handleChange}
-                    className={`rounded-xl border bg-[#11161D] px-4 py-3 text-sm text-slate-100 outline-none transition-all placeholder:text-slate-500 ${errors.email ? 'border-red-500/60 focus:ring-2 focus:ring-red-500/20' : 'border-[#20262D] focus:border-app-primary/60 focus:ring-2 focus:ring-app-primary/20'}`}
-                  />
-                  <AnimatePresence>
-                    {errors.email && (
-                      <motion.p initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="flex items-center gap-1 text-[11px] text-red-400">
-                        <AlertCircle className="h-3.5 w-3.5" />
-                        {t(`contact.error.${errors.email}`)}
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
+                   <input
+                     type="email"
+                     id="email"
+                     name="email"
+                     placeholder={t('contact.placeholder.email')}
+                     value={formData.email}
+                     onChange={handleChange}
+                     className={`rounded-xl border bg-[#11161D] px-4 py-3 text-sm text-slate-100 outline-none transition-all placeholder:text-slate-500 ${errors.email ? 'border-status-error/60 focus:ring-2 focus:ring-status-error/20' : 'border-[#20262D] focus:border-app-primary/60 focus:ring-2 focus:ring-app-primary/20'}`}
+                   />
+                   <AnimatePresence>
+                     {errors.email && (
+                       <motion.p initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="flex items-center gap-1 text-[11px] text-status-error">
+                         <AlertCircle className="h-3.5 w-3.5" />
+                         {t(`contact.error.${errors.email}`)}
+                       </motion.p>
+                     )}
+                   </AnimatePresence>
                 </div>
               </div>
 

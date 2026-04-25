@@ -128,12 +128,12 @@ export default function LiveMetricsBento() {
             )}
             <div className="flex flex-wrap gap-2">
               {latencyDelta !== null && (
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-mono ${latencyDelta > 0 ? 'bg-red-500/10 text-red-400' : 'bg-emerald-500/10 text-emerald-500'}`}>
+                <span className={`rounded-full px-2 py-0.5 text-[10px] font-mono ${latencyDelta > 0 ? 'bg-status-error-soft text-status-error' : 'bg-status-ok-soft text-status-ok'}`}>
                   {t('metrics.delta.previous')} {latencyDelta > 0 ? '+' : ''}{latencyDelta}ms
                 </span>
               )}
               {baselineDelta !== null && (
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-mono ${baselineDelta > 0 ? 'bg-amber-500/10 text-amber-400' : 'bg-emerald-500/10 text-emerald-500'}`}>
+                <span className={`rounded-full px-2 py-0.5 text-[10px] font-mono ${baselineDelta > 0 ? 'bg-status-warn-soft text-status-warn' : 'bg-status-ok-soft text-status-ok'}`}>
                   {t('metrics.delta.baseline')} {baselineDelta > 0 ? '+' : ''}{baselineDelta}ms
                 </span>
               )}
@@ -144,38 +144,41 @@ export default function LiveMetricsBento() {
               )}
             </div>
           </div>
-          <span className={`text-xs font-mono px-2 py-0.5 rounded-full w-fit ${effectiveP95 <= 60 ? 'bg-emerald-500/15 text-emerald-500' : effectiveP95 <= 100 ? 'bg-amber-400/15 text-amber-400' : 'bg-red-500/15 text-red-400'}`}>
+          <span className={`text-xs font-mono px-2 py-0.5 rounded-full w-fit ${effectiveP95 <= 60 ? 'bg-status-ok-soft text-status-ok' : effectiveP95 <= 100 ? 'bg-status-warn-soft text-status-warn' : 'bg-status-error-soft text-status-error'}`}>
             {effectiveP95 <= 60 ? t('metrics.health.healthy') : effectiveP95 <= 100 ? t('metrics.health.warning') : t('metrics.status.degraded')}
           </span>
         </Tile>
 
         <Tile index={2} label={t('metrics.error_rate')}>
-          <div className="flex items-center gap-2 mt-1">
-            <AnimatePresence>
-              {errorIsElevated && (
-                <m.span
-                  initial={{ opacity: 0, scale: 0.5 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.5 }}
-                  className="text-red-500 text-xl drop-shadow-[0_0_8px_rgba(239,68,68,0.4)]"
-                >
-                  ⚠
-                </m.span>
-              )}
-            </AnimatePresence>
-            <m.span 
-              animate={errorIsElevated ? { color: '#f87171' } : { color: 'inherit' }}
-              className={`font-mono text-2xl font-bold ${errorNumberColor}`}
-            >
-              {data.error_rate_pct}
-            </m.span>
-          </div>
-          <m.div
-            animate={errorIsElevated ? { scale: [1, 1.05, 1], transition: { repeat: Infinity, duration: 2 } } : {}}
-            className={`text-xs font-mono px-2 py-0.5 rounded-full w-fit ${errorRateColor}`}
-          >
-            {t(`metrics.health.${data.error_rate_status}`)}
-          </m.div>
+           <div className="flex items-center gap-2 mt-1">
+             <AnimatePresence>
+               {errorIsElevated && (
+                 <m.span
+                   initial={{ opacity: 0, scale: 0.5 }}
+                   animate={{ opacity: 1, scale: 1 }}
+                   exit={{ opacity: 0, scale: 0.5 }}
+                   className="text-status-error text-xl drop-shadow-[0_0_8px_rgba(239,68,68,0.4)]"
+                 >
+                   ⚠
+                 </m.span>
+               )}
+             </AnimatePresence>
+             <m.span 
+               animate={errorIsElevated ? { color: '#f87171' } : { color: 'inherit' }}
+               className={`font-mono text-2xl font-bold ${errorNumberColor}`}
+             >
+               {data.error_rate_pct}
+             </m.span>
+           </div>
+           <div className="text-[9px] text-status-ok/80 mt-1">
+             {t('metrics.error_rate_slo_context')}
+           </div>
+           <m.div
+             animate={errorIsElevated ? { scale: [1, 1.05, 1], transition: { repeat: Infinity, duration: 2 } } : {}}
+             className={`text-xs font-mono px-2 py-0.5 rounded-full w-fit ${errorRateColor}`}
+           >
+             {t(`metrics.health.${data.error_rate_status}`)}
+           </m.div>
         </Tile>
 
         <Tile index={3} label={t('metrics.requests_24h')}>
@@ -185,12 +188,12 @@ export default function LiveMetricsBento() {
 
         <Tile index={4} label={t('metrics.retries_1h')}>
           <div className="flex items-center gap-2 mt-1">
-            {strategyProfile.retryBudget > 5 && <span className="text-red-400 text-lg">⚠</span>}
-            <span className={`font-mono text-2xl font-bold ${strategyProfile.retryBudget > 10 ? 'text-red-400' : strategyProfile.retryBudget > 0 ? 'text-amber-400' : 'text-app-text'}`}>
+            {strategyProfile.retryBudget > 5 && <span className="text-status-error text-lg">⚠</span>}
+            <span className={`font-mono text-2xl font-bold ${strategyProfile.retryBudget > 10 ? 'text-status-error' : strategyProfile.retryBudget > 0 ? 'text-status-warn' : 'text-app-text'}`}>
               {strategyProfile.retryBudget}
             </span>
           </div>
-          <span className={`text-xs font-mono px-2 py-0.5 rounded-full w-fit ${strategyProfile.retryBudget > 10 ? 'bg-red-500/15 text-red-400' : strategyProfile.retryBudget > 0 ? 'bg-amber-400/15 text-amber-400' : 'bg-emerald-500/15 text-emerald-500'}`}>
+          <span className={`text-xs font-mono px-2 py-0.5 rounded-full w-fit ${strategyProfile.retryBudget > 10 ? 'bg-status-error-soft text-status-error' : strategyProfile.retryBudget > 0 ? 'bg-status-warn-soft text-status-warn' : 'bg-status-ok-soft text-status-ok'}`}>
             {strategyProfile.retryBudget > 10 ? t('metrics.health.investigating') : strategyProfile.retryBudget > 0 ? t('metrics.health.warning') : t('metrics.health.stable')}
           </span>
           <span className="text-[10px] font-mono text-app-muted">{t('metrics.strategy.retry')} {strategyProfile.source === 'synthetic' ? t('metrics.strategy.synthetic') : t('metrics.strategy.backend')}</span>
@@ -239,9 +242,9 @@ export default function LiveMetricsBento() {
             <div className="rounded-xl border border-app-border/50 bg-app-surface/30 p-3 space-y-2">
               <div className="text-[10px] font-mono uppercase tracking-widest text-app-muted mb-1">{t('metrics.system_model.paths')}</div>
               {[
-                { pathKey: 'sync',     labelKey: 'metrics.system_model.sync',     color: 'text-emerald-400' },
-                { pathKey: 'async',    labelKey: 'metrics.system_model.async',    color: 'text-amber-400' },
-                { pathKey: 'fallback', labelKey: 'metrics.system_model.fallback', color: 'text-blue-400' },
+                { pathKey: 'sync',     labelKey: 'metrics.system_model.sync',     color: 'text-status-ok' },
+                { pathKey: 'async',    labelKey: 'metrics.system_model.async',    color: 'text-status-warn' },
+                { pathKey: 'fallback', labelKey: 'metrics.system_model.fallback', color: 'text-status-info' },
               ].map(({ pathKey, labelKey, color }) => {
                 const active = activePath === pathKey;
                 return (
@@ -259,10 +262,10 @@ export default function LiveMetricsBento() {
             <div className="rounded-xl border border-app-border/50 bg-app-surface/30 p-3">
               <div className="text-[10px] font-mono uppercase tracking-widest text-app-muted">{t('metrics.system_model.lifecycle')}</div>
               <div className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-xs font-mono ${
-                displayLifecycle === 'DEGRADED'   ? 'bg-red-500/10 text-red-400' :
-                displayLifecycle === 'RECOVERING' ? 'bg-amber-500/10 text-amber-400' :
-                displayLifecycle === 'STABLE'     ? 'bg-emerald-500/10 text-emerald-400' :
-                'bg-emerald-500/10 text-emerald-500'
+                displayLifecycle === 'DEGRADED'   ? 'bg-status-error-soft text-status-error' :
+                displayLifecycle === 'RECOVERING' ? 'bg-status-warn-soft text-status-warn' :
+                displayLifecycle === 'STABLE'     ? 'bg-status-ok-soft text-status-ok' :
+                'bg-status-ok-soft text-status-ok'
               }`}>
                 {displayLifecycle}
               </div>

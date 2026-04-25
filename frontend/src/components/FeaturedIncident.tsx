@@ -46,19 +46,19 @@ export default function FeaturedIncident() {
                   </h3>
                 </div>
 
-                <div className="flex gap-4 border-l border-app-border/40 pl-4">
-                  <div className="text-center">
-                    <div className="text-xs font-mono text-app-muted uppercase">{t(`incident.${id}.mttr`)}</div>
-                    <div className="text-lg font-bold text-app-primary">
-                      {id === '001' ? 'Fixed' : id === '002' ? '50ms' : 'Synced'}
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xs font-mono text-app-muted uppercase">{t(`incident.${id}.impact_label`)}</div>
-                    <div className="text-lg font-bold text-red-400">
-                      {id === '001' ? '100%' : id === '002' ? '>300ms' : '100%'}
-                    </div>
-                  </div>
+                 <div className="flex gap-4 border-l border-app-border/40 pl-4">
+                   <div className="text-center">
+                     <div className="text-xs font-mono text-app-muted uppercase">{t(`incident.${id}.mttr`)}</div>
+                     <div className="text-lg font-bold text-app-primary">
+                       {id === '001' ? 'Fixed' : id === '002' ? '50ms' : 'Synced'}
+                     </div>
+                   </div>
+                   <div className="text-center">
+                     <div className="text-xs font-mono text-app-muted uppercase">{t(`incident.${id}.impact_label`)}</div>
+                     <div className="text-lg font-bold text-status-error">
+                       {id === '001' ? '100%' : id === '002' ? '>300ms' : '100%'}
+                     </div>
+                   </div>
                 </div>
               </div>
 

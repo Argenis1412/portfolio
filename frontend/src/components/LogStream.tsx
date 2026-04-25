@@ -14,9 +14,9 @@ import { type LogLevel } from '../types/logs';
 type FilterLevel = 'ALL' | LogLevel;
 
 const LEVEL_COLOR: Record<LogLevel, string> = {
-  INFO:     'text-emerald-400/70',
-  WARN:     'text-amber-400',
-  ERROR:    'text-red-400',
+  INFO:     'text-status-ok/70',
+  WARN:     'text-status-warn',
+  ERROR:    'text-status-error',
   DECISION: 'text-violet-400 font-bold',
 };
 
@@ -84,7 +84,7 @@ export default function LogStream() {
             ))}
             <button
               onClick={clear}
-              className="rounded-full border border-app-border px-3 py-1.5 text-[10px] font-mono text-app-muted transition-all duration-150 hover:border-red-500/40 hover:text-red-400"
+              className="rounded-full border border-app-border px-3 py-1.5 text-[10px] font-mono text-app-muted transition-all duration-150 hover:border-status-error/40 hover:text-status-error"
             >
               {t('logs.clear')}
             </button>
@@ -93,18 +93,18 @@ export default function LogStream() {
 
         {/* Terminal */}
         <div className="rounded-xl bg-[#080808] border border-app-border overflow-hidden">
-          {/* Terminal title bar */}
-          <div className="flex items-center gap-2 px-4 py-2.5 border-b border-app-border bg-[#0f0f0f]">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-400/60" />
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/60" />
-            <span className="text-[10px] font-mono text-app-muted/40 ml-2 uppercase tracking-widest">
-              system-log
-            </span>
-            <span className="ml-auto text-[10px] font-mono text-app-muted/30">
-              {filtered.length} entries
-            </span>
-          </div>
+           {/* Terminal title bar */}
+           <div className="flex items-center gap-2 px-4 py-2.5 border-b border-app-border bg-[#0f0f0f]">
+             <span className="w-2.5 h-2.5 rounded-full bg-status-error/60" />
+             <span className="w-2.5 h-2.5 rounded-full bg-status-warn/60" />
+             <span className="w-2.5 h-2.5 rounded-full bg-status-ok/60" />
+             <span className="text-[10px] font-mono text-app-muted/40 ml-2 uppercase tracking-widest">
+               system-log
+             </span>
+             <span className="ml-auto text-[10px] font-mono text-app-muted/30">
+               {filtered.length} entries
+             </span>
+           </div>
 
           {/* Log body */}
           <div ref={bodyRef} className="h-[280px] overflow-y-auto p-4 font-mono text-xs space-y-1.5 scroll-smooth">

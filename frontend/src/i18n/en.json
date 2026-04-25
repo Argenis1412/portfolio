@@ -115,7 +115,9 @@
   "experience.signal.impact": "Impact",
   "metrics.section_subtitle": "Metrics combine backend telemetry with clearly-labeled synthetic projections during active chaos events.",
   "metrics.latency": "P95 Latency",
-  "metrics.error_rate": "Error Rate",
+   "metrics.error_rate": "Error Rate",
+   "metrics.error_rate_slo_context": "SLO < 0.5% (5xx / 15min) · includes 4xx",
+   "hero.sidecar.uptime_note": "keep-alive cron active"
   "metrics.uptime": "Uptime",
   "metrics.system_status": "System Status",
   "metrics.status.operational": "Operational",
