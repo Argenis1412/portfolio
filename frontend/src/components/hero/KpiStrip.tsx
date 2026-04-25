@@ -6,10 +6,10 @@ import DeltaBadge from '../ui/DeltaBadge';
 
 const STATUS_COLORS: Record<SystemStatus, string> = {
   loading: 'text-app-muted',
-  operational: 'text-emerald-400',
-  warning: 'text-amber-400',
-  degraded: 'text-red-400',
-  down: 'text-red-600',
+  operational: 'text-status-ok',
+  warning: 'text-status-warn',
+  degraded: 'text-status-error',
+  down: 'text-status-error',
 };
 
 interface KpiStripProps {
@@ -30,12 +30,13 @@ export function KpiStrip({ data, previous, status, effectiveP95, confidenceScore
       value: `${effectiveP95}ms`,
       delta: <DeltaBadge current={effectiveP95} previous={previous?.p95_ms ?? null} unit="ms" />,
     },
-    {
-      label: t('hero.kpi.error_rate'),
-      value: data.error_rate_pct,
-      className: data.error_rate > 0.045 ? 'text-red-400' : 'text-app-text',
-      delta: <DeltaBadge current={data.error_rate * 100} previous={previous ? previous.error_rate * 100 : null} unit="%" decimals={2} />,
-    },
+     {
+       label: t('hero.kpi.error_rate'),
+       value: data.error_rate_pct,
+       className: data.error_rate > 0.045 ? 'text-status-error' : 'text-app-text',
+       delta: <DeltaBadge current={data.error_rate * 100} previous={previous ? previous.error_rate * 100 : null} unit="%" decimals={2} />,
+       footnote: t('metrics.error_rate_slo_context'),
+     },
     {
       label: t('hero.kpi.requests'),
       value: data.requests_24h.toLocaleString(),
@@ -60,12 +61,17 @@ export function KpiStrip({ data, previous, status, effectiveP95, confidenceScore
       {items.map((item) => (
         <div key={item.label} className="glass rounded-xl px-4 py-3 flex flex-col gap-1">
           <span className="text-[10px] font-mono uppercase tracking-widest text-app-muted">{item.label}</span>
-          <div className="flex items-baseline flex-wrap">
-            <span className={`font-mono text-lg font-bold ${item.className ?? 'text-app-text'}`}>
-              {item.value}
-            </span>
-            {item.delta}
-          </div>
+           <div className="flex items-baseline flex-wrap">
+             <span className={`font-mono text-lg font-bold ${item.className ?? 'text-app-text'}`}>
+               {item.value}
+             </span>
+             {item.delta}
+             {item.footnote && (
+               <div className="text-[9px] text-status-ok/80 mt-1">
+                 {item.footnote}
+               </div>
+             )}
+           </div>
         </div>
       ))}
     </div>

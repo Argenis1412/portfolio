@@ -8,10 +8,10 @@ const BADGE_CONFIG: Record<
   { dot: string; text: string; i18nKey: string }
 > = {
   loading:     { dot: 'bg-app-muted animate-pulse',   text: 'text-app-muted',   i18nKey: 'metrics.status.loading' },
-  operational: { dot: 'bg-emerald-500 animate-pulse', text: 'text-emerald-500', i18nKey: 'metrics.api_live' },
-  warning:     { dot: 'bg-amber-400 animate-pulse',   text: 'text-amber-400',   i18nKey: 'metrics.status.warning' },
-  degraded:    { dot: 'bg-red-400',                   text: 'text-red-400',     i18nKey: 'metrics.status.degraded' },
-  down:        { dot: 'bg-red-600',                   text: 'text-red-600',     i18nKey: 'metrics.status.down' },
+  operational: { dot: 'bg-status-ok animate-pulse', text: 'text-status-ok', i18nKey: 'metrics.api_live' },
+  warning:     { dot: 'bg-status-warn animate-pulse',   text: 'text-status-warn',   i18nKey: 'metrics.status.warning' },
+  degraded:    { dot: 'bg-status-error',                   text: 'text-status-error',     i18nKey: 'metrics.status.degraded' },
+  down:        { dot: 'bg-status-error',                   text: 'text-status-error',     i18nKey: 'metrics.status.down' },
 };
 
 interface LiveStatusBadgeProps {

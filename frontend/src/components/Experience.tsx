@@ -179,11 +179,11 @@ export default function Experience() {
                           <span className={`rounded-full border px-2.5 py-1 ${isEducation ? 'border-[var(--color-signal-decision-border)] bg-[var(--color-signal-decision-bg)] text-[var(--color-signal-decision)]' : 'border-app-primary/20 bg-app-primary/10 text-app-primary'}`}>
                             {isEducation ? t('experience.label.education') : t('experience.label.experience')}
                           </span>
-                          {entry.current && (
-                            <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-400 border border-emerald-500/20">
-                              {t('experience.status.current')}
-                            </span>
-                          )}
+                           {entry.current && (
+                             <span className="rounded-full bg-status-ok/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-status-ok border border-status-ok/20">
+                               {t('experience.status.current')}
+                             </span>
+                           )}
                         </div>
 
                         <h3 className="text-xl md:text-2xl font-bold text-app-text leading-snug">

@@ -8,10 +8,10 @@ import MetricsSparkline from '../ui/MetricsSparkline';
 
 const STATUS_COLORS: Record<SystemStatus, string> = {
   loading: 'text-app-muted',
-  operational: 'text-emerald-400',
-  warning: 'text-amber-400',
-  degraded: 'text-red-400',
-  down: 'text-red-600',
+  operational: 'text-status-ok',
+  warning: 'text-status-warn',
+  degraded: 'text-status-error',
+  down: 'text-status-error',
 };
 
 interface SystemSidecarProps {
@@ -37,7 +37,7 @@ export const SystemSidecar = React.memo(({
     <div className="glass rounded-2xl p-6 border border-app-border/40 premium-shadow">
       <div className="flex items-center justify-between mb-6">
         <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-app-muted">{t('hero.sidecar.title')}</span>
-        <div className="flex items-center gap-1.5 font-mono text-[10px] text-emerald-500">
+        <div className="flex items-center gap-1.5 font-mono text-[10px] text-status-ok">
           <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
           LIVE_FEED
         </div>
@@ -90,7 +90,7 @@ export const SystemSidecar = React.memo(({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <div className="text-[10px] font-mono text-app-muted mb-1">{t('hero.sidecar.circuit_breaker')}</div>
-            <div className={`text-sm font-mono ${recoveryState === 'open' ? 'text-red-400' : recoveryState === 'half_open' ? 'text-amber-400' : 'text-emerald-400'}`}>
+            <div className={`text-sm font-mono ${recoveryState === 'open' ? 'text-status-error' : recoveryState === 'half_open' ? 'text-status-warn' : 'text-status-ok'}`}>
               {recoveryState.toUpperCase()}
             </div>
           </div>
@@ -107,9 +107,9 @@ export const SystemSidecar = React.memo(({
         <div className="text-[9px] font-mono text-app-muted/60">
           NODE_ID: PRODUCTION-01
         </div>
-        <div className="text-[9px] font-mono text-app-muted/60">
-          {t('hero.sidecar.uptime')}: 99.98%
-        </div>
+         <div className="text-[9px] font-mono text-app-muted/60">
+           {t('hero.sidecar.uptime')}: {data?.uptime ?? '...'} <span className="text-[9px] text-status-ok/80">{t('hero.sidecar.uptime_note')}</span>
+         </div>
       </div>
     </div>
   );

@@ -25,6 +25,16 @@
   --color-status-degraded: var(--color-status-degraded);
   --color-status-recovering: var(--color-status-recovering);
   --color-status-stable: var(--color-status-stable);
+
+  /* Semantic status tokens (light/dark aware) */
+  --color-status-ok: var(--color-status-ok);
+  --color-status-ok-soft: var(--color-status-ok-soft);
+  --color-status-warn: var(--color-status-warn);
+  --color-status-warn-soft: var(--color-status-warn-soft);
+  --color-status-error: var(--color-status-error);
+  --color-status-error-soft: var(--color-status-error-soft);
+  --color-status-info: var(--color-status-info);
+  --color-status-info-soft: var(--color-status-info-soft);
 }
 
 :root {
@@ -69,6 +79,16 @@
   --color-status-synthetic-bg:    rgba(221, 214, 254, 0.10);
   --color-status-synthetic-border: rgba(167, 139, 250, 0.30);
 
+  /* Semantic status tokens - light mode */
+  --color-status-ok:          #059669;
+  --color-status-ok-soft:     rgba(5, 150, 105, 0.12);
+  --color-status-warn:        #B45309;
+  --color-status-warn-soft:   rgba(180, 83, 9, 0.12);
+  --color-status-error:       #DC2626;
+  --color-status-error-soft:  rgba(220, 38, 38, 0.12);
+  --color-status-info:        #1D4ED8;
+  --color-status-info-soft:   rgba(29, 78, 216, 0.12);
+
   /* Ambient glow effects */
   --glow-primary: rgba(168, 105, 46, 0.05);
 }
@@ -103,6 +123,16 @@
   --color-status-ok-text:         #6EE7B7;
   --color-status-info-text:       #93C5FD;
   --color-status-synthetic-text:  #C4B5FD;
+
+  /* Semantic status tokens - dark mode */
+  --color-status-ok:          #34D399;
+  --color-status-ok-soft:     rgba(52, 211, 153, 0.12);
+  --color-status-warn:        #FBBF24;
+  --color-status-warn-soft:   rgba(251, 191, 36, 0.12);
+  --color-status-error:       #F87171;
+  --color-status-error-soft:  rgba(248, 113, 113, 0.12);
+  --color-status-info:        #60A5FA;
+  --color-status-info-soft:   rgba(96, 165, 250, 0.12);
 
   /* Ambient glow effects - dark mode */
   --glow-primary: rgba(212, 163, 115, 0.10);
