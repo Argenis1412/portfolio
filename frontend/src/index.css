@@ -40,53 +40,53 @@
 :root {
   /* Remaining specific theme tokens not in critical path */
   --theme-surface-hover:  #F0E4D5;
-  --theme-muted:          #5C5248;
+  --theme-muted:          #4B433B; /* Darkened from #5C5248 */
   --theme-primary-hover:  #8F5620;
   --theme-secondary:      #C07A3A;
   --theme-section-alt:    #E9DDD0;
 
-  /* Semantic signal colors - light mode */
-  --color-signal-decision:        #1D4ED8;
+  /* Semantic signal colors - light mode (Darkened for contrast) */
+  --color-signal-decision:        #1E40AF; /* Blue-800 */
   --color-signal-decision-bg:     rgba(59, 130, 246, 0.10);
   --color-signal-decision-border: rgba(96, 165, 250, 0.25);
-  --color-signal-failure:         #DC2626;
+  --color-signal-failure:         #B91C1C; /* Red-700 */
   --color-signal-failure-bg:      rgba(239, 68, 68, 0.10);
   --color-signal-failure-border:  rgba(248, 113, 113, 0.25);
-  --color-signal-learning:        #D97706;
+  --color-signal-learning:        #92400E; /* Amber-800 */
   --color-signal-learning-bg:     rgba(245, 158, 11, 0.10);
   --color-signal-learning-border: rgba(251, 191, 36, 0.25);
-  --color-signal-impact:          #059669;
+  --color-signal-impact:          #047857; /* Green-700 */
   --color-signal-impact-bg:       rgba(16, 185, 129, 0.10);
   --color-signal-impact-border:   rgba(52, 211, 153, 0.25);
 
-  /* Status colors - light mode */
-  --color-status-degraded:        #DC2626;
+  /* Status colors - light mode (Darkened for contrast) */
+  --color-status-degraded:        #B91C1C; /* Red-700 */
   --color-status-degraded-bg:     rgba(254, 202, 202, 0.90);
   --color-status-degraded-border: #FCA5A5;
   --color-status-degraded-text:   #7F1D1D;
-  --color-status-recovering:      #D97706;
+  --color-status-recovering:      #92400E; /* Amber-800 */
   --color-status-recovering-bg:   rgba(254, 243, 199, 0.90);
   --color-status-recovering-border: #FCD34D;
   --color-status-recovering-text: #92400E;
-  --color-status-stable:          #059669;
+  --color-status-stable:          #047857; /* Green-700 */
   --color-status-ok-bg:           rgba(209, 250, 229, 0.10);
   --color-status-ok-border:       rgba(16, 185, 129, 0.30);
-  --color-status-ok-text:         #047857;
+  --color-status-ok-text:         #047857; /* Green-700 */
   --color-status-info-bg:         rgba(191, 219, 254, 0.10);
   --color-status-info-border:     rgba(96, 165, 250, 0.30);
-  --color-status-info-text:       #1D4ED8;
-  --color-status-synthetic:       #7C3AED;
+  --color-status-info-text:       #1E40AF; /* Blue-800 */
+  --color-status-synthetic:       #5B21B6; /* Violet-800 */
   --color-status-synthetic-bg:    rgba(221, 214, 254, 0.10);
   --color-status-synthetic-border: rgba(167, 139, 250, 0.30);
 
-  /* Semantic status tokens - light mode */
-  --color-status-ok:          #059669;
+  /* Semantic status tokens - light mode (Darkened for contrast) */
+  --color-status-ok:          #047857; /* Green-700 */
   --color-status-ok-soft:     rgba(5, 150, 105, 0.12);
-  --color-status-warn:        #B45309;
+  --color-status-warn:        #92400E; /* Amber-800 */
   --color-status-warn-soft:   rgba(180, 83, 9, 0.12);
-  --color-status-error:       #DC2626;
+  --color-status-error:       #B91C1C; /* Red-700 */
   --color-status-error-soft:  rgba(220, 38, 38, 0.12);
-  --color-status-info:        #1D4ED8;
+  --color-status-info:        #1E40AF; /* Blue-800 */
   --color-status-info-soft:   rgba(29, 78, 216, 0.12);
 
   /* Ambient glow effects */

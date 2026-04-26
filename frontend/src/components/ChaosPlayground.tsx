@@ -114,7 +114,7 @@ export default function ChaosPlayground() {
             <m.div 
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
-              className="mt-3 pt-3 border-t border-app-border/40 text-[10px] font-mono text-violet-300/70 italic"
+              className="mt-3 pt-3 border-t border-app-border/40 text-[10px] font-mono text-[var(--color-status-synthetic)] italic"
             >
               {preset === 'mild' && t('chaos.presets.mild_effect')}
               {preset === 'stress' && t('chaos.presets.stress_effect')}
@@ -210,7 +210,7 @@ export default function ChaosPlayground() {
                               {isInvestigating ? 'INVESTIGATING' : 'MITIGATING'}
                             </span>
                             {inc.origin && (
-                              <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${inc.origin === 'synthetic' ? 'bg-violet-500/10 border-violet-500/20 text-violet-200' : 'bg-status-ok-soft border-status-ok/20 text-status-ok'}`}>
+                              <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border ${inc.origin === 'synthetic' ? 'bg-[var(--color-status-synthetic-bg)] border-[var(--color-status-synthetic-border)] text-[var(--color-status-synthetic)]' : 'bg-status-ok-soft border-status-ok/20 text-status-ok'}`}>
                                 {inc.origin}
                               </span>
                             )}
