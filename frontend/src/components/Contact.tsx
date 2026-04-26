@@ -212,11 +212,11 @@ export default function Contact() {
                   placeholder={t('contact.placeholder.message')}
                   value={formData.message}
                   onChange={handleChange}
-                  className={`resize-none rounded-xl border bg-[#11161D] px-4 py-3 text-sm text-slate-100 outline-none transition-all placeholder:text-slate-500 ${errors.message ? 'border-red-500/60 focus:ring-2 focus:ring-red-500/20' : 'border-[#20262D] focus:border-app-primary/60 focus:ring-2 focus:ring-app-primary/20'}`}
+                  className={`resize-none rounded-xl border bg-[#11161D] px-4 py-3 text-sm text-slate-100 outline-none transition-all placeholder:text-slate-500 ${errors.message ? 'border-status-error/60 focus:ring-2 focus:ring-status-error/20' : 'border-[#20262D] focus:border-app-primary/60 focus:ring-2 focus:ring-app-primary/20'}`}
                 />
                 <AnimatePresence>
                   {errors.message && (
-                    <motion.p initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="flex items-center gap-1 text-[11px] text-red-400">
+                    <motion.p initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="flex items-center gap-1 text-[11px] text-status-error">
                       <AlertCircle className="h-3.5 w-3.5" />
                       {t(`contact.error.${errors.message}`)}
                     </motion.p>
@@ -257,11 +257,11 @@ export default function Contact() {
                   <div>
                     <span className="text-slate-500">{t('contact.console.response')}:</span>
                     {status === 'success' && traceResult ? (
-                      <span className="ml-2 text-emerald-400">200 OK ({traceResult.durationMs}ms)</span>
+                      <span className="ml-2 text-status-ok">200 OK ({traceResult.durationMs}ms)</span>
                     ) : status === 'error' ? (
-                      <span className="ml-2 text-red-400">{responseStatusCode ?? 500} ERROR</span>
+                      <span className="ml-2 text-status-error">{responseStatusCode ?? 500} ERROR</span>
                     ) : status === 'loading' ? (
-                      <span className="ml-2 text-amber-400">{t('contact.sending')}</span>
+                      <span className="ml-2 text-status-warn">{t('contact.sending')}</span>
                     ) : (
                       <span className="ml-2 text-slate-500">{t('contact.console.ready')}</span>
                     )}
@@ -270,7 +270,7 @@ export default function Contact() {
                   {responseTraceId && (
                     <div>
                       <span className="text-slate-500">{t('contact.console.trace')}:</span>
-                      <span className="ml-2 break-all text-blue-400">{responseTraceId}</span>
+                      <span className="ml-2 break-all text-status-info">{responseTraceId}</span>
                     </div>
                   )}
 
@@ -278,7 +278,7 @@ export default function Contact() {
                     <>
                       <div>
                         <span className="text-slate-500">{t('contact.console.queue')}:</span>
-                        <span className="ml-2 text-amber-300">{queueStatus}</span>
+                        <span className="ml-2 text-status-warn">{queueStatus}</span>
                       </div>
                       <div>
                         <span className="text-slate-500">{t('contact.console.mode')}:</span>
@@ -292,11 +292,11 @@ export default function Contact() {
                   )}
 
                   {status === 'success' && (
-                    <div className="text-emerald-400">{t('contact.console.delivered')}</div>
+                    <div className="text-status-ok">{t('contact.console.delivered')}</div>
                   )}
 
                   {status === 'error' && (
-                    <div className="text-red-400">{submitError || t('contact.console.rejected')}</div>
+                    <div className="text-status-error">{submitError || t('contact.console.rejected')}</div>
                   )}
                 </div>
               </div>

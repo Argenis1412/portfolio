@@ -9,7 +9,7 @@
   "nav.experience": "Experience",
   "nav.journey": "Journey",
   "hero.title": "Backend Systems in Production Conditions",
-  "hero.subtitle": "Interactive platform exposing real metrics, controlled failures, and system behaviour under load.",
+  "hero.subtitle": "Interactive platform exposing real metrics, controlled failures, and system behavior under load.",
   "hero.differentiator": "This system intentionally injects failures to demonstrate resilience, degradation, and real-time recovery.",
   "hero.cta_metrics": "Live Metrics",
   "hero.cta_chaos": "Simulate Failure",

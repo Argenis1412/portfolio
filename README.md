@@ -29,8 +29,6 @@ This project didn't start production-ready. It evolved through real production i
 
 | Version | Milestone | Key Change |
 |---|---|---|
-| **v1.4.0** | Production Deploy | Custom domain + Resend email + CSP/CORS sync (ADR-15.3) — fixed INC-004 |
-| **v1.4.1** | Cold Start Fix | JSON-First Read Path (ADR-05) — fixed INC-002 |
 | **v1.5.0** | Chaos Engineering | Deterministic chaos presets + stateful decision engine (ADR-14) |
 | **v1.5.1** | Honest Telemetry | Synthetic vs. real labels + confidence indicator (ADR-13) |
 | **v1.6.0** | Build Standardization | Modular API layer + root-context Dockerfile (ADR-15.2) — fixed INC-005 |

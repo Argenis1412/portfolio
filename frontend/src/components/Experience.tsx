@@ -170,9 +170,9 @@ export default function Experience() {
                   transition={{ duration: 0.4, delay: index * 0.06 }}
                   className="relative pl-10"
                 >
-                  <span className={`absolute left-0 top-3 h-[22px] w-[22px] rounded-full border-4 ${isEducation ? 'border-blue-400 bg-[#0f172a]' : 'border-app-primary bg-[#1a1510]'}`} />
+                  <span className={`absolute left-0 top-3 h-[22px] w-[22px] rounded-full border-4 ${isEducation ? 'border-status-info bg-[#0f172a]' : 'border-app-primary bg-[#1a1510]'}`} />
 
-                  <div className={`glass rounded-2xl border p-6 md:p-7 ${isEducation ? 'border-blue-400/15 shadow-[0_0_0_1px_rgba(96,165,250,0.04)]' : 'border-app-border'}`}>
+                  <div className={`glass rounded-2xl border p-6 md:p-7 ${isEducation ? 'border-status-info/15 shadow-[0_0_0_1px_rgba(96,165,250,0.04)]' : 'border-app-border'}`}>
                     <div className="flex flex-col gap-5 xl:grid xl:grid-cols-[1.4fr_0.7fr] xl:items-start">
                       <div>
                         <div className="flex flex-wrap items-center gap-2 mb-3 text-[10px] font-mono uppercase tracking-[0.22em] text-app-muted">

@@ -71,15 +71,15 @@ export default function FeaturedIncident() {
                     </h4>
                     <div className="relative border-l border-app-border/40 pl-4 space-y-6">
                       <div className="relative">
-                        <span className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.4)]" />
+                        <span className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-status-error shadow-[0_0_8px_rgba(248,113,113,0.4)]" />
                         <div className="text-xs font-bold text-app-text mt-1">{t(`incident.${id}.t1_desc`)}</div>
                       </div>
                       <div className="relative">
-                        <span className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-amber-400" />
+                        <span className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-status-warn" />
                         <div className="text-xs font-bold text-app-text mt-1">{t(`incident.${id}.t2_desc`)}</div>
                       </div>
                       <div className="relative">
-                        <span className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-emerald-400" />
+                        <span className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-status-ok" />
                         <div className="text-xs font-bold text-app-text mt-1">{t(`incident.${id}.t3_desc`)}</div>
                       </div>
                     </div>
