@@ -20,6 +20,7 @@ A **production-grade backend system** disguised as a portfolio — a system buil
 - ✅ **Observability stack** — Sentry + Prometheus + OpenTelemetry
 - ✅ **CI/CD with quality gates** — 80% coverage threshold, ruff/mypy checks
 - ✅ **Multi-layer anti-abuse** — Honeypot + Spam Scoring + Redis-backed deduplication + Rate Limiting (10/day per email, 30/hour per IP)
+- ✅ **Reproducible benchmarks** — k6 scripts archived per commit in [`/benchmarks`](benchmarks/README.md); results include trade-offs, not just passing numbers
 
 ---
 
@@ -93,11 +94,17 @@ See [FAILURE_MODEL.md](docs/architecture/FAILURE_MODEL.md) for full degradation 
 ---
 
 ## 📊 Performance Baseline (SLO Targets)
-*From [SLO_DEFINITIONS.md](docs/architecture/SLO_DEFINITIONS.md) — source: ENGINEERING_PLAYBOOK.md section 11:*
-- **Portfolio Data** (`/about`, `/projects`, `/stack`): P95 < 50ms ✅
-- **Contact Endpoint** (`/contact`): P95 < 200ms ✅
-- **Health Check** (`/health`): P99 < 20ms ✅
-- **Error Rate**: < 0.5% (5xx over 15-min window) ✅ 
+*From [SLO_DEFINITIONS.md](docs/architecture/SLO_DEFINITIONS.md) — targets calibrated against production (Koyeb + PostgreSQL):*
+
+| Endpoint | SLO Target | Benchmark Result |
+|----------|-----------|------------------|
+| `/about`, `/projects`, `/stack` | P95 < 50ms | [local baseline: ~820ms P95](benchmarks/results/02c08d3/summary.md) — SQLite/single-worker; prod run pending |
+| `/contact` | P95 < 200ms | **P95 = 37ms** ✅ (local, in-memory anti-abuse stack) |
+| `/health` | P99 < 20ms | [local baseline: 257ms P99](benchmarks/results/02c08d3/summary.md) — OTel console exporter adds latency locally |
+| Error Rate | < 0.5% 5xx | **0%** across all benchmark scenarios ✅ |
+
+> See [`benchmarks/results/02c08d3/summary.md`](benchmarks/results/02c08d3/summary.md) for full analysis including why local breaches are expected.
+> Reproduce: `k6 run --env BASE_URL=https://api.argenisbackend.com benchmarks/scripts/health.js` 
 
 ---
 

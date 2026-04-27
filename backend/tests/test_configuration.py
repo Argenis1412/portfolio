@@ -10,7 +10,6 @@ def test_debug_desactivado_en_produccion():
     os.environ["AMBIENTE"] = "producao"
     settings = Settings()
     assert settings.debug is False
-    # Limpa
     if "AMBIENTE" in os.environ:
         del os.environ["AMBIENTE"]
 
@@ -20,7 +19,6 @@ def test_debug_activado_en_desarrollo():
     os.environ["AMBIENTE"] = "desenvolvimento"
     settings = Settings()
     assert settings.debug is True
-    # Limpa
     if "AMBIENTE" in os.environ:
         del os.environ["AMBIENTE"]
 
@@ -30,7 +28,6 @@ def test_debug_activado_en_local():
     os.environ["AMBIENTE"] = "local"
     settings = Settings()
     assert settings.debug is True
-    # Limpa
     if "AMBIENTE" in os.environ:
         del os.environ["AMBIENTE"]
 
@@ -79,3 +76,53 @@ def test_validate_production_aceita_supabase_e_metrics_auth():
         "METRICS_BASIC_AUTH_PASSWORD",
     ]:
         os.environ.pop(key, None)
+
+
+# --- A1: Security — API docs must be disabled in production ---
+
+
+def test_docs_accesibles_en_local(client):
+    """
+    /openapi.json must be accessible in local/dev environments.
+    The test client runs with AMBIENTE=local (default), so the app was
+    created with docs_url/redoc_url/openapi_url set — 200 expected.
+    """
+    response = client.get("/openapi.json")
+    assert response.status_code == 200
+
+
+def test_root_no_expone_docs_en_produccion(client):
+    """
+    Root endpoint must not advertise /docs path in production.
+    Leaking the docs path is an unnecessary hint for attackers.
+    We patch is_production at the settings instance level to simulate prod.
+    """
+    from unittest.mock import PropertyMock, patch
+
+    from app.settings import settings
+
+    with patch.object(
+        type(settings), "is_production", new_callable=PropertyMock, return_value=True
+    ):
+        response = client.get("/")
+        assert response.status_code == 200
+        data = response.json()
+        assert "docs" not in data, (
+            "Root endpoint must not include 'docs' key in production"
+        )
+
+
+def test_root_expone_docs_en_local(client):
+    """Root endpoint includes 'docs' key only in non-production environments."""
+    from unittest.mock import PropertyMock, patch
+
+    from app.settings import settings
+
+    with patch.object(
+        type(settings), "is_production", new_callable=PropertyMock, return_value=False
+    ):
+        response = client.get("/")
+        assert response.status_code == 200
+        data = response.json()
+        assert "docs" in data
+        assert data["docs"] == "/docs"
