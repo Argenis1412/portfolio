@@ -101,13 +101,15 @@ def test_root_no_expone_docs_en_produccion(client):
 
     from app.settings import settings
 
-    with patch.object(type(settings), "is_production", new_callable=PropertyMock, return_value=True):
+    with patch.object(
+        type(settings), "is_production", new_callable=PropertyMock, return_value=True
+    ):
         response = client.get("/")
         assert response.status_code == 200
         data = response.json()
-        assert "docs" not in data, (
-            "Root endpoint must not include 'docs' key in production"
-        )
+        assert (
+            "docs" not in data
+        ), "Root endpoint must not include 'docs' key in production"
 
 
 def test_root_expone_docs_en_local(client):
@@ -116,7 +118,9 @@ def test_root_expone_docs_en_local(client):
 
     from app.settings import settings
 
-    with patch.object(type(settings), "is_production", new_callable=PropertyMock, return_value=False):
+    with patch.object(
+        type(settings), "is_production", new_callable=PropertyMock, return_value=False
+    ):
         response = client.get("/")
         assert response.status_code == 200
         data = response.json()
