@@ -7,7 +7,7 @@ This module configures the FastAPI application with:
 - Global exception handlers
 - Health check endpoint (/health)
 - Versioned API routes (/api/v1/*)
-- Automatic documentation (/docs)
+- API documentation: enabled in local/dev, disabled in production
 
 Architecture: Simplified Clean Architecture
 - Controllers (HTTP) → Use Cases (logic) → Entities (domain) → Adapters (external)
@@ -41,13 +41,16 @@ def create_app() -> FastAPI:
     """
     settings.validate_production()
 
+    # Disable interactive docs in production — no red flags for attackers,
+    # no accidental schema leaks. Run locally with AMBIENTE=local to access /docs.
+    _is_prod = settings.is_production
     application = FastAPI(
         title=settings.app_name,
         description=_get_api_description(),
         version=__version__,
-        docs_url="/docs",
-        redoc_url="/redoc",
-        openapi_url="/openapi.json",
+        docs_url=None if _is_prod else "/docs",
+        redoc_url=None if _is_prod else "/redoc",
+        openapi_url=None if _is_prod else "/openapi.json",
         openapi_tags=_get_openapi_tags(),
         debug=settings.debug,
     )
@@ -199,12 +202,15 @@ def _register_routes(application: FastAPI) -> None:
     # Root route to avoid 404 (Koyeb/Public)
     @application.get("/", tags=["Health"])
     async def root():
-        return {
+        payload: dict = {
             "status": "ok",
             "service": settings.app_name,
             "version": __version__,
-            "docs": "/docs",
         }
+        # Only advertise docs path in non-production environments.
+        if not settings.is_production:
+            payload["docs"] = "/docs"
+        return payload
 
     # API v1 (recommended)
     application.include_router(router_v1, prefix="/api")
