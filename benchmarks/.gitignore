@@ -1,0 +1,7 @@
+# Benchmark results — large JSON files from k6 raw output
+# Only summary.md and structured outputs are tracked in git.
+# Raw k6 JSON files can be hundreds of MB under stress scenarios.
+results/**/*.json
+
+# k6 temp files
+*.k6temp
