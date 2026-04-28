@@ -109,6 +109,7 @@ def _setup_prometheus(app: FastAPI) -> None:
         # Application version metric (Info type)
         try:
             from prometheus_client import Info
+
             i = Info("app_version", "Current application version")
             i.info({"version": __version__})
         except Exception:
@@ -121,7 +122,6 @@ def _setup_prometheus(app: FastAPI) -> None:
             include_in_schema=False,  # do not show in /docs
             tags=["Observability"],
         )
-
 
         logger.info("prometheus_configured", endpoint="/metrics")
     except ImportError:
