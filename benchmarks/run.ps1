@@ -1,7 +1,7 @@
 # Benchmark Runner
 #
 # Runs all k6 benchmark scripts against a target URL and archives results
-# per git commit. Designed to be simple and reproducible — no external deps.
+# per git commit. Designed to be simple and reproducible - no external deps.
 #
 # Usage:
 #   .\benchmarks\run.ps1                          # runs against localhost:8000
@@ -23,7 +23,10 @@ param(
 $ErrorActionPreference = "Stop"
 
 # --- Setup ---
-$commit = (git rev-parse --short HEAD 2>$null) ?? "no-git"
+$commit = (git rev-parse --short HEAD 2>$null)
+if ([string]::IsNullOrWhiteSpace($commit)) {
+    $commit = "no-git"
+}
 $timestamp = (Get-Date -Format "yyyy-MM-ddTHH-mm-ss")
 $resultsDir = "benchmarks\results\$commit"
 $scriptsDir = "benchmarks\scripts"
@@ -48,7 +51,7 @@ try {
     $healthCheck = Invoke-WebRequest -Uri "$BaseUrl/health" -TimeoutSec 5 -UseBasicParsing
     Write-Host "  Server OK (HTTP $($healthCheck.StatusCode))" -ForegroundColor Green
 } catch {
-    Write-Error "Cannot reach $BaseUrl/health — is the backend running?"
+    Write-Error "Cannot reach $BaseUrl/health - is the backend running?"
     exit 1
 }
 
@@ -63,7 +66,7 @@ function Run-Benchmark {
 
     $scriptPath = "$scriptsDir\$Name.js"
     if (-not (Test-Path $scriptPath)) {
-        Write-Warning "Script not found: $scriptPath — skipping"
+        Write-Warning "Script not found: $scriptPath - skipping"
         return
     }
 
@@ -75,7 +78,7 @@ function Run-Benchmark {
         "run",
         "--env", "BASE_URL=$BaseUrl",
         "--summary-trend-stats", "p(50),p(95),p(99),max,min",
-        "--out", "json=$outPath"
+        "--out", "json=$outPath",
         $scriptPath
     )
 
@@ -93,9 +96,9 @@ function Run-Benchmark {
     $exitCode = $LASTEXITCODE
 
     if ($exitCode -ne 0) {
-        Write-Warning "$Name: k6 exited with code $exitCode (thresholds may have failed — check results)"
+        Write-Warning "$($Name): k6 exited with code $exitCode (thresholds may have failed - check results)"
     } else {
-        Write-Host "  $Name: passed all thresholds" -ForegroundColor Green
+        Write-Host "  $($Name): passed all thresholds" -ForegroundColor Green
     }
 
     return $exitCode
@@ -116,7 +119,7 @@ if (-not $NoSave) {
 
     $summaryPath = "$resultsDir\summary.md"
     $summaryContent = @"
-# Benchmark Results — commit $commit
+# Benchmark Results - commit $commit
 
 **Timestamp:** $timestamp
 **Base URL:** $BaseUrl
@@ -127,12 +130,12 @@ if (-not $NoSave) {
 | Script | Status | Notes |
 |--------|--------|-------|
 $(foreach ($s in $scripts) {
-    $status = if ($results[$s] -eq 0) { "✅ PASSED" } else { "⚠️ THRESHOLD BREACH" }
+    $status = if ($results[$s] -eq 0) { "[OK] PASSED" } else { "[WARN] THRESHOLD BREACH" }
     "| ``$s`` | $status | See $s.json |"
 })
 
 **$passed/$total scripts passed all thresholds.**
-$(if ($failed -gt 0) { "`n> ⚠️ $failed script(s) breached thresholds — review .json files for the degradation point. This is expected in stress scenarios." })
+$(if ($failed -gt 0) { "`n> [WARN] $failed script(s) breached thresholds - review .json files for the degradation point. This is expected in stress scenarios." })
 
 ## How to reproduce
 
@@ -149,7 +152,7 @@ uvicorn app.principal:app --port 8000
 
 - Results labeled ``load_test_reproduced`` are not real production traffic.
 - Results labeled ``baseline_real`` (when available) are from production monitoring.
-- Stress scenarios are intentionally designed to breach thresholds — the goal is to find the degradation point, not to always pass.
+- Stress scenarios are intentionally designed to breach thresholds - the goal is to find the degradation point, not to always pass.
 - Run each script 2-3 times and compare: if p99 varies >30%, the environment is noisy (Koyeb is not deterministic).
 "@
 
