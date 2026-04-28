@@ -1,7 +1,7 @@
 """
-Testes dos casos de uso.
+Use case tests.
 
-Testa lógica de negócio isoladamente, sem dependências de HTTP.
+Tests business logic in isolation, without HTTP dependencies.
 """
 
 import pytest
@@ -18,8 +18,8 @@ from app.use_cases import (
 
 
 @pytest.mark.asyncio
-async def test_get_about_retorna_dados_correctos(repository_mock):
-    """Testa que GetAboutUseCase retorna dados do repositório."""
+async def test_get_about_returns_correct_data(repository_mock):
+    """Tests that GetAboutUseCase returns data from the repository."""
     uc = GetAboutUseCase(repository_mock)
 
     resultado = await uc.execute()
@@ -30,21 +30,21 @@ async def test_get_about_retorna_dados_correctos(repository_mock):
 
 
 @pytest.mark.asyncio
-async def test_get_projects_ordena_por_destaque(repository_mock):
-    """Testa que projects destacados aparecem primeiro."""
+async def test_get_projects_sorts_by_featured(repository_mock):
+    """Tests that featured projects appear first."""
     uc = GetProjectsUseCase(repository_mock)
 
     projects = await uc.execute()
 
     assert len(projects) == 2
-    assert projects[0].highlighted is True  # Destacado primeiro
+    assert projects[0].highlighted is True  # Featured first
     assert projects[1].highlighted is False
     repository_mock.get_projects.assert_called_once()
 
 
 @pytest.mark.asyncio
-async def test_get_project_by_id_encontrado(repository_mock):
-    """Testa busca de project existente por ID."""
+async def test_get_project_by_id_found(repository_mock):
+    """Tests lookup of an existing project by ID."""
     uc = GetProjectByIdUseCase(repository_mock)
 
     project = await uc.execute("project-1")
@@ -55,8 +55,8 @@ async def test_get_project_by_id_encontrado(repository_mock):
 
 
 @pytest.mark.asyncio
-async def test_get_project_by_id_nao_encontrado(repository_mock):
-    """Testa busca de project inexistente retorna None."""
+async def test_get_project_by_id_not_found(repository_mock):
+    """Tests that lookup of a nonexistent project returns None."""
     uc = GetProjectByIdUseCase(repository_mock)
 
     project = await uc.execute("project-inexistente")
@@ -65,8 +65,8 @@ async def test_get_project_by_id_nao_encontrado(repository_mock):
 
 
 @pytest.mark.asyncio
-async def test_get_stack_agrupa_por_categoria(repository_mock):
-    """Testa que stack é agrupado por categoria."""
+async def test_get_stack_groups_by_category(repository_mock):
+    """Tests that stack items are grouped by category."""
     uc = GetStackUseCase(repository_mock)
 
     resultado = await uc.execute()
@@ -79,21 +79,21 @@ async def test_get_stack_agrupa_por_categoria(repository_mock):
 
 
 @pytest.mark.asyncio
-async def test_get_experiences_ordena_cronologicamente(repository_mock):
-    """Testa que experiências são ordenadas (atual primeiro)."""
+async def test_get_experiences_orders_chronologically(repository_mock):
+    """Tests that experiences are ordered (current first)."""
     uc = GetExperiencesUseCase(repository_mock)
 
     experiences = await uc.execute()
 
     assert len(experiences) == 2
-    assert experiences[0].current is True  # Atual primeiro
+    assert experiences[0].current is True  # Current first
     assert experiences[1].current is False
     repository_mock.get_experiences.assert_called_once()
 
 
 @pytest.mark.asyncio
-async def test_get_formation_ordena_por_atual(repository_mock):
-    """Testa que formações acadêmicas retornam ordenadas (em curso primeiro)."""
+async def test_get_formation_orders_by_current(repository_mock):
+    """Tests that academic formations are returned ordered (in-progress first)."""
     uc = GetFormationUseCase(repository_mock)
 
     formations = await uc.execute()
@@ -104,28 +104,28 @@ async def test_get_formation_ordena_por_atual(repository_mock):
 
 
 @pytest.mark.asyncio
-async def test_send_contact_sucesso(email_adapter_mock, logger_mock):
-    """Testa envio de message com sucesso."""
+async def test_send_contact_success(email_adapter_mock, logger_mock):
+    """Tests successful message sending."""
     uc = SendContactUseCase(email_adapter_mock, logger_mock)
     email_adapter_mock.send_message.return_value = True
 
-    sucesso = await uc.execute(
+    success = await uc.execute(
         name="Maria",
         email="maria@example.com",
-        subject="Teste",
-        message="Message de teste",
+        subject="Test",
+        message="Test message",
     )
 
-    assert sucesso is True
+    assert success is True
     email_adapter_mock.send_message.assert_called_once()
     logger_mock.info.assert_called()
 
 
 @pytest.mark.asyncio
-async def test_send_contact_suspeito_recebe_marcacao_visivel(
+async def test_send_contact_suspicious_receives_visible_warning(
     email_adapter_mock, logger_mock
 ):
-    """Testa se emails suspeitos recebem aviso forte no assunto e corpo."""
+    """Tests that suspicious emails receive a strong warning in subject and body."""
     uc = SendContactUseCase(email_adapter_mock, logger_mock)
     email_adapter_mock.send_message.return_value = True
 
@@ -145,18 +145,18 @@ async def test_send_contact_suspeito_recebe_marcacao_visivel(
 
 
 @pytest.mark.asyncio
-async def test_send_contact_falha(email_adapter_mock, logger_mock):
-    """Testa envio de message com falha."""
+async def test_send_contact_fails(email_adapter_mock, logger_mock):
+    """Tests message sending with failure."""
     uc = SendContactUseCase(email_adapter_mock, logger_mock)
     email_adapter_mock.send_message.return_value = False
 
-    sucesso = await uc.execute(
+    success = await uc.execute(
         name="Maria",
         email="maria@example.com",
-        subject="Teste",
-        message="Message de teste",
+        subject="Test",
+        message="Test message",
     )
 
-    assert sucesso is False
+    assert success is False
     email_adapter_mock.send_message.assert_called_once()
     logger_mock.error.assert_called()

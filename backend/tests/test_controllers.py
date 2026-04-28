@@ -1,7 +1,7 @@
 """
-Testes dos controladores (endpoints HTTP).
+Controller tests (HTTP endpoints).
 
-Testa integração entre rotas FastAPI e casos de uso.
+Tests integration between FastAPI routes and use cases.
 """
 
 from unittest.mock import AsyncMock
@@ -15,13 +15,13 @@ from app.main import app
 
 @pytest.fixture
 def client():
-    """Fixture para fornecer um TestClient da aplicação."""
+    """Fixture that provides a TestClient for the application."""
     with TestClient(app) as c:
         yield c
 
 
-def test_health_retorna_ok(client):
-    """Testa endpoint GET /health retorna status ok."""
+def test_health_returns_ok(client):
+    """Tests GET /health returns status ok."""
     response = client.get("/health")
 
     assert response.status_code == 200
@@ -30,16 +30,16 @@ def test_health_retorna_ok(client):
     assert "message" in data
 
 
-def test_live_retorna_ok_sem_dependencies(client):
-    """Testa endpoint GET /live retorna status ok sem consultar DB."""
+def test_live_returns_ok_without_dependencies(client):
+    """Tests GET /live returns status ok without consulting DB."""
     response = client.get("/live")
 
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
 
 
-def test_get_about_retorna_200(client):
-    """Testa endpoint GET /api/v1/about retorna 200."""
+def test_get_about_returns_200(client):
+    """Tests GET /api/v1/about returns 200."""
     response = client.get("/api/v1/about")
 
     assert response.status_code == 200
@@ -49,8 +49,8 @@ def test_get_about_retorna_200(client):
     assert "description" in data
 
 
-def test_listar_projects_retorna_200(client):
-    """Testa endpoint GET /api/v1/projects retorna lista."""
+def test_list_projects_returns_200(client):
+    """Tests GET /api/v1/projects returns a list."""
     # Since we use mock in conftest, it should return mock data
     response = client.get("/api/v1/projects")
 
@@ -61,8 +61,8 @@ def test_listar_projects_retorna_200(client):
     assert isinstance(data["projects"], list)
 
 
-def test_obter_project_existente_retorna_200(client):
-    """Testa GET /api/v1/projects/{id} com project existente."""
+def test_get_existing_project_returns_200(client):
+    """Tests GET /api/v1/projects/{id} with an existing project."""
     # The mock in conftest defines 'project-1' as a valid ID
     response = client.get("/api/v1/projects/project-1")
 
@@ -73,8 +73,8 @@ def test_obter_project_existente_retorna_200(client):
     assert "technologies" in data
 
 
-def test_obter_project_inexistente_retorna_404(client):
-    """Testa GET /api/v1/projects/{id} com project inexistente."""
+def test_get_nonexistent_project_returns_404(client):
+    """Tests GET /api/v1/projects/{id} with a nonexistent project."""
     response = client.get("/api/v1/projects/project-inexistente")
 
     assert response.status_code == 404
@@ -84,8 +84,8 @@ def test_obter_project_inexistente_retorna_404(client):
     assert "message" in data["error"]
 
 
-def test_get_stack_retorna_200(client):
-    """Testa endpoint GET /api/v1/stack retorna tecnologias."""
+def test_get_stack_returns_200(client):
+    """Tests GET /api/v1/stack returns technologies."""
     response = client.get("/api/v1/stack")
 
     assert response.status_code == 200
@@ -95,8 +95,8 @@ def test_get_stack_retorna_200(client):
     assert isinstance(data["stack"], list)
 
 
-def test_listar_experiences_retorna_200(client):
-    """Testa endpoint GET /api/v1/experiences retorna lista."""
+def test_list_experiences_returns_200(client):
+    """Tests GET /api/v1/experiences returns a list."""
     response = client.get("/api/v1/experiences")
 
     assert response.status_code == 200
@@ -106,8 +106,8 @@ def test_listar_experiences_retorna_200(client):
     assert isinstance(data["experiences"], list)
 
 
-def test_listar_formation_retorna_200(client):
-    """Testa endpoint GET /api/v1/formation retorna lista."""
+def test_list_formation_returns_200(client):
+    """Tests GET /api/v1/formation returns a list."""
     response = client.get("/api/v1/formation")
 
     assert response.status_code == 200
@@ -117,13 +117,13 @@ def test_listar_formation_retorna_200(client):
     assert isinstance(data["formations"], list)
 
 
-def test_send_contact_com_dados_validos_retorna_200(client):
-    """Testa POST /api/contact com dados válidos usando Mock secundário."""
+def test_send_contact_with_valid_data_returns_200(client):
+    """Tests POST /api/contact with valid data using a secondary Mock."""
     payload = {
         "name": "Maria Silva",
         "email": "maria@example.com",
-        "subject": "Teste",
-        "message": "Esta é uma message de teste com mais de 10 caracteres.",
+        "subject": "Test",
+        "message": "This is a test message with more than 10 characters.",
     }
 
     mock_uc = AsyncMock()
@@ -142,16 +142,16 @@ def test_send_contact_com_dados_validos_retorna_200(client):
     mock_uc.execute.assert_awaited_once()
 
 
-def test_send_contact_com_dados_invalidos_retorna_sucesso_falso(client):
+def test_send_contact_with_invalid_data_returns_false_success(client):
     """
-    Testa POST /api/contact com dados inválidos.
-    Deve retornar 200 (Sucesso Falso) para não vazar informações about o filtro.
+    Tests POST /api/contact with invalid data.
+    Should return 200 (False Success) to avoid leaking information about the filter.
     """
     payload = {
-        "name": "M",  # Muito curto
-        "email": "email-invalido",
-        "subject": "Abc",  # Muito curto
-        "message": "123",  # Muito curta
+        "name": "M",  # Too short
+        "email": "invalid-email",
+        "subject": "Abc",  # Too short
+        "message": "123",  # Too short
     }
 
     response = client.post("/api/v1/contact", json=payload)

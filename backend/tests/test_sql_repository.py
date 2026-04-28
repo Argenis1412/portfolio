@@ -1,14 +1,14 @@
 """
-Testes de integração do SqlRepository.
+Integration tests for SqlRepository.
 
-Usa um banco SQLite em arquivo temporário para testar as queries reais,
-a serialização manual de JSON e o comportamento do repositório.
+Uses a temporary SQLite file to test real queries,
+manual JSON serialization, and repository behavior.
 
-Por que arquivo temporário e não :memory:?
-- O SqlRepository usa um engine assíncrono (aiosqlite).
-- O codigo de setup usa um engine síncrono para semear os dados.
-- SQLite só compartilha :memory: entre conexões da mesma thread,
-  por isso usamos um arquivo temporário que ambos os engines conseguem ler.
+Why a temporary file and not :memory:?
+- SqlRepository uses an async engine (aiosqlite).
+- The setup code uses a synchronous engine to seed data.
+- SQLite only shares :memory: between connections on the same thread,
+  so we use a temporary file that both engines can read.
 """
 
 import os
@@ -31,26 +31,25 @@ from app.adapters.sql_repository import SqlRepository
 
 
 @pytest.fixture(scope="function")
-def repo_com_dados():
+def seeded_repo():
     """
-    Cria um SqlRepository com banco SQLite temporário populado com dados de teste.
-    O banco é destruído automaticamente ao final de cada teste.
+    Creates a SqlRepository with a temporary SQLite database populated with test data.
+    The database is automatically destroyed at the end of each test.
     """
     # Create temporary file for database
     fd, db_path = tempfile.mkstemp(suffix=".db")
     os.close(fd)
 
-    # URLs for both engines
     sync_url = f"sqlite:///{db_path}"
     async_url = f"sqlite+aiosqlite:///{db_path}"
 
     try:
-        # Cria tabelas e semente com engine síncrono
+        # Create tables and seed with synchronous engine
         sync_engine = create_engine(sync_url, connect_args={"check_same_thread": False})
         SQLModel.metadata.create_all(sync_engine)
 
         with Session(sync_engine) as session:
-            _popular_banco(session)
+            _seed_database(session)
             session.commit()
 
         # Returns async repository pointing to the same file
@@ -64,8 +63,8 @@ def repo_com_dados():
             pass
 
 
-def _popular_banco(session: Session) -> None:
-    """Popula o banco de teste com dados de exemplo."""
+def _seed_database(session: Session) -> None:
+    """Populates the test database with sample data."""
 
     session.add(
         AboutModel(
@@ -152,18 +151,18 @@ def _popular_banco(session: Session) -> None:
 # ─── Testes: check_health ───────────────────────────────────────────────────
 
 
-async def test_check_health_retorna_ok(repo_com_dados):
-    """Health check deve retornar status 'ok' quando o banco está acessível."""
-    resultado = await repo_com_dados.check_health()
+async def test_check_health_returns_ok(seeded_repo):
+    """Health check should return status 'ok' when the database is accessible."""
+    resultado = await seeded_repo.check_health()
     assert resultado["status"] == "ok"
 
 
 # ─── Testes: get_about ───────────────────────────────────────────────────────
 
 
-async def test_get_about_retorna_dados_basicos(repo_com_dados):
-    """get_about deve retornar um dict com os campos do modelo."""
-    resultado = await repo_com_dados.get_about()
+async def test_get_about_returns_basic_data(seeded_repo):
+    """get_about should return a dict with the model fields."""
+    resultado = await seeded_repo.get_about()
 
     assert isinstance(resultado, dict)
     assert resultado["name"] == "Argenis Teste"
@@ -171,9 +170,9 @@ async def test_get_about_retorna_dados_basicos(repo_com_dados):
     assert resultado["title"] == "Backend Developer"
 
 
-async def test_get_about_deserializa_descricao(repo_com_dados):
-    """O campo 'description' deve ser deserializado de JSON string para dict."""
-    resultado = await repo_com_dados.get_about()
+async def test_get_about_deserializes_description(seeded_repo):
+    """The 'description' field should be deserialized from JSON string to dict."""
+    resultado = await seeded_repo.get_about()
 
     assert isinstance(resultado["description"], dict)
     assert resultado["description"]["pt"] == "Descrição PT"
@@ -181,9 +180,9 @@ async def test_get_about_deserializa_descricao(repo_com_dados):
     assert resultado["description"]["es"] == "Descripción ES"
 
 
-async def test_get_about_deserializa_disponibilidade(repo_com_dados):
-    """O campo 'availability' deve ser deserializado de JSON string para dict."""
-    resultado = await repo_com_dados.get_about()
+async def test_get_about_deserializes_availability(seeded_repo):
+    """The 'availability' field should be deserialized from JSON string to dict."""
+    resultado = await seeded_repo.get_about()
 
     assert isinstance(resultado["availability"], dict)
     assert resultado["availability"]["en"] == "Remote"
@@ -192,17 +191,17 @@ async def test_get_about_deserializa_disponibilidade(repo_com_dados):
 # ─── Testes: get_projects ────────────────────────────────────────────────────
 
 
-async def test_get_projects_retorna_lista(repo_com_dados):
-    """get_projects deve retornar uma lista de Project."""
-    projects = await repo_com_dados.get_projects()
+async def test_get_projects_returns_list(seeded_repo):
+    """get_projects should return a list of Project."""
+    projects = await seeded_repo.get_projects()
 
     assert isinstance(projects, list)
     assert len(projects) == 1
 
 
-async def test_get_projects_dados_corretos(repo_com_dados):
-    """Project retornado deve ter os dados corretos seeded."""
-    projects = await repo_com_dados.get_projects()
+async def test_get_projects_returns_correct_data(seeded_repo):
+    """Returned project should have the correct seeded data."""
+    projects = await seeded_repo.get_projects()
     p = projects[0]
 
     assert p.id == "proj-test-1"
@@ -212,9 +211,9 @@ async def test_get_projects_dados_corretos(repo_com_dados):
     assert p.demo is None
 
 
-async def test_get_projects_deserializa_tecnologias(repo_com_dados):
-    """O campo 'technologies' deve ser deserializado de JSON string para list."""
-    projects = await repo_com_dados.get_projects()
+async def test_get_projects_deserializes_technologies(seeded_repo):
+    """The 'technologies' field should be deserialized from JSON string to list."""
+    projects = await seeded_repo.get_projects()
     p = projects[0]
 
     assert isinstance(p.technologies, list)
@@ -222,9 +221,9 @@ async def test_get_projects_deserializa_tecnologias(repo_com_dados):
     assert "FastAPI" in p.technologies
 
 
-async def test_get_projects_deserializa_descricao_curta(repo_com_dados):
-    """O campo 'short_description' deve ser deserializado para dict localizado."""
-    projects = await repo_com_dados.get_projects()
+async def test_get_projects_deserializes_short_description(seeded_repo):
+    """The 'short_description' field should be deserialized to a localized dict."""
+    projects = await seeded_repo.get_projects()
     p = projects[0]
 
     assert isinstance(p.short_description, dict)
@@ -232,18 +231,18 @@ async def test_get_projects_deserializa_descricao_curta(repo_com_dados):
     assert p.short_description["en"] == "Short EN"
 
 
-async def test_get_project_by_id_existente(repo_com_dados):
-    """Busca por ID existente deve retornar o project."""
-    project = await repo_com_dados.get_project_by_id("proj-test-1")
+async def test_get_project_by_id_found(seeded_repo):
+    """Lookup by existing ID should return the project."""
+    project = await seeded_repo.get_project_by_id("proj-test-1")
 
     assert project is not None
     assert project.id == "proj-test-1"
     assert project.name == "Project Teste"
 
 
-async def test_get_project_by_id_inexistente(repo_com_dados):
-    """Busca por ID inexistente deve retornar None."""
-    project = await repo_com_dados.get_project_by_id("id-fantasma-999")
+async def test_get_project_by_id_not_found(seeded_repo):
+    """Lookup by nonexistent ID should return None."""
+    project = await seeded_repo.get_project_by_id("id-fantasma-999")
 
     assert project is None
 
@@ -251,17 +250,17 @@ async def test_get_project_by_id_inexistente(repo_com_dados):
 # ─── Testes: get_stack ──────────────────────────────────────────────────────
 
 
-async def test_get_stack_retorna_lista(repo_com_dados):
-    """get_stack deve retornar uma lista de dicts."""
-    stack = await repo_com_dados.get_stack()
+async def test_get_stack_returns_list(seeded_repo):
+    """get_stack should return a list of dicts."""
+    stack = await seeded_repo.get_stack()
 
     assert isinstance(stack, list)
     assert len(stack) == 3
 
 
-async def test_get_stack_campos_corretos(repo_com_dados):
-    """Cada item do stack deve ter os 4 campos esperados."""
-    stack = await repo_com_dados.get_stack()
+async def test_get_stack_returns_correct_fields(seeded_repo):
+    """Each stack item should have the 4 expected fields."""
+    stack = await seeded_repo.get_stack()
 
     for item in stack:
         assert "name" in item
@@ -270,9 +269,9 @@ async def test_get_stack_campos_corretos(repo_com_dados):
         assert "icon" in item
 
 
-async def test_get_stack_valores_corretos(repo_com_dados):
-    """Stack deve conter as tecnologias inseridas."""
-    stack = await repo_com_dados.get_stack()
+async def test_get_stack_returns_correct_values(seeded_repo):
+    """Stack should contain the inserted technologies."""
+    stack = await seeded_repo.get_stack()
     nomes = [s["name"] for s in stack]
 
     assert "Python" in nomes
@@ -283,17 +282,17 @@ async def test_get_stack_valores_corretos(repo_com_dados):
 # ─── Testes: get_experiences ───────────────────────────────────────────────
 
 
-async def test_get_experiences_retorna_lista(repo_com_dados):
-    """get_experiences deve retornar uma lista de ProfessionalExperience."""
-    experiences = await repo_com_dados.get_experiences()
+async def test_get_experiences_returns_list(seeded_repo):
+    """get_experiences should return a list of ProfessionalExperience."""
+    experiences = await seeded_repo.get_experiences()
 
     assert isinstance(experiences, list)
     assert len(experiences) == 1
 
 
-async def test_get_experiences_deserializa_role(repo_com_dados):
-    """O campo 'role' (localizado) deve ser deserializado para dict."""
-    experiences = await repo_com_dados.get_experiences()
+async def test_get_experiences_deserializes_role(seeded_repo):
+    """The 'role' (localized) field should be deserialized to a dict."""
+    experiences = await seeded_repo.get_experiences()
     exp = experiences[0]
 
     assert isinstance(exp.role, dict)
@@ -301,18 +300,18 @@ async def test_get_experiences_deserializa_role(repo_com_dados):
     assert exp.role["en"] == "Backend Dev"
 
 
-async def test_get_experiences_deserializa_technologies(repo_com_dados):
-    """O campo 'technologies' deve ser deserializado para list."""
-    experiences = await repo_com_dados.get_experiences()
+async def test_get_experiences_deserializes_technologies(seeded_repo):
+    """The 'technologies' field should be deserialized to a list."""
+    experiences = await seeded_repo.get_experiences()
     exp = experiences[0]
 
     assert isinstance(exp.technologies, list)
     assert "Python" in exp.technologies
 
 
-async def test_get_experiences_current_true(repo_com_dados):
-    """Experiência marcada como atual deve ter actual=True."""
-    experiences = await repo_com_dados.get_experiences()
+async def test_get_experiences_current_is_true(seeded_repo):
+    """Experience marked as current should have current=True."""
+    experiences = await seeded_repo.get_experiences()
     exp = experiences[0]
 
     assert exp.current is True
@@ -322,17 +321,17 @@ async def test_get_experiences_current_true(repo_com_dados):
 # ─── Testes: get_formation ───────────────────────────────────────────────────
 
 
-async def test_get_formation_retorna_lista(repo_com_dados):
-    """get_formation deve retornar uma lista de AcademicFormation."""
-    formation = await repo_com_dados.get_formation()
+async def test_get_formation_returns_list(seeded_repo):
+    """get_formation should return a list of AcademicFormation."""
+    formation = await seeded_repo.get_formation()
 
     assert isinstance(formation, list)
     assert len(formation) == 1
 
 
-async def test_get_formation_deserializa_course(repo_com_dados):
-    """O campo 'course' (localizado) deve ser deserializado para dict."""
-    formation = await repo_com_dados.get_formation()
+async def test_get_formation_deserializes_course(seeded_repo):
+    """The 'course' (localized) field should be deserialized to a dict."""
+    formation = await seeded_repo.get_formation()
     f = formation[0]
 
     assert isinstance(f.course, dict)
@@ -340,9 +339,9 @@ async def test_get_formation_deserializa_course(repo_com_dados):
     assert f.course["en"] == "Systems Analysis"
 
 
-async def test_get_formation_dados_corretos(repo_com_dados):
-    """Formação deve ter os dados corretos seeded."""
-    formation = await repo_com_dados.get_formation()
+async def test_get_formation_returns_correct_data(seeded_repo):
+    """Formation should have the correct seeded data."""
+    formation = await seeded_repo.get_formation()
     f = formation[0]
 
     assert f.id == "edu-test-1"

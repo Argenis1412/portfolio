@@ -1,5 +1,5 @@
 """
-Testes de robustez: Idempotência e Rate Limiting.
+Robustness tests: Idempotency and Rate Limiting.
 """
 
 from unittest.mock import AsyncMock
@@ -46,8 +46,8 @@ def test_idempotencia_contact(client):
         app.dependency_overrides.pop(get_send_contact_use_case, None)
 
 
-def test_idempotencia_contact_aceita_header_legado(client):
-    """Mantém compatibilidade com clientes que ainda enviam X-Idempotency-Key."""
+def test_idempotency_contact_accepts_legacy_header(client):
+    """Ensures backward-compatibility with clients still sending X-Idempotency-Key."""
     payload = {
         "name": "Test User",
         "email": "legacy@example.com",
@@ -89,8 +89,8 @@ def test_rate_limiting_projects(client):
     assert "rate limit exceeded" in data["error"]["message"].lower()
 
 
-def test_idempotencia_sem_chave_funciona_normalmente(client):
-    """Testa se funciona sem a chave (sem cache)."""
+def test_idempotency_without_key_works_normally(client):
+    """Tests that the endpoint works without an idempotency key (no caching)."""
     payload = {
         "name": "Test User",
         "email": "test@example.com",

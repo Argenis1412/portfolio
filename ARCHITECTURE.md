@@ -37,7 +37,7 @@ This document details the reasoning behind the architectural choices found in th
 **Why?** Observability is more than just metrics; it's about context. Sentry provides the "why" behind failures, capturing breadcrumbs, request metadata, and stack traces that Prometheus metrics (`/metrics`) can't show. By using `VITE_SENTRY_DSN` on the frontend and `SENTRY_DSN` on the backend, we achieve unified error correlation across the entire user journey.
 
 ## 10. Security Hardening (Defense-in-Depth)
-**Decision**: Implementing `SegurancaHeadersMiddleware` and `GZipMiddleware`.
+**Decision**: Implementing `SecurityHeadersMiddleware` and `GZipMiddleware`.
 **Why?** Browsers rely on specific headers (HSTS, NoSniff, X-Frame-Options) to enforce security policies. While the frontend had these in Vercel, the backend API was unprotected if accessed directly. Adding these headers at the middleware level ensures that every response is hardened by default. Additionally, GZip compression for payloads >1KB significantly improves UI performance on low-bandwidth networks.
 
 ## 11. External Storage for Distributed State
@@ -90,3 +90,10 @@ Building for production introduced real-world challenges that were addressed wit
 ## 16. Internationalization (i18n) & API Contracts
 **Decision**: Enforce "English-First" API contracts while maintaining multi-language content.
 **Reasoning**: All internal identifiers, routes, and database keys were migrated from Portuguese to English to ensure the codebase follows global engineering standards, while still serving localized content via the `/api` responses.
+
+## 17. SRE Alerting Coherence (A2 Basic)
+**Decision**: Separating Error Rate alerts from Latency alerts and optimizing histogram buckets for SLO tracking.
+**Why?** Generic "High Latency" alerts that actually trigger on 5xx errors (the previous state) create noise and confuse incident response. By separating them, we achieve:
+1. **Actionable Alerts**: `HighErrorRate` points to code bugs or database failures; `HighLatencyP95` points to resource exhaustion or N+1 queries.
+2. **SLO Alignment**: Histogram buckets in the backend are now explicitly set to `[50ms, 200ms, ...]` to match the P95 targets defined in the Engineering Playbook.
+3. **Traceability**: All alerts and metrics now include `app_version` as a label, allowing instant correlation between a new deployment and a performance degradation.
