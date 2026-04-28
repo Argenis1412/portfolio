@@ -88,7 +88,7 @@ def _setup_prometheus(app: FastAPI) -> None:
     On Koyeb, it becomes publicly accessible at https://<app>.koyeb.app/metrics.
     """
     try:
-        from prometheus_fastapi_instrumentator import Instrumentator
+        from prometheus_fastapi_instrumentator import Instrumentator, metrics
         from app import __version__
 
         instrumentator = Instrumentator(
@@ -96,12 +96,24 @@ def _setup_prometheus(app: FastAPI) -> None:
             should_ignore_untemplated=True,  # ignores routes without template (invalid 404s)
             should_respect_env_var=False,  # always active
             excluded_handlers=["/metrics"],  # do not auto-instrument /metrics itself
-            buckets=(0.01, 0.025, 0.05, 0.1, 0.2, 0.5, 1.0, 2.5, 5.0, 10.0),
         )
 
+        # Custom metrics configuration for version 7.x
+        instrumentator.add(metrics.requests())
+        instrumentator.add(
+            metrics.latency(
+                buckets=(0.01, 0.025, 0.05, 0.1, 0.2, 0.5, 1.0, 2.5, 5.0, 10.0)
+            )
+        )
 
-        # Add app_version as a constant label to all metrics
-        instrumentator.add_schema_label("app_version", __version__)
+        # Application version metric (Info type)
+        try:
+            from prometheus_client import Info
+            i = Info("app_version", "Current application version")
+            i.info({"version": __version__})
+        except Exception:
+            # Avoid crashing if Info is already registered (re-imports)
+            pass
 
         instrumentator.instrument(app).expose(
             app,
