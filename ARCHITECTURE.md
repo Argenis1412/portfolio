@@ -37,7 +37,7 @@ This document details the reasoning behind the architectural choices found in th
 **Why?** Observability is more than just metrics; it's about context. Sentry provides the "why" behind failures, capturing breadcrumbs, request metadata, and stack traces that Prometheus metrics (`/metrics`) can't show. By using `VITE_SENTRY_DSN` on the frontend and `SENTRY_DSN` on the backend, we achieve unified error correlation across the entire user journey.
 
 ## 10. Security Hardening (Defense-in-Depth)
-**Decision**: Implementing `SegurancaHeadersMiddleware` and `GZipMiddleware`.
+**Decision**: Implementing `SecurityHeadersMiddleware` and `GZipMiddleware`.
 **Why?** Browsers rely on specific headers (HSTS, NoSniff, X-Frame-Options) to enforce security policies. While the frontend had these in Vercel, the backend API was unprotected if accessed directly. Adding these headers at the middleware level ensures that every response is hardened by default. Additionally, GZip compression for payloads >1KB significantly improves UI performance on low-bandwidth networks.
 
 ## 11. External Storage for Distributed State
