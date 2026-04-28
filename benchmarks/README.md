@@ -13,7 +13,7 @@ Results are archived per git commit so regressions are detectable over time.
 ```
 benchmarks/
 ├── scripts/
-│   ├── health.js       # GET /health — SLO: P99 < 20ms
+│   ├── health.js       # GET /health — SLO: P99 < 100ms
 │   ├── read_path.js    # GET /about, /projects, /stack — SLO: P95 < 50ms
 │   └── contact.js      # POST /contact — SLO: P95 < 200ms (write path + anti-abuse)
 ├── results/

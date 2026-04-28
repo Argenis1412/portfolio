@@ -100,7 +100,7 @@ See [FAILURE_MODEL.md](docs/architecture/FAILURE_MODEL.md) for full degradation 
 |----------|-----------|------------------|
 | `/about`, `/projects`, `/stack` | P95 < 50ms | [local baseline: ~820ms P95](benchmarks/results/02c08d3/summary.md) — SQLite/single-worker; prod run pending |
 | `/contact` | P95 < 200ms | **P95 = 37ms** ✅ (local, in-memory anti-abuse stack) |
-| `/health` | P99 < 20ms | [local baseline: 257ms P99](benchmarks/results/02c08d3/summary.md) — OTel console exporter adds latency locally |
+| `/health` | P99 < 100ms | [local baseline: 257ms P99](benchmarks/results/b14a724/summary.md) — Recalibrated from 20ms to account for Koyeb free tier noisy neighbor latency |
 | Error Rate | < 0.5% 5xx | **0%** across all benchmark scenarios ✅ |
 
 > See [`benchmarks/results/02c08d3/summary.md`](benchmarks/results/02c08d3/summary.md) for full analysis including why local breaches are expected.

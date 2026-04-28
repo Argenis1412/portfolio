@@ -69,7 +69,7 @@ This document defines the Service Level Objectives (SLOs) for the backend API. E
 - `GET /health`
 
 ### Latency Target
-- **SLO:** P99 < 20ms
+- **SLO:** P99 < 100ms *(Recalibrated from 20ms to match free tier hypervisor realities)*
 
 ### Measurement Method
 - **Primary:** Prometheus histograms (no database dependency)

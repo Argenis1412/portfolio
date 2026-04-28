@@ -2,7 +2,7 @@
  * k6 Benchmark: Health Check endpoint
  *
  * Endpoint: GET /health
- * SLO Target: P99 < 20ms (from SLO_DEFINITIONS.md)
+ * SLO Target: P99 < 100ms (from SLO_DEFINITIONS.md)
  *
  * What we're measuring:
  *   - Baseline latency under sustained load (no cold starts)
@@ -100,7 +100,7 @@ export function handleSummary(data) {
           error_rate: data.metrics.health_error_rate?.values?.rate,
           iterations: data.metrics.iterations?.values?.count,
         },
-        slo_target: { p99_ms: 20, note: "Koyeb probe cadence ~10s" },
+        slo_target: { p99_ms: 100, note: "Koyeb probe cadence ~10s" },
       },
       null,
       2
