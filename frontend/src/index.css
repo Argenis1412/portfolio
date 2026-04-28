@@ -25,6 +25,7 @@
   --color-status-degraded: var(--color-status-degraded);
   --color-status-recovering: var(--color-status-recovering);
   --color-status-stable: var(--color-status-stable);
+  --color-status-synthetic: var(--color-status-synthetic);
 
   /* Semantic status tokens (light/dark aware) */
   --color-status-ok: var(--color-status-ok);
@@ -76,8 +77,8 @@
   --color-status-info-border:     rgba(96, 165, 250, 0.30);
   --color-status-info-text:       #1E40AF; /* Blue-800 */
   --color-status-synthetic:       #5B21B6; /* Violet-800 */
-  --color-status-synthetic-bg:    rgba(221, 214, 254, 0.10);
-  --color-status-synthetic-border: rgba(167, 139, 250, 0.30);
+  --color-status-synthetic-bg:    rgba(139, 92, 246, 0.08);
+  --color-status-synthetic-border: rgba(139, 92, 246, 0.25);
 
   /* Semantic status tokens - light mode (Darkened for contrast) */
   --color-status-ok:          #047857; /* Green-700 */
@@ -122,6 +123,9 @@
   --color-status-stable:          #6EE7B7;
   --color-status-ok-text:         #6EE7B7;
   --color-status-info-text:       #93C5FD;
+  --color-status-synthetic:      #A78BFA; /* Violet-400 */
+  --color-status-synthetic-bg:   rgba(167, 139, 250, 0.15);
+  --color-status-synthetic-border: rgba(167, 139, 250, 0.30);
   --color-status-synthetic-text:  #C4B5FD;
 
   /* Semantic status tokens - dark mode */
