@@ -7,17 +7,26 @@ groups:
         labels:
           severity: critical
         annotations:
-          summary: "A API do Portfólio caiu"
-          description: "O endpoint /metrics da API não pode ser rastreado por mais de 1 minuto."
+          summary: "Backend API is offline"
+          description: "The /metrics endpoint is unreachable for more than 1 minute."
 
-      - alert: HighLatency
-        # Acionar caso o tempo mediano (p50) das requisições passe de 2 segundos.
-        # Usa metricas auto-geradas pelo prometheus-fastapi-instrumentator (http_request_duration_seconds).
-        # A sintaxe depende da estrutura do histograma. Simplificaremos para demonstracao.
-        expr: rate(http_requests_total{status=~"5.."}[1m]) > 5
+      - alert: HighErrorRate
+        # Captures server-side errors (5xx)
+        expr: rate(http_requests_total{status_code="5xx"}[1m]) > 0
         for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High HTTP 5xx error rate"
+          description: "The API is returning 5xx errors. Action required to check logs for INC-xxx candidates."
+
+      - alert: HighLatencyP95
+        # Aligned with SLOs (P95 targets). Baseline set at 500ms for general alerts.
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 0.5
+        for: 2m
         labels:
           severity: warning
         annotations:
-          summary: "Taxa de Erro 5xx Elevada"
-          description: "Mais de 5 requests resultaram num HTTP 5xx no último 1 minuto."
+          summary: "P95 latency threshold exceeded"
+          description: "95% of requests are slower than 500ms. Check for N+1 queries or resource exhaustion."
+
