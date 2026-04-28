@@ -90,3 +90,10 @@ Building for production introduced real-world challenges that were addressed wit
 ## 16. Internationalization (i18n) & API Contracts
 **Decision**: Enforce "English-First" API contracts while maintaining multi-language content.
 **Reasoning**: All internal identifiers, routes, and database keys were migrated from Portuguese to English to ensure the codebase follows global engineering standards, while still serving localized content via the `/api` responses.
+
+## 17. SRE Alerting Coherence (A2 Basic)
+**Decision**: Separating Error Rate alerts from Latency alerts and optimizing histogram buckets for SLO tracking.
+**Why?** Generic "High Latency" alerts that actually trigger on 5xx errors (the previous state) create noise and confuse incident response. By separating them, we achieve:
+1. **Actionable Alerts**: `HighErrorRate` points to code bugs or database failures; `HighLatencyP95` points to resource exhaustion or N+1 queries.
+2. **SLO Alignment**: Histogram buckets in the backend are now explicitly set to `[50ms, 200ms, ...]` to match the P95 targets defined in the Engineering Playbook.
+3. **Traceability**: All alerts and metrics now include `app_version` as a label, allowing instant correlation between a new deployment and a performance degradation.

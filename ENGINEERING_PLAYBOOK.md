@@ -234,3 +234,59 @@ Accepted side effects: what the fix broke or constrained
 ---
 
 *Last updated: v1.6.0*
+
+---
+
+## 📈 Implementation Plan: SRE Portfolio Refinement
+
+This document defines the execution strategy to demonstrate engineering judgment under uncertainty. The core focus is technical honesty: real data (including noise), explicit trade-offs, and human friction.
+
+> [!NOTE]
+> **Time Expectation**: 10–12 weeks (part-time). Controlled execution to avoid scope creep.
+
+### PROJECT STATUS
+
+#### Phase 1: Hygiene and Benchmarks (✅ COMPLETED)
+
+- [x] **1. Reproducible Benchmark (B1)**
+  - **Tool**: k6 implemented with scripts in `/benchmarks/scripts/` (health.js, read_path.js, contact.js).
+  - **Execution**: PowerShell runner (`benchmarks/run.ps1`) created to archive results per commit.
+  - **Transparency**: README updated with Real Baseline and honest analysis of failures (SQLite vs Prod).
+
+- [x] **2. Basic Security (A1)**
+  - **Hygiene**: Swagger/ReDoc disabled conditionally in production.
+  - **Validation**: Test suite added in `test_configuration.py` guaranteeing behavior.
+
+- [x] **3. Coherent SRE Alerts (A2 Basic)**
+  - **Objective**: Monitoring aligned with SLOs without over-design.
+  - **Result**: Error alerts (5xx) separated from latency degradations. Metrics enriched with `app_version` for total traceability. Naming conventions standardized in English.
+
+---
+
+### UPCOMING PHASES
+
+#### Phase 2: Credibility and Incidents (Weeks 4-7)
+
+> [!WARNING]
+> **Strict Timebox and Scope**: Maximum 2 Case Studies. Writing and data extraction are slow; expanding scope here guarantees not finishing.
+
+- [ ] **4. Case Studies (D1 + D2)**
+  - Human Friction and Partial Cause: Document real incidents (e.g., INC-002: cold-starts) with "before vs after" metrics.
+  - Data (Real vs Reproduced): Strict labeling in reports.
+
+- [ ] **5. Real vs Synthetic Signal (B2)**
+  - **Tasks**: Explicit visual indicator (Badge) to distinguish real from synthetic telemetry.
+  - **Confidence Score**: Simplified implementation (maximum 2 lines of logic).
+
+#### Phase 3: Visual Consistency (Week 8)
+
+> [!WARNING]
+> **Non-negotiable Timebox**: 3–4 real days maximum. Focus on typography and reducing visual noise.
+
+- [ ] Premium aesthetic improvement focused on readability of technical data.
+
+#### Phase 4: Closure and Release (Weeks 9-12)
+
+- [ ] Final smoke tests.
+- [ ] Technical release notes documenting accepted degradations.
+- [ ] Final hygiene check in production.
