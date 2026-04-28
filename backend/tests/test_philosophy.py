@@ -3,7 +3,7 @@ import pytest
 from app.adapters.repository import JsonRepository
 
 
-def test_api_philosophy_retorna_200_e_formato_valido(client) -> None:
+def test_api_philosophy_returns_200_and_valid_format(client) -> None:
     """Verifies the /api/v1/philosophy endpoint returns 200 OK and valid JSON schema."""
     response = client.get("/api/v1/philosophy")
 

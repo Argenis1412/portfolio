@@ -5,8 +5,8 @@ import pytest
 from app.settings import Settings
 
 
-def test_debug_desactivado_en_produccion():
-    """Garante que debug é falso em produção."""
+def test_debug_disabled_in_production():
+    """Ensures debug is disabled in production."""
     os.environ["AMBIENTE"] = "producao"
     settings = Settings()
     assert settings.debug is False
@@ -14,8 +14,8 @@ def test_debug_desactivado_en_produccion():
         del os.environ["AMBIENTE"]
 
 
-def test_debug_activado_en_desarrollo():
-    """Garante que debug é verdadeiro em desenvolvimento."""
+def test_debug_enabled_in_development():
+    """Ensures debug is enabled in development."""
     os.environ["AMBIENTE"] = "desenvolvimento"
     settings = Settings()
     assert settings.debug is True
@@ -23,8 +23,8 @@ def test_debug_activado_en_desarrollo():
         del os.environ["AMBIENTE"]
 
 
-def test_debug_activado_en_local():
-    """Garante que debug é verdadeiro no ambiente local."""
+def test_debug_enabled_in_local():
+    """Ensures debug is enabled in local environment."""
     os.environ["AMBIENTE"] = "local"
     settings = Settings()
     assert settings.debug is True
@@ -32,7 +32,7 @@ def test_debug_activado_en_local():
         del os.environ["AMBIENTE"]
 
 
-def test_validate_production_falha_sem_redis_e_metrics_auth():
+def test_validate_production_fails_without_redis_and_metrics_auth():
     os.environ["AMBIENTE"] = "producao"
     os.environ["DATABASE_URL"] = (
         "postgresql+asyncpg://postgres:secret@db.example.com:5432/postgres"
@@ -56,7 +56,7 @@ def test_validate_production_falha_sem_redis_e_metrics_auth():
         os.environ.pop(key, None)
 
 
-def test_validate_production_aceita_supabase_e_metrics_auth():
+def test_validate_production_accepts_supabase_and_metrics_auth():
     os.environ["AMBIENTE"] = "producao"
     os.environ["DATABASE_URL"] = (
         "postgresql+asyncpg://postgres:secret@db.example.com:5432/postgres"
@@ -81,7 +81,7 @@ def test_validate_production_aceita_supabase_e_metrics_auth():
 # --- A1: Security — API docs must be disabled in production ---
 
 
-def test_docs_accesibles_en_local(client):
+def test_docs_accessible_in_local(client):
     """
     /openapi.json must be accessible in local/dev environments.
     The test client runs with AMBIENTE=local (default), so the app was
@@ -91,7 +91,7 @@ def test_docs_accesibles_en_local(client):
     assert response.status_code == 200
 
 
-def test_root_no_expone_docs_en_produccion(client):
+def test_root_does_not_expose_docs_in_production(client):
     """
     Root endpoint must not advertise /docs path in production.
     Leaking the docs path is an unnecessary hint for attackers.
@@ -112,7 +112,7 @@ def test_root_no_expone_docs_en_produccion(client):
         )
 
 
-def test_root_expone_docs_en_local(client):
+def test_root_exposes_docs_in_local(client):
     """Root endpoint includes 'docs' key only in non-production environments."""
     from unittest.mock import PropertyMock, patch
 
