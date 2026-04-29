@@ -32,7 +32,7 @@ def get_email_or_ip_key(request: Request) -> str:
     back to client IP. Synchronous for full compatibility with the Limiter.
     """
     # Identity is populated by MiddlewareRequisicao for POST /api/v1/contact
-    identity = getattr(request.state, "identidade", None)
+    identity = getattr(request.state, "identity", None)
     if identity:
         return identity
 

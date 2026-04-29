@@ -11,7 +11,7 @@ from app.main import app
 # client = TestClient(app) # Removed to use fixture
 
 
-def test_idempotencia_contact(client):
+def test_idempotency_contact(client):
     """Testa se o envio duplicado com mesma chave retorna cache."""
     payload = {
         "name": "Test User",
@@ -118,7 +118,7 @@ def test_idempotency_without_key_works_normally(client):
         app.dependency_overrides.pop(get_send_contact_use_case, None)
 
 
-def test_idempotencia_em_progresso(client):
+def test_idempotency_in_progress(client):
     """Testa se requisições simultâneas com mesma chave retornam 409."""
     payload = {
         "name": "Test User",
@@ -145,7 +145,7 @@ def test_idempotencia_em_progresso(client):
         store._cache.pop("progress-key-456", None)
 
 
-def test_rate_limiting_contact_por_email(client):
+def test_rate_limiting_contact_by_email(client):
     """Testa se o limite de 10/dia por e-mail funciona."""
     payload = {
         "name": "Test User",

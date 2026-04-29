@@ -7,10 +7,10 @@ complex fields are stored as TEXT and manually converted in the repository.
 """
 
 import json
-from datetime import date
+from datetime import date, datetime
 from typing import Optional
 
-from sqlalchemy import JSON, Column, Text, TypeDecorator
+from sqlalchemy import JSON, Column, DateTime, Text, TypeDecorator
 from sqlmodel import Field, SQLModel
 
 
@@ -130,3 +130,4 @@ class ChaosIncidentModel(SQLModel, table=True):  # type: ignore[call-arg]
     requests_dropped: int = 0
     recovery_ms: int = 0
     error_triggered: bool = False
+    deleted_at: Optional[datetime] = Field(default=None, sa_column=Column(DateTime(timezone=True), nullable=True))

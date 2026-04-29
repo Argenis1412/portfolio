@@ -22,7 +22,7 @@ from app.adapters.sql_models import (  # noqa: E402
     ProjectModel,  # noqa: F401
     AboutModel,  # noqa: F401
     StackModel,  # noqa: F401
-    ChaosIncidentModelo,  # noqa: F401
+    ChaosIncidentModel,  # noqa: F401
 )
 from app.settings import settings  # noqa: E402
 
