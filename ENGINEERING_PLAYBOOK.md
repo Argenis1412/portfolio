@@ -167,7 +167,7 @@ test_chaos_persistence_failure_does_not_crash_simulation     # ← the test that
 **Document the SLO before optimizing**: Write down the target before writing the code. Current targets for this project:
 - Static portfolio data (`/about`, `/projects`, `/stack`): P95 < 50ms
 - Contact endpoint (`/contact`): P95 < 200ms (includes Redis round-trip)
-- Health check (`/health`): P99 < 100ms *(Recalibrated from 20ms to reflect Koyeb Free Tier cold-start network constraints)*
+- Health check (`/health`): P99 < 100ms *(Recalibrated from 20ms to reflect Koyeb Free Tier cold-start network constraints; P95 Cold: ~3.5s, P95 Warm: ~1.3s)*
 
 **N+1 is a bug, not a todo**: A query inside a loop is a defect. Detect with `EXPLAIN ANALYZE` before it reaches production.
 

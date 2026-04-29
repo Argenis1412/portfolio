@@ -77,9 +77,13 @@ This document defines the Service Level Objectives (SLOs) for the backend API. E
 - **Chaos Testing:** Chaos Playground includes health check latency in telemetry
 
 ### Current Status
-- **Status:** ✅ BEING MET
-- **Evidence:** ADR-05 removed PostgreSQL dependency from `/health`. Keep-alive targets fast endpoint.
-- **Historical Issue:** INC-002 showed keep-alive hitting `/health` was not enough when data endpoints still required DB
+- **Status:** ⚠️ DEGRADATION OBSERVED
+- **Evidence:** Benchmarks against production (commit 3775843) show a clear distinction between infrastructure states:
+    - **P95 Cold Start:** ~3.5s (Initial container spin-up on Koyeb Free Tier).
+    - **P95 Warm State:** ~1.3s (Steady state traffic, 5 concurrent VUs).
+    - **Ramp-up Failure:** Timeouts observed at 20 concurrent VUs (Error rate ~9.7%), indicating infrastructure capacity limits.
+- **Root Cause:** Primarily Koyeb Free Tier cold-starts and "noisy neighbor" latency on shared hypervisors. ADR-05 removal of DB dependency fixed the logic, but infra remains non-deterministic under load.
+- **Historical Issue:** INC-002 showed keep-alive hitting `/health` was not enough when data endpoints still required DB.
 
 ### Alert Trigger
 - P99 > 20ms for 3 minutes
