@@ -130,4 +130,6 @@ class ChaosIncidentModel(SQLModel, table=True):  # type: ignore[call-arg]
     requests_dropped: int = 0
     recovery_ms: int = 0
     error_triggered: bool = False
-    deleted_at: Optional[datetime] = Field(default=None, sa_column=Column(DateTime(timezone=True), nullable=True))
+    deleted_at: Optional[datetime] = Field(
+        default=None, sa_column=Column(DateTime(timezone=True), nullable=True)
+    )
