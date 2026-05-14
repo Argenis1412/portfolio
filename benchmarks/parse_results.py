@@ -24,7 +24,7 @@ def parse_k6_results(file_path):
             p99 = statistics.quantiles(values, n=100)[98]
             print(f"Scenario: {scenario}")
             print(f"  Count: {len(values)}")
-            print(f"  Avg: {sum(values)/len(values):.2f}ms")
+            print(f"  Avg: {sum(values) / len(values):.2f}ms")
             print(f"  P95: {p95:.2f}ms")
             print(f"  P99: {p99:.2f}ms")
             print(f"  Max: {max(values):.2f}ms")
