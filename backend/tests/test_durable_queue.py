@@ -368,7 +368,7 @@ async def test_worker_reports_consumer_lag():
 
 
 @pytest.mark.asyncio
-async def test_worker_acks_before_xadd_on_retry():
+async def test_worker_xadds_before_xack_on_retry():
     mock_redis = AsyncMock()
     payload = {
         "job_name": "send_contact_email",
@@ -418,4 +418,4 @@ async def test_worker_acks_before_xadd_on_retry():
         await worker.run()
 
     assert "xack" in calls and "xadd" in calls
-    assert calls.index("xack") < calls.index("xadd")
+    assert calls.index("xadd") < calls.index("xack")

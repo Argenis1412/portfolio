@@ -184,13 +184,14 @@ class StreamWorker:
                         await self._move_to_dlq(
                             job_id, body, "max_age_exceeded", "TimeoutError"
                         )
+                        client = await self._get_client()
+                        await client.xack(self.stream_name, self.group_name, job_id)
                         return
                 except Exception:
                     pass
 
-            # ACK original first to avoid races with XAUTOCLAIM before re-enqueue
+            # Re-enqueue before ACK to maintain at-least-once semantics
             client = await self._get_client()
-            await client.xack(self.stream_name, self.group_name, job_id)
             body["meta"] = meta
             await client.xadd(
                 self.stream_name,
@@ -201,6 +202,7 @@ class StreamWorker:
                 maxlen=10000,
                 approximate=True,
             )
+            await client.xack(self.stream_name, self.group_name, job_id)
             return
 
         # For terminal failures, publish to DLQ first, then ACK original.
