@@ -379,7 +379,12 @@ async def test_worker_acks_before_xadd_on_retry():
     mock_redis.xreadgroup.return_value = [
         (
             "contact_jobs",
-            [("job-1", {"job_name": "send_contact_email", "payload": json.dumps(payload)})],
+            [
+                (
+                    "job-1",
+                    {"job_name": "send_contact_email", "payload": json.dumps(payload)},
+                )
+            ],
         )
     ]
 
