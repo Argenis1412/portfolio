@@ -38,7 +38,6 @@ Global Edge UI deployment.
     *   **Output Directory**: `dist`
 3.  **Environment Variables**:
     *   `VITE_API_URL`: `https://api.argenisbackend.com/api/v1`
-    *   `VITE_ENABLE_CHAOS_PLAYGROUND`: `true` (enables the Chaos Playground and Trace Viewer UI)
     *   **Live Status**: `https://api.argenisbackend.com/health` (JSON Health Check)
 
 ---
