@@ -81,9 +81,9 @@ def test_rate_limiting_projects(client):
 
     # The 21st must fail
     resp = client.get("/api/v1/projects")
-    assert (
-        resp.status_code == 429
-    ), f"Expected 429, got {resp.status_code}. Body: {resp.text}"
+    assert resp.status_code == 429, (
+        f"Expected 429, got {resp.status_code}. Body: {resp.text}"
+    )
     data = resp.json()
     assert "error" in data, f"Key 'error' not in response: {data}"
     assert "rate limit exceeded" in data["error"]["message"].lower()
@@ -227,6 +227,6 @@ def test_rate_limiter_redis_fallback_fail_open_on_readonly(client, monkeypatch):
     # We simply verify the endpoint is reachable (fail-open behavior is the default
     # for the slowapi decorator on read-only routes).
     resp = client.get("/api/v1/projects")
-    assert (
-        resp.status_code == 200
-    ), f"Expected 200 (read-only route should be available), got {resp.status_code}."
+    assert resp.status_code == 200, (
+        f"Expected 200 (read-only route should be available), got {resp.status_code}."
+    )
