@@ -22,6 +22,7 @@ from app.worker_metrics import (
     inc_processed,
     inc_retry,
     observe_job_duration,
+    set_lag,
     set_pel_size,
 )
 
@@ -218,11 +219,15 @@ class StreamWorker:
         while self.running:
             try:
                 try:
-                    pel_summary = await client.xpending(self.stream_name, self.group_name)
+                    pel_summary = await client.xpending(
+                        self.stream_name, self.group_name
+                    )
                     pending = (
                         pel_summary.get("pending", 0)
                         if isinstance(pel_summary, dict)
-                        else int(pel_summary[0]) if pel_summary else 0
+                        else int(pel_summary[0])
+                        if pel_summary
+                        else 0
                     )
                     set_lag(int(pending))
                 except Exception:
