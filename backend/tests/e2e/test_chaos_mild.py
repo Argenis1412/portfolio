@@ -13,11 +13,11 @@ def test_chaos_mild(api_client, chaos_teardown):
     metrics = metrics_resp.json()
 
     # Assert acceptable degradation (P95 should not exceed a large threshold, and error rate should be low)
-    assert 0 <= metrics.get("p95_ms", 0) <= 2000, (
-        f"P95 latency {metrics.get('p95_ms')}ms out of acceptable degraded window"
-    )
-    assert 0.0 <= metrics.get("error_rate", 0.0) <= 0.15, (
-        f"Error rate {metrics.get('error_rate')} exceeds MILD threshold"
-    )
+    assert (
+        0 <= metrics.get("p95_ms", 0) <= 2000
+    ), f"P95 latency {metrics.get('p95_ms')}ms out of acceptable degraded window"
+    assert (
+        0.0 <= metrics.get("error_rate", 0.0) <= 0.15
+    ), f"Error rate {metrics.get('error_rate')} exceeds MILD threshold"
 
     # 3. Teardown handles the recovery validation

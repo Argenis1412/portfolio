@@ -107,9 +107,9 @@ def test_root_does_not_expose_docs_in_production(client):
         response = client.get("/")
         assert response.status_code == 200
         data = response.json()
-        assert "docs" not in data, (
-            "Root endpoint must not include 'docs' key in production"
-        )
+        assert (
+            "docs" not in data
+        ), "Root endpoint must not include 'docs' key in production"
 
 
 def test_root_exposes_docs_in_local(client):

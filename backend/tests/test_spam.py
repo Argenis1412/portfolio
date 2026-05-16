@@ -162,9 +162,9 @@ def test_spam_score_url_with_trailing_punctuation_no_false_penalty():
         message="Visit https://alpha.com or www.beta.com.",
         email="user@example.com",
     )
-    assert score <= 30, (
-        f"Expected score <= 30 for different domains with trailing punct, got {score}"
-    )
+    assert (
+        score <= 30
+    ), f"Expected score <= 30 for different domains with trailing punct, got {score}"
 
 
 def test_spam_score_adjacent_urls_with_comma_are_separated():
