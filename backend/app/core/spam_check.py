@@ -3,7 +3,6 @@ Spam scoring and classification logic.
 """
 
 import re
-import unicodedata
 
 # List of suspicious keywords common in spam (with word boundaries to avoid false positives)
 SPAM_KEYWORDS = [
@@ -90,9 +89,7 @@ def calculate_spam_score(
     if name:
         for char in name:
             if char.isnumeric():
-                category = unicodedata.category(char)
-                if category in {"Nl", "No"}:
-                    return 100
+                return 100
 
     if subject and not SUBJECT_REGEX.fullmatch(subject):
         return 100

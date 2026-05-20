@@ -266,3 +266,16 @@ def test_name_rejects_unicode_fraction_numeric_character():
         subject="Opportunity",
     )
     assert score == 100
+
+
+def test_name_rejects_unicode_lo_numeric_character():
+    """Rejects numeric chars even when unicode category is Lo."""
+    from app.core.spam_check import calculate_spam_score
+
+    score = calculate_spam_score(
+        message="Hello, I would like to discuss a role.",
+        email="recruiter@example.com",
+        name="John 四",
+        subject="Opportunity",
+    )
+    assert score == 100
