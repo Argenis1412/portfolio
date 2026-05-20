@@ -12,7 +12,7 @@
  *   history   — rolling last-20 P95 values for the sparkline chart
  *   previous  — snapshot of the prior fetch for delta calculation
  */
-import { useMemo, useRef, useState, useCallback, useEffect } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import { useCurrentTime } from './useCurrentTime';
 import { useQuery } from '@tanstack/react-query';
 import { fetchMetricsSummary, type MetricsSummary } from '../api/portfolioService';
@@ -141,6 +141,7 @@ export function useLiveMetrics() {
     retry: 1,
   });
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (query.data && query.dataUpdatedAt) {
       const data = query.data;
@@ -174,6 +175,7 @@ export function useLiveMetrics() {
       previousRef.current = data;
     }
   }, [query.data, query.dataUpdatedAt]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   // Derive combined status: backend signal + local latency threshold
   const latestSample = sampleHistory[sampleHistory.length - 1] ?? null;
