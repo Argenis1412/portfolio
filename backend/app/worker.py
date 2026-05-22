@@ -48,11 +48,13 @@ class StreamWorker:
         stream_name: str = "contact_jobs",
         group_name: str = "email_workers",
         consumer_name: str = f"worker-{os.getpid()}",
+        recovery_interval: int = 300,
     ):
         self.redis_url = redis_url
         self.stream_name = stream_name
         self.group_name = group_name
         self.consumer_name = consumer_name
+        self.recovery_interval = recovery_interval
         self.running = True
         self._redis: redis.Redis | None = None
         self.redis_disabled_until: float | None = None
@@ -247,8 +249,8 @@ class StreamWorker:
         """
         while self.running:
             try:
-                await asyncio.sleep(_RECOVERY_INTERVAL)
                 if self._is_redis_disabled():
+                    await asyncio.sleep(self.recovery_interval)
                     continue
 
                 client = await self._get_client()
@@ -278,11 +280,12 @@ class StreamWorker:
                             "recovery_reclaimed",
                             count=reclaimed_count,
                         )
+                await asyncio.sleep(self.recovery_interval)
             except asyncio.CancelledError:
                 break
             except Exception as e:
                 logger.error("recovery_loop_error", error=str(e))
-                await asyncio.sleep(10)
+                await asyncio.sleep(self.recovery_interval)
 
     async def run(self):
         """Main consumption loop with separate recovery task."""
