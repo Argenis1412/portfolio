@@ -18,9 +18,7 @@ describe('API URL normalizer (ensureApiV1Suffix)', () => {
     const originalDev = import.meta.env.DEV;
     const originalProd = import.meta.env.PROD;
     
-    // @ts-expect-error mocking read-only property
     import.meta.env.DEV = true;
-    // @ts-expect-error mocking read-only property
     import.meta.env.PROD = false;
 
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -29,9 +27,7 @@ describe('API URL normalizer (ensureApiV1Suffix)', () => {
     expect(warnSpy).toHaveBeenCalled();
     warnSpy.mockRestore();
 
-    // @ts-expect-error restoring read-only property
     import.meta.env.DEV = originalDev;
-    // @ts-expect-error restoring read-only property
     import.meta.env.PROD = originalProd;
   });
 
@@ -39,16 +35,12 @@ describe('API URL normalizer (ensureApiV1Suffix)', () => {
     const originalDev = import.meta.env.DEV;
     const originalProd = import.meta.env.PROD;
     
-    // @ts-expect-error mocking read-only property
     import.meta.env.DEV = false;
-    // @ts-expect-error mocking read-only property
     import.meta.env.PROD = true;
     
     expect(() => ensureApiV1Suffix('https://api.test.com')).toThrowError(/It must end with \/api\/v1 in production/);
     
-    // @ts-expect-error restoring read-only property
     import.meta.env.DEV = originalDev;
-    // @ts-expect-error restoring read-only property
     import.meta.env.PROD = originalProd;
   });
 });
