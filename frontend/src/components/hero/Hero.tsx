@@ -38,7 +38,7 @@ export const Hero = React.memo(() => {
           {/* Status badge */}
           {status !== 'degraded' && status !== 'down' && (
             <m.div
-              initial={{ opacity: 0 }}
+              initial={animate ? { opacity: 0 } : false}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.4 }}
               className="mb-4 flex justify-center md:justify-start"
@@ -70,7 +70,7 @@ export const Hero = React.memo(() => {
           {/* Dynamic system state line */}
           {status !== 'degraded' && status !== 'down' && (
             <m.div
-              initial={{ opacity: 0 }}
+              initial={animate ? { opacity: 0 } : false}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3, delay: 0.15 }}
             >
@@ -86,7 +86,7 @@ export const Hero = React.memo(() => {
           {/* KPI strip */}
           {data && (
             <m.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={animate ? { opacity: 0, y: 10 } : false}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.2 }}
             >
@@ -100,7 +100,7 @@ export const Hero = React.memo(() => {
 
           {/* CTAs */}
           <m.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={animate ? { opacity: 0, y: 10 } : false}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.25 }}
             className="flex flex-col sm:flex-row gap-3 mt-8 justify-center md:justify-start"
@@ -121,7 +121,7 @@ export const Hero = React.memo(() => {
 
           {/* Secondary links */}
           <m.div
-            initial={{ opacity: 0 }}
+            initial={animate ? { opacity: 0 } : false}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3, delay: 0.35 }}
             className="flex gap-4 mt-4 justify-center md:justify-start"
