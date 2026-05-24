@@ -1,5 +1,5 @@
 import React from 'react';
-import { m } from 'framer-motion';
+import { m, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '../../context/LanguageContext';
 import { scrollToSection } from '../../utils/scrollToSection';
 import { useLiveMetrics } from '../../hooks/useLiveMetrics';
@@ -17,6 +17,11 @@ export const Hero = React.memo(() => {
     latestSample, effectiveP95, confidenceScore, confidenceLabel, recoveryState,
   } = useLiveMetrics();
 
+  // Animation guard: respect prefers-reduced-motion and desktop-only
+  const reducedMotion = useReducedMotion();
+  const isDesktop = typeof window !== 'undefined' && window.innerWidth > 768;
+  const animate = !reducedMotion && isDesktop;
+
   return (
     <section id="hero" className="pt-12 pb-12 md:pt-16 md:pb-20 px-4 max-w-6xl mx-auto relative min-h-[85vh] flex items-center">
       {/* Background glow */}
@@ -25,15 +30,15 @@ export const Hero = React.memo(() => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center w-full">
         {/* Left Column: Hero Content */}
         <m.div
-          initial={window.innerWidth > 768 ? { x: -20, opacity: 0 } : false}
+          initial={animate ? { x: -20, opacity: 0 } : false}
           animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.4 }}
           className="max-w-xl text-center md:text-left mx-auto md:mx-0"
         >
           {/* Status badge */}
           {status !== 'degraded' && status !== 'down' && (
             <m.div
-              initial={{ opacity: 0 }}
+              initial={animate ? { opacity: 0 } : false}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.4 }}
               className="mb-4 flex justify-center md:justify-start"
@@ -44,9 +49,9 @@ export const Hero = React.memo(() => {
 
           {/* H1 */}
           <m.h1
-            initial={window.innerWidth > 768 ? { opacity: 0, x: -10 } : { opacity: 1, x: 0 }}
+            initial={animate ? { opacity: 0, x: -10 } : { opacity: 1, x: 0 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
+            transition={{ duration: 0.3 }}
             className="text-4xl md:text-6xl font-extrabold tracking-tight mb-4 text-app-text"
           >
             {t('hero.title')}
@@ -54,9 +59,9 @@ export const Hero = React.memo(() => {
 
           {/* Subtitle */}
           <m.p
-            initial={window.innerWidth > 768 ? { opacity: 0, x: -10 } : { opacity: 1, x: 0 }}
+            initial={animate ? { opacity: 0, x: -10 } : { opacity: 1, x: 0 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
             className="text-lg md:text-xl text-app-muted max-w-2xl mx-auto md:mx-0"
           >
             {t('hero.subtitle')}
@@ -65,9 +70,9 @@ export const Hero = React.memo(() => {
           {/* Dynamic system state line */}
           {status !== 'degraded' && status !== 'down' && (
             <m.div
-              initial={{ opacity: 0 }}
+              initial={animate ? { opacity: 0 } : false}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
+              transition={{ duration: 0.3, delay: 0.15 }}
             >
               <SystemStateLine
                 status={status}
@@ -81,9 +86,9 @@ export const Hero = React.memo(() => {
           {/* KPI strip */}
           {data && (
             <m.div
-              initial={{ opacity: 0, y: 10 }}
+              initial={animate ? { opacity: 0, y: 10 } : false}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.35 }}
+              transition={{ duration: 0.3, delay: 0.2 }}
             >
               <KpiStrip
                 data={data}
@@ -95,9 +100,9 @@ export const Hero = React.memo(() => {
 
           {/* CTAs */}
           <m.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={animate ? { opacity: 0, y: 10 } : false}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.45 }}
+            transition={{ duration: 0.3, delay: 0.25 }}
             className="flex flex-col sm:flex-row gap-3 mt-8 justify-center md:justify-start"
           >
             <button
@@ -116,9 +121,9 @@ export const Hero = React.memo(() => {
 
           {/* Secondary links */}
           <m.div
-            initial={{ opacity: 0 }}
+            initial={animate ? { opacity: 0 } : false}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
+            transition={{ duration: 0.3, delay: 0.35 }}
             className="flex gap-4 mt-4 justify-center md:justify-start"
           >
             <a
@@ -134,9 +139,9 @@ export const Hero = React.memo(() => {
 
         {/* Right Column: System State Sidecar */}
         <m.div
-          initial={window.innerWidth > 768 ? { x: 20, opacity: 0 } : false}
+          initial={animate ? { x: 20, opacity: 0 } : false}
           animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          transition={{ duration: 0.4, delay: 0.1 }}
           className="hidden md:block"
         >
           <SystemSidecar
