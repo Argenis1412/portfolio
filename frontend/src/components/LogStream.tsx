@@ -6,7 +6,7 @@
  * Auto-scrolls to latest. Filterable by level.
  */
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { m, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { useLog } from '../hooks/useLog';
 import { type LogLevel } from '../types/logs';
@@ -33,16 +33,20 @@ export default function LogStream() {
   const { entries, clear } = useLog();
   const [filter, setFilter] = useState<FilterLevel>('ALL');
   const bodyRef = useRef<HTMLDivElement | null>(null);
+  const prefersReducedMotion = useReducedMotion();
 
   const filtered = filter === 'ALL'
     ? entries
     : entries.filter((e) => e.level === filter);
 
   // Keep the newest visible inside the terminal body without moving the page.
+  // rAF separates the scroll write from React's commit phase, avoiding forced reflow.
   useEffect(() => {
-    if (entries.length > 0 && bodyRef.current) {
-      bodyRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    if (entries.length === 0 || !bodyRef.current) return;
+    const raf = requestAnimationFrame(() => {
+      bodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    return () => cancelAnimationFrame(raf);
   }, [entries.length]);
 
   const handleFilter = useCallback((level: FilterLevel) => {
@@ -111,13 +115,13 @@ export default function LogStream() {
             {filtered.length === 0 ? (
               <p className="text-white/40">{'>'} {t('logs.waiting')}</p>
             ) : (
-              <AnimatePresence mode="popLayout" initial={false}>
+              <AnimatePresence initial={false}>
                 {[...filtered].reverse().map((entry) => (
                   <m.div
                     key={entry.id}
-                    initial={{ opacity: 0, x: -4 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.15 }}
+                    initial={prefersReducedMotion ? false : { opacity: 0, x: -4 }}
+                    animate={prefersReducedMotion ? {} : { opacity: 1, x: 0 }}
+                    transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
                     className="flex gap-2 min-w-0"
                   >
                     <span className="text-white/60 flex-shrink-0">
