@@ -1,5 +1,5 @@
-import React from 'react';
-import { m, useReducedMotion } from 'framer-motion';
+import React, { useState } from 'react';
+import { m, useReducedMotion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../../context/LanguageContext';
 import { scrollToSection } from '../../utils/scrollToSection';
 import { useLiveMetrics } from '../../hooks/useLiveMetrics';
@@ -21,6 +21,7 @@ export const Hero = React.memo(() => {
   const reducedMotion = useReducedMotion();
   const isDesktop = typeof window !== 'undefined' && window.innerWidth > 768;
   const animate = !reducedMotion && isDesktop;
+  const [showMetrics, setShowMetrics] = useState(false);
 
   return (
     <section id="hero" className="pt-12 pb-12 md:pt-16 md:pb-20 px-4 max-w-6xl mx-auto relative min-h-[85vh] flex items-center">
@@ -107,13 +108,13 @@ export const Hero = React.memo(() => {
           >
             <button
               onClick={() => scrollToSection('metrics')}
-              className="bg-app-primary hover:bg-app-primary-hover text-app-primary-text font-bold py-3 px-8 rounded-full transition-smooth premium-shadow font-mono text-sm"
+              className="bg-app-primary hover:bg-app-primary-hover text-app-primary-text font-bold py-3 px-8 rounded-full transition-smooth premium-shadow text-sm"
             >
               → {t('hero.cta_metrics')}
             </button>
             <button
               onClick={() => scrollToSection('chaos')}
-              className="bg-transparent hover:bg-app-surface-hover text-app-text font-semibold py-3 px-8 rounded-full transition-smooth border border-app-border font-mono text-sm"
+              className="bg-transparent hover:bg-app-surface-hover text-app-text font-semibold py-3 px-8 rounded-full transition-smooth border border-app-border text-sm"
             >
               → {t('hero.cta_chaos')}
             </button>
@@ -135,6 +136,42 @@ export const Hero = React.memo(() => {
               {t('hero.cta_secondary')} ↗
             </a>
           </m.div>
+
+          {/* Mobile metrics accordion */}
+          <div className="md:hidden mt-6">
+            <button
+              onClick={() => setShowMetrics(!showMetrics)}
+              className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg border border-app-border bg-app-surface/40 font-mono text-xs text-app-muted hover:text-app-primary hover:border-app-primary/40 transition-colors"
+            >
+              {showMetrics ? `[ ${t('hero.metrics.hide')} ]` : `[ ${t('hero.metrics.show')} ]`}
+            </button>
+            <AnimatePresence initial={false}>
+              {showMetrics && (
+                <m.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: reducedMotion ? 0 : 0.2 }}
+                  className="overflow-hidden"
+                >
+                  <div className="mt-4">
+                    <SystemSidecar
+                      status={status}
+                      data={data}
+                      sampleHistory={sampleHistory}
+                      recentTraces={recentTraces}
+                      latestTrace={latestTrace}
+                      latestSample={latestSample}
+                      effectiveP95={effectiveP95}
+                      confidenceScore={confidenceScore}
+                      confidenceLabel={confidenceLabel}
+                      recoveryState={recoveryState}
+                    />
+                  </div>
+                </m.div>
+              )}
+            </AnimatePresence>
+          </div>
         </m.div>
 
         {/* Right Column: System State Sidecar */}
