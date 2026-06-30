@@ -55,7 +55,7 @@
   "lint-staged": {
     "*.{ts,tsx}": [
       "eslint --fix",
-      "npm run test -- --run"
+      "npm run test -- --run --passWithNoTests"
     ]
   },
   "description": "> **Live Demo:** [portfolio-argenis1412.vercel.app →](https://portfolio-argenis1412s-projects.vercel.app)",

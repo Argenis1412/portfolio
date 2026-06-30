@@ -51,18 +51,29 @@ export default function About() {
                     <div key={category} className="border border-app-border rounded-lg bg-app-surface overflow-hidden">
                       <button
                         onClick={() => setExpandedCat(isExpanded ? null : category)}
-                        className="w-full flex items-center justify-between p-3 text-left hover:bg-app-surface-hover transition-colors focus-visible:outline-none"
+                        aria-expanded={isExpanded}
+                        aria-controls={`skills-${category}`}
+                        className="w-full flex items-start justify-between gap-3 p-3 text-left hover:bg-app-surface-hover transition-colors focus-visible:outline-none"
                       >
-                        <span className="text-xs font-mono uppercase tracking-widest text-app-text">
-                          {t(`stack.category.${category}`)}
-                        </span>
+                        <div className="flex flex-col items-start flex-1 min-w-0">
+                          <span className="text-xs font-mono uppercase tracking-widest text-app-text">
+                            {t(`stack.category.${category}`)}
+                          </span>
+                          {catSkills.length > 0 && (
+                            <span className="block mt-1 text-[10px] font-mono text-app-muted/70 truncate max-w-full">
+                              {catSkills.slice(0, 3).map(s => s.name).join(' · ')}
+                              {catSkills.length > 3 && ` · +${catSkills.length - 3}`}
+                            </span>
+                          )}
+                        </div>
                         <ChevronRight
-                          className={`w-4 h-4 text-app-primary transition-transform duration-300 ${isExpanded ? 'rotate-90' : ''}`}
+                          className={`w-4 h-4 text-app-primary transition-transform duration-300 flex-shrink-0 mt-0.5 ${isExpanded ? 'rotate-90' : ''}`}
                         />
                       </button>
                       <AnimatePresence initial={false}>
                         {isExpanded && (
                           <m.div
+                            id={`skills-${category}`}
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}

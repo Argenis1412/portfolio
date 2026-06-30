@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Code2, Mail, Copy, Check } from 'lucide-react';
+import { Code2, Mail, Copy, Check, Github, Linkedin } from 'lucide-react';
 import { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAbout } from '../hooks/useApi';
@@ -17,6 +17,8 @@ export default function Footer() {
   const [copiedWhatsApp, setCopiedWhatsApp] = useState(false);
   const email = about?.email || 'argenisbackend@gmail.com';
   const phone = about?.phone || '(41) 9 9510-3364';
+  const githubUrl = about?.github || 'https://github.com/Argenis1412';
+  const linkedinUrl = about?.linkedin || 'https://www.linkedin.com/in/argenis1412/';
 
   const handleCopyEmail = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -115,6 +117,26 @@ export default function Footer() {
             >
               <Code2 className="w-3.5 h-3.5" />
               <span>{t('projects.source_code')}</span>
+            </a>
+            <a
+              href={githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub"
+              className="inline-flex items-center gap-2 rounded-full border border-app-border bg-app-surface/40 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-app-muted transition-colors hover:border-app-primary/40 hover:text-app-primary"
+            >
+              <Github className="w-3.5 h-3.5" />
+              <span>GitHub</span>
+            </a>
+            <a
+              href={linkedinUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="LinkedIn"
+              className="inline-flex items-center gap-2 rounded-full border border-app-border bg-app-surface/40 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-app-muted transition-colors hover:border-app-primary/40 hover:text-app-primary"
+            >
+              <Linkedin className="w-3.5 h-3.5" />
+              <span>LinkedIn</span>
             </a>
           </div>
 
