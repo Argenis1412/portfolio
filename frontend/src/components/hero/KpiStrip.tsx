@@ -2,6 +2,8 @@
 import { useLanguage } from '../../context/LanguageContext';
 import { type MetricsSummary } from '../../api/types';
 import DeltaBadge from '../ui/DeltaBadge';
+import { useChaosMode } from '../../hooks/useChaosMode';
+import { Zap } from 'lucide-react';
 
 interface KpiStripProps {
   data: MetricsSummary;
@@ -11,6 +13,8 @@ interface KpiStripProps {
 
 export function KpiStrip({ data, previous, effectiveP95 }: KpiStripProps) {
   const { t } = useLanguage();
+  const { preset } = useChaosMode();
+  const chaosActive = preset !== 'off';
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -62,6 +66,12 @@ export function KpiStrip({ data, previous, effectiveP95 }: KpiStripProps) {
                {item.value}
              </span>
              {item.delta}
+             {item.label === t('hero.kpi.error_rate') && chaosActive && (
+               <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider text-status-warn border border-status-warn/30 bg-status-warn/5 w-full">
+                 <Zap className="w-2.5 h-2.5" />
+                 {t('hero.kpi.chaos_active')}
+               </span>
+             )}
              {item.footnote && (
                <div className="text-[9px] text-status-ok/80 mt-1">
                  {item.footnote}
