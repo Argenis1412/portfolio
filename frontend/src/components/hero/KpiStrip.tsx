@@ -30,6 +30,7 @@ export function KpiStrip({ data, previous, effectiveP95 }: KpiStripProps) {
       delta: <DeltaBadge current={effectiveP95} previous={previous?.p95_ms ?? null} unit="ms" />,
     },
      {
+       id: 'error_rate',
        label: t('hero.kpi.error_rate'),
        value: data.error_rate_pct,
        className: data.error_rate > 0.045 ? 'text-status-error' : 'text-app-text',
@@ -66,7 +67,7 @@ export function KpiStrip({ data, previous, effectiveP95 }: KpiStripProps) {
                {item.value}
              </span>
              {item.delta}
-             {item.label === t('hero.kpi.error_rate') && chaosActive && (
+             {item.id === 'error_rate' && chaosActive && (
                <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider text-status-warn border border-status-warn/30 bg-status-warn/5 w-full">
                  <Zap className="w-2.5 h-2.5" />
                  {t('hero.kpi.chaos_active')}

@@ -51,6 +51,8 @@ export default function About() {
                     <div key={category} className="border border-app-border rounded-lg bg-app-surface overflow-hidden">
                       <button
                         onClick={() => setExpandedCat(isExpanded ? null : category)}
+                        aria-expanded={isExpanded}
+                        aria-controls={`skills-${category}`}
                         className="w-full flex items-start justify-between gap-3 p-3 text-left hover:bg-app-surface-hover transition-colors focus-visible:outline-none"
                       >
                         <div className="flex flex-col items-start flex-1 min-w-0">
@@ -71,6 +73,7 @@ export default function About() {
                       <AnimatePresence initial={false}>
                         {isExpanded && (
                           <m.div
+                            id={`skills-${category}`}
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: 'auto', opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}

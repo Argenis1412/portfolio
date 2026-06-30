@@ -141,6 +141,8 @@ export const Hero = React.memo(() => {
           <div className="md:hidden mt-6">
             <button
               onClick={() => setShowMetrics(!showMetrics)}
+              aria-expanded={showMetrics}
+              aria-controls="mobile-metrics"
               className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded-lg border border-app-border bg-app-surface/40 font-mono text-xs text-app-muted hover:text-app-primary hover:border-app-primary/40 transition-colors"
             >
               {showMetrics ? `[ ${t('hero.metrics.hide')} ]` : `[ ${t('hero.metrics.show')} ]`}
@@ -148,6 +150,7 @@ export const Hero = React.memo(() => {
             <AnimatePresence initial={false}>
               {showMetrics && (
                 <m.div
+                  id="mobile-metrics"
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
