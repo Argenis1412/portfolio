@@ -11,6 +11,7 @@ export function useAnimatedNumber(target: number, duration = 300): number {
   const rafRef = useRef<number>(0);
   const startTimeRef = useRef(0);
   const startValueRef = useRef(target);
+  const currentValueRef = useRef(target);
   const initializedRef = useRef(false);
 
   const animateTo = useCallback((from: number, to: number) => {
@@ -22,12 +23,14 @@ export function useAnimatedNumber(target: number, duration = 300): number {
       const progress = Math.min(elapsed / duration, 1);
       const eased = easeOut(progress);
       const current = from + (to - from) * eased;
+      currentValueRef.current = current;
 
       setDisplayed(current);
 
       if (progress < 1) {
         rafRef.current = requestAnimationFrame(tick);
       } else {
+        currentValueRef.current = to;
         startValueRef.current = to;
       }
     };
@@ -39,15 +42,17 @@ export function useAnimatedNumber(target: number, duration = 300): number {
     if (!initializedRef.current) {
       initializedRef.current = true;
       startValueRef.current = target;
+      currentValueRef.current = target;
       return;
     }
 
     if (prefersReducedMotion) {
       startValueRef.current = target;
+      currentValueRef.current = target;
       return;
     }
 
-    const from = startValueRef.current;
+    const from = currentValueRef.current;
     if (from === target) return;
 
     animateTo(from, target);

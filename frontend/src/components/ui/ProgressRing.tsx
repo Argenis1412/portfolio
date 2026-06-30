@@ -28,7 +28,13 @@ export default function ProgressRing({
   const color = ringColor(value);
 
   return (
-    <span className={`inline-flex items-center gap-1.5 ${className}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 ${className}`}
+      role="progressbar"
+      aria-valuenow={Math.round(Math.min(Math.max(value, 0), 100))}
+      aria-valuemin={0}
+      aria-valuemax={100}
+    >
       <svg
         width={size}
         height={size}

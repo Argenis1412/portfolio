@@ -27,6 +27,7 @@ export function useAnimatedPolyline(targetPoints: string, duration = 350): strin
   const rafRef = useRef<number>(0);
   const startTimeRef = useRef(0);
   const fromPointsRef = useRef<number[][]>([]);
+  const currentPointsRef = useRef<number[][]>([]);
   const initializedRef = useRef(false);
 
   const animateBetween = useCallback((fromPts: number[][], toPts: number[][]) => {
@@ -41,12 +42,14 @@ export function useAnimatedPolyline(targetPoints: string, duration = 350): strin
         const [tx, ty] = toPts[i];
         return [fx + (tx - fx) * eased, fy + (ty - fy) * eased];
       });
+      currentPointsRef.current = interpolated;
 
       setDisplayed(serializePoints(interpolated));
 
       if (progress < 1) {
         rafRef.current = requestAnimationFrame(tick);
       } else {
+        currentPointsRef.current = toPts;
         fromPointsRef.current = toPts;
       }
     };
@@ -57,21 +60,28 @@ export function useAnimatedPolyline(targetPoints: string, duration = 350): strin
   useEffect(() => {
     if (!initializedRef.current) {
       initializedRef.current = true;
-      fromPointsRef.current = parsePoints(targetPoints);
+      const pts = parsePoints(targetPoints);
+      fromPointsRef.current = pts;
+      currentPointsRef.current = pts;
       return;
     }
 
     if (prefersReducedMotion) {
-      fromPointsRef.current = parsePoints(targetPoints);
+      const pts = parsePoints(targetPoints);
+      fromPointsRef.current = pts;
+      currentPointsRef.current = pts;
       return;
     }
 
-    const fromPts = fromPointsRef.current;
     const toPts = parsePoints(targetPoints);
+    const fromPts = currentPointsRef.current.length === toPts.length
+      ? currentPointsRef.current
+      : fromPointsRef.current;
 
     // Skip interpolation when point count changes — snap directly
     if (fromPts.length !== toPts.length || toPts.length === 0) {
       fromPointsRef.current = toPts;
+      currentPointsRef.current = toPts;
       return;
     }
 
