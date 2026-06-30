@@ -168,6 +168,8 @@ export default function MetricsSparkline({
           threshold === 60
             ? effectiveP95 >= 45 && effectiveP95 <= 60
             : effectiveP95 >= 85 && effectiveP95 <= 100;
+        const isAbove =
+          threshold === 60 ? effectiveP95 > 60 : effectiveP95 > 100;
         const color = threshold === 100 ? '#ef4444' : '#f59e0b';
         return (
           <g key={threshold}>
@@ -184,6 +186,9 @@ export default function MetricsSparkline({
                     transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
                   />
             )}
+            {isAbove && (
+              <rect x={0} y={y - 4} width={width} height={8} fill={color} opacity={0.12} />
+            )}
             <line
               x1="0"
               y1={y}
@@ -193,6 +198,7 @@ export default function MetricsSparkline({
               strokeOpacity={compact ? 0.12 : 0.18}
               strokeDasharray="2 2"
               strokeWidth="1"
+              style={{ filter: isApproaching || isAbove ? `drop-shadow(0 0 3px ${color})` : undefined }}
             />
             {!compact && (
               <text x={width - 2} y={y - 2} textAnchor="end" fontSize="8" fontFamily="monospace" fill="#7c7469" opacity="0.5">
@@ -280,9 +286,10 @@ export default function MetricsSparkline({
         return (
           <m.g
             key={trace.id}
-            initial={{ opacity: prefersReducedMotion ? 1 : 0 }}
-            animate={{ opacity: 1 }}
+            initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.7 }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, delay: index * 0.08 }}
+            style={{ transformOrigin: `${point.x}px ${labelY}px` }}
           >
             <m.line
               x1={point.x}
@@ -310,8 +317,9 @@ export default function MetricsSparkline({
                     <rect
                       x="-2" y="0" width={boxWidth} height="12"
                       fill={metaSeverity} fillOpacity="0.4" rx="2"
+                      style={{ transition: 'fill 300ms ease' }}
                     />
-                    <text x="2" y="9" fontSize="7" fill="#fff" fontFamily="monospace">
+                    <text x="2" y="9" fontSize="7" fill="#fff" fontFamily="monospace" style={{ transition: 'fill 300ms ease' }}>
                       {metaText}
                     </text>
                   </g>
