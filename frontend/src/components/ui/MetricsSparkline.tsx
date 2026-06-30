@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
+import { m, useReducedMotion } from 'framer-motion';
 import type { TraceEntry } from '../../services/TraceEmitter';
 import { type MetricSample } from '../../types/metrics';
+import { useAnimatedPolyline } from '../../hooks/useAnimatedPolyline';
 
 interface MetricsSparklineProps {
   samples: MetricSample[];
@@ -25,6 +27,13 @@ function annotationWidth(label: string, meta?: string) {
   return metaWidth;
 }
 
+function severityColor(impactPct?: string): string {
+  const pct = impactPct ? parseFloat(impactPct) : NaN;
+  if (isNaN(pct) || pct < 10) return '#10b981';
+  if (pct <= 50) return '#f59e0b';
+  return '#ef4444';
+}
+
 export default function MetricsSparkline({
   samples,
   traces = [],
@@ -32,10 +41,11 @@ export default function MetricsSparkline({
   height = 64,
   compact = false,
 }: MetricsSparklineProps) {
+  const prefersReducedMotion = useReducedMotion();
+
   const model = useMemo(() => {
-    // Build a flat baseline if there isn't enough real data yet
-    const PLACEHOLDER_VALUE = 30; // below 60ms healthy threshold — visually neutral
-    const REFERENCE_TIME = 1713620000000; // Stable reference for placeholders
+    const PLACEHOLDER_VALUE = 30;
+    const REFERENCE_TIME = 1713620000000;
     const effectiveSamples: MetricSample[] =
       samples.length >= 2
         ? samples
@@ -49,10 +59,10 @@ export default function MetricsSparkline({
     const _samples =
       effectiveSamples.length === 1
         ? [
-             { ...effectiveSamples[0], timestamp: effectiveSamples[0].timestamp - 15000 },
-             effectiveSamples[0],
-           ]
-         : effectiveSamples;
+            { ...effectiveSamples[0], timestamp: effectiveSamples[0].timestamp - 15000 },
+            effectiveSamples[0],
+          ]
+        : effectiveSamples;
 
     const paddingX = compact ? 4 : 8;
     const paddingY = compact ? 6 : 10;
@@ -119,7 +129,19 @@ export default function MetricsSparkline({
     };
   }, [compact, height, samples, traces, width]);
 
+  const animatedMainPolyline = useAnimatedPolyline(model.polyline, 350);
+  const animatedRealPolyline = useAnimatedPolyline(model.realPolyline, 350);
+  const animatedSyntheticPolyline = useAnimatedPolyline(model.syntheticPolyline, 350);
+
   if (!model) return null;
+
+  const areaPathD = (() => {
+    const pts = animatedMainPolyline.trim().split(/\s+/).filter(Boolean);
+    if (pts.length < 2) return '';
+    const firstX = pts[0].split(',')[0];
+    const lastX = pts[pts.length - 1].split(',')[0];
+    return `M ${firstX},${height} L ${pts.join(' L ')} L ${lastX},${height} Z`;
+  })();
 
   const thresholdLines = [60, 100].map((threshold) => {
     const y = 6 + (height - 12) - ((threshold - model.min) / ((model.max - model.min) || 1)) * (height - 12);
@@ -130,6 +152,7 @@ export default function MetricsSparkline({
 
   const latestPoint = model.points.at(-1);
   const latestSample = model.samples.at(-1);
+  const effectiveP95 = latestSample?.value ?? 0;
 
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} aria-hidden>
@@ -140,25 +163,51 @@ export default function MetricsSparkline({
         </linearGradient>
       </defs>
 
-      {thresholdLines.map(({ threshold, y }) => (
-        <g key={threshold}>
-          <line
-            x1="0"
-            y1={y}
-            x2={width}
-            y2={y}
-            stroke={threshold === 100 ? '#ef4444' : '#f59e0b'}
-            strokeOpacity={compact ? 0.12 : 0.18}
-            strokeDasharray="2 2"
-            strokeWidth="1"
-          />
-          {!compact && (
-            <text x={width - 2} y={y - 2} textAnchor="end" fontSize="8" fontFamily="monospace" fill="#7c7469" opacity="0.5">
-              {threshold}ms
-            </text>
-          )}
-        </g>
-      ))}
+      {thresholdLines.map(({ threshold, y }) => {
+        const isApproaching =
+          threshold === 60
+            ? effectiveP95 >= 45 && effectiveP95 <= 60
+            : effectiveP95 >= 85 && effectiveP95 <= 100;
+        const isAbove =
+          threshold === 60 ? effectiveP95 > 60 : effectiveP95 > 100;
+        const color = threshold === 100 ? '#ef4444' : '#f59e0b';
+        return (
+          <g key={threshold}>
+            {isApproaching && (
+              prefersReducedMotion
+                ? <rect x={0} y={y - 4} width={width} height={8} fill={color} opacity={0.08} />
+                : <m.rect
+                    x={0}
+                    y={y - 4}
+                    width={width}
+                    height={8}
+                    fill={color}
+                    animate={{ opacity: [0.05, 0.15, 0.05] }}
+                    transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
+                  />
+            )}
+            {isAbove && (
+              <rect x={0} y={y - 4} width={width} height={8} fill={color} opacity={0.12} />
+            )}
+            <line
+              x1="0"
+              y1={y}
+              x2={width}
+              y2={y}
+              stroke={color}
+              strokeOpacity={compact ? 0.12 : 0.18}
+              strokeDasharray="2 2"
+              strokeWidth="1"
+              style={{ filter: isApproaching || isAbove ? `drop-shadow(0 0 3px ${color})` : undefined }}
+            />
+            {!compact && (
+              <text x={width - 2} y={y - 2} textAnchor="end" fontSize="8" fontFamily="monospace" fill="#7c7469" opacity="0.5">
+                {threshold}ms
+              </text>
+            )}
+          </g>
+        );
+      })}
 
       <line
         x1="0"
@@ -176,12 +225,13 @@ export default function MetricsSparkline({
         </text>
       )}
 
-      {/* Area under the curve */}
-      <path
-        d={`M ${model.points[0].x},${height} L ${model.points.map(p => `${p.x},${p.y}`).join(' L ')} L ${model.points[model.points.length - 1].x},${height} Z`}
-        fill="url(#sparkline-gradient)"
-        stroke="none"
-      />
+      {areaPathD && (
+        <path
+          d={areaPathD}
+          fill="url(#sparkline-gradient)"
+          stroke="none"
+        />
+      )}
 
       <polyline
         fill="none"
@@ -189,22 +239,22 @@ export default function MetricsSparkline({
         strokeWidth={compact ? '1.5' : '2'}
         strokeLinejoin="round"
         strokeLinecap="round"
-        points={model.polyline}
+        points={animatedMainPolyline}
         strokeOpacity="0.18"
       />
 
-      {model.realPolyline && (
+      {animatedRealPolyline && (
         <polyline
           fill="none"
           stroke="#14d3a5"
           strokeWidth={compact ? '1.5' : '2'}
           strokeLinejoin="round"
           strokeLinecap="round"
-          points={model.realPolyline}
+          points={animatedRealPolyline}
         />
       )}
 
-      {model.syntheticPolyline && (
+      {animatedSyntheticPolyline && (
         <polyline
           fill="none"
           stroke="#a855f7"
@@ -212,7 +262,7 @@ export default function MetricsSparkline({
           strokeLinejoin="round"
           strokeLinecap="round"
           strokeDasharray="5 3"
-          points={model.syntheticPolyline}
+          points={animatedSyntheticPolyline}
           strokeOpacity="0.95"
         />
       )}
@@ -231,54 +281,79 @@ export default function MetricsSparkline({
         const laneHeights = [18, 38, 58];
         const labelX = previous && isCrowded && clampedX <= previous.point.x ? Math.max(6, clampedX - 20) : clampedX;
         const labelY = Math.max(16, Math.min(laneHeights[lane], height - (metaText ? 34 : 20)));
+        const metaSeverity = severityColor(trace.impactPct);
 
         return (
-          <g key={trace.id}>
-            <line
+          <m.g
+            key={trace.id}
+            initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.7 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, delay: index * 0.08 }}
+            style={{ transformOrigin: `${point.x}px ${labelY}px` }}
+          >
+            <m.line
               x1={point.x}
-              y1="0"
+              y1={0}
               x2={point.x}
               y2={height}
               stroke={markerColor}
               strokeWidth="1"
-              strokeDasharray={isSpike ? "none" : "3 2"}
-              strokeOpacity={0.45}
+              strokeDasharray={isSpike ? 'none' : '3 2'}
+              initial={{ strokeOpacity: prefersReducedMotion ? 0.45 : 0 }}
+              animate={{ strokeOpacity: 0.45 }}
+              transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, delay: index * 0.08 }}
             />
             {!compact && (
               <g transform={`translate(${labelX}, ${labelY})`}>
-                 <rect
-                    x="-2" y="-10" width={boxWidth} height="14"
-                    fill={markerColor} rx="2" fillOpacity="0.82"
-                 />
-                 <text x="2" y="1" fontSize="9" fontWeight="bold" fill="#000" fontFamily="monospace">
-                   {isSpike ? 'SPIKE' : style.label}
-                 </text>
+                <rect
+                  x="-2" y="-10" width={boxWidth} height="14"
+                  fill={markerColor} rx="2" fillOpacity="0.82"
+                />
+                <text x="2" y="1" fontSize="9" fontWeight="bold" fill="#000" fontFamily="monospace">
+                  {isSpike ? 'SPIKE' : style.label}
+                </text>
                 {metaText && (
-                   <g transform="translate(0, 14)">
-                     <rect
-                       x="-2" y="0" width={boxWidth} height="12"
-                       fill="#000" fillOpacity="0.6" rx="2"
-                     />
-                     <text x="2" y="9" fontSize="7" fill="#fff" fontFamily="monospace opacity-80">
-                       {metaText}
-                     </text>
-                   </g>
-                 )}
+                  <g transform="translate(0, 14)">
+                    <rect
+                      x="-2" y="0" width={boxWidth} height="12"
+                      fill={metaSeverity} fillOpacity="0.4" rx="2"
+                      style={{ transition: 'fill 300ms ease' }}
+                    />
+                    <text x="2" y="9" fontSize="7" fill="#fff" fontFamily="monospace" style={{ transition: 'fill 300ms ease' }}>
+                      {metaText}
+                    </text>
+                  </g>
+                )}
               </g>
             )}
-          </g>
+          </m.g>
         );
       })}
 
       {latestPoint && latestSample && (
-        <circle
-          cx={latestPoint.x}
-          cy={latestPoint.y}
-          r={compact ? '2.5' : '3'}
-          fill={latestSample.source === 'synthetic' ? '#a855f7' : '#14d3a5'}
-          stroke="#020617"
-          strokeWidth="0.7"
-        />
+        prefersReducedMotion
+          ? (
+            <circle
+              cx={latestPoint.x}
+              cy={latestPoint.y}
+              r={compact ? 2.5 : 3}
+              fill={latestSample.source === 'synthetic' ? '#a855f7' : '#14d3a5'}
+              stroke="#020617"
+              strokeWidth="0.7"
+            />
+          )
+          : (
+            <m.circle
+              cx={latestPoint.x}
+              cy={latestPoint.y}
+              r={compact ? 2.5 : 3}
+              fill={latestSample.source === 'synthetic' ? '#a855f7' : '#14d3a5'}
+              stroke="#020617"
+              strokeWidth="0.7"
+              animate={{ r: compact ? [2.5, 3.5, 2.5] : [3, 4, 3] }}
+              transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+            />
+          )
       )}
     </svg>
   );
