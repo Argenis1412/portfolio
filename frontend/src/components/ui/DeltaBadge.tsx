@@ -1,4 +1,4 @@
-
+import { m, AnimatePresence } from 'framer-motion';
 
 interface DeltaBadgeProps {
   current: number;
@@ -20,9 +20,19 @@ export function DeltaBadge({ current, previous, unit = '', invertColor = true, d
   const val = decimals > 0 ? Math.abs(diff).toFixed(decimals) : Math.abs(Math.round(diff)).toString();
 
   return (
-    <span className={`text-[10px] font-mono ml-1 ${color}`}>
-      ({sign}{isUp ? '' : '-'}{val}{unit})
-    </span>
+    <AnimatePresence mode="wait">
+      <m.span
+        key={diff}
+        initial={{ opacity: 0, y: -4, scale: 0.9 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 4, scale: 0.9 }}
+        transition={{ duration: 0.2 }}
+        className={`text-[10px] font-mono ml-1 ${color}`}
+        style={{ display: 'inline-block' }}
+      >
+        ({sign}{isUp ? '' : '-'}{val}{unit})
+      </m.span>
+    </AnimatePresence>
   );
 }
 
