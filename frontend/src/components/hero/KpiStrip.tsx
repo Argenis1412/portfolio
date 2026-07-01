@@ -4,6 +4,7 @@ import { type MetricsSummary } from '../../api/types';
 import DeltaBadge from '../ui/DeltaBadge';
 import { useChaosMode } from '../../hooks/useChaosMode';
 import { Zap } from 'lucide-react';
+import { useAnimatedNumber } from '../../hooks/useAnimatedNumber';
 
 interface KpiStripProps {
   data: MetricsSummary;
@@ -15,6 +16,7 @@ export function KpiStrip({ data, previous, effectiveP95 }: KpiStripProps) {
   const { t } = useLanguage();
   const { preset } = useChaosMode();
   const chaosActive = preset !== 'off';
+  const animatedP95 = useAnimatedNumber(effectiveP95);
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -26,7 +28,7 @@ export function KpiStrip({ data, previous, effectiveP95 }: KpiStripProps) {
   const items = [
     {
       label: t('hero.kpi.latency'),
-      value: `${effectiveP95}ms`,
+      value: `${Math.round(animatedP95)}ms`,
       delta: <DeltaBadge current={effectiveP95} previous={previous?.p95_ms ?? null} unit="ms" />,
     },
      {
