@@ -29,6 +29,7 @@ export const LiveStatusBadge = React.memo(({ status, latencyMs, source }: LiveSt
   return (
     <span
       title={t('metrics.latency_tooltip')}
+      aria-live="polite"
       className="inline-flex items-center gap-1.5 text-xs font-mono px-2.5 py-1 rounded-full border border-app-border bg-app-surface/60 backdrop-blur-sm select-none"
     >
       <AnimatePresence mode="wait">

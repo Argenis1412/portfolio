@@ -63,7 +63,7 @@ export const SystemStateLine = React.memo(({ status, effectiveP95, recoveryState
     'text-app-primary/80';
 
   return (
-    <p className={`mt-3 text-sm font-mono italic max-w-2xl mx-auto md:mx-0 transition-colors duration-500 ${colorClass}`}>
+    <p aria-live="polite" className={`mt-3 text-sm font-mono italic max-w-2xl mx-auto md:mx-0 transition-colors duration-500 ${colorClass}`}>
       <AnimatePresence mode="wait">
         <m.span
           key={line}
