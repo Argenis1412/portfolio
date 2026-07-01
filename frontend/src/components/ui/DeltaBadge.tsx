@@ -22,7 +22,7 @@ export function DeltaBadge({ current, previous, unit = '', invertColor = true, d
   return (
     <AnimatePresence mode="wait">
       <m.span
-        key={diff}
+        key={`${sign}${val}`}
         initial={{ opacity: 0, y: -4, scale: 0.9 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 4, scale: 0.9 }}
