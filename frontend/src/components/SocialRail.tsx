@@ -1,16 +1,33 @@
 import { Github, Linkedin } from 'lucide-react';
+import { m, useReducedMotion } from 'framer-motion';
 import { useAbout } from '../hooks/useApi';
 
 export default function SocialRail() {
   const { data: about } = useAbout();
+  const reduced = useReducedMotion();
 
   const githubUrl = about?.github || 'https://github.com/Argenis1412';
   const linkedinUrl = about?.linkedin || 'https://www.linkedin.com/in/argenis1412/';
 
+  const containerVariants = {
+    hidden: {},
+    show: { transition: { staggerChildren: 0.08, delayChildren: 0.6 } },
+  };
+  const itemVariants = {
+    hidden: { opacity: 0, x: 12 },
+    show: { opacity: 1, x: 0, transition: { duration: 0.3, ease: 'easeOut' as const } },
+  };
+
   return (
     <aside className="pointer-events-none fixed right-4 top-1/2 z-40 hidden -translate-y-1/2 xl:block">
-      <div className="pointer-events-auto flex flex-col gap-3 rounded-2xl border border-app-border bg-app-bg/85 p-2 shadow-[0_14px_40px_rgba(0,0,0,0.28)] backdrop-blur">
-        <a
+      <m.div
+        variants={containerVariants}
+        initial={reduced ? false : 'hidden'}
+        animate="show"
+        className="pointer-events-auto flex flex-col gap-3 rounded-2xl border border-app-border bg-app-bg/85 p-2 shadow-[0_14px_40px_rgba(0,0,0,0.28)] backdrop-blur"
+      >
+        <m.a
+          variants={itemVariants}
           href={githubUrl}
           target="_blank"
           rel="noopener noreferrer"
@@ -18,8 +35,9 @@ export default function SocialRail() {
           aria-label="GitHub"
         >
           <Github className="h-5 w-5" />
-        </a>
-        <a
+        </m.a>
+        <m.a
+          variants={itemVariants}
           href={linkedinUrl}
           target="_blank"
           rel="noopener noreferrer"
@@ -27,8 +45,8 @@ export default function SocialRail() {
           aria-label="LinkedIn"
         >
           <Linkedin className="h-5 w-5" />
-        </a>
-      </div>
+        </m.a>
+      </m.div>
     </aside>
   );
 }

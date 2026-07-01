@@ -1,4 +1,5 @@
 import React from 'react';
+import { m, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '../../context/LanguageContext';
 import { type SystemStatus } from '../../hooks/useLiveMetrics';
 
@@ -11,6 +12,7 @@ interface SystemStateLineProps {
 
 export const SystemStateLine = React.memo(({ status, effectiveP95, recoveryState, lastIncident }: SystemStateLineProps) => {
   const { t } = useLanguage();
+  const reduced = useReducedMotion();
 
   const line = React.useMemo(() => {
     if (status === 'loading') return t('metrics.status.loading');
@@ -62,7 +64,18 @@ export const SystemStateLine = React.memo(({ status, effectiveP95, recoveryState
 
   return (
     <p className={`mt-3 text-sm font-mono italic max-w-2xl mx-auto md:mx-0 transition-colors duration-500 ${colorClass}`}>
-      {line}
+      <AnimatePresence mode="wait">
+        <m.span
+          key={line}
+          initial={reduced ? false : { opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={reduced ? undefined : { opacity: 0, y: -4 }}
+          transition={{ duration: 0.2 }}
+          style={{ display: 'block' }}
+        >
+          {line}
+        </m.span>
+      </AnimatePresence>
     </p>
   );
 });

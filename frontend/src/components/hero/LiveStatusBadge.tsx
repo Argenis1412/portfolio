@@ -1,4 +1,5 @@
 import React from 'react';
+import { m, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '../../context/LanguageContext';
 import { type SystemStatus } from '../../hooks/useLiveMetrics';
 import { type MetricSampleSource } from '../../types/metrics';
@@ -22,6 +23,7 @@ interface LiveStatusBadgeProps {
 
 export const LiveStatusBadge = React.memo(({ status, latencyMs, source }: LiveStatusBadgeProps) => {
   const { t } = useLanguage();
+  const reduced = useReducedMotion();
   const cfg = BADGE_CONFIG[status];
 
   return (
@@ -29,18 +31,29 @@ export const LiveStatusBadge = React.memo(({ status, latencyMs, source }: LiveSt
       title={t('metrics.latency_tooltip')}
       className="inline-flex items-center gap-1.5 text-xs font-mono px-2.5 py-1 rounded-full border border-app-border bg-app-surface/60 backdrop-blur-sm select-none"
     >
-      <span className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
-      <span className={cfg.text}>
-        {t(cfg.i18nKey)}
-        {(status === 'operational' || status === 'degraded') && latencyMs !== undefined && (
-          <span className="text-app-muted ml-1">· {latencyMs}ms</span>
-        )}
-      </span>
-      {source && (
-        <span className={`rounded-full px-1.5 py-0.5 text-[9px] ${source === 'synthetic' ? 'bg-[var(--color-status-synthetic-bg)] text-[var(--color-status-synthetic)]' : 'bg-[var(--color-status-ok-bg)] text-[var(--color-status-ok-text)]'}`}>
-          {t(`metrics.origin.${source}`)}
-        </span>
-      )}
+      <AnimatePresence mode="wait">
+        <m.span
+          key={status}
+          initial={reduced ? false : { opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={reduced ? undefined : { opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.15 }}
+          className="inline-flex items-center gap-1.5"
+        >
+          <span className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
+          <span className={cfg.text}>
+            {t(cfg.i18nKey)}
+            {(status === 'operational' || status === 'degraded') && latencyMs !== undefined && (
+              <span className="text-app-muted ml-1">· {latencyMs}ms</span>
+            )}
+          </span>
+          {source && (
+            <span className={`rounded-full px-1.5 py-0.5 text-[9px] ${source === 'synthetic' ? 'bg-[var(--color-status-synthetic-bg)] text-[var(--color-status-synthetic)]' : 'bg-[var(--color-status-ok-bg)] text-[var(--color-status-ok-text)]'}`}>
+              {t(`metrics.origin.${source}`)}
+            </span>
+          )}
+        </m.span>
+      </AnimatePresence>
     </span>
   );
 });

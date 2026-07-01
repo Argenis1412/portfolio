@@ -1,4 +1,4 @@
-
+import { m, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '../../context/LanguageContext';
 import { type MetricsSummary } from '../../api/types';
 import DeltaBadge from '../ui/DeltaBadge';
@@ -15,8 +15,18 @@ interface KpiStripProps {
 export function KpiStrip({ data, previous, effectiveP95 }: KpiStripProps) {
   const { t } = useLanguage();
   const { preset } = useChaosMode();
+  const reduced = useReducedMotion();
   const chaosActive = preset !== 'off';
   const animatedP95 = useAnimatedNumber(effectiveP95);
+
+  const container = {
+    hidden: {},
+    show: { transition: { staggerChildren: 0.07 } },
+  };
+  const card = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' as const } },
+  };
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -55,10 +65,17 @@ export function KpiStrip({ data, previous, effectiveP95 }: KpiStripProps) {
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-8 max-w-xl mx-auto md:mx-0">
+    <m.div
+      className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-8 max-w-xl mx-auto md:mx-0"
+      variants={container}
+      initial={reduced ? false : 'hidden'}
+      whileInView="show"
+      viewport={{ once: true }}
+    >
       {items.map((item) => (
-        <div
+        <m.div
           key={item.label}
+          variants={card}
           className="glass rounded-xl px-4 py-3 flex flex-col gap-1"
           onClick={item.onClick}
           role={item.onClick ? 'button' : undefined}
@@ -81,9 +98,9 @@ export function KpiStrip({ data, previous, effectiveP95 }: KpiStripProps) {
                </div>
              )}
            </div>
-        </div>
+        </m.div>
       ))}
-    </div>
+    </m.div>
   );
 }
 
