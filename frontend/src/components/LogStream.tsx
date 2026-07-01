@@ -10,8 +10,13 @@ import { m, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { useLog } from '../hooks/useLog';
 import { type LogLevel } from '../types/logs';
+import VirtualList from './ui/VirtualList';
 
 type FilterLevel = 'ALL' | LogLevel;
+
+const ITEM_HEIGHT = 28;
+const CONTAINER_HEIGHT = 280;
+const VIRTUAL_THRESHOLD = 25;
 
 const LEVEL_COLOR: Record<LogLevel, string> = {
   INFO:     'text-status-ok/70',
@@ -28,6 +33,13 @@ const FILTER_PILLS: { key: FilterLevel; labelKey: string }[] = [
   { key: 'DECISION', labelKey: 'logs.filter.decision' },
 ];
 
+const LATENCY_RE = /latency_ms=(\d+)/;
+
+function isHighLatency(message: string): boolean {
+  const m = LATENCY_RE.exec(message);
+  return m !== null && parseInt(m[1], 10) > 100;
+}
+
 export default function LogStream() {
   const { t } = useLanguage();
   const { entries, clear } = useLog();
@@ -38,6 +50,8 @@ export default function LogStream() {
   const filtered = filter === 'ALL'
     ? entries
     : entries.filter((e) => e.level === filter);
+
+  const reversed = [...filtered].reverse();
 
   // Keep the newest visible inside the terminal body without moving the page.
   // rAF separates the scroll write from React's commit phase, avoiding forced reflow.
@@ -51,6 +65,28 @@ export default function LogStream() {
 
   const handleFilter = useCallback((level: FilterLevel) => {
     setFilter(level);
+  }, []);
+
+  const renderLogRow = useCallback((entry: (typeof reversed)[number]) => {
+    const pulse = entry.level === 'ERROR' || isHighLatency(entry.message);
+    return (
+      <div key={entry.id} className={`h-7 flex gap-2 min-w-0 animate-log-entry${pulse ? ' animate-error-pulse' : ''}`}>
+        <span className="text-white/60 flex-shrink-0">
+          [{entry.timestamp.toLocaleTimeString('en-GB', { hour12: false })}]
+        </span>
+        <span className={`flex-shrink-0 w-5 ${LEVEL_COLOR[entry.level]}`}>
+          {entry.level[0]}
+        </span>
+        <span className="text-white/90 truncate">
+          {entry.message}
+          {entry.requestId && (
+            <span className="text-white/50 ml-1 text-[10px]">
+              request_id={entry.requestId}
+            </span>
+          )}
+        </span>
+      </div>
+    );
   }, []);
 
   return (
@@ -111,38 +147,57 @@ export default function LogStream() {
            </div>
 
           {/* Log body */}
-          <div ref={bodyRef} className="h-[280px] overflow-y-auto p-4 font-mono text-xs space-y-1.5 scroll-smooth">
-            {filtered.length === 0 ? (
+          {filtered.length === 0 ? (
+            <div className="h-[280px] p-4 font-mono text-xs">
               <p className="text-white/40">{'>'} {t('logs.waiting')}</p>
-            ) : (
+            </div>
+          ) : reversed.length <= VIRTUAL_THRESHOLD ? (
+            <div
+              ref={bodyRef}
+              className="h-[280px] overflow-y-auto p-4 font-mono text-xs space-y-1.5 scroll-smooth"
+            >
               <AnimatePresence initial={false}>
-                {[...filtered].reverse().map((entry) => (
-                  <m.div
-                    key={entry.id}
-                    initial={prefersReducedMotion ? false : { opacity: 0, x: -4 }}
-                    animate={prefersReducedMotion ? {} : { opacity: 1, x: 0 }}
-                    transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
-                    className="flex gap-2 min-w-0"
-                  >
-                    <span className="text-white/60 flex-shrink-0">
-                      [{entry.timestamp.toLocaleTimeString('en-GB', { hour12: false })}]
-                    </span>
-                    <span className={`flex-shrink-0 w-5 ${LEVEL_COLOR[entry.level]}`}>
-                      {entry.level[0]}
-                    </span>
-                    <span className="text-white/90 break-all">
-                      {entry.message}
-                      {entry.requestId && (
-                        <span className="text-white/50 ml-1 text-[10px]">
-                          request_id={entry.requestId}
-                        </span>
-                      )}
-                    </span>
-                  </m.div>
-                ))}
+                {reversed.map((entry) => {
+                  const pulse = entry.level === 'ERROR' || isHighLatency(entry.message);
+                  return (
+                    <m.div
+                      key={entry.id}
+                      initial={prefersReducedMotion ? false : { opacity: 0, x: -4 }}
+                      animate={prefersReducedMotion ? {} : { opacity: 1, x: 0 }}
+                      transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
+                      className={`h-7 flex gap-2 min-w-0${pulse ? ' animate-error-pulse' : ''}`}
+                    >
+                      <span className="text-white/60 flex-shrink-0">
+                        [{entry.timestamp.toLocaleTimeString('en-GB', { hour12: false })}]
+                      </span>
+                      <span className={`flex-shrink-0 w-5 ${LEVEL_COLOR[entry.level]}`}>
+                        {entry.level[0]}
+                      </span>
+                      <span className="text-white/90 truncate">
+                        {entry.message}
+                        {entry.requestId && (
+                          <span className="text-white/50 ml-1 text-[10px]">
+                            request_id={entry.requestId}
+                          </span>
+                        )}
+                      </span>
+                    </m.div>
+                  );
+                })}
               </AnimatePresence>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="p-4 font-mono text-xs">
+              <VirtualList
+                key={filter}
+                items={reversed}
+                itemHeight={ITEM_HEIGHT}
+                containerHeight={CONTAINER_HEIGHT}
+                overscan={3}
+                renderItem={renderLogRow}
+              />
+            </div>
+          )}
         </div>
       </m.div>
     </section>
