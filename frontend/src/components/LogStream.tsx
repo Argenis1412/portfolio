@@ -70,14 +70,14 @@ export default function LogStream() {
   const renderLogRow = useCallback((entry: (typeof reversed)[number]) => {
     const pulse = entry.level === 'ERROR' || isHighLatency(entry.message);
     return (
-      <div className={`h-7 flex gap-2 min-w-0 animate-log-entry${pulse ? ' animate-error-pulse' : ''}`}>
+      <div key={entry.id} className={`h-7 flex gap-2 min-w-0 animate-log-entry${pulse ? ' animate-error-pulse' : ''}`}>
         <span className="text-white/60 flex-shrink-0">
           [{entry.timestamp.toLocaleTimeString('en-GB', { hour12: false })}]
         </span>
         <span className={`flex-shrink-0 w-5 ${LEVEL_COLOR[entry.level]}`}>
           {entry.level[0]}
         </span>
-        <span className="text-white/90 break-all">
+        <span className="text-white/90 truncate">
           {entry.message}
           {entry.requestId && (
             <span className="text-white/50 ml-1 text-[10px]">
@@ -157,35 +157,39 @@ export default function LogStream() {
               className="h-[280px] overflow-y-auto p-4 font-mono text-xs space-y-1.5 scroll-smooth"
             >
               <AnimatePresence initial={false}>
-                {reversed.map((entry) => (
-                  <m.div
-                    key={entry.id}
-                    initial={prefersReducedMotion ? false : { opacity: 0, x: -4 }}
-                    animate={prefersReducedMotion ? {} : { opacity: 1, x: 0 }}
-                    transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
-                    className="h-7 flex gap-2 min-w-0"
-                  >
-                    <span className="text-white/60 flex-shrink-0">
-                      [{entry.timestamp.toLocaleTimeString('en-GB', { hour12: false })}]
-                    </span>
-                    <span className={`flex-shrink-0 w-5 ${LEVEL_COLOR[entry.level]}`}>
-                      {entry.level[0]}
-                    </span>
-                    <span className="text-white/90 break-all">
-                      {entry.message}
-                      {entry.requestId && (
-                        <span className="text-white/50 ml-1 text-[10px]">
-                          request_id={entry.requestId}
-                        </span>
-                      )}
-                    </span>
-                  </m.div>
-                ))}
+                {reversed.map((entry) => {
+                  const pulse = entry.level === 'ERROR' || isHighLatency(entry.message);
+                  return (
+                    <m.div
+                      key={entry.id}
+                      initial={prefersReducedMotion ? false : { opacity: 0, x: -4 }}
+                      animate={prefersReducedMotion ? {} : { opacity: 1, x: 0 }}
+                      transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
+                      className={`h-7 flex gap-2 min-w-0${pulse ? ' animate-error-pulse' : ''}`}
+                    >
+                      <span className="text-white/60 flex-shrink-0">
+                        [{entry.timestamp.toLocaleTimeString('en-GB', { hour12: false })}]
+                      </span>
+                      <span className={`flex-shrink-0 w-5 ${LEVEL_COLOR[entry.level]}`}>
+                        {entry.level[0]}
+                      </span>
+                      <span className="text-white/90 truncate">
+                        {entry.message}
+                        {entry.requestId && (
+                          <span className="text-white/50 ml-1 text-[10px]">
+                            request_id={entry.requestId}
+                          </span>
+                        )}
+                      </span>
+                    </m.div>
+                  );
+                })}
               </AnimatePresence>
             </div>
           ) : (
             <div className="p-4 font-mono text-xs">
               <VirtualList
+                key={filter}
                 items={reversed}
                 itemHeight={ITEM_HEIGHT}
                 containerHeight={CONTAINER_HEIGHT}
