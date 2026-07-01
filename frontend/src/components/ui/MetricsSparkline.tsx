@@ -346,12 +346,12 @@ export default function MetricsSparkline({
             <m.circle
               cx={latestPoint.x}
               cy={latestPoint.y}
-              r={compact ? 2.5 : 3}
+              initial={{ r: compact ? 2.5 : 3 }}
+              animate={{ r: compact ? [2.5, 3.5, 2.5] : [3, 4, 3] }}
+              transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
               fill={latestSample.source === 'synthetic' ? '#a855f7' : '#14d3a5'}
               stroke="#020617"
               strokeWidth="0.7"
-              animate={{ r: compact ? [2.5, 3.5, 2.5] : [3, 4, 3] }}
-              transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
             />
           )
       )}
