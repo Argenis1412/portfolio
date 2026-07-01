@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
+import { m, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '../../context/LanguageContext';
 import { type SystemStatus } from '../../hooks/useLiveMetrics';
 import { type MetricsSummary } from '../../api/types';
 import { type MetricSample } from '../../types/metrics';
 import { type TraceEntry } from '../../services/TraceEmitter';
 import MetricsSparkline from '../ui/MetricsSparkline';
-import { m, AnimatePresence } from 'framer-motion';
+import { useAnimatedNumber } from '../../hooks/useAnimatedNumber';
+import TypewriterText from '../ui/TypewriterText';
+import ProgressRing from '../ui/ProgressRing';
 
 const STATUS_COLORS: Record<SystemStatus, string> = {
   loading: 'text-app-muted',
@@ -34,6 +37,17 @@ export const SystemSidecar = React.memo(({
 }: SystemSidecarProps) => {
   const { t } = useLanguage();
   const [showRaw, setShowRaw] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+
+  const recoveryMs = latestTrace
+    ? latestTrace.totalMs
+    : data?.last_incident === 'none' ? 0 : effectiveP95;
+  const animatedRecoveryMs = useAnimatedNumber(recoveryMs);
+
+  const requestIdText = latestTrace
+    ? latestTrace.requestId
+    : (data?.last_incident === 'none' || !data) ? 'NONE' : data?.last_incident_ago || 'N/A';
+  const traceIdText = latestTrace ? latestTrace.traceId : 'NONE';
 
   return (
     <div className="glass rounded-2xl p-6 border border-app-border/40 premium-shadow">
@@ -52,11 +66,12 @@ export const SystemSidecar = React.memo(({
             {status.toUpperCase()}
           </div>
           <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono">
-            <span className={`rounded-full px-2 py-0.5 ${confidenceLabel === 'estimated' ? 'bg-[var(--color-status-synthetic-bg)] text-[var(--color-status-synthetic)]' : 'bg-[var(--color-status-ok-bg)] text-[var(--color-status-ok-text)]'}`}>
-              {t(`metrics.confidence.${confidenceLabel}`)} {confidenceScore}%
+            <span className={`rounded-full px-2 py-0.5 flex items-center gap-1.5 ${confidenceLabel === 'estimated' ? 'bg-[var(--color-status-synthetic-bg)] text-[var(--color-status-synthetic)]' : 'bg-[var(--color-status-ok-bg)] text-[var(--color-status-ok-text)]'}`}>
+              {t(`metrics.confidence.${confidenceLabel}`)}
+              <ProgressRing value={confidenceScore} size={28} strokeWidth={3} />
             </span>
             {latestSample && (
-              <span className="rounded-full border border-app-border/40 bg-app-surface/40 px-2 py-0.5 text-app-muted">
+              <span className={`rounded-full border border-app-border/40 bg-app-surface/40 px-2 py-0.5 text-app-muted${latestSample.source === 'synthetic' ? ' animate-pulse-soft' : ''}`}>
                 {t(`metrics.origin.${latestSample.source}`)}
               </span>
             )}
@@ -66,14 +81,14 @@ export const SystemSidecar = React.memo(({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <div className="text-[10px] font-mono text-app-muted mb-1">{t('hero.sidecar.last_request')}</div>
-            <div className="text-sm font-mono text-app-text">
-              {latestTrace ? latestTrace.requestId : (data?.last_incident === 'none' || !data) ? 'NONE' : data?.last_incident_ago || 'N/A'}
+            <div className="text-sm font-mono text-app-text truncate">
+              <TypewriterText text={requestIdText} />
             </div>
           </div>
           <div>
             <div className="text-[10px] font-mono text-app-muted mb-1">{t('hero.sidecar.recovery_time')}</div>
             <div className="text-sm font-mono text-app-text">
-              {latestTrace ? `${latestTrace.totalMs}ms` : data?.last_incident === 'none' ? '0ms' : `${effectiveP95}ms`}
+              {Math.round(animatedRecoveryMs)}ms
             </div>
           </div>
         </div>
@@ -92,14 +107,23 @@ export const SystemSidecar = React.memo(({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <div className="text-[10px] font-mono text-app-muted mb-1">{t('hero.sidecar.circuit_breaker')}</div>
-            <div className={`text-sm font-mono ${recoveryState === 'open' ? 'text-status-error' : recoveryState === 'half_open' ? 'text-status-warn' : 'text-status-ok'}`}>
-              {recoveryState.toUpperCase()}
-            </div>
+            <AnimatePresence mode="wait">
+              <m.div
+                key={recoveryState}
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={prefersReducedMotion ? undefined : { opacity: 0, y: -4 }}
+                transition={{ duration: 0.15 }}
+                className={`text-sm font-mono ${recoveryState === 'open' ? 'text-status-error' : recoveryState === 'half_open' ? 'text-status-warn' : 'text-status-ok'}`}
+              >
+                {recoveryState.toUpperCase()}
+              </m.div>
+            </AnimatePresence>
           </div>
           <div>
             <div className="text-[10px] font-mono text-app-muted mb-1">{t('hero.sidecar.latest_trace')}</div>
             <div className="text-sm font-mono text-app-text truncate">
-              {latestTrace ? latestTrace.traceId : 'NONE'}
+              <TypewriterText text={traceIdText} />
             </div>
           </div>
         </div>
