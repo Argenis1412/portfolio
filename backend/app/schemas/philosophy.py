@@ -6,10 +6,10 @@ class PhilosophyItemSchema(BaseModel):
     Schema representing an inspirational philosophy item.
     """
 
-    id: str
-    name: str
+    id: str = Field(..., description="Unique identifier", max_length=50)
+    name: str = Field(..., description="Name of the philosopher", max_length=100)
     role: dict[str, str] = Field(..., description="Role or title in multiple languages")
-    image_url: str
+    image_url: str = Field(..., description="URL of the philosopher's image")
     description: dict[str, str] = Field(
         ..., description="Detailed description in multiple languages"
     )
