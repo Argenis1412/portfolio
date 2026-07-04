@@ -71,5 +71,7 @@ class TestGetClientIpLegacyMode:
         # untrusted1/untrusted2: attacker-injected (depth=2 trusts only last 2 hops).
         # real_client: appended by proxy1 (= real client IP seen by proxy1).
         # proxy1_egress: appended by proxy2 (= proxy1 outbound IP seen by proxy2).
-        request = _make_request(xff="untrusted1, untrusted2, real_client, proxy1_egress")
+        request = _make_request(
+            xff="untrusted1, untrusted2, real_client, proxy1_egress"
+        )
         assert get_client_ip(request) == "real_client"
