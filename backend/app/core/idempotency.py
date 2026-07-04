@@ -2,11 +2,15 @@ import threading
 import time
 from typing import Any, Dict, Optional
 
+import structlog
 from fastapi import Header, HTTPException, Request, status
 from pydantic import BaseModel
 from redis import asyncio as redis
 
 from app.settings import settings
+
+logger = structlog.get_logger(__name__)
+_REDIS_WARNING_INTERVAL = 60.0
 
 
 class IdempotencyRecord(BaseModel):
@@ -44,6 +48,7 @@ class IdempotencyStore:
         self.lock_ttl_seconds = lock_ttl_seconds
         self._lock = threading.Lock()
         self._redis = None
+        self._last_redis_warning: float = float("-inf")
 
         if settings.redis_url and not settings.redis_url.startswith("memory://"):
             self._redis = redis.from_url(
@@ -57,13 +62,27 @@ class IdempotencyStore:
     def _redis_key(self, key: str) -> str:
         return f"idempotency:{key}"
 
+    def _log_redis_fallback(self, op: str, exc: Exception) -> None:
+        now = time.monotonic()
+        with self._lock:
+            if now - self._last_redis_warning < _REDIS_WARNING_INTERVAL:
+                return
+            self._last_redis_warning = now
+        logger.warning(
+            "idempotency_redis_fallback",
+            op=op,
+            error=str(exc),
+            error_type=type(exc).__name__,
+        )
+
     async def _redis_get(self, key: str) -> Optional[IdempotencyRecord]:
         if not self._redis:
             return None
 
         try:
             payload = await self._redis.get(self._redis_key(key))
-        except Exception:
+        except Exception as exc:
+            self._log_redis_fallback("get", exc)
             return None
 
         if not payload:
@@ -114,8 +133,8 @@ class IdempotencyStore:
                 )
                 if acquired:
                     return True
-            except Exception:
-                pass
+            except Exception as exc:
+                self._log_redis_fallback("set_in_progress", exc)
 
         with self._lock:
             if key in self._cache:
@@ -150,8 +169,8 @@ class IdempotencyStore:
                     ex=self.ttl_seconds,
                 )
                 return
-            except Exception:
-                pass
+            except Exception as exc:
+                self._log_redis_fallback("set", exc)
 
         with self._lock:
             self._cache[key] = record
@@ -162,8 +181,8 @@ class IdempotencyStore:
             try:
                 await self._redis.delete(self._redis_key(key))
                 return
-            except Exception:
-                pass
+            except Exception as exc:
+                self._log_redis_fallback("release", exc)
 
         with self._lock:
             self._cache.pop(key, None)
