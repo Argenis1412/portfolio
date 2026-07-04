@@ -37,6 +37,7 @@ export function KpiStrip({ data, previous, effectiveP95 }: KpiStripProps) {
 
   const items = [
     {
+      id: 'latency',
       label: t('hero.kpi.latency'),
       value: `${Math.round(animatedP95)}ms`,
       delta: <DeltaBadge current={effectiveP95} previous={previous?.p95_ms ?? null} unit="ms" />,
@@ -50,6 +51,7 @@ export function KpiStrip({ data, previous, effectiveP95 }: KpiStripProps) {
        footnote: t('metrics.error_rate_slo_context'),
      },
     {
+      id: 'requests',
       label: t('hero.kpi.requests'),
       value: data.requests_24h.toLocaleString('en-US'),
       delta: null,
@@ -74,7 +76,7 @@ export function KpiStrip({ data, previous, effectiveP95 }: KpiStripProps) {
     >
       {items.map((item) => (
         <m.div
-          key={item.label}
+          key={item.id}
           variants={card}
           className="glass rounded-xl px-4 py-3 flex flex-col gap-1"
           onClick={item.onClick}
