@@ -56,7 +56,20 @@ class TestGetClientIpLegacyMode:
         result = get_client_ip(request)
         assert result == "172.16.0.5"
 
+    def test_x_real_ip_ignored_when_depth_zero(self):
+        self.settings.trusted_proxy_depth = 0
+        request = _make_request(peer_ip="10.0.0.1")
+        request.headers.get = lambda key, default=None: {
+            "x-forwarded-for": None,
+            "x-real-ip": "attacker_ip",
+        }.get(key, default)
+        result = get_client_ip(request)
+        assert result == "10.0.0.1"
+
     def test_depth_two_with_two_proxies(self):
         self.settings.trusted_proxy_depth = 2
-        request = _make_request(xff="spoofed, client_real, proxy1, proxy2")
-        assert get_client_ip(request) == "proxy1"
+        # untrusted1/untrusted2: attacker-injected (depth=2 trusts only last 2 hops).
+        # real_client: appended by proxy1 (= real client IP seen by proxy1).
+        # proxy1_egress: appended by proxy2 (= proxy1 outbound IP seen by proxy2).
+        request = _make_request(xff="untrusted1, untrusted2, real_client, proxy1_egress")
+        assert get_client_ip(request) == "real_client"

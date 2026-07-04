@@ -39,7 +39,7 @@ def get_client_ip(request: Request) -> str:
         return ips[trusted_index]
 
     real_ip = request.headers.get("x-real-ip")
-    if real_ip:
+    if real_ip and (settings.strict_proxy_mode or settings.trusted_proxy_depth > 0):
         return real_ip.strip()
 
     return get_remote_address(request)
