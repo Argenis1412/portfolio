@@ -33,9 +33,9 @@ def get_client_ip(request: Request) -> str:
             return peer_ip or "unknown"
 
     forwarded_for = request.headers.get("x-forwarded-for")
-    if forwarded_for:
+    if forwarded_for and settings.trusted_proxy_depth > 0:
         ips = [ip.strip() for ip in forwarded_for.split(",")]
-        trusted_index = max(0, len(ips) - settings.trusted_proxy_depth - 1)
+        trusted_index = max(0, len(ips) - settings.trusted_proxy_depth)
         return ips[trusted_index]
 
     real_ip = request.headers.get("x-real-ip")
