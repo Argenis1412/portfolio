@@ -60,7 +60,7 @@ TEMP_EMAIL_DOMAINS = [
 
 
 # Regexes previously in the schema, now used for scoring
-NAME_REGEX = re.compile(r"^[^\d\W_](?:[^\d\W_]|[ .,'-]){1,79}$")
+NAME_REGEX = re.compile(r"^[^\d\W_](?:[^\d\W_]|[0-9]|[ .,'-]){1,79}$")
 SUBJECT_REGEX = re.compile(r"^(?:[^\d\W_]|[0-9]|[ .\[\],:;!?()/#&+@'\-]){0,120}$")
 EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
 
@@ -86,10 +86,8 @@ def calculate_spam_score(
     if name and not NAME_REGEX.fullmatch(name):
         return 100
 
-    if name:
-        for char in name:
-            if char.isnumeric():
-                return 100
+    if name and any(c.isnumeric() and not c.isascii() for c in name):
+        return 100
 
     if subject and not SUBJECT_REGEX.fullmatch(subject):
         return 100

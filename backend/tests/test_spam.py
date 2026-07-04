@@ -279,3 +279,37 @@ def test_name_rejects_unicode_lo_numeric_character():
         subject="Opportunity",
     )
     assert score == 100
+
+
+@pytest.mark.parametrize(
+    "name",
+    ["Studio 54", "Jean-Paul 2nd", "Room 101"],
+)
+def test_name_allows_ascii_digits_after_first_char(name):
+    """Names with ASCII digits in non-initial positions are valid."""
+    from app.core.spam_check import calculate_spam_score
+
+    score = calculate_spam_score(
+        message="Hello, I would like to discuss a role with you.",
+        email="recruiter@example.com",
+        name=name,
+        subject="Opportunity",
+    )
+    assert score < 70
+
+
+@pytest.mark.parametrize(
+    "name",
+    ["12345", "9lives"],
+)
+def test_name_rejects_digit_as_first_char(name):
+    """Names starting with a digit are still rejected."""
+    from app.core.spam_check import calculate_spam_score
+
+    score = calculate_spam_score(
+        message="Hello, I would like to discuss a role with you.",
+        email="recruiter@example.com",
+        name=name,
+        subject="Opportunity",
+    )
+    assert score == 100
