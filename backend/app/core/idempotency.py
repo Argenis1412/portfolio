@@ -48,7 +48,7 @@ class IdempotencyStore:
         self.lock_ttl_seconds = lock_ttl_seconds
         self._lock = threading.Lock()
         self._redis = None
-        self._last_redis_warning: float = 0.0
+        self._last_redis_warning: float = float("-inf")
 
         if settings.redis_url and not settings.redis_url.startswith("memory://"):
             self._redis = redis.from_url(

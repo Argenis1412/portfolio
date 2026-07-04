@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from app.core.idempotency import IdempotencyStore, _REDIS_WARNING_INTERVAL
+from app.core.idempotency import IdempotencyStore
 
 
 @pytest.fixture
@@ -50,7 +50,7 @@ class TestRedisWarningDebounce:
 
         with patch("app.core.idempotency.logger") as mock_logger:
             await store.set_in_progress("key-1")
-            store._last_redis_warning -= _REDIS_WARNING_INTERVAL + 1
+            store._last_redis_warning = float("-inf")
             await store.set_in_progress("key-2")
 
         assert mock_logger.warning.call_count == 2
@@ -72,7 +72,7 @@ class TestRedisWarningDebounce:
     @pytest.mark.asyncio
     async def test_release_emits_warning_on_redis_failure(self, store):
         store._redis.delete = AsyncMock(side_effect=OSError("network unreachable"))
-        store._last_redis_warning = 0.0
+        store._last_redis_warning = float("-inf")
 
         with patch("app.core.idempotency.logger") as mock_logger:
             await store.release("key-1")
