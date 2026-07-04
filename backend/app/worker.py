@@ -209,10 +209,24 @@ class StreamWorker:
             first_seen_at = meta.get("first_seen_at")
             if first_seen_at:
                 try:
-                    age = (
-                        datetime.now(timezone.utc)
-                        - datetime.fromisoformat(first_seen_at)
-                    ).total_seconds()
+                    ts = datetime.fromisoformat(first_seen_at)
+                    if ts.tzinfo is None:
+                        ts = ts.replace(tzinfo=timezone.utc)
+                    age = (datetime.now(timezone.utc) - ts).total_seconds()
+                except (ValueError, TypeError) as parse_err:
+                    logger.warning(
+                        "job_invalid_first_seen_at",
+                        job_id=job_id,
+                        raw_value=first_seen_at,
+                        error=str(parse_err),
+                    )
+                    await self._move_to_dlq(
+                        job_id, body, "invalid_first_seen_at", "ValueError"
+                    )
+                    client = await self._get_client()
+                    await client.xack(self.stream_name, self.group_name, job_id)
+                    return
+                else:
                     if age > 900:
                         await self._move_to_dlq(
                             job_id, body, "max_age_exceeded", "TimeoutError"
@@ -220,8 +234,6 @@ class StreamWorker:
                         client = await self._get_client()
                         await client.xack(self.stream_name, self.group_name, job_id)
                         return
-                except Exception:
-                    pass
 
             client = await self._get_client()
             body["meta"] = meta
