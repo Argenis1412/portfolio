@@ -37,7 +37,7 @@ export default function ArchitectureTradeoffs() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {tradeOffs.map((item, i) => (
           <m.div
-            key={item.title}
+            key={i}
             initial={{ opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
