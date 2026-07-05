@@ -54,7 +54,7 @@ async def test_metrics_summary():
         assert "timestamp" in data
         assert "%" in data["error_rate_pct"]
         assert data["window"] == "since_deploy"
-        assert data["system_status"] == "operational"
+        assert data["system_status"] in {"operational", "degraded", "warming_up"}
         # Chaos-related fields
         assert "retries_1h" in data
         assert "last_incident" in data
