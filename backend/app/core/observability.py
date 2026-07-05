@@ -102,7 +102,13 @@ def _setup_prometheus(app: FastAPI) -> None:
             should_group_status_codes=True,  # groups 2xx, 4xx, 5xx
             should_ignore_untemplated=True,  # ignores routes without template (invalid 404s)
             should_respect_env_var=False,  # always active
-            excluded_handlers=["/metrics"],  # do not auto-instrument /metrics itself
+            excluded_handlers=[
+                "^/metrics$",
+                "^/health$",
+                "^/live$",
+                "^/saude$",
+                "^/salud$",
+            ],
         )
 
         # Custom metrics configuration for version 7.x

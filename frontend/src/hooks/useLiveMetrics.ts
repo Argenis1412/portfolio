@@ -181,15 +181,21 @@ export function useLiveMetrics() {
   const latestSample = sampleHistory[sampleHistory.length - 1] ?? null;
   const effectiveP95 = latestSample?.value ?? query.data?.p95_ms ?? 0;
   const confidenceScore = latestSample?.confidence ?? (query.data ? DEFAULT_CONFIDENCE_REAL : 0);
-  const confidenceLabel = latestSample?.source === 'synthetic' ? 'estimated' : 'verified';
+  const confidenceLabel = useMemo(() => {
+    if (query.data?.p95_status === 'warming_up') return 'warming_up' as const;
+    return latestSample?.source === 'synthetic' ? 'estimated' as const : 'verified' as const;
+  }, [query.data?.p95_status, latestSample?.source]);
 
   const status: SystemStatus = useMemo(() => {
     if (query.isLoading) return 'loading';
     if (!query.data || query.isError) return 'down';
 
-    const { system_status, error_rate } = query.data;
+    const { system_status, error_rate, p95_status } = query.data;
     if (system_status === 'down') return 'down';
-    if (effectiveP95 > LATENCY_DEGRADED_MS || error_rate > ERROR_RATE_DEGRADED) return 'degraded';
+    if (system_status === 'degraded') return 'degraded';
+    if (error_rate > ERROR_RATE_DEGRADED) return 'degraded';
+    if (p95_status === 'warming_up') return 'operational';
+    if (effectiveP95 > LATENCY_DEGRADED_MS) return 'degraded';
     if (effectiveP95 > LATENCY_WARNING_MS) return 'warning';
     return 'operational';
   }, [effectiveP95, query.data, query.isLoading, query.isError]);
@@ -223,10 +229,10 @@ export function useLiveMetrics() {
     }
 
     const ageMs = currentTime - latestSample.timestamp;
-    if (ageMs < SYNTHETIC_WINDOW_MS && effectiveP95 > LATENCY_WARNING_MS) return 'DEGRADED';
+    if (query.data?.p95_status !== 'warming_up' && ageMs < SYNTHETIC_WINDOW_MS && effectiveP95 > LATENCY_WARNING_MS) return 'DEGRADED';
     if (ageMs < RECOVERING_WINDOW_MS) return 'RECOVERING';
     return query.data?.system_lifecycle ?? 'NORMAL';
-  }, [currentTime, effectiveP95, latestSample, query.data?.system_lifecycle]);
+  }, [currentTime, effectiveP95, latestSample, query.data?.system_lifecycle, query.data?.p95_status]);
 
   const strategyProfile = useMemo(() => {
     const baseRetry = query.data?.retries_1h ?? 0;
