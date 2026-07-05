@@ -33,6 +33,7 @@ from app.controllers.dependencies import (
     dep_stack,
 )
 from app.core.cache_http import cacheable_response
+from app.core.uptime import APP_START_TIME
 from app.core.exceptions import ResourceNotFoundError
 from app.core.prometheus_aggregation import compute_p95, compute_request_stats
 from app.core.rate_limit import check_rate_limit
@@ -45,8 +46,6 @@ from app.schemas.projects import DetailedProject, ProjectSummary, ProjectsRespon
 from app.schemas.stack import StackItem, StackResponse
 
 router = APIRouter(tags=["API"])
-
-_START_TIME = time.time()
 
 
 def _format_uptime(seconds: int) -> str:
@@ -72,7 +71,7 @@ async def get_metrics_summary(response: Response) -> MetricsSummary:
     """
     response.headers["Cache-Control"] = "public, max-age=15"
 
-    uptime_seconds = int(time.time() - _START_TIME)
+    uptime_seconds = int(time.time() - APP_START_TIME)
 
     p95_seconds, total_samples = compute_p95()
     p95_ms = p95_seconds * 1000

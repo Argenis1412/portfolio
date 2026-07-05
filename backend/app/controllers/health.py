@@ -12,12 +12,10 @@ from fastapi import APIRouter, Depends, Response
 from app.adapters.repository import PortfolioRepository
 from app.settings import settings
 from app.controllers.dependencies import get_repository
+from app.core.uptime import APP_START_TIME
 from app.schemas.health import HealthResponse
 
 router = APIRouter(tags=["Health"])
-
-# Application initialization timestamp
-_APP_START_TIME = time.time()
 
 
 @router.get(
@@ -46,7 +44,7 @@ async def check_health(
     """
     Verifies if the API and its dependencies are healthy.
     """
-    uptime = int(time.time() - _APP_START_TIME)
+    uptime = int(time.time() - APP_START_TIME)
 
     # Check database
     db_health = await repository.check_health()
