@@ -58,21 +58,41 @@ class MetricsSummary(BaseModel):
     Simplified schema for frontend evidence dashboard.
     """
 
-    p95_ms: int = Field(..., examples=[43], description="P95 latency in ms")
-    p95_status: str = Field(..., examples=["healthy"], description="Latency status")
-    requests_24h: int = Field(..., examples=[987], description="Total requests (24h)")
-    error_rate: float = Field(..., examples=[0.0131], description="Decimal error rate")
+    p95_ms: int = Field(
+        ...,
+        examples=[43],
+        description="P95 latency in ms (histogram bucket interpolation)",
+    )
+    p95_status: str = Field(
+        ...,
+        examples=["healthy", "degraded", "warming_up"],
+        description="Latency status — warming_up when <20 samples collected",
+    )
+    requests_since_deploy: int = Field(
+        ...,
+        examples=[987],
+        description="Total requests since process start (from Prometheus counter)",
+    )
+    error_rate: float = Field(
+        ..., examples=[0.0131], description="Decimal error rate (5xx / total)"
+    )
     error_rate_pct: str = Field(
         ..., examples=["1.31%"], description="Formatted error rate"
     )
     error_rate_status: str = Field(
-        ..., examples=["stable"], description="Error rate status"
+        ...,
+        examples=["stable", "warning", "investigating", "warming_up"],
+        description="Error rate status — warming_up when <20 samples collected",
     )
     system_status: str = Field(
         ..., examples=["operational"], description="Overall system state"
     )
-    uptime: str = Field(..., examples=["2h 14m"], description="Formatted activity time")
-    window: str = Field(..., examples=["last_24h"], description="Metrics time window")
+    uptime: str = Field(
+        ..., examples=["2h 14m"], description="Formatted process uptime"
+    )
+    window: str = Field(
+        ..., examples=["since_deploy"], description="Metrics time window"
+    )
     timestamp: str = Field(..., description="ISO 8601 reading timestamp")
     retries_1h: int = Field(
         default=0, examples=[3], description="Retries triggered in the last hour"
@@ -90,8 +110,8 @@ class MetricsSummary(BaseModel):
     # ── Sub-system status fields (Epic 1: degraded state detail) ──────────────
     worker_status: str = Field(
         default="ok",
-        examples=["ok", "delayed"],
-        description="Worker/queue processor status",
+        examples=["ok", "delayed", "idle"],
+        description="Worker/queue processor status — idle when no requests processed yet",
     )
     queue_backlog: int = Field(
         default=0,
@@ -118,8 +138,8 @@ class MetricsSummary(BaseModel):
         examples=["NORMAL", "DEGRADED", "RECOVERING", "STABLE"],
         description="Current state machine position based on time-since-last-incident",
     )
-    total_incidents_24h: int = Field(
+    total_chaos_events_since_deploy: int = Field(
         default=0,
-        examples=[12],
-        description="Total number of chaos incidents recorded in the last 24h window",
+        examples=[3],
+        description="Total chaos incidents since process start",
     )

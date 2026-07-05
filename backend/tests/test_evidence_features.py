@@ -44,7 +44,7 @@ async def test_metrics_summary():
         data = response.json()
         assert "p95_ms" in data
         assert "p95_status" in data
-        assert "requests_24h" in data
+        assert "requests_since_deploy" in data
         assert "error_rate" in data
         assert "error_rate_pct" in data
         assert "error_rate_status" in data
@@ -53,7 +53,7 @@ async def test_metrics_summary():
         assert "window" in data
         assert "timestamp" in data
         assert "%" in data["error_rate_pct"]
-        assert data["window"] == "last_24h"
+        assert data["window"] == "since_deploy"
         assert data["system_status"] == "operational"
         # Chaos-related fields
         assert "retries_1h" in data

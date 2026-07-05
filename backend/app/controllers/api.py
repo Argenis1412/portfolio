@@ -10,14 +10,11 @@ Endpoints:
 - GET /api/formation
 """
 
-import random
 import time
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request, Response
-from prometheus_client import REGISTRY
 
 from app.use_cases.get_about import GetAboutUseCase
 from app.use_cases.get_experiences import GetExperiencesUseCase
@@ -37,6 +34,7 @@ from app.controllers.dependencies import (
 )
 from app.core.cache_http import cacheable_response
 from app.core.exceptions import ResourceNotFoundError
+from app.core.prometheus_aggregation import compute_p95, compute_request_stats
 from app.core.rate_limit import check_rate_limit
 from app.schemas.about import AboutResponse
 from app.schemas.experiences import Experience, ExperiencesResponse
@@ -48,16 +46,7 @@ from app.schemas.stack import StackItem, StackResponse
 
 router = APIRouter(tags=["API"])
 
-# Uptime persistence (to avoid dev-server restarts resetting time)
-# On Koyeb/Production, this file is recreated on deploy, marking the real start.
-_START_FILE = Path(".app_start_time")
-if not _START_FILE.exists():
-    _START_FILE.write_text(str(time.time()))
-
-try:
-    _START_TIME = float(_START_FILE.read_text())
-except ValueError:
-    _START_TIME = time.time()
+_START_TIME = time.time()
 
 
 def _format_uptime(seconds: int) -> str:
@@ -79,55 +68,47 @@ def _format_uptime(seconds: int) -> str:
 )
 async def get_metrics_summary(response: Response) -> MetricsSummary:
     """
-    Returns consolidated metrics for the dashboard with a focus on professional UX.
+    Returns consolidated metrics for the dashboard sourced from Prometheus.
     """
-    # 1. Cache to avoid polling spam
     response.headers["Cache-Control"] = "public, max-age=15"
 
     uptime_seconds = int(time.time() - _START_TIME)
 
-    # 2. Deterministic base values for credibility
-    random.seed(int(time.time() // 60))
-    p95 = 42.0 + (random.random() * 3.0)
-    requests = 980 + (uptime_seconds // 30) + chaos_state.total_chaos_requests
-    error_rate = 0.012 + (random.random() * 0.002)
+    p95_seconds, total_samples = compute_p95()
+    p95_ms = p95_seconds * 1000
+
+    total_requests, total_5xx = compute_request_stats()
+    error_rate = total_5xx / max(total_requests, 1)
 
     # Factor in chaos incidents — real impact on error rate
     last = chaos_state.last_incident
-    recent_incident_active = (
-        last is not None and (time.time() - last.timestamp) < 120  # 2min window
-    )
+    recent_incident_active = last is not None and (time.time() - last.timestamp) < 120
     if recent_incident_active and last is not None:
         if last.error_triggered:
-            error_rate += 0.03  # Real spike from forced failure
+            error_rate += 0.03
         if last.requests_dropped > 0:
             error_rate += last.requests_dropped * 0.005
 
-    # Semantic Status — now reflects real state
-    p95_status = "healthy" if p95 < 100 else "degraded"
+    # Status derived from real data — SLO threshold is p95 < 50ms
+    warming_up = total_samples < 20
+    if warming_up:
+        p95_status = "warming_up"
+        error_status = "warming_up"
+    else:
+        p95_status = "healthy" if p95_ms < 50 else "degraded"
+        if recent_incident_active and last is not None and last.error_triggered:
+            error_status = "investigating"
+        elif error_rate > 0.05:
+            error_status = "warning"
+        else:
+            error_status = "stable"
+
     if recent_incident_active and last is not None and last.error_triggered:
-        error_status = "investigating"
         system_status = "degraded"
-    elif error_rate > 0.05:
-        error_status = "warning"
+    elif error_rate > 0.05 or (not warming_up and p95_ms >= 50):
         system_status = "degraded"
     else:
-        error_status = "stable"
         system_status = "operational"
-
-    # Try to extract real metrics from Prometheus if available
-    try:
-        latency = REGISTRY.get_sample_value(
-            "http_request_duration_seconds_sum", labels={"handler": "/api/v1/projects"}
-        )
-        count = REGISTRY.get_sample_value(
-            "http_request_duration_seconds_count",
-            labels={"handler": "/api/v1/projects"},
-        )
-        if latency and count:
-            p95 = (latency / count) * 1000
-    except Exception:
-        pass
 
     # Incident tracking from chaos playground
     retries_1h = chaos_state.get_retries_last_hour()
@@ -144,30 +125,34 @@ async def get_metrics_summary(response: Response) -> MetricsSummary:
         last_incident_ago = "none"
         last_incident_type = "none"
 
-    # Sub-system status — computed from live chaos_state, single source of truth
     subsys = chaos_state.subsystem_status
 
+    # worker_status precedence: chaos_state overrides prometheus idle detection
+    worker = subsys.get("worker", "ok")
+    if worker == "ok" and total_requests == 0:
+        worker = "idle"
+
     return MetricsSummary(
-        p95_ms=int(p95),  # Less visual noise, int is enough for ms
+        p95_ms=int(p95_ms),
         p95_status=p95_status,
-        requests_24h=requests,
+        requests_since_deploy=total_requests,
         error_rate=round(error_rate, 4),
         error_rate_pct=f"{error_rate * 100:.2f}%",
         error_rate_status=error_status,
         system_status=system_status,
         uptime=_format_uptime(uptime_seconds),
-        window="last_24h",
+        window="since_deploy",
         timestamp=datetime.now(UTC).isoformat(),
         retries_1h=retries_1h,
         last_incident=last_incident_type,
         last_incident_ago=last_incident_ago,
-        worker_status=subsys.get("worker", "ok"),
+        worker_status=worker,
         queue_backlog=subsys.get("queue_backlog", 0),
         cache_status=subsys.get("cache", "direct"),
         cache_ttl_s=subsys.get("cache_ttl_s", 0),
         active_path=subsys.get("active_path", "sync"),
         system_lifecycle=subsys.get("system_lifecycle", "NORMAL"),
-        total_incidents_24h=14 + chaos_state.total_incidents,
+        total_chaos_events_since_deploy=chaos_state.total_incidents,
     )
 
 
