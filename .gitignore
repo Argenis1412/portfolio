@@ -19,6 +19,9 @@ credentials/
 # PYTHON / BACKEND
 # ===========================
 
+# Runtime artifacts
+.app_start_time
+
 # Virtual environments
 venv/
 .venv/
