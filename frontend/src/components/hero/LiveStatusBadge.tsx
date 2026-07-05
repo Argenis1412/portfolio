@@ -19,9 +19,10 @@ interface LiveStatusBadgeProps {
   status: SystemStatus;
   latencyMs?: number;
   source?: MetricSampleSource;
+  warmingUp?: boolean;
 }
 
-export const LiveStatusBadge = React.memo(({ status, latencyMs, source }: LiveStatusBadgeProps) => {
+export const LiveStatusBadge = React.memo(({ status, latencyMs, source, warmingUp }: LiveStatusBadgeProps) => {
   const { t } = useLanguage();
   const reduced = useReducedMotion();
   const cfg = BADGE_CONFIG[status];
@@ -44,7 +45,7 @@ export const LiveStatusBadge = React.memo(({ status, latencyMs, source }: LiveSt
           <span className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
           <span className={cfg.text}>
             {t(cfg.i18nKey)}
-            {(status === 'operational' || status === 'degraded') && latencyMs !== undefined && (
+            {(status === 'operational' || status === 'degraded') && latencyMs !== undefined && !warmingUp && (
               <span className="text-app-muted ml-1">· {latencyMs}ms</span>
             )}
           </span>
