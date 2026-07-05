@@ -72,12 +72,13 @@ export const PhilosophyItemSchema = z.object({
 
 export const MetricsSummarySchema = z.object({
   p95_ms: z.number().int(),
-  p95_status: z.enum(['healthy', 'degraded']),
-  requests_24h: z.number().int(),
+  p95_status: z.enum(['healthy', 'degraded', 'warming_up']).catch('healthy'),
+  requests_24h: z.number().int().optional(),
+  requests_since_deploy: z.number().int().optional(),
   error_rate: z.number(),
   error_rate_pct: z.string(),
-  error_rate_status: z.enum(['stable', 'warning', 'investigating']),
-  system_status: z.enum(['operational', 'degraded', 'down']),
+  error_rate_status: z.enum(['stable', 'warning', 'investigating', 'warming_up']).catch('stable'),
+  system_status: z.enum(['operational', 'degraded', 'down']).catch('operational'),
   uptime: z.string(),
   window: z.string(),
   timestamp: z.string(),
@@ -85,14 +86,15 @@ export const MetricsSummarySchema = z.object({
   last_incident: z.string().default('none'),
   last_incident_ago: z.string().default('none'),
   // Sub-system status
-  worker_status: z.enum(['ok', 'delayed']).default('ok'),
+  worker_status: z.enum(['ok', 'delayed', 'idle']).catch('ok').default('ok'),
   queue_backlog: z.number().int().default(0),
-  cache_status: z.enum(['direct', 'serving']).default('direct'),
+  cache_status: z.enum(['direct', 'serving']).catch('direct').default('direct'),
   cache_ttl_s: z.number().int().default(0),
-  active_path: z.enum(['sync', 'async', 'fallback']).default('sync'),
+  active_path: z.enum(['sync', 'async', 'fallback']).catch('sync').default('sync'),
   // State machine lifecycle
-  system_lifecycle: z.enum(['NORMAL', 'DEGRADED', 'RECOVERING', 'STABLE']).default('NORMAL'),
-  total_incidents_24h: z.number().int().default(0),
+  system_lifecycle: z.enum(['NORMAL', 'DEGRADED', 'RECOVERING', 'STABLE']).catch('NORMAL').default('NORMAL'),
+  total_incidents_24h: z.number().int().optional(),
+  total_chaos_events_since_deploy: z.number().int().optional(),
 });
 
 export const AboutSchema = z.object({
