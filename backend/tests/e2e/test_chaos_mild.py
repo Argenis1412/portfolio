@@ -15,16 +15,15 @@ def test_chaos_mild(api_client, chaos_teardown):
     assert metrics_resp.status_code == 200
     metrics = metrics_resp.json()
 
-    assert (
-        metrics.get("system_lifecycle")
-        in (
-            "DEGRADED",
-            "RECOVERING",
-        )
-    ), f"Expected DEGRADED or RECOVERING after spike, got {metrics.get('system_lifecycle')}"
-    assert (
-        0.0 <= metrics.get("error_rate", 0.0) <= 0.15
-    ), f"Error rate {metrics.get('error_rate')} exceeds MILD threshold"
+    assert metrics.get("system_lifecycle") in (
+        "DEGRADED",
+        "RECOVERING",
+    ), (
+        f"Expected DEGRADED or RECOVERING after spike, got {metrics.get('system_lifecycle')}"
+    )
+    assert 0.0 <= metrics.get("error_rate", 0.0) <= 0.15, (
+        f"Error rate {metrics.get('error_rate')} exceeds MILD threshold"
+    )
     assert metrics.get("p95_ms", 0) >= 0, "P95 must be non-negative"
 
     # 3. Teardown handles the recovery validation
