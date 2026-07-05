@@ -105,7 +105,7 @@ export const SystemSidecar = React.memo(({
             {sampleHistory.length >= 2 ? (
               <MetricsSparkline samples={sampleHistory} traces={recentTraces} width={360} height={76} compact />
             ) : (
-              <span className="text-[10px] font-mono text-app-muted/60 tracking-widest">warming-up...</span>
+              <span className="text-[10px] font-mono text-app-muted/60 tracking-widest">{t('metrics.confidence.warming_up')}...</span>
             )}
           </div>
         </div>
