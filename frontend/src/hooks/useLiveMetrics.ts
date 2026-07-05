@@ -112,6 +112,7 @@ export function useLiveMetrics() {
   const [previous, setPrevious] = useState<MetricsSummary | null>(null);
   const [recentTraces, setRecentTraces] = useState<TraceEntry[]>(() => getRecentTraces());
   const serverDataRef = useRef<MetricsSummary | null>(null);
+  const prevRequestsSinceDeployRef = useRef<number | null>(null);
 
 
 
@@ -140,6 +141,23 @@ export function useLiveMetrics() {
     gcTime: 60_000,
     retry: 1,
   });
+
+  /* eslint-disable react-hooks/set-state-in-effect */
+  useEffect(() => {
+    const current = query.data?.requests_since_deploy ?? null;
+    const prev = prevRequestsSinceDeployRef.current;
+    const isDeployReset = current !== null && prev !== null && current < prev && current <= 10;
+
+    if (isDeployReset) {
+      historyRef.current = [];
+      sampleHistoryRef.current = [];
+      setHistory([]);
+      setSampleHistory([]);
+    }
+
+    prevRequestsSinceDeployRef.current = current;
+  }, [query.data?.requests_since_deploy]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
