@@ -192,6 +192,7 @@ export function useLiveMetrics() {
 
     const { system_status, error_rate, p95_status } = query.data;
     if (system_status === 'down') return 'down';
+    if (system_status === 'degraded') return 'degraded';
     if (error_rate > ERROR_RATE_DEGRADED) return 'degraded';
     if (p95_status === 'warming_up') return 'operational';
     if (effectiveP95 > LATENCY_DEGRADED_MS) return 'degraded';
