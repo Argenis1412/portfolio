@@ -53,15 +53,15 @@ export function KpiStrip({ data, previous, effectiveP95 }: KpiStripProps) {
     {
       id: 'requests',
       label: t('hero.kpi.requests'),
-      value: data.requests_24h.toLocaleString('en-US'),
+      value: (data.requests_since_deploy ?? data.requests_24h ?? 0).toLocaleString('en-US'),
       delta: null,
     },
     {
       id: 'incidents',
       label: t('hero.kpi.incidents'),
-      value: data.total_incidents_24h,
+      value: data.total_chaos_events_since_deploy ?? data.total_incidents_24h ?? 0,
       className: 'text-app-primary cursor-pointer hover:underline',
-      delta: <DeltaBadge current={data.total_incidents_24h} previous={previous?.total_incidents_24h ?? null} unit="" />,
+      delta: <DeltaBadge current={data.total_chaos_events_since_deploy ?? data.total_incidents_24h ?? 0} previous={(previous?.total_chaos_events_since_deploy ?? previous?.total_incidents_24h) ?? null} unit="" />,
       onClick: () => scrollToSection('incidents'),
     },
   ];

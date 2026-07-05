@@ -12,7 +12,7 @@ export default function LiveMetricsBento() {
 
   // Hooks must be called unconditionally — before the early return guard.
   const animatedRetryBudget = useAnimatedNumber(displayContext.metrics?.strategyProfile?.retryBudget ?? 0);
-  const animatedRequests24h = useAnimatedNumber(displayContext.data?.requests_24h ?? 0);
+  const animatedRequests24h = useAnimatedNumber(displayContext.data?.requests_since_deploy ?? displayContext.data?.requests_24h ?? 0);
 
   if (isLoading || !displayContext.data) {
     return (
