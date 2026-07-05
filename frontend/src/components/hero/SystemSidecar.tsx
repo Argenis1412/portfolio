@@ -27,7 +27,7 @@ interface SystemSidecarProps {
   latestSample: MetricSample | null;
   effectiveP95: number;
   confidenceScore: number;
-  confidenceLabel: string;
+  confidenceLabel: 'verified' | 'estimated' | 'warming_up';
   recoveryState: string;
 }
 
@@ -66,7 +66,13 @@ export const SystemSidecar = React.memo(({
             {status.toUpperCase()}
           </div>
           <div className="mt-2 flex flex-wrap gap-2 text-[10px] font-mono">
-            <span className={`rounded-full px-2 py-0.5 flex items-center gap-1.5 ${confidenceLabel === 'estimated' ? 'bg-[var(--color-status-synthetic-bg)] text-[var(--color-status-synthetic)]' : 'bg-[var(--color-status-ok-bg)] text-[var(--color-status-ok-text)]'}`}>
+            <span className={`rounded-full px-2 py-0.5 flex items-center gap-1.5 ${
+              confidenceLabel === 'warming_up'
+                ? 'bg-[var(--color-status-synthetic-bg)] text-[var(--color-status-synthetic)] animate-pulse-soft'
+                : confidenceLabel === 'estimated'
+                  ? 'bg-[var(--color-status-synthetic-bg)] text-[var(--color-status-synthetic)]'
+                  : 'bg-[var(--color-status-ok-bg)] text-[var(--color-status-ok-text)]'
+            }`}>
               {t(`metrics.confidence.${confidenceLabel}`)}
               <ProgressRing value={confidenceScore} size={28} strokeWidth={3} />
             </span>

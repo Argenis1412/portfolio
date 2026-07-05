@@ -137,6 +137,7 @@
   "metrics.health.warning": "warning",
   "metrics.confidence.verified": "verified",
   "metrics.confidence.estimated": "estimated",
+  "metrics.confidence.warming_up": "calibrating",
   "metrics.origin.real": "real",
   "metrics.origin.synthetic": "synthetic",
   "metrics.api_live": "API Live",
