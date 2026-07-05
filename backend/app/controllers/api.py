@@ -88,6 +88,7 @@ async def get_metrics_summary(response: Response) -> MetricsSummary:
             error_rate += 0.03
         if last.requests_dropped > 0:
             error_rate += last.requests_dropped * 0.005
+    error_rate = min(error_rate, 1.0)
 
     # Status derived from real data — SLO threshold is p95 < 50ms
     warming_up = total_samples < 20
