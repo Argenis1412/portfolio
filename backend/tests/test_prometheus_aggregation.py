@@ -89,6 +89,46 @@ def test_request_stats_excludes_self_polling():
     assert errors == 0
 
 
+def test_p95_excludes_health_endpoints():
+    registry = CollectorRegistry()
+    h = Histogram(
+        "http_request_duration_seconds",
+        "Request duration",
+        labelnames=["handler"],
+        buckets=(0.01, 0.025, 0.05, 0.1, 0.2, 0.5, 1.0, 2.5, 5.0, 10.0),
+        registry=registry,
+    )
+    for _ in range(50):
+        h.labels(handler="/api/v1/projects").observe(0.020)
+    for _ in range(500):
+        h.labels(handler="/health").observe(0.130)
+    for _ in range(500):
+        h.labels(handler="/live").observe(0.005)
+
+    p95, total = compute_p95(registry=registry)
+    assert total == 50
+    assert p95 < 0.1
+
+
+def test_request_stats_excludes_health_endpoints():
+    registry = CollectorRegistry()
+    c = Counter(
+        "http_requests_total",
+        "Total requests",
+        labelnames=["handler", "status"],
+        registry=registry,
+    )
+    c.labels(handler="/api/v1/projects", status="2xx").inc(100)
+    c.labels(handler="/health", status="2xx").inc(5000)
+    c.labels(handler="/live", status="2xx").inc(3000)
+    c.labels(handler="/saude", status="2xx").inc(200)
+    c.labels(handler="/salud", status="2xx").inc(200)
+
+    total, errors = compute_request_stats(registry=registry)
+    assert total == 100
+    assert errors == 0
+
+
 def test_p95_empty_registry():
     registry = CollectorRegistry()
     p95, total = compute_p95(registry=registry)
