@@ -7,10 +7,16 @@ without requiring a running Prometheus server.
 
 from prometheus_client import REGISTRY, CollectorRegistry
 
-EXCLUDED_HANDLERS = frozenset({
-    "/api/v1/metrics/summary", "/metrics",
-    "/health", "/live", "/saude", "/salud",
-})
+EXCLUDED_HANDLERS = frozenset(
+    {
+        "/api/v1/metrics/summary",
+        "/metrics",
+        "/health",
+        "/live",
+        "/saude",
+        "/salud",
+    }
+)
 
 
 def compute_p95(
