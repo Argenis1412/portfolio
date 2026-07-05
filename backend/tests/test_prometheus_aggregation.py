@@ -33,7 +33,7 @@ def test_p95_accuracy():
 def test_p95_warming_up_threshold():
     registry = _make_registry_with_latency([0.010] * 5)
     _, total = compute_p95(registry=registry)
-    assert total < 20
+    assert total == 5
 
 
 def test_p95_excludes_self_polling():
