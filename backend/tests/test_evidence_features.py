@@ -131,8 +131,10 @@ async def test_retries_accumulate_across_chaos_actions():
 @pytest.mark.anyio
 async def test_metrics_warming_up_suppresses_degraded():
     chaos_state.reset()
-    with patch("app.controllers.api.compute_p95", return_value=(0.500, 10)), \
-         patch("app.controllers.api.compute_request_stats", return_value=(10, 0)):
+    with (
+        patch("app.controllers.api.compute_p95", return_value=(0.500, 10)),
+        patch("app.controllers.api.compute_request_stats", return_value=(10, 0)),
+    ):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as ac:
             response = await ac.get("/api/v1/metrics/summary")
@@ -145,8 +147,10 @@ async def test_metrics_warming_up_suppresses_degraded():
 @pytest.mark.anyio
 async def test_metrics_healthy_after_warming():
     chaos_state.reset()
-    with patch("app.controllers.api.compute_p95", return_value=(0.030, 100)), \
-         patch("app.controllers.api.compute_request_stats", return_value=(100, 0)):
+    with (
+        patch("app.controllers.api.compute_p95", return_value=(0.030, 100)),
+        patch("app.controllers.api.compute_request_stats", return_value=(100, 0)),
+    ):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as ac:
             response = await ac.get("/api/v1/metrics/summary")
@@ -158,8 +162,10 @@ async def test_metrics_healthy_after_warming():
 @pytest.mark.anyio
 async def test_metrics_degraded_after_warming():
     chaos_state.reset()
-    with patch("app.controllers.api.compute_p95", return_value=(0.500, 100)), \
-         patch("app.controllers.api.compute_request_stats", return_value=(100, 0)):
+    with (
+        patch("app.controllers.api.compute_p95", return_value=(0.500, 100)),
+        patch("app.controllers.api.compute_request_stats", return_value=(100, 0)),
+    ):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as ac:
             response = await ac.get("/api/v1/metrics/summary")
