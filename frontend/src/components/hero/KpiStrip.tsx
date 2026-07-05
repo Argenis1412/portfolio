@@ -39,8 +39,8 @@ export function KpiStrip({ data, previous, effectiveP95 }: KpiStripProps) {
     {
       id: 'latency',
       label: t('hero.kpi.latency'),
-      value: `${Math.round(animatedP95)}ms`,
-      delta: <DeltaBadge current={effectiveP95} previous={previous?.p95_ms ?? null} unit="ms" />,
+      value: data.p95_status === 'warming_up' ? '---' : `${Math.round(animatedP95)}ms`,
+      delta: data.p95_status === 'warming_up' ? null : <DeltaBadge current={effectiveP95} previous={previous?.p95_ms ?? null} unit="ms" />,
     },
      {
        id: 'error_rate',

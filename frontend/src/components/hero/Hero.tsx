@@ -44,7 +44,7 @@ export const Hero = React.memo(() => {
               transition={{ duration: 0.4 }}
               className="mb-4 flex justify-center md:justify-start"
             >
-              <LiveStatusBadge status={status} latencyMs={effectiveP95} source={latestSample?.source} />
+              <LiveStatusBadge status={status} latencyMs={effectiveP95} source={latestSample?.source} warmingUp={confidenceLabel === 'warming_up'} />
             </m.div>
           )}
 
@@ -80,6 +80,7 @@ export const Hero = React.memo(() => {
                 effectiveP95={effectiveP95}
                 recoveryState={recoveryState}
                 lastIncident={data?.last_incident}
+                warmingUp={confidenceLabel === 'warming_up'}
               />
             </m.div>
           )}

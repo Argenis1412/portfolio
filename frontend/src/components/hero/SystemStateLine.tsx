@@ -8,9 +8,10 @@ interface SystemStateLineProps {
   effectiveP95: number;
   recoveryState: string;
   lastIncident?: string;
+  warmingUp?: boolean;
 }
 
-export const SystemStateLine = React.memo(({ status, effectiveP95, recoveryState, lastIncident }: SystemStateLineProps) => {
+export const SystemStateLine = React.memo(({ status, effectiveP95, recoveryState, lastIncident, warmingUp }: SystemStateLineProps) => {
   const { t } = useLanguage();
   const reduced = useReducedMotion();
 
@@ -44,16 +45,18 @@ export const SystemStateLine = React.memo(({ status, effectiveP95, recoveryState
     if (status === 'operational') {
       if (recoveryState === 'half_open') {
         const cbState = t('hero.status.circuit_breaker') + ' HALF-OPEN';
+        if (warmingUp) return `RECOVERING · ${cbState}`;
         const msg = t('hero.status.recovering_testing', { n: effectiveP95 });
         return `RECOVERING · ${cbState} · ${msg}`;
       }
       const msg = t('hero.status.nominal');
+      if (warmingUp) return `OPERATIONAL · ${msg}`;
       const p95Text = t('hero.status.p95_at', { n: effectiveP95 });
       return `OPERATIONAL · ${msg} · ${p95Text}`;
     }
 
     return t('hero.differentiator');
-  }, [status, effectiveP95, recoveryState, lastIncident, t]);
+  }, [status, effectiveP95, recoveryState, lastIncident, warmingUp, t]);
 
   const colorClass =
     status === 'down' ? 'text-status-error' :
