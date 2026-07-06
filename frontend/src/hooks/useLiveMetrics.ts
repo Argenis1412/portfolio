@@ -90,6 +90,10 @@ function buildSyntheticSample(trace: TraceEntry, baseline: number): MetricSample
   };
 }
 
+function findLatestChaosTrace(traces: TraceEntry[]): TraceEntry | undefined {
+  return traces.find(t => t.type === 'forced_failure' || t.type === 'latency_injection');
+}
+
 function appendSample(samples: MetricSample[], sample: MetricSample): MetricSample[] {
   const deduped = samples.filter((entry) => !(entry.timestamp === sample.timestamp && entry.traceId === sample.traceId));
   return [...deduped, sample].sort((a, b) => a.timestamp - b.timestamp).slice(-MAX_HISTORY);
@@ -159,11 +163,9 @@ export function useLiveMetrics() {
   }, [preset, queryClient]);
 
   useEffect(() => {
-    const chaosTrace = recentTraces.find(t =>
-      ['forced_failure', 'latency_injection'].includes(t.type)
-    );
+    const chaosTrace = findLatestChaosTrace(recentTraces);
     isInChaosRecoveryRef.current = chaosTrace !== undefined &&
-      Date.now() - chaosTrace.timestamp.getTime() < RECOVERING_WINDOW_MS;
+      currentTime - chaosTrace.timestamp.getTime() < RECOVERING_WINDOW_MS;
   }, [recentTraces, currentTime]);
 
   /* eslint-disable react-hooks/set-state-in-effect */
@@ -235,11 +237,8 @@ export function useLiveMetrics() {
     const { system_status, error_rate, p95_status } = query.data;
     if (system_status === 'down') return 'down';
 
-    const latestChaosTrace = recentTraces.find(t =>
-      ['forced_failure', 'latency_injection'].includes(t.type)
-    );
-    const isChaosRecovering = latestChaosTrace !== null &&
-      latestChaosTrace !== undefined &&
+    const latestChaosTrace = findLatestChaosTrace(recentTraces);
+    const isChaosRecovering = latestChaosTrace !== undefined &&
       currentTime - latestChaosTrace.timestamp.getTime() < RECOVERING_WINDOW_MS;
 
     // Real error spikes always surface as degraded, regardless of chaos state
@@ -261,12 +260,13 @@ export function useLiveMetrics() {
    }, [sampleHistory]);
 
   const recoveryState = useMemo(() => {
-    if (!latestTrace || !['forced_failure', 'latency_injection'].includes(latestTrace.type)) return 'closed' as const;
-    const ageMs = currentTime - latestTrace.timestamp.getTime();
+    const chaosTrace = findLatestChaosTrace(recentTraces);
+    if (!chaosTrace) return 'closed' as const;
+    const ageMs = currentTime - chaosTrace.timestamp.getTime();
     if (ageMs < SYNTHETIC_WINDOW_MS) return 'open' as const;
     if (ageMs < RECOVERING_WINDOW_MS) return 'half_open' as const;
     return 'closed' as const;
-  }, [latestTrace, currentTime]);
+  }, [recentTraces, currentTime]);
 
   const timeoutState = useMemo(() => {
     const realP95 = query.data?.p95_ms ?? 0;
