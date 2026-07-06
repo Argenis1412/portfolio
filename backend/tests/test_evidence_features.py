@@ -189,6 +189,58 @@ async def test_metrics_degraded_after_warming():
 
 
 @pytest.mark.anyio
+async def test_system_status_operational_at_p95_between_50_and_100ms():
+    """Regression: backend degraded threshold was 50ms, misaligned with frontend
+    LATENCY_DEGRADED_MS=100ms. Production P95 naturally sits in 50-100ms range
+    (Koyeb + remote DB) and was pinning the badge to DEGRADED. Threshold aligned
+    to 100ms so this range now stays operational."""
+    chaos_state.reset()
+    with (
+        patch("app.controllers.api.compute_p95", return_value=(0.070, 100)),
+        patch("app.controllers.api.compute_request_stats", return_value=(100, 0)),
+    ):
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
+            response = await ac.get("/api/v1/metrics/summary")
+            data = response.json()
+            assert data["p95_ms"] == 70
+            assert data["system_status"] == "operational"
+
+
+@pytest.mark.anyio
+async def test_system_status_degraded_at_p95_exact_100ms():
+    """Boundary: p95 == 100ms must trigger degraded (threshold is >= 100)."""
+    chaos_state.reset()
+    with (
+        patch("app.controllers.api.compute_p95", return_value=(0.100, 100)),
+        patch("app.controllers.api.compute_request_stats", return_value=(100, 0)),
+    ):
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
+            response = await ac.get("/api/v1/metrics/summary")
+            data = response.json()
+            assert data["p95_ms"] == 100
+            assert data["system_status"] == "degraded"
+
+
+@pytest.mark.anyio
+async def test_system_status_degraded_at_p95_above_100ms():
+    """Regression: crossing the aligned 100ms boundary must still flip
+    system_status to degraded."""
+    chaos_state.reset()
+    with (
+        patch("app.controllers.api.compute_p95", return_value=(0.120, 100)),
+        patch("app.controllers.api.compute_request_stats", return_value=(100, 0)),
+    ):
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
+            response = await ac.get("/api/v1/metrics/summary")
+            data = response.json()
+            assert data["p95_ms"] == 120
+            assert data["system_status"] == "degraded"
+
+
+@pytest.mark.anyio
 async def test_error_response_includes_trace_id():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
