@@ -89,7 +89,8 @@ async def get_metrics_summary(response: Response) -> MetricsSummary:
             error_rate += last.requests_dropped * 0.005
     error_rate = min(error_rate, 1.0)
 
-    # Status derived from real data — SLO threshold is p95 < 50ms
+    # Status derived from real data — SLO threshold is p95 < 100ms
+    # (aligned with frontend LATENCY_DEGRADED_MS in useLiveMetrics.ts)
     warming_up = total_samples < 10
     if warming_up:
         p95_status = "warming_up"
@@ -105,7 +106,7 @@ async def get_metrics_summary(response: Response) -> MetricsSummary:
 
     if recent_incident_active and last is not None and last.error_triggered:
         system_status = "degraded"
-    elif error_rate > 0.05 or (not warming_up and p95_ms >= 50):
+    elif error_rate > 0.05 or (not warming_up and p95_ms >= 100):
         system_status = "degraded"
     else:
         system_status = "operational"
