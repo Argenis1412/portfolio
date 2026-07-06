@@ -208,6 +208,22 @@ async def test_system_status_operational_at_p95_between_50_and_100ms():
 
 
 @pytest.mark.anyio
+async def test_system_status_degraded_at_p95_exact_100ms():
+    """Boundary: p95 == 100ms must trigger degraded (threshold is >= 100)."""
+    chaos_state.reset()
+    with (
+        patch("app.controllers.api.compute_p95", return_value=(0.100, 100)),
+        patch("app.controllers.api.compute_request_stats", return_value=(100, 0)),
+    ):
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
+            response = await ac.get("/api/v1/metrics/summary")
+            data = response.json()
+            assert data["p95_ms"] == 100
+            assert data["system_status"] == "degraded"
+
+
+@pytest.mark.anyio
 async def test_system_status_degraded_at_p95_above_100ms():
     """Regression: crossing the aligned 100ms boundary must still flip
     system_status to degraded."""
