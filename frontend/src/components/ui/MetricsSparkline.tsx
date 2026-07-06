@@ -149,7 +149,7 @@ export default function MetricsSparkline({
       const maxX = width - boxWidth - 6;
       let x = Math.min(point.x + 4, maxX);
       if (x < lastRight + 4) x = lastRight + 4;
-      const hidden = x > maxX;
+      const hidden = x > maxX || maxX < 0;
       if (!hidden) x = Math.min(x, maxX);
       const lane = index % 3;
       const y = Math.max(16, Math.min(laneHeights[lane], height - (metaText ? 34 : 20)));
