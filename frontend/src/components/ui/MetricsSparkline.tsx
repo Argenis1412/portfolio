@@ -34,6 +34,10 @@ function severityColor(impactPct?: string): string {
   return '#ef4444';
 }
 
+function traceMetaText(trace: TraceEntry): string {
+  return `${trace.impactPct ? `aff:${trace.impactPct}` : ''}${trace.impactPct && trace.latencyDelta ? ' ' : ''}${trace.latencyDelta ? `Δ:${trace.latencyDelta}` : ''}`.trim();
+}
+
 export default function MetricsSparkline({
   samples,
   traces = [],
@@ -132,6 +136,28 @@ export default function MetricsSparkline({
   const animatedMainPolyline = useAnimatedPolyline(model.polyline, 350);
   const animatedRealPolyline = useAnimatedPolyline(model.realPolyline, 350);
   const animatedSyntheticPolyline = useAnimatedPolyline(model.syntheticPolyline, 350);
+
+  const labelPositions = useMemo(() => {
+    const laneHeights = [18, 38, 58];
+    const positions: Array<{ x: number; y: number; boxWidth: number; hidden: boolean }> = [];
+    let lastRight = -Infinity;
+    model.annotations.forEach(({ trace, point }, index) => {
+      const style = TRACE_STYLE[trace.type];
+      const isSpike = trace.type === 'traffic_spike';
+      const metaText = traceMetaText(trace);
+      const boxWidth = annotationWidth(isSpike ? 'SPIKE' : style.label, metaText || undefined);
+      const maxX = width - boxWidth - 6;
+      let x = Math.min(point.x + 4, maxX);
+      if (x < lastRight + 4) x = lastRight + 4;
+      const hidden = x > maxX;
+      if (!hidden) x = Math.min(x, maxX);
+      const lane = index % 3;
+      const y = Math.max(16, Math.min(laneHeights[lane], height - (metaText ? 34 : 20)));
+      positions.push({ x, y, boxWidth, hidden });
+      lastRight = hidden ? lastRight : x + boxWidth;
+    });
+    return positions;
+  }, [model.annotations, width, height]);
 
   if (!model) return null;
 
@@ -267,20 +293,12 @@ export default function MetricsSparkline({
         />
       )}
 
-      {model.annotations.map(({ trace, point }, index, annotations) => {
+      {model.annotations.map(({ trace, point }, index) => {
         const style = TRACE_STYLE[trace.type];
         const isSpike = trace.type === 'traffic_spike';
         const markerColor = isSpike ? '#ef4444' : style.stroke;
-        const metaText = `${trace.impactPct ? `aff:${trace.impactPct}` : ''}${trace.impactPct && trace.latencyDelta ? ' ' : ''}${trace.latencyDelta ? `Δ:${trace.latencyDelta}` : ''}`.trim();
-        const boxWidth = annotationWidth(isSpike ? 'SPIKE' : style.label, metaText || undefined);
-        const desiredX = point.x + 4;
-        const clampedX = Math.min(desiredX, width - boxWidth - 6);
-        const previous = annotations[index - 1];
-        const isCrowded = previous ? Math.abs(previous.point.x - point.x) < boxWidth * 0.9 : false;
-        const lane = isCrowded ? index % 3 : index % 2;
-        const laneHeights = [18, 38, 58];
-        const labelX = previous && isCrowded && clampedX <= previous.point.x ? Math.max(6, clampedX - 20) : clampedX;
-        const labelY = Math.max(16, Math.min(laneHeights[lane], height - (metaText ? 34 : 20)));
+        const metaText = traceMetaText(trace);
+        const { x: labelX, y: labelY, boxWidth, hidden } = labelPositions[index];
         const metaSeverity = severityColor(trace.impactPct);
 
         return (
@@ -303,7 +321,7 @@ export default function MetricsSparkline({
               animate={{ strokeOpacity: 0.45 }}
               transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.3, delay: index * 0.08 }}
             />
-            {!compact && (
+            {!compact && !hidden && (
               <g transform={`translate(${labelX}, ${labelY})`}>
                 <rect
                   x="-2" y="-10" width={boxWidth} height="14"
