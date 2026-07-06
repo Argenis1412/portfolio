@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createElement, type ReactNode } from 'react';
 import { ChaosContext, type ChaosPreset } from '../context/ChaosContextCore';
 import { useLiveMetrics } from '../hooks/useLiveMetrics';
-import { getRecentTraces } from '../services/TraceEmitter';
+import { getRecentTraces, subscribeToTraces, type TraceEntry } from '../services/TraceEmitter';
 
 vi.mock('../services/TraceEmitter', () => ({
   subscribeToTraces: vi.fn(() => () => {}),
@@ -110,14 +110,40 @@ describe('useLiveMetrics', () => {
 
   describe('status derivation ignores synthetic P95', () => {
     it('stays operational when backend is healthy regardless of effectiveP95', async () => {
-      const qc = makeQueryClient();
+      const chaosTrace = {
+        id: 'trace-synth-1',
+        traceId: 'trace-synth-1',
+        requestId: 'req-synth-1',
+        type: 'latency_injection' as const,
+        timestamp: new Date(),
+        origin: 'synthetic' as const,
+        endpoint: '/api/test',
+        status: 'ok' as const,
+        totalMs: 3999,
+        apiMs: 3999,
+        dbMs: 0,
+        cacheMs: 0,
+      };
 
+      let traceListener: ((trace: TraceEntry) => void) | null = null;
+      vi.mocked(subscribeToTraces).mockImplementation((cb) => {
+        traceListener = cb;
+        return () => { traceListener = null; };
+      });
+      vi.mocked(getRecentTraces).mockReturnValue([chaosTrace]);
+
+      const qc = makeQueryClient();
       const { result } = renderHook(() => useLiveMetrics(), {
         wrapper: createWrapper('mild', qc),
       });
 
       await waitFor(() => expect(result.current.data).toBeDefined());
 
+      await act(async () => {
+        traceListener!({ ...chaosTrace, timestamp: new Date() });
+      });
+
+      expect(result.current.effectiveP95).toBeGreaterThan(44);
       expect(result.current.status).toBe('operational');
       expect(result.current.timeoutState).toBe('within_budget');
     });
