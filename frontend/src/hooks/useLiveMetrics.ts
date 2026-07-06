@@ -14,7 +14,7 @@
  */
 import { useMemo, useRef, useState, useEffect } from 'react';
 import { useCurrentTime } from './useCurrentTime';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchMetricsSummary, type MetricsSummary } from '../api/portfolioService';
 import { useChaosMode } from './useChaosMode';
 import { getRecentTraces, subscribeToTraces, type TraceEntry } from '../services/TraceEmitter';
@@ -135,12 +135,26 @@ export function useLiveMetrics() {
     queryKey: ['metrics-summary', preset],
     queryFn: async () => fetchMetricsSummary(preset),
     staleTime: 10_000,
-    refetchInterval: 15_000,
+    refetchInterval: preset === 'off' ? 15_000 : 5_000,
     refetchIntervalInBackground: false,
     refetchOnWindowFocus: false,
     gcTime: 60_000,
     retry: 1,
   });
+
+  const queryClient = useQueryClient();
+  const prevPresetRef = useRef(preset);
+  const seenPresetsRef = useRef<Set<string>>(new Set([preset]));
+
+  useEffect(() => {
+    if (prevPresetRef.current === preset) return;
+    const alreadySeen = seenPresetsRef.current.has(preset);
+    prevPresetRef.current = preset;
+    seenPresetsRef.current.add(preset);
+    if (alreadySeen) {
+      queryClient.invalidateQueries({ queryKey: ['metrics-summary'] });
+    }
+  }, [preset, queryClient]);
 
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
