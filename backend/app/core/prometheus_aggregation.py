@@ -3,11 +3,16 @@ Prometheus histogram quantile estimation via bucket interpolation.
 
 Reads raw bucket samples from a CollectorRegistry and computes percentiles
 without requiring a running Prometheus server.
+
+NOTE: Excluding /api/v1/chaos/* is a tactical fix on top of a
+process-lifetime cumulative histogram. Long-term this should be
+replaced by a rolling-window or periodically-reset histogram so
+any endpoint outlier decays naturally.
 """
 
 from prometheus_client import REGISTRY, CollectorRegistry
 
-EXCLUDED_HANDLERS = frozenset(
+EXCLUDED_HANDLER_EXACT = frozenset(
     {
         "/api/v1/metrics/summary",
         "/metrics",
@@ -17,6 +22,16 @@ EXCLUDED_HANDLERS = frozenset(
         "/salud",
     }
 )
+
+EXCLUDED_HANDLER_PREFIXES: tuple[str, ...] = ("/api/v1/chaos/",)
+
+
+def _is_excluded_handler(handler: object) -> bool:
+    if not isinstance(handler, str):
+        return False
+    if handler in EXCLUDED_HANDLER_EXACT:
+        return True
+    return handler.startswith(EXCLUDED_HANDLER_PREFIXES)
 
 
 def compute_p95(
@@ -38,7 +53,7 @@ def compute_p95(
             continue
         for sample in metric.samples:
             handler = sample.labels.get("handler", "")
-            if handler in EXCLUDED_HANDLERS:
+            if _is_excluded_handler(handler):
                 continue
 
             if sample.name == f"{metric_name}_bucket":
@@ -89,7 +104,7 @@ def compute_request_stats(
             if sample.name == f"{metric_name}_created":
                 continue
             handler = sample.labels.get("handler", "")
-            if handler in EXCLUDED_HANDLERS:
+            if _is_excluded_handler(handler):
                 continue
             count = int(sample.value)
             total += count
