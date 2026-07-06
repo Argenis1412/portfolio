@@ -66,7 +66,7 @@ class MetricsSummary(BaseModel):
     p95_status: str = Field(
         ...,
         examples=["healthy", "degraded", "warming_up"],
-        description="Latency status — warming_up when <50 samples collected",
+        description="Latency status — warming_up when <10 samples collected",
     )
     requests_since_deploy: int = Field(
         ...,
@@ -82,7 +82,7 @@ class MetricsSummary(BaseModel):
     error_rate_status: str = Field(
         ...,
         examples=["stable", "warning", "investigating", "warming_up"],
-        description="Error rate status — warming_up when <50 samples collected",
+        description="Error rate status — warming_up when <10 samples collected",
     )
     system_status: str = Field(
         ..., examples=["operational"], description="Overall system state"

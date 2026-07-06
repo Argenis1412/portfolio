@@ -14,7 +14,7 @@
  */
 import { useMemo, useRef, useState, useEffect } from 'react';
 import { useCurrentTime } from './useCurrentTime';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { fetchMetricsSummary, type MetricsSummary } from '../api/portfolioService';
 import { useChaosMode } from './useChaosMode';
 import { getRecentTraces, subscribeToTraces, type TraceEntry } from '../services/TraceEmitter';
@@ -26,7 +26,7 @@ const LATENCY_DEGRADED_MS = 100;
 const ERROR_RATE_DEGRADED = 0.05;
 const MAX_HISTORY = 12;
 const SYNTHETIC_WINDOW_MS = 20_000;
-const RECOVERING_WINDOW_MS = 45_000;
+const RECOVERING_WINDOW_MS = 120_000;
 const DEFAULT_CONFIDENCE_REAL = 98;
 
 const TRACE_PROJECTION: Record<TraceEntry['type'], { factor: number; floor: number; cap: number }> = {
@@ -90,6 +90,10 @@ function buildSyntheticSample(trace: TraceEntry, baseline: number): MetricSample
   };
 }
 
+function findLatestChaosTrace(traces: TraceEntry[]): TraceEntry | undefined {
+  return traces.find(t => t.type === 'forced_failure' || t.type === 'latency_injection');
+}
+
 function appendSample(samples: MetricSample[], sample: MetricSample): MetricSample[] {
   const deduped = samples.filter((entry) => !(entry.timestamp === sample.timestamp && entry.traceId === sample.traceId));
   return [...deduped, sample].sort((a, b) => a.timestamp - b.timestamp).slice(-MAX_HISTORY);
@@ -130,17 +134,39 @@ export function useLiveMetrics() {
   }, []);
 
   const { preset } = useChaosMode();
+  const currentTime = useCurrentTime(1000);
+  const isInChaosRecoveryRef = useRef(false);
 
   const query = useQuery({
     queryKey: ['metrics-summary', preset],
     queryFn: async () => fetchMetricsSummary(preset),
     staleTime: 10_000,
-    refetchInterval: 15_000,
+    refetchInterval: () => preset !== 'off' || isInChaosRecoveryRef.current ? 5_000 : 15_000,
     refetchIntervalInBackground: false,
     refetchOnWindowFocus: false,
     gcTime: 60_000,
     retry: 1,
   });
+
+  const queryClient = useQueryClient();
+  const prevPresetRef = useRef(preset);
+  const seenPresetsRef = useRef<Set<string>>(new Set([preset]));
+
+  useEffect(() => {
+    if (prevPresetRef.current === preset) return;
+    const alreadySeen = seenPresetsRef.current.has(preset);
+    prevPresetRef.current = preset;
+    seenPresetsRef.current.add(preset);
+    if (alreadySeen) {
+      queryClient.invalidateQueries({ queryKey: ['metrics-summary'] });
+    }
+  }, [preset, queryClient]);
+
+  useEffect(() => {
+    const chaosTrace = findLatestChaosTrace(recentTraces);
+    isInChaosRecoveryRef.current = chaosTrace !== undefined &&
+      currentTime - chaosTrace.timestamp.getTime() < RECOVERING_WINDOW_MS;
+  }, [recentTraces, currentTime]);
 
   /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
@@ -210,13 +236,20 @@ export function useLiveMetrics() {
 
     const { system_status, error_rate, p95_status } = query.data;
     if (system_status === 'down') return 'down';
-    if (system_status === 'degraded') return 'degraded';
+
+    const latestChaosTrace = findLatestChaosTrace(recentTraces);
+    const isChaosRecovering = latestChaosTrace !== undefined &&
+      currentTime - latestChaosTrace.timestamp.getTime() < RECOVERING_WINDOW_MS;
+
+    // Real error spikes always surface as degraded, regardless of chaos state
     if (error_rate > ERROR_RATE_DEGRADED) return 'degraded';
+    // During chaos recovery window, soften backend-accumulated latency degradation to warning
+    if (system_status === 'degraded' && !isChaosRecovering) return 'degraded';
     if (p95_status === 'warming_up') return 'operational';
-    if (effectiveP95 > LATENCY_DEGRADED_MS) return 'degraded';
-    if (effectiveP95 > LATENCY_WARNING_MS) return 'warning';
+    if (query.data.p95_ms > LATENCY_DEGRADED_MS) return isChaosRecovering ? 'warning' : 'degraded';
+    if (query.data.p95_ms > LATENCY_WARNING_MS) return 'warning';
     return 'operational';
-  }, [effectiveP95, query.data, query.isLoading, query.isError]);
+  }, [query.data, query.isLoading, query.isError, recentTraces, currentTime]);
 
   const latestTrace = recentTraces[0] ?? null;
 
@@ -226,20 +259,21 @@ export function useLiveMetrics() {
      return Math.round(avg);
    }, [sampleHistory]);
 
-  const currentTime = useCurrentTime(1000);
   const recoveryState = useMemo(() => {
-    if (!latestTrace || !['forced_failure', 'latency_injection'].includes(latestTrace.type)) return 'closed' as const;
-    const ageMs = currentTime - latestTrace.timestamp.getTime();
+    const chaosTrace = findLatestChaosTrace(recentTraces);
+    if (!chaosTrace) return 'closed' as const;
+    const ageMs = currentTime - chaosTrace.timestamp.getTime();
     if (ageMs < SYNTHETIC_WINDOW_MS) return 'open' as const;
     if (ageMs < RECOVERING_WINDOW_MS) return 'half_open' as const;
     return 'closed' as const;
-  }, [latestTrace, currentTime]);
+  }, [recentTraces, currentTime]);
 
   const timeoutState = useMemo(() => {
-    if (effectiveP95 > LATENCY_DEGRADED_MS) return 'visible' as const;
-    if (effectiveP95 > LATENCY_WARNING_MS) return 'risk' as const;
+    const realP95 = query.data?.p95_ms ?? 0;
+    if (realP95 > LATENCY_DEGRADED_MS) return 'visible' as const;
+    if (realP95 > LATENCY_WARNING_MS) return 'risk' as const;
     return 'within_budget' as const;
-  }, [effectiveP95]);
+  }, [query.data?.p95_ms]);
 
   const displayLifecycle = useMemo(() => {
     if (!latestSample || latestSample.source === 'real') {
@@ -247,10 +281,10 @@ export function useLiveMetrics() {
     }
 
     const ageMs = currentTime - latestSample.timestamp;
-    if (query.data?.p95_status !== 'warming_up' && ageMs < SYNTHETIC_WINDOW_MS && effectiveP95 > LATENCY_WARNING_MS) return 'DEGRADED';
+    if (query.data?.p95_status !== 'warming_up' && ageMs < SYNTHETIC_WINDOW_MS && (query.data?.p95_ms ?? 0) > LATENCY_WARNING_MS) return 'DEGRADED';
     if (ageMs < RECOVERING_WINDOW_MS) return 'RECOVERING';
     return query.data?.system_lifecycle ?? 'NORMAL';
-  }, [currentTime, effectiveP95, latestSample, query.data?.system_lifecycle, query.data?.p95_status]);
+  }, [currentTime, query.data?.p95_ms, latestSample, query.data?.system_lifecycle, query.data?.p95_status]);
 
   const strategyProfile = useMemo(() => {
     const baseRetry = query.data?.retries_1h ?? 0;
