@@ -132,8 +132,8 @@ async def test_retries_accumulate_across_chaos_actions():
 async def test_metrics_warming_up_suppresses_degraded():
     chaos_state.reset()
     with (
-        patch("app.controllers.api.compute_p95", return_value=(0.500, 10)),
-        patch("app.controllers.api.compute_request_stats", return_value=(10, 0)),
+        patch("app.controllers.api.compute_p95", return_value=(0.500, 5)),
+        patch("app.controllers.api.compute_request_stats", return_value=(5, 0)),
     ):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as ac:
@@ -142,6 +142,20 @@ async def test_metrics_warming_up_suppresses_degraded():
             assert data["p95_status"] == "warming_up"
             assert data["error_rate_status"] == "warming_up"
             assert data["system_status"] == "operational"
+
+
+@pytest.mark.anyio
+async def test_metrics_exits_warming_up_at_threshold():
+    chaos_state.reset()
+    with (
+        patch("app.controllers.api.compute_p95", return_value=(0.500, 10)),
+        patch("app.controllers.api.compute_request_stats", return_value=(10, 0)),
+    ):
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
+            response = await ac.get("/api/v1/metrics/summary")
+            data = response.json()
+            assert data["p95_status"] == "degraded"
 
 
 @pytest.mark.anyio

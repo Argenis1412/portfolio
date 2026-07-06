@@ -90,7 +90,7 @@ async def get_metrics_summary(response: Response) -> MetricsSummary:
     error_rate = min(error_rate, 1.0)
 
     # Status derived from real data — SLO threshold is p95 < 50ms
-    warming_up = total_samples < 50
+    warming_up = total_samples < 10
     if warming_up:
         p95_status = "warming_up"
         error_status = "warming_up"
