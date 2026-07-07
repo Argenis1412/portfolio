@@ -241,6 +241,36 @@ async def test_system_status_degraded_at_p95_above_100ms():
 
 
 @pytest.mark.anyio
+async def test_chaos_reset_clears_prometheus_baseline():
+    """Regression: POST /chaos/reset must also clear the Prometheus baseline so
+    that a manual reset returns the badge to operational without a redeploy."""
+    chaos_state.reset()
+    with (
+        patch("app.controllers.api.compute_p95", return_value=(0.150, 100)),
+        patch("app.controllers.api.compute_request_stats", return_value=(100, 0)),
+    ):
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
+            response = await ac.get("/api/v1/metrics/summary")
+            assert response.json()["system_status"] == "degraded"
+
+            # After manual reset the badge must return to operational
+            await ac.post("/api/v1/chaos/reset")
+
+    # Now compute_p95 returns fresh low value (post-reset, no contamination)
+    with (
+        patch("app.controllers.api.compute_p95", return_value=(0.070, 5)),
+        patch("app.controllers.api.compute_request_stats", return_value=(5, 0)),
+    ):
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
+            response = await ac.get("/api/v1/metrics/summary")
+            data = response.json()
+            # warming_up (5 < 10 samples after reset) → operational
+            assert data["system_status"] == "operational"
+
+
+@pytest.mark.anyio
 async def test_error_response_includes_trace_id():
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:

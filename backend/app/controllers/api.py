@@ -35,7 +35,7 @@ from app.controllers.dependencies import (
 from app.core.cache_http import cacheable_response
 from app.core.uptime import APP_START_TIME
 from app.core.exceptions import ResourceNotFoundError
-from app.core.prometheus_aggregation import compute_p95, compute_request_stats
+from app.core.prometheus_aggregation import compute_p95, compute_request_stats, reset_metrics_baseline
 from app.core.rate_limit import check_rate_limit
 from app.schemas.about import AboutResponse
 from app.schemas.experiences import Experience, ExperiencesResponse
@@ -46,6 +46,11 @@ from app.schemas.projects import DetailedProject, ProjectSummary, ProjectsRespon
 from app.schemas.stack import StackItem, StackResponse
 
 router = APIRouter(tags=["API"])
+
+# Tracks whether the previous metrics poll was inside a chaos recovery window.
+# When it transitions True→False the Prometheus baseline is reset so that
+# chaos-period slow samples don't permanently inflate the cumulative P95.
+_was_chaos_active: bool = False
 
 
 def _format_uptime(seconds: int) -> str:
@@ -69,19 +74,30 @@ async def get_metrics_summary(response: Response) -> MetricsSummary:
     """
     Returns consolidated metrics for the dashboard sourced from Prometheus.
     """
+    global _was_chaos_active
+
     response.headers["Cache-Control"] = "public, max-age=15"
 
     uptime_seconds = int(time.time() - APP_START_TIME)
+
+    # Evaluate chaos state BEFORE reading Prometheus so the baseline reset
+    # (if needed) happens before compute_p95 / compute_request_stats.
+    last = chaos_state.last_incident
+    recent_incident_active = last is not None and (time.time() - last.timestamp) < 120
+
+    # Auto-reset Prometheus baseline when the chaos recovery window expires.
+    # This discards chaos-period slow samples from the cumulative histogram so
+    # P95 is computed from only post-chaos clean traffic — preventing the badge
+    # from getting permanently stuck at DEGRADED after multiple chaos cycles.
+    if _was_chaos_active and not recent_incident_active:
+        reset_metrics_baseline()
+    _was_chaos_active = recent_incident_active
 
     p95_seconds, total_samples = compute_p95()
     p95_ms = p95_seconds * 1000
 
     total_requests, total_5xx = compute_request_stats()
     error_rate = total_5xx / max(total_requests, 1)
-
-    # Factor in chaos incidents — real impact on error rate
-    last = chaos_state.last_incident
-    recent_incident_active = last is not None and (time.time() - last.timestamp) < 120
     if recent_incident_active and last is not None:
         if last.error_triggered:
             error_rate += 0.03
