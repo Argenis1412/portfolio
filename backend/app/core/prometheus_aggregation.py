@@ -8,7 +8,15 @@ NOTE: Excluding /api/v1/chaos/* is a tactical fix on top of a
 process-lifetime cumulative histogram. Long-term this should be
 replaced by a rolling-window or periodically-reset histogram so
 any endpoint outlier decays naturally.
+
+Baseline reset: after each chaos recovery cycle the caller may call
+reset_metrics_baseline() to snapshot current Prometheus state. Subsequent
+calls to compute_p95 / compute_request_stats return only incremental data
+relative to that snapshot, giving a clean P95 after each incident without
+restarting the process.
 """
+
+import threading
 
 from prometheus_client import REGISTRY, CollectorRegistry
 
@@ -25,6 +33,11 @@ EXCLUDED_HANDLER_EXACT = frozenset(
 
 EXCLUDED_HANDLER_PREFIXES: tuple[str, ...] = ("/api/v1/chaos/",)
 
+# Baseline snapshot: (sample_name, frozenset(labels)) → value at last reset.
+# Empty dict means "no baseline" — all cumulative data is used.
+_baseline: dict[tuple[str, frozenset], float] = {}
+_baseline_lock = threading.Lock()
+
 
 def _is_excluded_handler(handler: object) -> bool:
     if not isinstance(handler, str):
@@ -32,6 +45,35 @@ def _is_excluded_handler(handler: object) -> bool:
     if handler in EXCLUDED_HANDLER_EXACT:
         return True
     return handler.startswith(EXCLUDED_HANDLER_PREFIXES)
+
+
+def reset_metrics_baseline(registry: CollectorRegistry = REGISTRY) -> None:
+    """Snapshot current Prometheus state as the new baseline.
+
+    After this call, compute_p95 and compute_request_stats return only
+    data observed since this snapshot — chaos-period contamination is
+    excluded without restarting the process.
+
+    Safe to call from async context (no awaits; lock is brief).
+    """
+    new_baseline: dict[tuple[str, frozenset], float] = {}
+    for metric in registry.collect():
+        if metric.name not in ("http_request_duration_seconds", "http_requests"):
+            continue
+        for sample in metric.samples:
+            key: tuple[str, frozenset] = (sample.name, frozenset(sample.labels.items()))
+            new_baseline[key] = sample.value
+    with _baseline_lock:
+        global _baseline
+        _baseline = new_baseline
+
+
+def _incremental(sample_name: str, labels: dict, raw_value: float) -> float:
+    """Return raw_value minus the baseline for this sample, clamped to 0."""
+    key: tuple[str, frozenset] = (sample_name, frozenset(labels.items()))
+    with _baseline_lock:
+        base = _baseline.get(key, 0.0)
+    return max(0.0, raw_value - base)
 
 
 def compute_p95(
@@ -44,9 +86,15 @@ def compute_p95(
 
     Returns (p_seconds, total_samples). If no data is available,
     returns (0.0, 0).
+
+    Values are relative to the last reset_metrics_baseline() call so that
+    chaos-period contamination does not persist across recovery cycles.
     """
     buckets: dict[float, float] = {}
     total_samples = 0
+
+    with _baseline_lock:
+        current_baseline = dict(_baseline)
 
     for metric in registry.collect():
         if metric.name != metric_name:
@@ -56,11 +104,14 @@ def compute_p95(
             if _is_excluded_handler(handler):
                 continue
 
+            key: tuple[str, frozenset] = (sample.name, frozenset(sample.labels.items()))
+            incremental = max(0.0, sample.value - current_baseline.get(key, 0.0))
+
             if sample.name == f"{metric_name}_bucket":
                 le = float(sample.labels["le"])
-                buckets[le] = buckets.get(le, 0.0) + sample.value
+                buckets[le] = buckets.get(le, 0.0) + incremental
             elif sample.name == f"{metric_name}_count":
-                total_samples += int(sample.value)
+                total_samples += int(incremental)
 
     if total_samples == 0 or not buckets:
         return 0.0, 0
@@ -93,9 +144,14 @@ def compute_request_stats(
 
     Excludes self-polling handlers. Note: prometheus_client strips the
     _total suffix from metric.name for counters, so we match on the base name.
+
+    Values are relative to the last reset_metrics_baseline() call.
     """
     total = 0
     errors = 0
+
+    with _baseline_lock:
+        current_baseline = dict(_baseline)
 
     for metric in registry.collect():
         if metric.name != metric_name:
@@ -106,7 +162,9 @@ def compute_request_stats(
             handler = sample.labels.get("handler", "")
             if _is_excluded_handler(handler):
                 continue
-            count = int(sample.value)
+
+            key: tuple[str, frozenset] = (sample.name, frozenset(sample.labels.items()))
+            count = int(max(0.0, sample.value - current_baseline.get(key, 0.0)))
             total += count
             if sample.labels.get("status") == "5xx":
                 errors += count

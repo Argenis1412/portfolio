@@ -21,6 +21,8 @@ from app.adapters.sql_models import ChaosIncidentModel
 from app.adapters.repository import PortfolioRepository
 from app.controllers.dependencies import get_repository
 from app.core.rate_limit import check_rate_limit, get_chaos_rate_key
+import app.controllers.api as _api_module
+from app.core.prometheus_aggregation import reset_metrics_baseline
 
 router = APIRouter(prefix="/chaos", tags=["Chaos Playground"])
 
@@ -398,4 +400,8 @@ async def inject_latency(
 async def reset_chaos():
     """Reset the chaos simulation to NORMAL/nominal state."""
     chaos_state.reset()
+    # Also reset the Prometheus baseline so post-reset P95 is computed from
+    # fresh traffic only — chaos-period slow samples no longer contaminate P95.
+    reset_metrics_baseline()
+    _api_module._was_chaos_active = False
     return {"status": "reset", "timestamp": datetime.now(UTC).isoformat()}
