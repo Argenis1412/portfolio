@@ -35,7 +35,11 @@ from app.controllers.dependencies import (
 from app.core.cache_http import cacheable_response
 from app.core.uptime import APP_START_TIME
 from app.core.exceptions import ResourceNotFoundError
-from app.core.prometheus_aggregation import compute_p95, compute_request_stats, reset_metrics_baseline
+from app.core.prometheus_aggregation import (
+    compute_p95,
+    compute_request_stats,
+    reset_metrics_baseline,
+)
 from app.core.rate_limit import check_rate_limit
 from app.schemas.about import AboutResponse
 from app.schemas.experiences import Experience, ExperiencesResponse
