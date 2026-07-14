@@ -147,6 +147,57 @@ describe('useLiveMetrics', () => {
       expect(result.current.status).toBe('operational');
       expect(result.current.timeoutState).toBe('within_budget');
     });
+
+    it('falls back to backend P95 when backend is warming_up and latest sample is synthetic', async () => {
+      const { fetchMetricsSummary } = await import('../api/portfolioService');
+      vi.mocked(fetchMetricsSummary).mockResolvedValue({
+        ...healthyMetrics,
+        active_path: 'sync' as const,
+        system_lifecycle: 'NORMAL' as const,
+        system_status: 'operational' as const,
+        p95_ms: 12,
+        p95_status: 'warming_up' as const,
+        error_rate_status: 'warming_up' as const,
+        worker_status: 'ok',
+        queue_backlog: 0,
+        cache_status: 'direct',
+      });
+
+      const chaosTrace = {
+        id: 'trace-synth-2',
+        traceId: 'trace-synth-2',
+        requestId: 'req-synth-2',
+        type: 'latency_injection' as const,
+        timestamp: new Date(),
+        origin: 'synthetic' as const,
+        endpoint: '/api/test',
+        status: 'ok' as const,
+        totalMs: 3999,
+        apiMs: 3999,
+        dbMs: 0,
+        cacheMs: 0,
+      };
+
+      let traceListener: ((trace: TraceEntry) => void) | null = null;
+      vi.mocked(subscribeToTraces).mockImplementation((cb) => {
+        traceListener = cb;
+        return () => { traceListener = null; };
+      });
+      vi.mocked(getRecentTraces).mockReturnValue([chaosTrace]);
+
+      const qc = makeQueryClient();
+      const { result } = renderHook(() => useLiveMetrics(), {
+        wrapper: createWrapper('mild', qc),
+      });
+
+      await waitFor(() => expect(result.current.data).toBeDefined());
+
+      await act(async () => {
+        traceListener!({ ...chaosTrace, timestamp: new Date() });
+      });
+
+      expect(result.current.effectiveP95).toBe(12);
+    });
   });
 
   describe('chaos recovery softening', () => {
