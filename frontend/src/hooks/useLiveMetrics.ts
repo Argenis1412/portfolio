@@ -26,7 +26,7 @@ const LATENCY_DEGRADED_MS = 100;
 const ERROR_RATE_DEGRADED = 0.05;
 const MAX_HISTORY = 12;
 const SYNTHETIC_WINDOW_MS = 20_000;
-const RECOVERING_WINDOW_MS = 120_000;
+const RECOVERING_WINDOW_MS = 30_000;
 const DEFAULT_CONFIDENCE_REAL = 98;
 
 const TRACE_PROJECTION: Record<TraceEntry['type'], { factor: number; floor: number; cap: number }> = {
