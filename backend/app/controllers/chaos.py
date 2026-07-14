@@ -95,20 +95,20 @@ class ChaosState:
         """Compute the current system state machine position.
 
         Transitions (time-based, from the most recent incident):
-          NORMAL      — no incident in the last 120s
-          DEGRADED    — incident occurred < 30s ago
-          RECOVERING  — incident occurred 30–90s ago
-          STABLE      — incident occurred 90–120s ago
+          NORMAL      — no incident in the last 30s
+          DEGRADED    — incident occurred < 8s ago
+          RECOVERING  — incident occurred 8–22s ago
+          STABLE      — incident occurred 22–30s ago
         """
         last = self.last_incident
         if last is None:
             return "NORMAL"
         age_s = time.time() - last.timestamp
-        if age_s >= 120:
-            return "NORMAL"
-        if age_s >= 90:
-            return "STABLE"
         if age_s >= 30:
+            return "NORMAL"
+        if age_s >= 22:
+            return "STABLE"
+        if age_s >= 8:
             return "RECOVERING"
         return "DEGRADED"
 
@@ -126,8 +126,8 @@ class ChaosState:
           }
         """
         last = self.last_incident
-        # Incident is considered "active" for 120s
-        if last is None or (time.time() - last.timestamp) >= 120:
+        # Incident is considered "active" for 30s
+        if last is None or (time.time() - last.timestamp) >= 30:
             return {
                 "worker": "ok",
                 "queue_backlog": 0,

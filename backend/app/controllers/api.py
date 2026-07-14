@@ -93,7 +93,7 @@ async def get_metrics_summary(response: Response) -> MetricsSummary:
     # Evaluate chaos state BEFORE reading Prometheus so the baseline reset
     # (if needed) happens before compute_p95 / compute_request_stats.
     last = chaos_state.last_incident
-    recent_incident_active = last is not None and (time.time() - last.timestamp) < 120
+    recent_incident_active = last is not None and (time.time() - last.timestamp) < 30
 
     # Auto-reset Prometheus baseline when the chaos recovery window expires.
     # This discards chaos-period slow samples from the cumulative histogram so
@@ -113,7 +113,7 @@ async def get_metrics_summary(response: Response) -> MetricsSummary:
     # stays continuous and the frontend's deploy-reset heuristic doesn't fire.
     time_warming = (time.time() - APP_START_TIME) < WARMUP_GRACE_S and not recent_incident_active
     if (not _baseline_established and not time_warming and not recent_incident_active
-            and total_samples >= 10):
+            and total_samples >= 5):
         reset_p95_baseline()
         _baseline_established = True
         p95_seconds, total_samples = compute_p95()
@@ -132,7 +132,7 @@ async def get_metrics_summary(response: Response) -> MetricsSummary:
     # (aligned with frontend LATENCY_DEGRADED_MS in useLiveMetrics.ts)
     # time_warming covers the initial grace period (cold-start outliers not
     # yet reset); sample-count covers the post-reset re-accumulation window.
-    warming_up = total_samples < 10 or time_warming
+    warming_up = total_samples < 5 or time_warming
     if warming_up:
         p95_status = "warming_up"
         error_status = "warming_up"

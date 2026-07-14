@@ -144,8 +144,8 @@ async def test_retries_accumulate_across_chaos_actions():
 async def test_metrics_warming_up_suppresses_degraded():
     chaos_state.reset()
     with (
-        patch("app.controllers.api.compute_p95", return_value=(0.500, 5)),
-        patch("app.controllers.api.compute_request_stats", return_value=(5, 0)),
+        patch("app.controllers.api.compute_p95", return_value=(0.500, 4)),
+        patch("app.controllers.api.compute_request_stats", return_value=(4, 0)),
     ):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as ac:
@@ -160,8 +160,8 @@ async def test_metrics_warming_up_suppresses_degraded():
 async def test_metrics_exits_warming_up_at_threshold():
     chaos_state.reset()
     with (
-        patch("app.controllers.api.compute_p95", return_value=(0.500, 10)),
-        patch("app.controllers.api.compute_request_stats", return_value=(10, 0)),
+        patch("app.controllers.api.compute_p95", return_value=(0.500, 5)),
+        patch("app.controllers.api.compute_request_stats", return_value=(5, 0)),
     ):
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as ac:
@@ -278,7 +278,7 @@ async def test_chaos_reset_clears_prometheus_baseline():
         async with AsyncClient(transport=transport, base_url="http://test") as ac:
             response = await ac.get("/api/v1/metrics/summary")
             data = response.json()
-            # warming_up (5 < 10 samples after reset) → operational
+            # 5 >= 5 samples → not warming_up; p95=70ms < 100ms → operational
             assert data["system_status"] == "operational"
 
 

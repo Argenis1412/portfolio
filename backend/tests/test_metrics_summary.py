@@ -54,8 +54,8 @@ def _patch_common(monkeypatch, *, total_samples, p95_seconds=0.5, app_start_offs
 
 @pytest.mark.anyio
 async def test_warmup_reset_fires_once_grace_expired_no_chaos(monkeypatch):
-    """total_samples>=10, grace period (90s) expired, no chaos -> reset fires once."""
-    calls = _patch_common(monkeypatch, total_samples=10, app_start_offset_s=100)
+    """total_samples>=5, grace period (90s) expired, no chaos -> reset fires once."""
+    calls = _patch_common(monkeypatch, total_samples=5, app_start_offset_s=100)
 
     result = await api_module.get_metrics_summary(Response())
 
@@ -66,8 +66,8 @@ async def test_warmup_reset_fires_once_grace_expired_no_chaos(monkeypatch):
 
 @pytest.mark.anyio
 async def test_warmup_reset_does_not_fire_within_grace_period(monkeypatch):
-    """total_samples>=10 but still within the 90s grace period -> no reset."""
-    calls = _patch_common(monkeypatch, total_samples=10, app_start_offset_s=30)
+    """total_samples>=5 but still within the 90s grace period -> no reset."""
+    calls = _patch_common(monkeypatch, total_samples=5, app_start_offset_s=30)
 
     result = await api_module.get_metrics_summary(Response())
 
@@ -79,7 +79,7 @@ async def test_warmup_reset_does_not_fire_within_grace_period(monkeypatch):
 @pytest.mark.anyio
 async def test_warmup_reset_does_not_fire_during_active_chaos(monkeypatch):
     """recent_incident_active=True -> chaos owns recovery, warmup guard skipped."""
-    calls = _patch_common(monkeypatch, total_samples=10, app_start_offset_s=100)
+    calls = _patch_common(monkeypatch, total_samples=5, app_start_offset_s=100)
     chaos_state.record_incident(
         ChaosIncident(type="latency_injection", timestamp=time.time(), error_triggered=False)
     )
@@ -93,7 +93,7 @@ async def test_warmup_reset_does_not_fire_during_active_chaos(monkeypatch):
 @pytest.mark.anyio
 async def test_warmup_reset_is_one_shot(monkeypatch):
     """Calling the endpoint twice past grace period only resets once."""
-    calls = _patch_common(monkeypatch, total_samples=10, app_start_offset_s=100)
+    calls = _patch_common(monkeypatch, total_samples=5, app_start_offset_s=100)
 
     await api_module.get_metrics_summary(Response())
     await api_module.get_metrics_summary(Response())
