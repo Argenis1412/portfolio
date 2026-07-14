@@ -1,10 +1,22 @@
+import time
 from unittest.mock import patch
 
 import pytest
 from httpx import ASGITransport, AsyncClient
 
+import app.controllers.api as api_module
 from app.controllers.chaos import chaos_state
 from app.main import app
+
+
+@pytest.fixture(autouse=True)
+def _bypass_warmup_reset(monkeypatch):
+    """These tests exercise p95-threshold and chaos-reset logic, not the
+    warmup baseline reset (covered separately in test_metrics_summary.py).
+    Without this, a fresh test-process APP_START_TIME (<90s old) would make
+    every request look like it's within the warmup grace window."""
+    monkeypatch.setattr(api_module, "_baseline_established", True)
+    monkeypatch.setattr(api_module, "APP_START_TIME", time.time() - 1000)
 
 
 @pytest.mark.anyio
