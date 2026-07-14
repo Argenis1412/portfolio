@@ -313,3 +313,61 @@ def test_name_rejects_digit_as_first_char(name):
         subject="Opportunity",
     )
     assert score == 100
+
+
+# ── Rule 9: Non-alphanumeric density ───────────────────────────────────────
+
+
+def test_spam_score_symbol_soup_silent_drop():
+    """
+    Regression: the exact garbage message reported in production must be
+    silently dropped (score >= SCORE_SILENT_DROP=70).
+    """
+    from app.core.spam_check import calculate_spam_score
+
+    score = calculate_spam_score(
+        message='&!@@#@#@!_+@!+({}) " "BUY skajsbka',
+        email="real@gmail.com",
+        name="Argenis",
+        subject="Contacto desde Portafolio",
+    )
+    assert score >= 70, f"Expected silent-drop score for symbol soup, got {score}"
+
+
+def test_spam_score_normal_spanish_message_not_flagged_by_density():
+    """Normal prose (accented ES chars) must not trigger the density rule."""
+    from app.core.spam_check import calculate_spam_score
+
+    score = calculate_spam_score(
+        message="Hola, me gustaría hablar sobre una vacante disponible. ¡Gracias!",
+        email="user@example.com",
+        name="María",
+    )
+    assert score <= 30
+
+
+def test_spam_score_heavy_query_string_url_not_false_positive():
+    """
+    A legit message containing a param-heavy URL must not be penalized by
+    the density rule — URLs are stripped before computing the ratio.
+    """
+    from app.core.spam_check import calculate_spam_score
+
+    score = calculate_spam_score(
+        message="Mira esto https://example.com/?a=1&b=2&c=3&d=4&e=5 saludos",
+        email="client@empresa.com",
+        name="Cliente",
+    )
+    assert score <= 30
+
+
+def test_spam_score_uppercase_url_scheme_not_false_positive():
+    """URL stripping must be case-insensitive (HTTP:// as well as http://)."""
+    from app.core.spam_check import calculate_spam_score
+
+    score = calculate_spam_score(
+        message="Visit HTTP://example.com/?x=1&y=2&z=3 thanks",
+        email="dev@co.com",
+        name="John",
+    )
+    assert score <= 30

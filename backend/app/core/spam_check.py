@@ -171,4 +171,19 @@ def calculate_spam_score(
         ):
             score += 30
 
+    # Rule 9: Non-alphanumeric density (symbol soup / injection payloads).
+    # Legit prose: 0.03-0.13 ratio. Target garbage: ~0.59.
+    # URLs stripped first (case-insensitive) to avoid false positives on param-heavy links.
+    stripped = message.strip()
+    url_free = re.sub(
+        r"https?://[^\s,;()\[\]]+|www\.[^\s,;()\[\]]+", "", stripped, flags=re.IGNORECASE
+    )
+    if len(url_free) >= 8:
+        non_alnum = sum(1 for c in url_free if not (c.isalnum() or c.isspace()))
+        density = non_alnum / len(url_free)
+        if density > 0.45:
+            score += 100
+        elif density > 0.30:
+            score += 40
+
     return min(score, 100)
