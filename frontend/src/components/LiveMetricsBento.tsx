@@ -1,4 +1,4 @@
-import { m, AnimatePresence, LayoutGroup } from 'framer-motion';
+import { m, AnimatePresence, LayoutGroup, useReducedMotion } from 'framer-motion';
 import { useMetricsDisplay } from '../hooks/useMetricsDisplay';
 import { Tile, TileSkeleton } from './ui/Tile';
 import MetricsSparkline from './ui/MetricsSparkline';
@@ -9,6 +9,7 @@ import { useAnimatedNumber } from '../hooks/useAnimatedNumber';
 export default function LiveMetricsBento() {
   const displayContext = useMetricsDisplay();
   const { isLoading, t } = displayContext;
+  const reducedMotion = useReducedMotion();
 
   // Hooks must be called unconditionally — before the early return guard.
   const animatedRetryBudget = useAnimatedNumber(displayContext.metrics?.strategyProfile?.retryBudget ?? 0);
@@ -30,12 +31,14 @@ export default function LiveMetricsBento() {
 
   const {
     data,
+    isError,
     hasIncident,
     incidentDot,
     incidentText,
     latestEventLabel,
     latestEventAgoSeconds,
     metrics: {
+      status,
       sampleHistory,
       confidenceScore,
       latestTrace,
@@ -46,6 +49,10 @@ export default function LiveMetricsBento() {
   } = displayContext;
 
   const activePath = strategyProfile.activePath;
+  // Down/degraded already surface their own dedicated banners
+  // (SystemStatusBanner, ServerWakeupNotice) — avoid stacking a second,
+  // softer "reconnecting" message on top of those.
+  const showStaleNotice = isError && status !== 'degraded' && status !== 'down';
 
   const lifecycleClass =
     displayLifecycle === 'DEGRADED'   ? 'bg-status-error-soft text-status-error' :
@@ -66,6 +73,27 @@ export default function LiveMetricsBento() {
             Session includes ~{100 - confidenceScore}% synthetic data during active chaos events.
           </span>
         </div>
+        <AnimatePresence>
+          {showStaleNotice && (
+            <m.div
+              key="stale-notice"
+              initial={reducedMotion ? false : { opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={reducedMotion ? undefined : { opacity: 0, height: 0 }}
+              transition={{ duration: 0.25 }}
+              className="mt-2 flex justify-center lg:justify-start overflow-hidden"
+            >
+              <span
+                role="status"
+                aria-live="polite"
+                className="inline-flex items-center gap-1.5 text-[10px] font-mono px-2.5 py-1 rounded-full border border-status-warn/30 bg-status-warn-soft text-status-warn"
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-status-warn animate-pulse-soft flex-shrink-0" />
+                {t('metrics.stale_notice')}
+              </span>
+            </m.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
