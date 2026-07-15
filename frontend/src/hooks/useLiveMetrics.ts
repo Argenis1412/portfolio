@@ -144,13 +144,19 @@ export function useLiveMetrics() {
       // + 8s timeout. AbortSignal.any() is not used for broader browser compatibility.
       const timeoutController = new AbortController();
       const timeoutId = setTimeout(() => timeoutController.abort(), 8_000);
-      if (signal) {
-        signal.addEventListener('abort', () => timeoutController.abort());
+      const onAbort = () => timeoutController.abort(signal?.reason);
+      if (signal?.aborted) {
+        onAbort();
+      } else if (signal) {
+        signal.addEventListener('abort', onAbort);
       }
       try {
         return await fetchMetricsSummary(preset, timeoutController.signal);
       } finally {
         clearTimeout(timeoutId);
+        if (signal) {
+          signal.removeEventListener('abort', onAbort);
+        }
       }
     },
     staleTime: 10_000,
