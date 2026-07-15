@@ -130,6 +130,7 @@
   "metrics.status.warning": "WARNING",
   "metrics.status.down": "DOWN",
   "metrics.status.loading": "Connecting...",
+  "metrics.stale_notice": "Showing last known data — reconnecting...",
   "metrics.db_connected": "DB Connected",
   "metrics.requests_24h": "Requests (24h)",
   "metrics.updated_ago": "Updated {s}s ago",
