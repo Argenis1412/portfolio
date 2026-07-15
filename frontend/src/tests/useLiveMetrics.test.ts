@@ -270,4 +270,66 @@ describe('useLiveMetrics', () => {
       expect(result.current.status).toBe('degraded');
     });
   });
+
+  describe('resilience: transient fetch failures', () => {
+    it('returns status=down when first fetch fails with no cached data', async () => {
+      vi.useFakeTimers();
+      try {
+        const { fetchMetricsSummary } = await import('../api/portfolioService');
+        vi.mocked(fetchMetricsSummary).mockRejectedValue(new Error('network error'));
+
+        const qc = makeQueryClient();
+        const { result } = renderHook(() => useLiveMetrics(), {
+          wrapper: createWrapper('off', qc),
+        });
+
+        // Fast-forward through retry delays: 1s + 2s + 4s = 7s
+        await act(async () => { await vi.advanceTimersByTimeAsync(10_000); });
+
+        expect(result.current.status).toBe('down');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('preserves last known status when fetch fails after successful data load', { timeout: 15_000 }, async () => {
+      const { fetchMetricsSummary } = await import('../api/portfolioService');
+      const successData = {
+        ...healthyMetrics,
+        active_path: 'sync' as const,
+        system_lifecycle: 'NORMAL' as const,
+        system_status: 'operational',
+        p95_ms: 44,
+        p95_status: 'healthy' as const,
+        error_rate_status: 'stable',
+        worker_status: 'ok',
+        queue_backlog: 0,
+        cache_status: 'direct',
+      };
+      vi.mocked(fetchMetricsSummary)
+        .mockResolvedValueOnce(successData)
+        .mockRejectedValue(new Error('transient'));
+
+      const qc = makeQueryClient();
+      const { result } = renderHook(() => useLiveMetrics(), {
+        wrapper: createWrapper('off', qc),
+      });
+
+      // Initial fetch succeeds
+      await waitFor(() => expect(result.current.data).toBeDefined());
+      expect(result.current.status).toBe('operational');
+
+      // Trigger a refetch that exhausts 3 retries (1s + 2s + 4s = ~7s)
+      await act(async () => {
+        await qc.invalidateQueries({ queryKey: ['metrics-summary'] });
+      });
+
+      // Wait for retries to exhaust with generous timeout
+      await waitFor(() => expect(result.current.isError).toBe(true), { timeout: 12_000 });
+
+      // Cached data keeps status alive — must not flip to 'down'
+      expect(result.current.status).not.toBe('down');
+      expect(result.current.data).toBeDefined();
+    });
+  });
 });

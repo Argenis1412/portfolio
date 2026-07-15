@@ -19,8 +19,12 @@ import type { About, Project, ProjectDetailed, Skill, Experience, Formation, Phi
 // Re-export types so consumers can import from a single service file
 export type { About, Project, ProjectDetailed, Skill, Experience, Formation, PhilosophyItem, MetricsSummary };
 
-export const fetchMetricsSummary = (chaosPreset?: string): Promise<MetricsSummary> =>
-  apiGet('/metrics/summary', MetricsSummarySchema, chaosPreset);
+export function fetchMetricsSummary(
+  chaosPreset?: string,
+  signal?: AbortSignal,
+): Promise<MetricsSummary> {
+  return apiGet('/metrics/summary', MetricsSummarySchema, chaosPreset, signal);
+}
 
 export const fetchAbout = (): Promise<About> =>
   apiGet<About>('/about', AboutSchema);

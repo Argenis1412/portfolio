@@ -139,13 +139,27 @@ export function useLiveMetrics() {
 
   const query = useQuery({
     queryKey: ['metrics-summary', preset],
-    queryFn: async () => fetchMetricsSummary(preset),
+    queryFn: async ({ signal }) => {
+      // Manual AbortController composition: react-query signal (preset change/unmount)
+      // + 8s timeout. AbortSignal.any() is not used for broader browser compatibility.
+      const timeoutController = new AbortController();
+      const timeoutId = setTimeout(() => timeoutController.abort(), 8_000);
+      if (signal) {
+        signal.addEventListener('abort', () => timeoutController.abort());
+      }
+      try {
+        return await fetchMetricsSummary(preset, timeoutController.signal);
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    },
     staleTime: 10_000,
     refetchInterval: () => preset !== 'off' || isInChaosRecoveryRef.current ? 5_000 : 15_000,
     refetchIntervalInBackground: false,
     refetchOnWindowFocus: false,
     gcTime: 60_000,
-    retry: 1,
+    retry: 3,
+    retryDelay: (failureCount) => Math.min(1_000 * 2 ** failureCount, 4_000),
   });
 
   const queryClient = useQueryClient();
@@ -168,7 +182,7 @@ export function useLiveMetrics() {
       currentTime - chaosTrace.timestamp.getTime() < RECOVERING_WINDOW_MS;
   }, [recentTraces, currentTime]);
 
-  /* eslint-disable react-hooks/set-state-in-effect */
+   
   useEffect(() => {
     const current = query.data?.requests_since_deploy ?? null;
     const prev = prevRequestsSinceDeployRef.current;
@@ -183,9 +197,9 @@ export function useLiveMetrics() {
 
     prevRequestsSinceDeployRef.current = current;
   }, [query.data?.requests_since_deploy]);
-  /* eslint-enable react-hooks/set-state-in-effect */
+   
 
-  /* eslint-disable react-hooks/set-state-in-effect */
+   
   useEffect(() => {
     if (query.data && query.dataUpdatedAt) {
       const data = query.data;
@@ -219,7 +233,7 @@ export function useLiveMetrics() {
       previousRef.current = data;
     }
   }, [query.data, query.dataUpdatedAt]);
-  /* eslint-enable react-hooks/set-state-in-effect */
+   
 
   // Derive combined status: backend signal + local latency threshold
   const latestSample = sampleHistory[sampleHistory.length - 1] ?? null;
@@ -238,7 +252,9 @@ export function useLiveMetrics() {
 
   const status: SystemStatus = useMemo(() => {
     if (query.isLoading) return 'loading';
-    if (!query.data || query.isError) return 'down';
+    if (!query.data) return 'down';
+    // isError with cached data: derive status from the last known snapshot
+    // rather than flashing 'down' on transient network failures.
 
     const { system_status, error_rate, p95_status } = query.data;
     if (system_status === 'down') return 'down';
@@ -255,7 +271,7 @@ export function useLiveMetrics() {
     if (query.data.p95_ms > LATENCY_DEGRADED_MS) return isChaosRecovering ? 'warning' : 'degraded';
     if (query.data.p95_ms > LATENCY_WARNING_MS) return 'warning';
     return 'operational';
-  }, [query.data, query.isLoading, query.isError, recentTraces, currentTime]);
+  }, [query.data, query.isLoading, recentTraces, currentTime]);
 
   const latestTrace = recentTraces[0] ?? null;
 
