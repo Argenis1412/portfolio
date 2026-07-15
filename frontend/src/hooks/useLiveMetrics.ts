@@ -27,6 +27,12 @@ const ERROR_RATE_DEGRADED = 0.05;
 const MAX_HISTORY = 12;
 const SYNTHETIC_WINDOW_MS = 20_000;
 const RECOVERING_WINDOW_MS = 30_000;
+// refetchInterval widens from 5s to 15s the moment RECOVERING_WINDOW_MS
+// elapses (see isInChaosRecoveryRef below), so the poll that actually carries
+// the backend's chaos-recovery baseline reset can land up to one full slow
+// interval past that boundary. Guard against the deploy-reset heuristic
+// misfiring on that late poll by extending its window by that margin.
+const CHAOS_BASELINE_RESET_GUARD_MS = RECOVERING_WINDOW_MS + 15_000;
 const DEFAULT_CONFIDENCE_REAL = 98;
 
 const TRACE_PROJECTION: Record<TraceEntry['type'], { factor: number; floor: number; cap: number }> = {
@@ -194,7 +200,16 @@ export function useLiveMetrics() {
     const prev = prevRequestsSinceDeployRef.current;
     const isDeployReset = current !== null && prev !== null && current < prev && current <= 10;
 
-    if (isDeployReset) {
+    // reset_metrics_baseline() on the backend resets request counters on every
+    // chaos-recovery cycle (not just on a real process restart), which produces
+    // the same signature (requests_since_deploy drops to a low number) that
+    // this heuristic uses to detect deploys. Exclude drops that correlate with
+    // a recent chaos trace so history isn't wiped mid-recovery.
+    const latestChaosTrace = findLatestChaosTrace(recentTraces);
+    const isChaosBaselineReset = latestChaosTrace !== undefined &&
+      currentTime - latestChaosTrace.timestamp.getTime() < CHAOS_BASELINE_RESET_GUARD_MS;
+
+    if (isDeployReset && !isChaosBaselineReset) {
       historyRef.current = [];
       sampleHistoryRef.current = [];
       setHistory([]);
@@ -202,7 +217,7 @@ export function useLiveMetrics() {
     }
 
     prevRequestsSinceDeployRef.current = current;
-  }, [query.data?.requests_since_deploy]);
+  }, [query.data?.requests_since_deploy, recentTraces, currentTime]);
    
 
    
@@ -218,25 +233,33 @@ export function useLiveMetrics() {
       lastSuccessRef.current = now;
       setLastSuccessSnapshot(now);
 
-      // Update previous before rolling in new data
-      if (previousRef.current !== null) {
-        setPrevious(previousRef.current);
+      // A zero-value warming_up sample is a reset sentinel, not a measurement
+      // (the histogram's smallest bucket is 10ms — a real P95 of 0ms is
+      // impossible). Skip it entirely: don't roll it into history, don't let
+      // it become "previous" for the next delta calculation.
+      const isEmptyWarmup = data.p95_status === 'warming_up' && data.p95_ms === 0;
+
+      if (!isEmptyWarmup) {
+        // Update previous before rolling in new data
+        if (previousRef.current !== null) {
+          setPrevious(previousRef.current);
+        }
+
+        // Roll in new P95 value
+        historyRef.current = [...historyRef.current, data.p95_ms].slice(-MAX_HISTORY);
+        setHistory([...historyRef.current]);
+
+        sampleHistoryRef.current = appendSample(sampleHistoryRef.current, {
+          value: data.p95_ms,
+          timestamp: now,
+          source: 'real',
+          confidence: DEFAULT_CONFIDENCE_REAL,
+        });
+        setSampleHistory([...sampleHistoryRef.current]);
+
+        // Store current as next "previous"
+        previousRef.current = data;
       }
-
-      // Roll in new P95 value
-      historyRef.current = [...historyRef.current, data.p95_ms].slice(-MAX_HISTORY);
-      setHistory([...historyRef.current]);
-
-      sampleHistoryRef.current = appendSample(sampleHistoryRef.current, {
-        value: data.p95_ms,
-        timestamp: now,
-        source: 'real',
-        confidence: DEFAULT_CONFIDENCE_REAL,
-      });
-      setSampleHistory([...sampleHistoryRef.current]);
-
-      // Store current as next "previous"
-      previousRef.current = data;
     }
   }, [query.data, query.dataUpdatedAt]);
    
@@ -249,7 +272,7 @@ export function useLiveMetrics() {
   const backendIsWarmingUp = query.data?.p95_status === 'warming_up';
   const effectiveP95 = latestSample && !(backendIsWarmingUp && latestSample.source === 'synthetic')
     ? latestSample.value
-    : query.data?.p95_ms ?? latestSample?.value ?? 0;
+    : (query.data?.p95_ms || previous?.p95_ms || latestSample?.value) ?? 0;
   const confidenceScore = latestSample?.confidence ?? (query.data ? DEFAULT_CONFIDENCE_REAL : 0);
   const confidenceLabel = useMemo(() => {
     if (query.data?.p95_status === 'warming_up') return 'warming_up' as const;
