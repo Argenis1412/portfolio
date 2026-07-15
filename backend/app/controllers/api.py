@@ -39,6 +39,7 @@ from app.core.prometheus_aggregation import (
     compute_p95,
     compute_request_stats,
     reset_metrics_baseline,
+    reset_p95_baseline,
 )
 from app.core.rate_limit import check_rate_limit
 from app.schemas.about import AboutResponse
@@ -55,6 +56,11 @@ router = APIRouter(tags=["API"])
 # When it transitions True→False the Prometheus baseline is reset so that
 # chaos-period slow samples don't permanently inflate the cumulative P95.
 _was_chaos_active: bool = False
+
+# One-shot warmup baseline reset: discards cold-start P95 outliers (Koyeb
+# wake, DB init) once initial traffic has settled, without chaos ever firing.
+_baseline_established: bool = False
+WARMUP_GRACE_S = 90
 
 
 def _format_uptime(seconds: int) -> str:
@@ -78,7 +84,7 @@ async def get_metrics_summary(response: Response) -> MetricsSummary:
     """
     Returns consolidated metrics for the dashboard sourced from Prometheus.
     """
-    global _was_chaos_active
+    global _was_chaos_active, _baseline_established
 
     response.headers["Cache-Control"] = "public, max-age=15"
 
@@ -87,7 +93,7 @@ async def get_metrics_summary(response: Response) -> MetricsSummary:
     # Evaluate chaos state BEFORE reading Prometheus so the baseline reset
     # (if needed) happens before compute_p95 / compute_request_stats.
     last = chaos_state.last_incident
-    recent_incident_active = last is not None and (time.time() - last.timestamp) < 120
+    recent_incident_active = last is not None and (time.time() - last.timestamp) < 30
 
     # Auto-reset Prometheus baseline when the chaos recovery window expires.
     # This discards chaos-period slow samples from the cumulative histogram so
@@ -100,6 +106,25 @@ async def get_metrics_summary(response: Response) -> MetricsSummary:
     p95_seconds, total_samples = compute_p95()
     p95_ms = p95_seconds * 1000
 
+    # One-shot warmup reset: once the initial grace period has elapsed and
+    # enough traffic has been served with no chaos active, discard cold-start
+    # P95 outliers from the cumulative histogram. Request counters are left
+    # untouched (reset_p95_baseline is duration-only) so requests_since_deploy
+    # stays continuous and the frontend's deploy-reset heuristic doesn't fire.
+    time_warming = (
+        time.time() - APP_START_TIME
+    ) < WARMUP_GRACE_S and not recent_incident_active
+    if (
+        not _baseline_established
+        and not time_warming
+        and not recent_incident_active
+        and total_samples >= 5
+    ):
+        reset_p95_baseline()
+        _baseline_established = True
+        p95_seconds, total_samples = compute_p95()
+        p95_ms = p95_seconds * 1000
+
     total_requests, total_5xx = compute_request_stats()
     error_rate = total_5xx / max(total_requests, 1)
     if recent_incident_active and last is not None:
@@ -111,7 +136,9 @@ async def get_metrics_summary(response: Response) -> MetricsSummary:
 
     # Status derived from real data — SLO threshold is p95 < 100ms
     # (aligned with frontend LATENCY_DEGRADED_MS in useLiveMetrics.ts)
-    warming_up = total_samples < 10
+    # time_warming covers the initial grace period (cold-start outliers not
+    # yet reset); sample-count covers the post-reset re-accumulation window.
+    warming_up = total_samples < 5 or time_warming
     if warming_up:
         p95_status = "warming_up"
         error_status = "warming_up"

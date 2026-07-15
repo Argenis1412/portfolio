@@ -68,6 +68,32 @@ def reset_metrics_baseline(registry: CollectorRegistry = REGISTRY) -> None:
         _baseline = new_baseline
 
 
+def reset_p95_baseline(registry: CollectorRegistry = REGISTRY) -> None:
+    """Snapshot only the duration histogram as baseline.
+
+    Unlike reset_metrics_baseline(), this preserves request counters
+    (http_requests) so that requests_since_deploy stays continuous —
+    avoids triggering the frontend's deploy-reset heuristic on warmup.
+    """
+    duration_entries: dict[tuple[str, frozenset], float] = {}
+    for metric in registry.collect():
+        if metric.name != "http_request_duration_seconds":
+            continue
+        for sample in metric.samples:
+            key: tuple[str, frozenset] = (sample.name, frozenset(sample.labels.items()))
+            duration_entries[key] = sample.value
+
+    with _baseline_lock:
+        global _baseline
+        merged = {
+            k: v
+            for k, v in _baseline.items()
+            if not k[0].startswith("http_request_duration_seconds")
+        }
+        merged.update(duration_entries)
+        _baseline = merged
+
+
 def _incremental(sample_name: str, labels: dict, raw_value: float) -> float:
     """Return raw_value minus the baseline for this sample, clamped to 0."""
     key: tuple[str, frozenset] = (sample_name, frozenset(labels.items()))

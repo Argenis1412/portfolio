@@ -26,7 +26,7 @@ const LATENCY_DEGRADED_MS = 100;
 const ERROR_RATE_DEGRADED = 0.05;
 const MAX_HISTORY = 12;
 const SYNTHETIC_WINDOW_MS = 20_000;
-const RECOVERING_WINDOW_MS = 120_000;
+const RECOVERING_WINDOW_MS = 30_000;
 const DEFAULT_CONFIDENCE_REAL = 98;
 
 const TRACE_PROJECTION: Record<TraceEntry['type'], { factor: number; floor: number; cap: number }> = {
@@ -223,7 +223,13 @@ export function useLiveMetrics() {
 
   // Derive combined status: backend signal + local latency threshold
   const latestSample = sampleHistory[sampleHistory.length - 1] ?? null;
-  const effectiveP95 = latestSample?.value ?? query.data?.p95_ms ?? 0;
+  // If the backend just reset its baseline (warming_up) and the latest local
+  // sample is still a stale synthetic value from a prior chaos trace, prefer
+  // the backend's fresh P95 instead of showing an outdated inflated number.
+  const backendIsWarmingUp = query.data?.p95_status === 'warming_up';
+  const effectiveP95 = latestSample && !(backendIsWarmingUp && latestSample.source === 'synthetic')
+    ? latestSample.value
+    : query.data?.p95_ms ?? latestSample?.value ?? 0;
   const confidenceScore = latestSample?.confidence ?? (query.data ? DEFAULT_CONFIDENCE_REAL : 0);
   const confidenceLabel = useMemo(() => {
     if (query.data?.p95_status === 'warming_up') return 'warming_up' as const;
