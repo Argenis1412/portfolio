@@ -298,13 +298,13 @@ describe('useLiveMetrics', () => {
         ...healthyMetrics,
         active_path: 'sync' as const,
         system_lifecycle: 'NORMAL' as const,
-        system_status: 'operational',
+        system_status: 'operational' as const,
         p95_ms: 44,
         p95_status: 'healthy' as const,
-        error_rate_status: 'stable',
-        worker_status: 'ok',
+        error_rate_status: 'stable' as const,
+        worker_status: 'ok' as const,
         queue_backlog: 0,
-        cache_status: 'direct',
+        cache_status: 'direct' as const,
       };
       vi.mocked(fetchMetricsSummary)
         .mockResolvedValueOnce(successData)
