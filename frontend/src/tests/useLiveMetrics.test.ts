@@ -332,4 +332,210 @@ describe('useLiveMetrics', () => {
       expect(result.current.data).toBeDefined();
     });
   });
+
+  describe('warming_up zero-value guard', () => {
+    const fullDefaults = {
+      active_path: 'sync' as const,
+      system_lifecycle: 'NORMAL' as const,
+      worker_status: 'ok' as const,
+      queue_backlog: 0,
+      cache_status: 'direct' as const,
+      system_status: 'operational' as const,
+      error_rate_status: 'stable' as const,
+    };
+
+    function recentChaosTrace() {
+      return {
+        id: 'trace-baseline-reset',
+        traceId: 'trace-baseline-reset',
+        requestId: 'req-baseline-reset',
+        type: 'latency_injection' as const,
+        timestamp: new Date(),
+        origin: 'synthetic' as const,
+        endpoint: '/api/test',
+        status: 'ok' as const,
+        totalMs: 150,
+        apiMs: 150,
+        dbMs: 0,
+        cacheMs: 0,
+      };
+    }
+
+    it('does not wipe history when requests_since_deploy drops during chaos recovery', async () => {
+      const { fetchMetricsSummary } = await import('../api/portfolioService');
+      vi.mocked(getRecentTraces).mockReturnValue([recentChaosTrace()]);
+      vi.mocked(fetchMetricsSummary)
+        .mockResolvedValueOnce({
+          ...healthyMetrics, ...fullDefaults,
+          p95_ms: 45, p95_status: 'healthy', requests_since_deploy: 100,
+        })
+        .mockResolvedValueOnce({
+          ...healthyMetrics, ...fullDefaults,
+          p95_ms: 0, p95_status: 'warming_up', error_rate_status: 'warming_up',
+          requests_since_deploy: 2,
+        });
+
+      const qc = makeQueryClient();
+      const { result } = renderHook(() => useLiveMetrics(), {
+        wrapper: createWrapper('off', qc),
+      });
+
+      await waitFor(() => expect(result.current.data?.p95_ms).toBe(45));
+      expect(result.current.sampleHistory.length).toBe(1);
+
+      await act(async () => {
+        await qc.invalidateQueries({ queryKey: ['metrics-summary'] });
+      });
+
+      await waitFor(() => expect(result.current.data?.p95_status).toBe('warming_up'));
+
+      // requests_since_deploy dropped (100 -> 2) but a recent chaos trace is
+      // present, so the deploy-reset heuristic must not treat this as a real
+      // process restart and wipe the sample history.
+      expect(result.current.sampleHistory.length).toBe(1);
+      expect(result.current.effectiveP95).toBe(45);
+    });
+
+    it('still wipes history on a real deploy reset with no recent chaos trace', async () => {
+      const { fetchMetricsSummary } = await import('../api/portfolioService');
+      vi.mocked(getRecentTraces).mockReturnValue([]);
+      vi.mocked(fetchMetricsSummary)
+        .mockResolvedValueOnce({
+          ...healthyMetrics, ...fullDefaults,
+          p95_ms: 45, p95_status: 'healthy', requests_since_deploy: 100,
+        })
+        .mockResolvedValueOnce({
+          ...healthyMetrics, ...fullDefaults,
+          p95_ms: 0, p95_status: 'warming_up', error_rate_status: 'warming_up',
+          requests_since_deploy: 2,
+        });
+
+      const qc = makeQueryClient();
+      const { result } = renderHook(() => useLiveMetrics(), {
+        wrapper: createWrapper('off', qc),
+      });
+
+      await waitFor(() => expect(result.current.data?.p95_ms).toBe(45));
+      expect(result.current.sampleHistory.length).toBe(1);
+
+      await act(async () => {
+        await qc.invalidateQueries({ queryKey: ['metrics-summary'] });
+      });
+
+      await waitFor(() => expect(result.current.data?.p95_status).toBe('warming_up'));
+
+      // No chaos trace correlates with this reset — the drop in
+      // requests_since_deploy is a genuine deploy signal, so history must
+      // still be cleared as before this fix.
+      expect(result.current.sampleHistory.length).toBe(0);
+    });
+
+    it('preserves the last known P95 and does not poison "previous" across a chaos baseline reset', async () => {
+      const { fetchMetricsSummary } = await import('../api/portfolioService');
+      vi.mocked(getRecentTraces).mockReturnValue([recentChaosTrace()]);
+      vi.mocked(fetchMetricsSummary)
+        .mockResolvedValueOnce({
+          ...healthyMetrics, ...fullDefaults,
+          p95_ms: 45, p95_status: 'healthy', requests_since_deploy: 100,
+        })
+        .mockResolvedValueOnce({
+          ...healthyMetrics, ...fullDefaults,
+          p95_ms: 0, p95_status: 'warming_up', error_rate_status: 'warming_up',
+          requests_since_deploy: 2,
+        })
+        .mockResolvedValueOnce({
+          ...healthyMetrics, ...fullDefaults,
+          p95_ms: 50, p95_status: 'healthy', requests_since_deploy: 105,
+        });
+
+      const qc = makeQueryClient();
+      const { result } = renderHook(() => useLiveMetrics(), {
+        wrapper: createWrapper('off', qc),
+      });
+
+      await waitFor(() => expect(result.current.data?.p95_ms).toBe(45));
+
+      await act(async () => {
+        await qc.invalidateQueries({ queryKey: ['metrics-summary'] });
+      });
+      await waitFor(() => expect(result.current.data?.p95_status).toBe('warming_up'));
+
+      // "0ms" must never reach the KPI display during warming_up
+      expect(result.current.effectiveP95).toBe(45);
+
+      await act(async () => {
+        await qc.invalidateQueries({ queryKey: ['metrics-summary'] });
+      });
+      await waitFor(() => expect(result.current.data?.p95_ms).toBe(50));
+
+      expect(result.current.sampleHistory.length).toBe(2);
+      // "previous" must reflect the last real snapshot (45), never the
+      // zero-value warmup sentinel skipped in between.
+      expect(result.current.previous?.p95_ms).toBe(45);
+    });
+
+    it('does not discard a warming_up sample that carries a real non-zero P95', async () => {
+      const { fetchMetricsSummary } = await import('../api/portfolioService');
+      vi.mocked(getRecentTraces).mockReturnValue([]);
+      vi.mocked(fetchMetricsSummary)
+        .mockResolvedValueOnce({
+          ...healthyMetrics, ...fullDefaults,
+          p95_ms: 45, p95_status: 'healthy', requests_since_deploy: 100,
+        })
+        .mockResolvedValueOnce({
+          ...healthyMetrics, ...fullDefaults,
+          p95_ms: 30, p95_status: 'warming_up', error_rate_status: 'warming_up',
+          requests_since_deploy: 105,
+        });
+
+      const qc = makeQueryClient();
+      const { result } = renderHook(() => useLiveMetrics(), {
+        wrapper: createWrapper('off', qc),
+      });
+
+      await waitFor(() => expect(result.current.data?.p95_ms).toBe(45));
+
+      await act(async () => {
+        await qc.invalidateQueries({ queryKey: ['metrics-summary'] });
+      });
+      await waitFor(() => expect(result.current.data?.p95_ms).toBe(30));
+
+      expect(result.current.sampleHistory.length).toBe(2);
+      expect(result.current.effectiveP95).toBe(30);
+    });
+
+    it('shows 0ms only transiently on true cold boot, correcting on the next real sample', async () => {
+      const { fetchMetricsSummary } = await import('../api/portfolioService');
+      vi.mocked(getRecentTraces).mockReturnValue([]);
+      vi.mocked(fetchMetricsSummary)
+        .mockResolvedValueOnce({
+          ...healthyMetrics, ...fullDefaults,
+          p95_ms: 0, p95_status: 'warming_up', error_rate_status: 'warming_up',
+          requests_since_deploy: 2,
+        })
+        .mockResolvedValueOnce({
+          ...healthyMetrics, ...fullDefaults,
+          p95_ms: 42, p95_status: 'warming_up', error_rate_status: 'warming_up',
+          requests_since_deploy: 3,
+        });
+
+      const qc = makeQueryClient();
+      const { result } = renderHook(() => useLiveMetrics(), {
+        wrapper: createWrapper('off', qc),
+      });
+
+      await waitFor(() => expect(result.current.data?.p95_ms).toBe(0));
+      // No prior snapshot exists on a true cold boot — this is the one
+      // accepted edge case where 0ms is transiently visible.
+      expect(result.current.effectiveP95).toBe(0);
+
+      await act(async () => {
+        await qc.invalidateQueries({ queryKey: ['metrics-summary'] });
+      });
+      await waitFor(() => expect(result.current.data?.p95_ms).toBe(42));
+
+      // Corrects immediately on the next real sample — never stuck at 0.
+      expect(result.current.effectiveP95).toBe(42);
+    });
+  });
 });
