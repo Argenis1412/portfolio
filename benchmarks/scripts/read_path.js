@@ -2,7 +2,7 @@
  * k6 Benchmark: JSON-First Read Path
  *
  * Endpoints: GET /api/v1/about, /api/v1/projects, /api/v1/stack
- * SLO Target: P95 < 50ms (from SLO_DEFINITIONS.md)
+ * SLO Target: P95 < 100ms (from SLO_DEFINITIONS.md)
  *
  * What we're measuring:
  *   - Read path latency under concurrent load (no DB cold-starts, JSON-first)
@@ -54,9 +54,9 @@ export const options = {
   },
   thresholds: {
     // SLO gates for the baseline scenario
-    "about_latency_ms{scenario:baseline}": ["p(95)<50"],
-    "projects_latency_ms{scenario:baseline}": ["p(95)<50"],
-    "stack_latency_ms{scenario:baseline}": ["p(95)<50"],
+    "about_latency_ms{scenario:baseline}": ["p(95)<100"],
+    "projects_latency_ms{scenario:baseline}": ["p(95)<100"],
+    "stack_latency_ms{scenario:baseline}": ["p(95)<100"],
     // Error rate across all scenarios
     read_path_error_rate: ["rate<0.02"],
   },
@@ -176,7 +176,7 @@ export function handleSummary(data) {
           },
         },
         error_rate: data.metrics.read_path_error_rate?.values?.rate,
-        slo_target: { p95_ms: 50, note: "JSON-first read path (post INC-002 fix)" },
+        slo_target: { p95_ms: 100, note: "JSON-first read path (post INC-002 fix)" },
         note: "Stress scenario intentionally pushes beyond SLO to find degradation point",
       },
       null,

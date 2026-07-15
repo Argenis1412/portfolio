@@ -47,7 +47,7 @@ This document details the reasoning behind the architectural choices found in th
 
 ## 12. Future Strategy: Scalability via Multi-Deploy (FastAPI & Go)
 **Decision**: A full rewrite of the backend to Go is officially discarded as over-engineering. Instead, any future expansion will follow a **multi-deploy strategy**: keeping Python (FastAPI) for the primary endpoints and expanding with Go only for specific, high-performance microservices.
-**Why?** Currently, the system is stable, P95 latency is < 50ms, and error rates are exceptionally low. The only previous penalty was cold starts, which was efficiently resolved with a cron-based keep-alive strategy. The true bottleneck is the hardware limitation of the Koyeb free tier, a constraint that no language change can magically fix.
+**Why?** Currently, the system is stable, P95 latency sits at ~79ms against a <100ms SLO, and error rates are exceptionally low. The only previous penalty was cold starts, which was efficiently resolved with a cron-based keep-alive strategy. The true bottleneck is the hardware limitation of the Koyeb free tier, a constraint that no language change can magically fix.
 Migrating entirely to Go simply to gain speed before a real problem exists is an anti-pattern. That approach introduces more infrastructure, more points of failure, and less clarity, all to fix something that is already working perfectly.
 If Go is integrated in the future, it will only be under real necessity signals (e.g., CPU constantly saturated, P95 rising under load, or heavy concurrent tasks) following this intelligent workflow:
 1.  **Create a minimal Go service** (e.g., isolated deploy) for specific tasks.
@@ -96,7 +96,7 @@ Building for production introduced real-world challenges that were addressed wit
 **Decision**: Separating Error Rate alerts from Latency alerts and optimizing histogram buckets for SLO tracking.
 **Why?** Generic "High Latency" alerts that actually trigger on 5xx errors (the previous state) create noise and confuse incident response. By separating them, we achieve:
 1. **Actionable Alerts**: `HighErrorRate` points to code bugs or database failures; `HighLatencyP95` points to resource exhaustion or N+1 queries.
-2. **SLO Alignment**: Histogram buckets in the backend are now explicitly set to `[50ms, 200ms, ...]` to match the P95 targets defined in the Engineering Playbook.
+2. **SLO Alignment**: Histogram buckets in the backend include a `100ms` boundary that coincides exactly with the P95 SLO cutoff defined in the Engineering Playbook, so the healthy/degraded decision doesn't depend on interpolation.
 3. **Traceability**: All alerts and metrics now include `app_version` as a label, allowing instant correlation between a new deployment and a performance degradation.
 
 ## 18. Chaos E2E Testing Strategy

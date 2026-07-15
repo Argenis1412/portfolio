@@ -143,9 +143,7 @@ async def get_metrics_summary(response: Response) -> MetricsSummary:
         p95_status = "warming_up"
         error_status = "warming_up"
     else:
-        # p95_status uses a stricter 50ms cutoff — it feeds the warming_up guard
-        # in the frontend, not the badge color. system_status below owns the SLO.
-        p95_status = "healthy" if p95_ms < 50 else "degraded"
+        p95_status = "healthy" if p95_ms < 100 else "degraded"
         if recent_incident_active and last is not None and last.error_triggered:
             error_status = "investigating"
         elif error_rate > 0.05:

@@ -217,6 +217,39 @@ async def test_system_status_operational_at_p95_between_50_and_100ms():
             data = response.json()
             assert data["p95_ms"] == 70
             assert data["system_status"] == "operational"
+            assert data["p95_status"] == "healthy"
+
+
+@pytest.mark.anyio
+async def test_p95_status_degraded_at_exact_100ms():
+    """Boundary: p95_status uses the same 100ms cutoff as system_status."""
+    chaos_state.reset()
+    with (
+        patch("app.controllers.api.compute_p95", return_value=(0.100, 100)),
+        patch("app.controllers.api.compute_request_stats", return_value=(100, 0)),
+    ):
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
+            response = await ac.get("/api/v1/metrics/summary")
+            data = response.json()
+            assert data["p95_ms"] == 100
+            assert data["p95_status"] == "degraded"
+
+
+@pytest.mark.anyio
+async def test_p95_status_stays_warming_up_despite_high_latency_with_few_samples():
+    """warming_up is evaluated independently of p95_ms — a cold-start with high
+    latency and too few samples must not skip straight to degraded."""
+    chaos_state.reset()
+    with (
+        patch("app.controllers.api.compute_p95", return_value=(0.150, 4)),
+        patch("app.controllers.api.compute_request_stats", return_value=(4, 0)),
+    ):
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as ac:
+            response = await ac.get("/api/v1/metrics/summary")
+            data = response.json()
+            assert data["p95_status"] == "warming_up"
 
 
 @pytest.mark.anyio

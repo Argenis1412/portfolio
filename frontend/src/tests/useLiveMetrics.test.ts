@@ -440,6 +440,10 @@ describe('useLiveMetrics', () => {
       vi.mocked(fetchMetricsSummary)
         .mockResolvedValueOnce({
           ...healthyMetrics, ...fullDefaults,
+          p95_ms: 40, p95_status: 'healthy', requests_since_deploy: 99,
+        })
+        .mockResolvedValueOnce({
+          ...healthyMetrics, ...fullDefaults,
           p95_ms: 45, p95_status: 'healthy', requests_since_deploy: 100,
         })
         .mockResolvedValueOnce({
@@ -457,6 +461,13 @@ describe('useLiveMetrics', () => {
         wrapper: createWrapper('off', qc),
       });
 
+      await waitFor(() => expect(result.current.data?.p95_ms).toBe(40));
+
+      await act(async () => {
+        await qc.invalidateQueries({ queryKey: ['metrics-summary'] });
+      });
+      // Second real snapshot (45) — previousRef.current must advance to this,
+      // not stay pinned to the first-ever value (40), before the sentinel hits.
       await waitFor(() => expect(result.current.data?.p95_ms).toBe(45));
 
       await act(async () => {
@@ -472,10 +483,10 @@ describe('useLiveMetrics', () => {
       });
       await waitFor(() => expect(result.current.data?.p95_ms).toBe(50));
 
-      expect(result.current.sampleHistory.length).toBe(2);
-      expect(result.current.history.length).toBe(2);
-      // "previous" must reflect the last real snapshot (45), never the
-      // zero-value warmup sentinel skipped in between.
+      expect(result.current.sampleHistory.length).toBe(3);
+      expect(result.current.history.length).toBe(3);
+      // "previous" must reflect the latest real snapshot (45), not the older
+      // (40) one or the zero-value warmup sentinel skipped in between.
       expect(result.current.previous?.p95_ms).toBe(45);
     });
 
