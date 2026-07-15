@@ -27,6 +27,12 @@ const ERROR_RATE_DEGRADED = 0.05;
 const MAX_HISTORY = 12;
 const SYNTHETIC_WINDOW_MS = 20_000;
 const RECOVERING_WINDOW_MS = 30_000;
+// refetchInterval widens from 5s to 15s the moment RECOVERING_WINDOW_MS
+// elapses (see isInChaosRecoveryRef below), so the poll that actually carries
+// the backend's chaos-recovery baseline reset can land up to one full slow
+// interval past that boundary. Guard against the deploy-reset heuristic
+// misfiring on that late poll by extending its window by that margin.
+const CHAOS_BASELINE_RESET_GUARD_MS = RECOVERING_WINDOW_MS + 15_000;
 const DEFAULT_CONFIDENCE_REAL = 98;
 
 const TRACE_PROJECTION: Record<TraceEntry['type'], { factor: number; floor: number; cap: number }> = {
@@ -201,7 +207,7 @@ export function useLiveMetrics() {
     // a recent chaos trace so history isn't wiped mid-recovery.
     const latestChaosTrace = findLatestChaosTrace(recentTraces);
     const isChaosBaselineReset = latestChaosTrace !== undefined &&
-      currentTime - latestChaosTrace.timestamp.getTime() < RECOVERING_WINDOW_MS;
+      currentTime - latestChaosTrace.timestamp.getTime() < CHAOS_BASELINE_RESET_GUARD_MS;
 
     if (isDeployReset && !isChaosBaselineReset) {
       historyRef.current = [];

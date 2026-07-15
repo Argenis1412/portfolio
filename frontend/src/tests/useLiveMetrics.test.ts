@@ -344,13 +344,13 @@ describe('useLiveMetrics', () => {
       error_rate_status: 'stable' as const,
     };
 
-    function recentChaosTrace() {
+    function recentChaosTrace(ageMs = 0) {
       return {
         id: 'trace-baseline-reset',
         traceId: 'trace-baseline-reset',
         requestId: 'req-baseline-reset',
         type: 'latency_injection' as const,
-        timestamp: new Date(),
+        timestamp: new Date(Date.now() - ageMs),
         origin: 'synthetic' as const,
         endpoint: '/api/test',
         status: 'ok' as const,
@@ -382,6 +382,7 @@ describe('useLiveMetrics', () => {
 
       await waitFor(() => expect(result.current.data?.p95_ms).toBe(45));
       expect(result.current.sampleHistory.length).toBe(1);
+      expect(result.current.history.length).toBe(1);
 
       await act(async () => {
         await qc.invalidateQueries({ queryKey: ['metrics-summary'] });
@@ -393,6 +394,7 @@ describe('useLiveMetrics', () => {
       // present, so the deploy-reset heuristic must not treat this as a real
       // process restart and wipe the sample history.
       expect(result.current.sampleHistory.length).toBe(1);
+      expect(result.current.history.length).toBe(1);
       expect(result.current.effectiveP95).toBe(45);
     });
 
@@ -417,6 +419,7 @@ describe('useLiveMetrics', () => {
 
       await waitFor(() => expect(result.current.data?.p95_ms).toBe(45));
       expect(result.current.sampleHistory.length).toBe(1);
+      expect(result.current.history.length).toBe(1);
 
       await act(async () => {
         await qc.invalidateQueries({ queryKey: ['metrics-summary'] });
@@ -428,6 +431,7 @@ describe('useLiveMetrics', () => {
       // requests_since_deploy is a genuine deploy signal, so history must
       // still be cleared as before this fix.
       expect(result.current.sampleHistory.length).toBe(0);
+      expect(result.current.history.length).toBe(0);
     });
 
     it('preserves the last known P95 and does not poison "previous" across a chaos baseline reset', async () => {
@@ -469,6 +473,7 @@ describe('useLiveMetrics', () => {
       await waitFor(() => expect(result.current.data?.p95_ms).toBe(50));
 
       expect(result.current.sampleHistory.length).toBe(2);
+      expect(result.current.history.length).toBe(2);
       // "previous" must reflect the last real snapshot (45), never the
       // zero-value warmup sentinel skipped in between.
       expect(result.current.previous?.p95_ms).toBe(45);
@@ -501,6 +506,7 @@ describe('useLiveMetrics', () => {
       await waitFor(() => expect(result.current.data?.p95_ms).toBe(30));
 
       expect(result.current.sampleHistory.length).toBe(2);
+      expect(result.current.history.length).toBe(2);
       expect(result.current.effectiveP95).toBe(30);
     });
 
@@ -536,6 +542,75 @@ describe('useLiveMetrics', () => {
 
       // Corrects immediately on the next real sample — never stuck at 0.
       expect(result.current.effectiveP95).toBe(42);
+    });
+
+    it('extends the chaos-recovery guard through a late-arriving reset poll', async () => {
+      // refetchInterval widens from 5s to 15s the moment RECOVERING_WINDOW_MS
+      // (30s) elapses, so the poll carrying the backend's baseline reset can
+      // realistically land up to one slow interval (15s) past that boundary.
+      // A 35s-old trace is past the 30s window but must still be covered by
+      // the extended CHAOS_BASELINE_RESET_GUARD_MS (30s + 15s = 45s).
+      const { fetchMetricsSummary } = await import('../api/portfolioService');
+      vi.mocked(getRecentTraces).mockReturnValue([recentChaosTrace(35_000)]);
+      vi.mocked(fetchMetricsSummary)
+        .mockResolvedValueOnce({
+          ...healthyMetrics, ...fullDefaults,
+          p95_ms: 45, p95_status: 'healthy', requests_since_deploy: 100,
+        })
+        .mockResolvedValueOnce({
+          ...healthyMetrics, ...fullDefaults,
+          p95_ms: 0, p95_status: 'warming_up', error_rate_status: 'warming_up',
+          requests_since_deploy: 2,
+        });
+
+      const qc = makeQueryClient();
+      const { result } = renderHook(() => useLiveMetrics(), {
+        wrapper: createWrapper('off', qc),
+      });
+
+      await waitFor(() => expect(result.current.data?.p95_ms).toBe(45));
+
+      await act(async () => {
+        await qc.invalidateQueries({ queryKey: ['metrics-summary'] });
+      });
+      await waitFor(() => expect(result.current.data?.p95_status).toBe('warming_up'));
+
+      expect(result.current.sampleHistory.length).toBe(1);
+      expect(result.current.history.length).toBe(1);
+      expect(result.current.effectiveP95).toBe(45);
+    });
+
+    it('stops treating a stale chaos trace as protecting history once the extended guard window elapses', async () => {
+      // Past CHAOS_BASELINE_RESET_GUARD_MS (45s) a drop in requests_since_deploy
+      // is indistinguishable from a real deploy — the wipe must still fire so
+      // the original deploy-reset detection isn't silently disabled.
+      const { fetchMetricsSummary } = await import('../api/portfolioService');
+      vi.mocked(getRecentTraces).mockReturnValue([recentChaosTrace(50_000)]);
+      vi.mocked(fetchMetricsSummary)
+        .mockResolvedValueOnce({
+          ...healthyMetrics, ...fullDefaults,
+          p95_ms: 45, p95_status: 'healthy', requests_since_deploy: 100,
+        })
+        .mockResolvedValueOnce({
+          ...healthyMetrics, ...fullDefaults,
+          p95_ms: 0, p95_status: 'warming_up', error_rate_status: 'warming_up',
+          requests_since_deploy: 2,
+        });
+
+      const qc = makeQueryClient();
+      const { result } = renderHook(() => useLiveMetrics(), {
+        wrapper: createWrapper('off', qc),
+      });
+
+      await waitFor(() => expect(result.current.data?.p95_ms).toBe(45));
+
+      await act(async () => {
+        await qc.invalidateQueries({ queryKey: ['metrics-summary'] });
+      });
+      await waitFor(() => expect(result.current.data?.p95_status).toBe('warming_up'));
+
+      expect(result.current.sampleHistory.length).toBe(0);
+      expect(result.current.history.length).toBe(0);
     });
   });
 });
