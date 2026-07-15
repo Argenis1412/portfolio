@@ -86,7 +86,8 @@ def reset_p95_baseline(registry: CollectorRegistry = REGISTRY) -> None:
     with _baseline_lock:
         global _baseline
         merged = {
-            k: v for k, v in _baseline.items()
+            k: v
+            for k, v in _baseline.items()
             if not k[0].startswith("http_request_duration_seconds")
         }
         merged.update(duration_entries)

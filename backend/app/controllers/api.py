@@ -111,9 +111,15 @@ async def get_metrics_summary(response: Response) -> MetricsSummary:
     # P95 outliers from the cumulative histogram. Request counters are left
     # untouched (reset_p95_baseline is duration-only) so requests_since_deploy
     # stays continuous and the frontend's deploy-reset heuristic doesn't fire.
-    time_warming = (time.time() - APP_START_TIME) < WARMUP_GRACE_S and not recent_incident_active
-    if (not _baseline_established and not time_warming and not recent_incident_active
-            and total_samples >= 5):
+    time_warming = (
+        time.time() - APP_START_TIME
+    ) < WARMUP_GRACE_S and not recent_incident_active
+    if (
+        not _baseline_established
+        and not time_warming
+        and not recent_incident_active
+        and total_samples >= 5
+    ):
         reset_p95_baseline()
         _baseline_established = True
         p95_seconds, total_samples = compute_p95()

@@ -176,7 +176,10 @@ def calculate_spam_score(
     # URLs stripped first (case-insensitive) to avoid false positives on param-heavy links.
     stripped = message.strip()
     url_free = re.sub(
-        r"https?://[^\s,;()\[\]]+|www\.[^\s,;()\[\]]+", "", stripped, flags=re.IGNORECASE
+        r"https?://[^\s,;()\[\]]+|www\.[^\s,;()\[\]]+",
+        "",
+        stripped,
+        flags=re.IGNORECASE,
     )
     if len(url_free) >= 8:
         non_alnum = sum(1 for c in url_free if not (c.isalnum() or c.isspace()))

@@ -81,7 +81,9 @@ async def test_warmup_reset_does_not_fire_during_active_chaos(monkeypatch):
     """recent_incident_active=True -> chaos owns recovery, warmup guard skipped."""
     calls = _patch_common(monkeypatch, total_samples=5, app_start_offset_s=100)
     chaos_state.record_incident(
-        ChaosIncident(type="latency_injection", timestamp=time.time(), error_triggered=False)
+        ChaosIncident(
+            type="latency_injection", timestamp=time.time(), error_triggered=False
+        )
     )
 
     result = await api_module.get_metrics_summary(Response())
