@@ -101,7 +101,7 @@ const SystemStatusBanner = React.memo(() => {
                 <>
                   <span className="text-current/45">·</span>
                   <span className="text-current/80">
-                    <span className="text-current/55">{t('banner.status')}: </span>
+                    <span className="text-current/55">{t('banner.incident_phase')}: </span>
                     <span className="capitalize">{t(`metrics.lifecycle.${lifecycle}`).toLowerCase()}</span>
                   </span>
                 </>

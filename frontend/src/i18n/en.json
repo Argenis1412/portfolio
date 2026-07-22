@@ -228,7 +228,7 @@
   "banner.cause": "Cause",
   "banner.impact": "Impact",
   "banner.impact.retries_active": "retries active",
-  "banner.status": "Status",
+  "banner.incident_phase": "Incident phase",
   "banner.recovery": "Recovery: in progress",
   "banner.label.degraded": "STATUS: DEGRADED",
   "banner.label.down": "STATUS: DOWN",
