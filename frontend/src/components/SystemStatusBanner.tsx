@@ -14,6 +14,7 @@ import React from 'react';
 import { m, AnimatePresence } from 'framer-motion';
 import { useMetricsDisplay } from '../hooks/useMetricsDisplay';
 import { useChaosMode } from '../hooks/useChaosMode';
+import LifecycleDetailRow from './LifecycleDetailRow';
 
 
 function causeKey(lastIncident: string): string {
@@ -50,11 +51,6 @@ const SystemStatusBanner = React.memo(() => {
 
   const showCause   = lifecycle !== 'STABLE' && lifecycle !== 'NORMAL';
   const showImpact  = lifecycle !== 'STABLE' && lifecycle !== 'NORMAL';
-  // Intentionally NOT the same condition as showCause/showImpact: STABLE (22-30s
-  // post-incident) is still a genuine, non-contradictory chaos-recovery state worth
-  // showing here. Only NORMAL (no chaos context at all) reads as a contradiction next
-  // to a real-degradation ⚠ status label. Do not merge this with showCause/showImpact.
-  const showLifecycle = lifecycle !== 'NORMAL';
 
   return (
     <AnimatePresence>
@@ -97,15 +93,7 @@ const SystemStatusBanner = React.memo(() => {
                 </>
               )}
 
-              {showLifecycle && (
-                <>
-                  <span className="text-current/45">·</span>
-                  <span className="text-current/80">
-                    <span className="text-current/55">{t('banner.incident_phase')}: </span>
-                    <span className="capitalize">{t(`metrics.lifecycle.${lifecycle}`).toLowerCase()}</span>
-                  </span>
-                </>
-              )}
+              <LifecycleDetailRow t={t} lifecycle={lifecycle} />
             </div>
           </div>
         </m.div>
