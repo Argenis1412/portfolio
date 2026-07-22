@@ -115,7 +115,25 @@ def _setup_prometheus(app: FastAPI) -> None:
         instrumentator.add(metrics.requests())
         instrumentator.add(
             metrics.latency(
-                buckets=(0.01, 0.025, 0.05, 0.1, 0.2, 0.5, 1.0, 2.5, 5.0, 10.0)
+                # 75-500ms zone narrowed (0.075, 0.15, 0.3, 0.4 added) so P95
+                # interpolation error stays bounded under low traffic — see
+                # SLO_DEFINITIONS.md §1 for the production incident this fixes.
+                buckets=(
+                    0.01,
+                    0.025,
+                    0.05,
+                    0.075,
+                    0.1,
+                    0.15,
+                    0.2,
+                    0.3,
+                    0.4,
+                    0.5,
+                    1.0,
+                    2.5,
+                    5.0,
+                    10.0,
+                )
             )
         )
 

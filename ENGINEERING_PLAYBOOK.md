@@ -189,7 +189,7 @@ test_chaos_persistence_failure_does_not_crash_simulation     # ← the test that
 ## 11. Performance
 
 **Document the SLO before optimizing**: Write down the target before writing the code. Current targets for this project:
-- Static portfolio data (`/about`, `/projects`, `/stack`): P95 < 100ms
+- Static portfolio data (`/about`, `/projects`, `/stack`): P95 < 100ms *(Measurement artifact, not a target exception: at production traffic volumes observed to date (~33-146 requests since deploy), isolated slow samples can interpolate to 150-500ms due to Koyeb free-tier hypervisor jitter and bucket granularity — the <100ms target and its alert trigger are not waived by this; see SLO_DEFINITIONS.md §1 for the underlying evidence)*
 - Contact endpoint (`/contact`): P95 < 200ms (includes Redis round-trip)
 - Health check (`/health`): P99 < 100ms *(Recalibrated from 20ms to reflect Koyeb Free Tier cold-start network constraints; P95 Cold: ~3.5s, P95 Warm: ~1.3s)*
 
