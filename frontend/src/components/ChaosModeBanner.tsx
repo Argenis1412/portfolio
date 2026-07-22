@@ -17,6 +17,7 @@ import { ChevronDown } from 'lucide-react';
 import { useChaosMode } from '../hooks/useChaosMode';
 import { useMetricsDisplay } from '../hooks/useMetricsDisplay';
 import { useLanguage } from '../context/LanguageContext';
+import LifecycleDetailRow from './LifecycleDetailRow';
 
 function causeKey(lastIncident: string): string {
   const map: Record<string, string> = {
@@ -148,11 +149,7 @@ export default function ChaosModeBanner() {
                     </>
                   )}
 
-                  <span className="text-current/45">·</span>
-                  <span className="text-current/80">
-                    <span className="text-current/55">{t('banner.incident_phase')}: </span>
-                    <span className="capitalize">{t(`metrics.lifecycle.${lifecycle}`).toLowerCase()}</span>
-                  </span>
+                  <LifecycleDetailRow t={t} lifecycle={lifecycle} />
                 </div>
               </div>
             </m.div>
