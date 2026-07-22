@@ -228,7 +228,7 @@
   "banner.cause": "Causa",
   "banner.impact": "Impacto",
   "banner.impact.retries_active": "retentativas ativas",
-  "banner.status": "Estado",
+  "banner.incident_phase": "Fase do incidente",
   "banner.recovery": "Recuperação: em andamento",
   "banner.label.degraded": "STATUS: DEGRADADO",
   "banner.label.down": "STATUS: FORA DO AR",
