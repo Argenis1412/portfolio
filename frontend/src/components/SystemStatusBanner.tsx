@@ -4,8 +4,11 @@
  * This banner follows a structured SRE-first format:
  * ⚠️ [STATUS] · Cause: [Trigger] · Impact: [Delta] · Status: [Lifecycle]
  *
- * Appears below the Navbar only when system_status is not 'operational'.
- * Never shown when lifecycle === 'NORMAL'.
+ * Visible whenever the live status (real P95/error-rate via useLiveMetrics) is
+ * 'degraded' or 'down' — independent of the chaos playground's lifecycle state
+ * machine. The trailing "Status: [Lifecycle]" clause only renders while a chaos
+ * incident is active or recently resolved (lifecycle !== 'NORMAL'); it is hidden
+ * otherwise so the banner never reads as "DEGRADED · Status: Normal".
  */
 import React from 'react';
 import { m, AnimatePresence } from 'framer-motion';
@@ -47,6 +50,11 @@ const SystemStatusBanner = React.memo(() => {
 
   const showCause   = lifecycle !== 'STABLE' && lifecycle !== 'NORMAL';
   const showImpact  = lifecycle !== 'STABLE' && lifecycle !== 'NORMAL';
+  // Intentionally NOT the same condition as showCause/showImpact: STABLE (22-30s
+  // post-incident) is still a genuine, non-contradictory chaos-recovery state worth
+  // showing here. Only NORMAL (no chaos context at all) reads as a contradiction next
+  // to a real-degradation ⚠ status label. Do not merge this with showCause/showImpact.
+  const showLifecycle = lifecycle !== 'NORMAL';
 
   return (
     <AnimatePresence>
@@ -89,11 +97,15 @@ const SystemStatusBanner = React.memo(() => {
                 </>
               )}
 
-              <span className="text-current/45">·</span>
-              <span className="text-current/80">
-                <span className="text-current/55">{t('banner.status')}: </span>
-                <span className="capitalize">{t(`metrics.lifecycle.${lifecycle}`).toLowerCase()}</span>
-              </span>
+              {showLifecycle && (
+                <>
+                  <span className="text-current/45">·</span>
+                  <span className="text-current/80">
+                    <span className="text-current/55">{t('banner.status')}: </span>
+                    <span className="capitalize">{t(`metrics.lifecycle.${lifecycle}`).toLowerCase()}</span>
+                  </span>
+                </>
+              )}
             </div>
           </div>
         </m.div>
