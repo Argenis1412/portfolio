@@ -120,3 +120,21 @@ Building for production introduced real-world challenges that were addressed wit
 ## 21. UI/UX Resilience & Observability
 **Decision**: In the TraceViewer and ChaosPlayground, a simulated "Latency Injection" explicitly emits a `503 ERR` trace rather than `200 OK`, even though the backend successfully handled the chaos request itself.
 **Why?** This demonstrates realistic system behavior and circuit breaker patterns. A timeout in a highly available architecture is an error that should trigger fallback mechanisms, not just a "slow success". Emitting a `503` in the observability trace proves the monitoring system can correctly identify SLA breaches and SLA-driven failure states.
+
+## 22. Hiring Home and Production Evidence Separation
+**Decision**: Separate the hiring-oriented home page from the detailed
+operational demonstration at `/production-evidence`.
+
+**Why?** Recruiters and hiring managers need a concise, evidence-led narrative
+before they need a live observability console. The home page therefore presents
+identity, selected projects, engineering proof, decisions, and a compact
+production snapshot. Detailed metrics, chaos controls, traces, logs, and
+incident narratives remain available through progressive disclosure.
+
+**Consequences**:
+- Production and synthetic signals must remain explicitly labeled.
+- The home page must not preload interactive-lab components or data.
+- Project and decision evidence must be reachable through stable, shareable
+  routes.
+- The canonical copy and evidence rules live in
+  `docs/architecture/PORTFOLIO_CONTENT_CONTRACT.md`.
