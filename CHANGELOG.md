@@ -191,6 +191,11 @@ Redis is now in the critical path for `/contact`. If Upstash is unavailable, the
 
 ---
 
+## [Unreleased]
+
+### Added
+- **PatchForge Featured Project**: Added the safety-first AI code modification tool to the portfolio, documenting its deterministic Plan → Preview → Validate → Apply workflow and Git-native review model.
+
 ## [1.9.2] - 2026-05-17
 
 ### Repository Hardening & Finalization
