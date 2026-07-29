@@ -37,7 +37,7 @@
     ],
     "repository": "https://github.com/Argenis1412/Loja_app",
     "demo": null,
-    "highlight": true,
+    "highlight": false,
     "image": null
   },
   {
@@ -74,6 +74,42 @@
       "CI/CD workflow orchestration"
     ],
     "repository": "https://github.com/Argenis1412/portfolio",
+    "demo": null,
+    "highlight": true,
+    "image": null
+  },
+  {
+    "id": "patchforge",
+    "name": "PatchForge",
+    "short_description": {
+      "pt": "Ferramenta de modificação de código orientada por IA que prioriza segurança, validação determinística e aprovação humana antes de aplicar mudanças.",
+      "en": "AI-powered code modification tool that prioritizes safety, deterministic validation, and human approval before applying changes.",
+      "es": "Herramienta de modificación de código con IA que prioriza seguridad, validación determinista y aprobación humana antes de aplicar cambios."
+    },
+    "full_description": {
+      "pt": "<div class=\"project-story\"><p>Ferramentas de código com IA podem modificar repositórios sem oferecer evidências suficientes de segurança, validação ou intenção.</p><p>As mudanças precisavam permanecer revisáveis, compatíveis com o estado do repositório e impossíveis de aplicar sem uma ação explícita do usuário.</p><p>O produto foi estruturado em um pipeline determinístico Plan → Preview → Validate → Apply, com contratos Pydantic tipados, artefatos persistidos e revisão nativa com Git.</p><p>O fluxo adiciona etapas e disciplina antes da alteração do repositório, mas torna cada mudança inspecionável e reduz automações opacas.</p><p>PatchForge entrega patches validados e auditáveis, permitindo que a IA proponha mudanças enquanto a decisão final permanece humana.</p></div>",
+      "en": "<div class=\"project-story\"><p>AI coding tools can modify repositories without providing enough evidence of safety, validation, or intent.</p><p>Changes had to remain reviewable, compatible with repository state, and impossible to apply without an explicit user action.</p><p>The product uses a deterministic Plan → Preview → Validate → Apply pipeline with typed Pydantic contracts, persisted artifacts, and Git-native review.</p><p>The workflow adds stages and discipline before repository modification, but makes every change inspectable and reduces opaque automation.</p><p>PatchForge delivers validated, auditable patches so AI can propose changes while the final decision remains human.</p></div>",
+      "es": "<div class=\"project-story\"><p>Las herramientas de código con IA pueden modificar repositorios sin aportar suficiente evidencia de seguridad, validación o intención.</p><p>Los cambios debían seguir siendo revisables, compatibles con el estado del repositorio e imposibles de aplicar sin una acción explícita del usuario.</p><p>El producto se organizó en un pipeline determinista Plan → Preview → Validate → Apply, con contratos Pydantic tipados, artefactos persistentes y revisión nativa con Git.</p><p>El flujo añade etapas y disciplina antes de modificar el repositorio, pero vuelve cada cambio inspeccionable y reduce la automatización opaca.</p><p>PatchForge entrega parches validados y auditables para que la IA proponga cambios mientras la decisión final sigue siendo humana.</p></div>"
+    },
+    "technologies": ["Python 3.12+", "Pydantic", "CLI", "Git", "Docker", "Pytest", "Ruff", "GitHub Actions"],
+    "features": [
+      "Deterministic Plan, Preview, Validate, and Apply workflow",
+      "Typed Pydantic contracts between specialized agents",
+      "Persisted plans, patches, and validation reports",
+      "Repository safety checks before patch application",
+      "Git-native review and explicit human approval",
+      "Configurable subprocess timeout policy",
+      "CI quality gates with pytest and Ruff"
+    ],
+    "learnings": [
+      "Safety-first AI-assisted code modification",
+      "Deterministic workflows for autonomous systems",
+      "Typed contracts for multi-agent orchestration",
+      "Artifact-based validation and auditability",
+      "Git compatibility checks and controlled patch application",
+      "CLI and Docker delivery for developer tools"
+    ],
+    "repository": "https://github.com/Argenis1412/PatchForge",
     "demo": null,
     "highlight": true,
     "image": null

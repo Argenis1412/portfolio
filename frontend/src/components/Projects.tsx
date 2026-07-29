@@ -1,7 +1,7 @@
-import { motion } from 'framer-motion';
-import { useMemo } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { useEffect, useMemo, useState } from 'react';
 import Skeleton from './ui/Skeleton';
-import { Github, ExternalLink } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Github, ExternalLink } from 'lucide-react';
 import { useProjects } from '../hooks/useApi';
 import { useLanguage } from '../context/LanguageContext';
 import { ServerWakeupError } from './ServerWakeupNotice';
@@ -51,6 +51,8 @@ function parseProjectStory(raw: string | undefined): StorySections {
 export default function Projects() {
   const { data: projects, isLoading, isError } = useProjects();
   const { language, t } = useLanguage();
+  const shouldReduceMotion = useReducedMotion();
+  const [activeIndex, setActiveIndex] = useState(0);
   const labels = useMemo(() => ([
     { key: 'problem', label: t('projects.problem') },
     { key: 'constraint', label: t('projects.constraint') },
@@ -59,12 +61,36 @@ export default function Projects() {
     { key: 'impact', label: t('projects.impact') },
   ]), [t]);
 
+  useEffect(() => {
+    if (!projects || projects.length < 2) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.target instanceof Element &&
+        event.target.closest('input, textarea, select, [contenteditable]')
+      ) {
+        return;
+      }
+
+      if (event.key === 'ArrowLeft') {
+        setActiveIndex((current) => (current - 1 + projects.length) % projects.length);
+      } else if (event.key === 'ArrowRight') {
+        setActiveIndex((current) => (current + 1) % projects.length);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [projects]);
+
+  const selectedIndex = Math.min(activeIndex, Math.max((projects?.length ?? 1) - 1, 0));
+
   if (isLoading) {
     return (
       <section id="projects" className="py-16 max-w-6xl mx-auto px-4">
         <div className="h-10 w-48 bg-app-surface-hover rounded-md mx-auto mb-12 animate-pulse" />
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          {[1, 2].map((i) => (
+        <div className="max-w-4xl mx-auto">
+          {[1].map((i) => (
             <div key={i} className="glass rounded-2xl p-8 border border-app-border">
               <Skeleton className="h-8 w-3/4 mb-4" />
               <Skeleton className="h-4 w-full mb-2" />
@@ -119,18 +145,19 @@ export default function Projects() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          {projects.map((project, index) => {
+        <div className="max-w-4xl mx-auto">
+          <AnimatePresence mode="wait" initial={false}>
+          {projects.filter((_, index) => index === selectedIndex).map((project) => {
             const shortDescription = project.short_description[language as keyof typeof project.short_description];
             const story = parseProjectStory(project.full_description?.[language as keyof typeof project.full_description]);
 
             return (
               <motion.article
                 key={project.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.1 }}
-                transition={{ duration: 0.5, delay: index * 0.08 }}
+                initial={shouldReduceMotion ? false : { opacity: 0, x: 24 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={shouldReduceMotion ? undefined : { opacity: 0, x: -24 }}
+                transition={{ duration: 0.25 }}
                 className="glass rounded-2xl border border-app-border p-6 md:p-8 hover:border-app-primary/40 hover:shadow-[0_0_30px_rgba(212,163,115,0.18)] transition-all duration-300"
               >
                 <div className="flex items-start justify-between gap-4 mb-4">
@@ -209,6 +236,31 @@ export default function Projects() {
               </motion.article>
             );
           })}
+          </AnimatePresence>
+
+          {projects.length > 1 && (
+            <div className="mt-6 flex items-center justify-center gap-4" aria-label={t('projects.navigation')}>
+              <button
+                type="button"
+                onClick={() => setActiveIndex((selectedIndex - 1 + projects.length) % projects.length)}
+                aria-label={t('projects.previous')}
+                className="rounded-xl border border-app-border bg-app-surface p-3 text-app-text transition-colors hover:border-app-primary hover:text-app-primary"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <span className="min-w-16 text-center font-mono text-xs text-app-muted" aria-live="polite">
+                {selectedIndex + 1} / {projects.length}
+              </span>
+              <button
+                type="button"
+                onClick={() => setActiveIndex((selectedIndex + 1) % projects.length)}
+                aria-label={t('projects.next')}
+                className="rounded-xl border border-app-border bg-app-surface p-3 text-app-text transition-colors hover:border-app-primary hover:text-app-primary"
+              >
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
+          )}
         </div>
       </motion.div>
     </section>

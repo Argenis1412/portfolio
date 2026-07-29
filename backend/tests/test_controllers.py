@@ -9,8 +9,11 @@ from unittest.mock import AsyncMock
 import pytest
 from fastapi.testclient import TestClient
 
+from app.adapters.repository import JsonRepository
+from app.controllers import dependencies
 from app.controllers.dependencies import get_send_contact_use_case
 from app.main import app
+from app.use_cases.get_projects import GetProjectsUseCase
 
 
 @pytest.fixture
@@ -59,6 +62,40 @@ def test_list_projects_returns_200(client):
     assert "projects" in data
     assert "total" in data
     assert isinstance(data["projects"], list)
+
+
+def test_list_projects_with_patchforge_returns_featured_alphabetical_order(client):
+    """Returns PatchForge as a highlighted project in the established order."""
+    app.dependency_overrides[dependencies.dep_projects] = lambda: GetProjectsUseCase(
+        JsonRepository()
+    )
+
+    response = client.get("/api/v1/projects")
+
+    assert response.status_code == 200
+    projects = response.json()["projects"]
+    patchforge = next(project for project in projects if project["id"] == "patchforge")
+    featured_names = [project["name"] for project in projects if project["highlighted"]]
+
+    assert patchforge["highlighted"] is True
+    assert patchforge["repository"] == "https://github.com/Argenis1412/PatchForge"
+    assert patchforge["demo"] is None
+    assert patchforge["image"] is None
+    assert set(patchforge["short_description"]) == {"pt", "en", "es"}
+    assert patchforge["learnings"] == [
+        "Safety-first AI-assisted code modification",
+        "Deterministic workflows for autonomous systems",
+        "Typed contracts for multi-agent orchestration",
+        "Artifact-based validation and auditability",
+        "Git compatibility checks and controlled patch application",
+        "CLI and Docker delivery for developer tools",
+    ]
+    assert featured_names == ["Full-Stack Portfolio", "PatchForge"]
+    assert [project["name"] for project in projects] == [
+        "Full-Stack Portfolio",
+        "PatchForge",
+        "Loja App",
+    ]
 
 
 def test_get_existing_project_returns_200(client):

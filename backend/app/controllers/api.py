@@ -259,6 +259,7 @@ async def list_projects(
             full_description=p.full_description,  # type: ignore[arg-type]
             technologies=p.technologies,
             features=p.features,
+            learnings=p.learnings,
             highlighted=p.highlighted,
             repository=p.repository,  # type: ignore[arg-type]
             demo=p.demo,  # type: ignore[arg-type]
