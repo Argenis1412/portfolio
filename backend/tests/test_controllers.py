@@ -82,7 +82,12 @@ def test_list_projects_with_patchforge_returns_featured_alphabetical_order(clien
     assert patchforge["demo"] is None
     assert patchforge["image"] is None
     assert set(patchforge["short_description"]) == {"pt", "en", "es"}
-    assert featured_names == ["Full-Stack Portfolio", "Loja App", "PatchForge"]
+    assert featured_names == ["Full-Stack Portfolio", "PatchForge"]
+    assert [project["name"] for project in projects] == [
+        "Full-Stack Portfolio",
+        "PatchForge",
+        "Loja App",
+    ]
 
 
 def test_get_existing_project_returns_200(client):
