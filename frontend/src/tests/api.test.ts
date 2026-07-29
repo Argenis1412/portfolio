@@ -16,6 +16,7 @@ import {
   fetchFormation,
   fetchPhilosophy,
 } from '../api/index';
+import { CaseStudyEvidenceSchema } from '../api/schemas';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -60,6 +61,23 @@ const projectFixture = {
   demo: null,
   highlighted: true,
   image: null,
+  case_study: {
+    problem: { pt: 'PT', en: 'EN', es: 'ES' },
+    constraints: { pt: 'PT', en: 'EN', es: 'ES' },
+    solution: { pt: 'PT', en: 'EN', es: 'ES' },
+    architecture: { pt: 'PT', en: 'EN', es: 'ES' },
+    testing: { pt: 'PT', en: 'EN', es: 'ES' },
+    reliability: { pt: 'PT', en: 'EN', es: 'ES' },
+    impact: { pt: 'PT', en: 'EN', es: 'ES' },
+    evidence: [
+      {
+        label: { pt: 'Fonte', en: 'Source', es: 'Fuente' },
+        value: 'Verified evidence',
+        classification: 'REAL',
+        source: 'docs/evidence.md',
+      },
+    ],
+  },
 };
 
 // ─── fetchAbout ────────────────────────────────────────────────────────────────
@@ -106,6 +124,7 @@ describe('fetchProjects', () => {
     expect(Array.isArray(projects)).toBe(true);
     expect(projects.length).toBe(1);
     expect(projects[0].id).toBe('proj-1');
+    expect(projects[0].case_study?.evidence[0].classification).toBe('REAL');
   });
 
   it('returns empty list if projects is not an array (Resilience / Hardening)', async () => {
@@ -120,6 +139,24 @@ describe('fetchProjects', () => {
     mockFetchError(500);
     await expect(fetchProjects()).rejects.toThrow(/API request failed: 500/);
     spy.mockRestore();
+  });
+});
+
+describe('CaseStudyEvidenceSchema', () => {
+  const evidence = {
+    label: { pt: 'Fonte', en: 'Source', es: 'Fuente' },
+    value: 'Verified evidence',
+    classification: 'REAL' as const,
+    source: 'docs/evidence.md',
+  };
+
+  it('accepts evidence within backend length limits', () => {
+    expect(CaseStudyEvidenceSchema.safeParse(evidence).success).toBe(true);
+  });
+
+  it('rejects evidence values beyond backend length limits', () => {
+    expect(CaseStudyEvidenceSchema.safeParse({ ...evidence, value: 'x'.repeat(161) }).success).toBe(false);
+    expect(CaseStudyEvidenceSchema.safeParse({ ...evidence, source: 'x'.repeat(241) }).success).toBe(false);
   });
 });
 

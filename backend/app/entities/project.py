@@ -39,3 +39,4 @@ class Project:
     demo: str | None
     highlighted: bool
     image: str | None = field(default=None)
+    case_study: dict | None = field(default=None)

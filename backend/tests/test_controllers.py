@@ -4,6 +4,7 @@ Controller tests (HTTP endpoints).
 Tests integration between FastAPI routes and use cases.
 """
 
+import json
 from unittest.mock import AsyncMock
 
 import pytest
@@ -81,6 +82,8 @@ def test_list_projects_with_patchforge_returns_featured_alphabetical_order(clien
     assert patchforge["repository"] == "https://github.com/Argenis1412/PatchForge"
     assert patchforge["demo"] is None
     assert patchforge["image"] is None
+    assert patchforge["case_study"]["problem"]["en"].startswith("AI coding tools")
+    assert patchforge["case_study"]["evidence"][0]["classification"] == "REAL"
     assert set(patchforge["short_description"]) == {"pt", "en", "es"}
     assert patchforge["learnings"] == [
         "Safety-first AI-assisted code modification",
@@ -98,6 +101,32 @@ def test_list_projects_with_patchforge_returns_featured_alphabetical_order(clien
     ]
 
 
+@pytest.mark.asyncio
+async def test_json_repository_without_case_study_sidecar_returns_projects(
+    tmp_path,
+):
+    """A missing optional sidecar must not make static project reads fail."""
+    project = {
+        "id": "project-1",
+        "name": "Project",
+        "short_description": {"pt": "PT", "en": "EN", "es": "ES"},
+        "full_description": {"pt": "PT", "en": "EN", "es": "ES"},
+        "technologies": ["Python"],
+        "features": [],
+        "learnings": [],
+        "repository": None,
+        "demo": None,
+        "highlight": False,
+        "image": None,
+    }
+    (tmp_path / "projects.json").write_text(json.dumps([project]), encoding="utf-8")
+
+    projects = await JsonRepository(tmp_path).get_projects()
+
+    assert projects[0].id == "project-1"
+    assert projects[0].case_study is None
+
+
 def test_get_existing_project_returns_200(client):
     """Tests GET /api/v1/projects/{id} with an existing project."""
     # The mock in conftest defines 'project-1' as a valid ID
@@ -108,6 +137,7 @@ def test_get_existing_project_returns_200(client):
     assert data["id"] == "project-1"
     assert "name" in data
     assert "technologies" in data
+    assert data["case_study"] is None
 
 
 def test_get_nonexistent_project_returns_404(client):

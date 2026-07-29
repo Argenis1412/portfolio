@@ -10,6 +10,24 @@ export const LocalizedStringSchema = z.object({
   es: z.string(),
 });
 
+export const CaseStudyEvidenceSchema = z.object({
+  label: LocalizedStringSchema,
+  value: z.string().max(160),
+  classification: z.enum(['REAL', 'REPRODUCED', 'SYNTHETIC']),
+  source: z.string().max(240),
+});
+
+export const ProjectCaseStudySchema = z.object({
+  problem: LocalizedStringSchema,
+  constraints: LocalizedStringSchema,
+  solution: LocalizedStringSchema,
+  architecture: LocalizedStringSchema,
+  testing: LocalizedStringSchema,
+  reliability: LocalizedStringSchema,
+  impact: LocalizedStringSchema,
+  evidence: z.array(CaseStudyEvidenceSchema).default([]),
+});
+
 // Summary schema (used in list endpoints)
 export const ProjectSchema = z.object({
   id: z.string(),
@@ -23,6 +41,7 @@ export const ProjectSchema = z.object({
   repository: z.string().nullable(),
   demo: z.string().nullable(),
   image: z.string().nullable(),
+  case_study: ProjectCaseStudySchema.nullable().optional(),
 });
 
 // Detail schema (used in single-project endpoints)
