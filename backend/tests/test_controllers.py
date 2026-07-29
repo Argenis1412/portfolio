@@ -82,6 +82,14 @@ def test_list_projects_with_patchforge_returns_featured_alphabetical_order(clien
     assert patchforge["demo"] is None
     assert patchforge["image"] is None
     assert set(patchforge["short_description"]) == {"pt", "en", "es"}
+    assert patchforge["learnings"] == [
+        "Safety-first AI-assisted code modification",
+        "Deterministic workflows for autonomous systems",
+        "Typed contracts for multi-agent orchestration",
+        "Artifact-based validation and auditability",
+        "Git compatibility checks and controlled patch application",
+        "CLI and Docker delivery for developer tools",
+    ]
     assert featured_names == ["Full-Stack Portfolio", "PatchForge"]
     assert [project["name"] for project in projects] == [
         "Full-Stack Portfolio",

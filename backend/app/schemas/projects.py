@@ -44,6 +44,10 @@ class ProjectSummary(BaseModel):
         default_factory=list,
         description="Main features or capabilities of the project",
     )
+    learnings: list[str] = Field(
+        default_factory=list,
+        description="Key learnings from the project",
+    )
     highlighted: bool = Field(
         default=False,
         description="Whether the project should be highlighted",

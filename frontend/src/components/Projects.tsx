@@ -65,6 +65,13 @@ export default function Projects() {
     if (!projects || projects.length < 2) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.target instanceof Element &&
+        event.target.closest('input, textarea, select, [contenteditable]')
+      ) {
+        return;
+      }
+
       if (event.key === 'ArrowLeft') {
         setActiveIndex((current) => (current - 1 + projects.length) % projects.length);
       } else if (event.key === 'ArrowRight') {
