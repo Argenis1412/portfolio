@@ -47,7 +47,12 @@ from app.schemas.experiences import Experience, ExperiencesResponse
 from app.schemas.formation import FormationItem, FormationResponse
 from app.schemas.health import MetricsSummary
 from app.schemas.philosophy import PhilosophyItemSchema, PhilosophyResponseSchema
-from app.schemas.projects import DetailedProject, ProjectSummary, ProjectsResponse
+from app.schemas.projects import (
+    DetailedProject,
+    ProjectCaseStudy,
+    ProjectSummary,
+    ProjectsResponse,
+)
 from app.schemas.stack import StackItem, StackResponse
 
 router = APIRouter(tags=["API"])
@@ -61,6 +66,13 @@ _was_chaos_active: bool = False
 # wake, DB init) once initial traffic has settled, without chaos ever firing.
 _baseline_established: bool = False
 WARMUP_GRACE_S = 90
+
+
+def _parse_case_study(case_study: dict | None) -> ProjectCaseStudy | None:
+    """Validate optional static case-study data at the API boundary."""
+    if case_study is None:
+        return None
+    return ProjectCaseStudy.model_validate(case_study)
 
 
 def _format_uptime(seconds: int) -> str:
@@ -264,6 +276,7 @@ async def list_projects(
             repository=p.repository,  # type: ignore[arg-type]
             demo=p.demo,  # type: ignore[arg-type]
             image=p.image,  # type: ignore[arg-type]
+            case_study=_parse_case_study(p.case_study),
         )
         for p in projects
     ]
@@ -350,6 +363,7 @@ async def get_project(
         demo=project.demo,  # type: ignore[arg-type]
         highlighted=project.highlighted,
         image=project.image,  # type: ignore[arg-type]
+        case_study=_parse_case_study(project.case_study),
     )
 
     return cacheable_response(request, response, result)

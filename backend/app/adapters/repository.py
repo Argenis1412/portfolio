@@ -138,6 +138,13 @@ class JsonRepository(PortfolioRepository):
         self._cache[filename] = data
         return data
 
+    async def _read_optional_json(self, filename: str, default: Any) -> Any:
+        """Read an optional JSON sidecar without making core data unavailable."""
+        path = self.data_directory / filename
+        if not path.exists():
+            return default
+        return await self._read_json(filename)
+
     async def get_about(self) -> dict:
         """
         Gets About section information.
@@ -155,6 +162,7 @@ class JsonRepository(PortfolioRepository):
             list[Project]: List of Project entities.
         """
         data = await self._read_json("projects.json")
+        case_studies = await self._read_optional_json("project_case_studies.json", {})
         return [
             Project(
                 id=p["id"],
@@ -168,6 +176,7 @@ class JsonRepository(PortfolioRepository):
                 demo=p.get("demo"),
                 highlighted=p.get("highlight", False),
                 image=p.get("image"),
+                case_study=case_studies.get(p["id"]),
             )
             for p in data
         ]

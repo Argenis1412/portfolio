@@ -1,0 +1,129 @@
+{
+  "loja-app": {
+    "problem": {
+      "en": "Payment rules must produce exact totals without duplicating business logic across the UI, framework, and persistence layers.",
+      "pt": "Regras de pagamento precisam produzir totais exatos sem duplicar a logica de negocio entre UI, framework e persistencia.",
+      "es": "Las reglas de pago deben producir totales exactos sin duplicar la logica de negocio entre la UI, el framework y la persistencia."
+    },
+    "constraints": {
+      "en": "Installments require explicit rounding and deterministic monetary rules.",
+      "pt": "Parcelamentos exigem arredondamento explicito e regras monetarias deterministicas.",
+      "es": "Las cuotas requieren redondeo explicito y reglas monetarias deterministas."
+    },
+    "solution": {
+      "en": "The backend is the single source of truth for payment calculation and validation.",
+      "pt": "O backend e a unica fonte de verdade para calculo e validacao de pagamentos.",
+      "es": "El backend es la unica fuente de verdad para el calculo y la validacion de pagos."
+    },
+    "architecture": {
+      "en": "Clean Architecture keeps the payment domain independent from FastAPI and SQLAlchemy.",
+      "pt": "Clean Architecture mantem o dominio de pagamentos independente de FastAPI e SQLAlchemy.",
+      "es": "Clean Architecture mantiene el dominio de pagos independiente de FastAPI y SQLAlchemy."
+    },
+    "testing": {
+      "en": "The payment calculation domain is fully unit-tested; the project documents 94% total coverage.",
+      "pt": "O dominio de calculo de pagamentos possui testes unitarios completos; o projeto documenta 94% de cobertura total.",
+      "es": "El dominio de calculo de pagos esta completamente probado por unidad; el proyecto documenta 94% de cobertura total."
+    },
+    "reliability": {
+      "en": "Idempotency keys, bounded pagination, soft deletes, and Alembic migrations protect transactional behavior.",
+      "pt": "Chaves de idempotencia, paginacao limitada, soft deletes e migracoes Alembic protegem o comportamento transacional.",
+      "es": "Claves de idempotencia, paginacion limitada, soft deletes y migraciones Alembic protegen el comportamiento transaccional."
+    },
+    "impact": {
+      "en": "The final installment absorbs rounding drift so the payment total remains mathematically exact.",
+      "pt": "A ultima parcela absorve a diferenca de arredondamento para manter o total matematicamente exato.",
+      "es": "La ultima cuota absorbe la diferencia de redondeo para mantener el total matematicamente exacto."
+    },
+    "evidence": [
+      {"label": {"en": "Domain tests", "pt": "Testes de dominio", "es": "Pruebas de dominio"}, "value": "Payment calculation domain is 100% unit-tested", "classification": "REAL", "source": "Loja_app/README.md"},
+      {"label": {"en": "Coverage", "pt": "Cobertura", "es": "Cobertura"}, "value": "94% total coverage", "classification": "REAL", "source": "Loja_app/CHANGELOG.md"},
+      {"label": {"en": "Transactional controls", "pt": "Controles transacionais", "es": "Controles transaccionales"}, "value": "Idempotency, pagination, soft deletes, and Alembic migrations", "classification": "REAL", "source": "Loja_app/docs/adr/0001-standardization-and-observability.md; Loja_app/docs/adr/0002-idempotency-and-pagination.md"},
+      {"label": {"en": "Rounding policy", "pt": "Politica de arredondamento", "es": "Politica de redondeo"}, "value": "Final installment absorbs rounding drift", "classification": "REAL", "source": "Loja_app/README.md"}
+    ]
+  },
+  "portfolio-api": {
+    "problem": {
+      "en": "A backend portfolio needs verifiable operational evidence instead of static quality claims.",
+      "pt": "Um portfolio backend precisa de evidencia operacional verificavel em vez de promessas estaticas de qualidade.",
+      "es": "Un portfolio backend necesita evidencia operativa verificable en lugar de promesas estaticas de calidad."
+    },
+    "constraints": {
+      "en": "The SPA must remain useful during backend cold starts and clearly distinguish live from simulated signals.",
+      "pt": "A SPA precisa permanecer util durante cold starts e distinguir claramente sinais reais de simulados.",
+      "es": "La SPA debe seguir siendo util durante cold starts y distinguir claramente las senales reales de las simuladas."
+    },
+    "solution": {
+      "en": "FastAPI Clean Architecture is paired with a React client, explicit telemetry labels, and documented failure behavior.",
+      "pt": "Clean Architecture com FastAPI e combinada com cliente React, etiquetas explicitas de telemetria e falhas documentadas.",
+      "es": "Clean Architecture con FastAPI se combina con un cliente React, etiquetas explicitas de telemetria y fallos documentados."
+    },
+    "architecture": {
+      "en": "Controllers call use cases and entities through repository ports; static reads use a JSON repository and mutations use transactional storage.",
+      "pt": "Controllers chamam casos de uso e entidades por portas de repositorio; leituras estaticas usam JSON e mutacoes usam armazenamento transacional.",
+      "es": "Los controllers llaman casos de uso y entidades mediante puertos de repositorio; las lecturas estaticas usan JSON y las mutaciones almacenamiento transaccional."
+    },
+    "testing": {
+      "en": "Backend, frontend, and chaos behavior are covered by unit, integration, and local CI end-to-end checks.",
+      "pt": "Backend, frontend e comportamento de chaos sao cobertos por testes unitarios, integracao e E2E local em CI.",
+      "es": "Backend, frontend y comportamiento de chaos estan cubiertos por pruebas unitarias, de integracion y E2E local en CI."
+    },
+    "reliability": {
+      "en": "Contact delivery uses idempotency, abuse controls, PII masking, Redis Streams retries, DLQ handling, and PEL recovery.",
+      "pt": "Entrega de contato usa idempotencia, controles de abuso, mascaramento de PII, retries Redis Streams, DLQ e recuperacao PEL.",
+      "es": "La entrega de contacto usa idempotencia, controles de abuso, enmascaramiento de PII, reintentos Redis Streams, DLQ y recuperacion PEL."
+    },
+    "impact": {
+      "en": "The JSON-first path removes the PostgreSQL round trip from static reads while preserving transactional storage for mutations.",
+      "pt": "O caminho JSON-first remove o round trip PostgreSQL de leituras estaticas e preserva armazenamento transacional para mutacoes.",
+      "es": "La ruta JSON-first elimina el round trip de PostgreSQL de las lecturas estaticas y conserva almacenamiento transaccional para mutaciones."
+    },
+    "evidence": [
+      {"label": {"en": "CI coverage", "pt": "Cobertura de CI", "es": "Cobertura de CI"}, "value": "Backend, frontend, and local chaos checks", "classification": "REPRODUCED", "source": "docs/architecture/ADR-17-chaos-e2e-strategy.md"},
+      {"label": {"en": "Contact reliability", "pt": "Confiabilidade de contato", "es": "Fiabilidad de contacto"}, "value": "Redis Streams retries, DLQ handling, and PEL recovery", "classification": "REAL", "source": "ARCHITECTURE.md#20-resilient-background-processing-redis-streams"},
+      {"label": {"en": "Cold-start incident", "pt": "Incidente de cold start", "es": "Incidente de cold start"}, "value": "JSON-first read path removes the PostgreSQL round trip", "classification": "REPRODUCED", "source": "docs/architecture/JSON_FIRST_READ_PATH.md"}
+    ]
+  },
+  "patchforge": {
+    "problem": {
+      "en": "AI coding tools can change repositories without giving developers enough proof of safety, validation, or intent.",
+      "pt": "Ferramentas de codigo com IA podem alterar repositorios sem fornecer prova suficiente de seguranca, validacao ou intencao.",
+      "es": "Las herramientas de codigo con IA pueden cambiar repositorios sin ofrecer prueba suficiente de seguridad, validacion o intencion."
+    },
+    "constraints": {
+      "en": "Changes must remain reviewable, compatible with repository state, and impossible to apply without explicit human action.",
+      "pt": "Mudancas devem permanecer revisaveis, compativeis com o estado do repositorio e impossiveis de aplicar sem acao humana explicita.",
+      "es": "Los cambios deben seguir siendo revisables, compatibles con el estado del repositorio e imposibles de aplicar sin una accion humana explicita."
+    },
+    "solution": {
+      "en": "A deterministic Plan, Preview, Validate, Apply pipeline persists artifacts and requires human approval before modification.",
+      "pt": "Um pipeline deterministico Plan, Preview, Validate, Apply persiste artefatos e exige aprovacao humana antes da modificacao.",
+      "es": "Un pipeline determinista Plan, Preview, Validate, Apply persiste artefactos y exige aprobacion humana antes de la modificacion."
+    },
+    "architecture": {
+      "en": "Typed Pydantic contracts and Git-native review keep planning, validation, and application boundaries explicit.",
+      "pt": "Contratos Pydantic tipados e revisao nativa Git mantem explicitas as fronteiras de planejamento, validacao e aplicacao.",
+      "es": "Contratos Pydantic tipados y revision nativa de Git mantienen explicitos los limites de planificacion, validacion y aplicacion."
+    },
+    "testing": {
+      "en": "The project maintains more than 1,000 automated tests, including regression coverage for concurrency and provider fallback behavior.",
+      "pt": "O projeto mantem mais de 1.000 testes automatizados, incluindo regressao para concorrencia e fallback de provedores.",
+      "es": "El proyecto mantiene mas de 1.000 pruebas automatizadas, incluida regresion para concurrencia y fallback de proveedores."
+    },
+    "reliability": {
+      "en": "Circuit breaker initialization uses ordered locks and contention tests to preserve a single provider instance under concurrent access.",
+      "pt": "A inicializacao do circuit breaker usa locks ordenados e testes de contencao para preservar uma unica instancia por provedor sob concorrencia.",
+      "es": "La inicializacion del circuit breaker usa locks ordenados y pruebas de contencion para preservar una unica instancia por proveedor bajo concurrencia."
+    },
+    "impact": {
+      "en": "AI can propose a change, but validation evidence and the final repository decision remain with the human reviewer.",
+      "pt": "A IA pode propor uma mudanca, mas a evidencia de validacao e a decisao final sobre o repositorio permanecem com o revisor humano.",
+      "es": "La IA puede proponer un cambio, pero la evidencia de validacion y la decision final sobre el repositorio permanecen con el revisor humano."
+    },
+    "evidence": [
+      {"label": {"en": "Test suite", "pt": "Suite de testes", "es": "Suite de pruebas"}, "value": "1,000+ automated tests", "classification": "REAL", "source": "PatchForge/docs/context/discoveries.md"},
+      {"label": {"en": "Concurrency safety", "pt": "Seguranca de concorrencia", "es": "Seguridad de concurrencia"}, "value": "Ordered locks and a registry contention regression test", "classification": "REAL", "source": "PatchForge/docs/context/discoveries.md"},
+      {"label": {"en": "Human approval", "pt": "Aprovacao humana", "es": "Aprobacion humana"}, "value": "Validation evidence and the final apply decision remain human-controlled", "classification": "REAL", "source": "PatchForge/docs/product-thesis-v2.md"}
+    ]
+  }
+}

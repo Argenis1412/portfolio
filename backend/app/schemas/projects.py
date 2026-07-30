@@ -4,9 +4,33 @@ Schemas for /api/projects and /api/projects/{id} endpoints.
 Defines contracts for project listing and details.
 """
 
+from typing import Literal
+
 from pydantic import BaseModel, Field, HttpUrl
 
 from app.schemas.base_types import LocalizedText
+
+
+class CaseStudyEvidence(BaseModel):
+    """A source-backed statement displayed in a project case study."""
+
+    label: LocalizedText
+    value: str = Field(..., max_length=160)
+    classification: Literal["REAL", "REPRODUCED", "SYNTHETIC"]
+    source: str = Field(..., max_length=240)
+
+
+class ProjectCaseStudy(BaseModel):
+    """Structured, localized project narrative for detail routes."""
+
+    problem: LocalizedText
+    constraints: LocalizedText
+    solution: LocalizedText
+    architecture: LocalizedText
+    testing: LocalizedText
+    reliability: LocalizedText
+    impact: LocalizedText
+    evidence: list[CaseStudyEvidence] = Field(default_factory=list)
 
 
 class ProjectSummary(BaseModel):
@@ -65,6 +89,10 @@ class ProjectSummary(BaseModel):
     image: HttpUrl | None = Field(
         default=None,
         description="Cover image URL",
+    )
+    case_study: ProjectCaseStudy | None = Field(
+        default=None,
+        description="Optional structured case study for project detail pages",
     )
 
 
@@ -126,6 +154,10 @@ class DetailedProject(BaseModel):
     image: HttpUrl | None = Field(
         default=None,
         description="Cover image URL",
+    )
+    case_study: ProjectCaseStudy | None = Field(
+        default=None,
+        description="Optional structured case study for project detail pages",
     )
 
 
