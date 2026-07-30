@@ -398,6 +398,7 @@
   "incident.005.debt_title": "Correcciones de Ingeniería",
   "incident.005.debt_item1": "Sincronizado el contexto de Docker al root del repositorio.",
   "incident.005.debt_item2": "Refactorizado el Dockerfile para usar rutas con prefijo relativo.",
+  "route.eyebrow": "Portafolio",
   "route.project.title": "Caso de estudio del proyecto",
   "route.project.description": "El caso de estudio de {projectId} estará disponible aquí.",
   "route.decision.title": "Decisión de ingeniería",

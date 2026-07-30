@@ -47,4 +47,15 @@ describe('public routes', () => {
     expect(document.activeElement).toBe(heading);
     expect(screen.getByRole('link', { name: 'Volver al inicio' }).getAttribute('href')).toBe('/');
   });
+
+  it('localizes and focuses placeholder route headings', async () => {
+    localStorage.setItem('portfolio_lang', 'pt');
+    visit('/production-evidence');
+
+    renderApp();
+
+    const heading = await screen.findByRole('heading', { name: 'Evidência de produção' });
+    expect(heading).toBe(document.activeElement);
+    expect(screen.getByText('Portfólio')).toBeTruthy();
+  });
 });

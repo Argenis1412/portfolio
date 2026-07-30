@@ -18,4 +18,12 @@ test.describe('public routes', () => {
     await expect(page.getByRole('heading', { name: 'Page not found' })).toBeFocused();
     await expect(page.getByRole('link', { name: 'Back to home' })).toHaveAttribute('href', '/');
   });
+
+  test('routes section navigation through the home page', async ({ page }) => {
+    await page.goto('/projects/rate-limiter');
+    await page.getByTestId('nav-contact').click();
+
+    await expect(page).toHaveURL(/\/#contact$/);
+    await expect(page.locator('#contact')).toBeVisible();
+  });
 });

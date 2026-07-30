@@ -399,6 +399,7 @@
   "incident.005.debt_title": "Engineering Fixes",
   "incident.005.debt_item1": "Synchronized Docker context at repository root.",
   "incident.005.debt_item2": "Refactored Dockerfile to use relative path mapping.",
+  "route.eyebrow": "Portfolio",
   "route.project.title": "Project case study",
   "route.project.description": "The case study for {projectId} will be available here.",
   "route.decision.title": "Engineering decision",

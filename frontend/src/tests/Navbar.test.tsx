@@ -6,6 +6,7 @@
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { LanguageProvider } from '../context/LanguageContext';
 import { ThemeProvider } from '../context/ThemeContext';
@@ -21,12 +22,20 @@ const queryClient = new QueryClient({
 });
 
 // Helper to render Navbar with all required contexts
-const renderNavbar = () =>
+const LocationProbe = () => {
+  const location = useLocation();
+  return <output data-testid="location">{`${location.pathname}${location.hash}`}</output>;
+};
+
+const renderNavbar = (initialEntry = '/') =>
   render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <LanguageProvider>
-          <Navbar />
+          <MemoryRouter initialEntries={[initialEntry]}>
+            <Navbar />
+            <LocationProbe />
+          </MemoryRouter>
         </LanguageProvider>
       </ThemeProvider>
     </QueryClientProvider>
@@ -59,6 +68,13 @@ describe('Navbar - button navigation', () => {
     const { getByTestId } = renderNavbar();
     const btn = getByTestId('nav-contact');
     expect(() => fireEvent.click(btn)).not.toThrow();
+  });
+
+  it('routes section navigation through the home hash from a detail page', () => {
+    const { getByTestId } = renderNavbar('/projects/rate-limiter');
+    fireEvent.click(getByTestId('nav-contact'));
+
+    expect(screen.getByTestId('location').textContent).toBe('/#contact');
   });
 });
 

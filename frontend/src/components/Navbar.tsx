@@ -7,12 +7,15 @@ import { queryKeys } from '../hooks/useApi';
 import { fetchAbout, fetchSkills } from '../api/portfolioService';
 import { scrollToSection } from '../utils/scrollToSection';
 import { m, AnimatePresence } from 'framer-motion';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const { language, setLanguage, t } = useLanguage();
   const { theme, toggleTheme } = useTheme();
   const queryClient = useQueryClient();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (isOpen) {
@@ -42,7 +45,12 @@ export default function Navbar() {
 
   const handleNavClick = (section: string) => {
     setIsOpen(false);
-    scrollToSection(section);
+    if (location.pathname === '/') {
+      scrollToSection(section);
+      return;
+    }
+
+    navigate({ pathname: '/', hash: `#${section}` });
   };
 
   const prefetch = (key: readonly unknown[], fn: () => Promise<unknown>) => {

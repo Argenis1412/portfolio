@@ -399,6 +399,7 @@
   "incident.005.debt_title": "Correções de Engenharia",
   "incident.005.debt_item1": "Sincronizado o contexto do Docker ao root do repositório.",
   "incident.005.debt_item2": "Refatorado o Dockerfile para usar mapeamento de caminhos com prefixo relativo.",
+  "route.eyebrow": "Portfólio",
   "route.project.title": "Estudo de caso do projeto",
   "route.project.description": "O estudo de caso de {projectId} estará disponível aqui.",
   "route.decision.title": "Decisão de engenharia",
