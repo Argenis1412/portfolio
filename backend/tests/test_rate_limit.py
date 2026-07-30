@@ -10,7 +10,7 @@ from app.core.rate_limit import get_client_ip
 def _make_request(xff: str | None = None, peer_ip: str = "10.0.0.1") -> MagicMock:
     request = MagicMock()
     request.client.host = peer_ip
-    headers = {}
+    headers: dict[str, str | None] = {}
     if xff is not None:
         headers["x-forwarded-for"] = xff
     headers.setdefault("x-real-ip", None)
