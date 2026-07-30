@@ -22,8 +22,8 @@ const CHAOS_ENDPOINTS = [
 
 test.describe('Chaos Playground — smoke tests', () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to the main page and wait until network is idle
-    await page.goto('/');
+    // Chaos controls are part of the production evidence route.
+    await page.goto('/production-evidence');
     await page.waitForLoadState('networkidle');
   });
 
