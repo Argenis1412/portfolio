@@ -6,7 +6,7 @@ test.describe('public routes', () => {
     await expect(page.getByRole('heading', { name: 'Project case study' })).toBeVisible();
 
     await page.goto('/decisions/json-first');
-    await expect(page.getByRole('heading', { name: 'Engineering decision' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'JSON-first reads' })).toBeVisible();
 
     await page.goto('/production-evidence');
     await expect(page.getByRole('heading', { name: 'Production evidence' })).toBeVisible();

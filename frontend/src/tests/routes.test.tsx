@@ -27,7 +27,7 @@ describe('public routes', () => {
 
   it.each([
     ['/projects/rate-limiter', 'Project case study'],
-    ['/decisions/json-first', 'Engineering decision'],
+    ['/decisions/json-first', 'JSON-first reads'],
     ['/production-evidence', 'Production evidence'],
   ])('renders the %s deep link', async (path, heading) => {
     visit(path);
