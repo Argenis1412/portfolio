@@ -45,6 +45,10 @@ export default function Navbar() {
 
   const handleNavClick = (section: string) => {
     setIsOpen(false);
+    if (section === 'production-evidence') {
+      navigate('/production-evidence');
+      return;
+    }
     if (location.pathname === '/') {
       scrollToSection(section);
       return;
@@ -62,15 +66,14 @@ export default function Navbar() {
   };
 
   const navItems = [
-    { id: 'metrics', label: t('nav.metrics'), prefetchFn: () => prefetch(queryKeys.about, fetchAbout) },
-    { id: 'chaos', label: t('nav.chaos') },
-    { id: 'observability', label: t('nav.observability') },
+    { id: 'projects', label: t('nav.projects'), prefetchFn: () => prefetch(queryKeys.about, fetchAbout) },
+    { id: 'production-evidence', label: t('nav.observability') },
     { id: 'about', label: t('nav.about'), prefetchFn: () => { prefetch(queryKeys.about, fetchAbout); prefetch(queryKeys.skills, fetchSkills); } },
     { id: 'contact', label: t('nav.contact'), testId: 'nav-contact' },
   ];
 
   return (
-    <nav className="fixed top-0 w-full z-50 glass border-b border-app-border/70">
+    <nav className="fixed top-0 w-full z-50 overflow-visible glass border-b border-app-border/70">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
@@ -145,7 +148,7 @@ export default function Navbar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+              className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm md:hidden"
               onClick={() => setIsOpen(false)}
               aria-hidden="true"
             />
@@ -154,7 +157,7 @@ export default function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 left-0 w-3/4 max-w-sm bg-app-bg border-r border-app-border shadow-2xl z-50 md:hidden flex flex-col"
+              className="fixed inset-y-0 left-0 z-[70] h-dvh w-3/4 max-w-sm overflow-y-auto border-r border-app-border bg-app-bg shadow-2xl md:hidden"
             >
               <div className="flex items-center justify-between h-16 px-4 border-b border-app-border/50">
                 <span className="font-mono font-bold text-app-primary tracking-widest text-sm">MENU</span>
@@ -166,7 +169,7 @@ export default function Navbar() {
                   <X className="w-6 h-6" />
                 </button>
               </div>
-              <div className="flex-1 overflow-y-auto py-6 px-4 flex flex-col gap-2">
+              <div className="flex flex-col gap-2 px-4 py-6">
                 {navItems.map((item) => (
                   <button
                     key={item.id}
