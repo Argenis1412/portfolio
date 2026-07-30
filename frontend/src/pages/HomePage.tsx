@@ -13,10 +13,11 @@ const ChaosModeBanner = lazy(() => import('../components/ChaosModeBanner'));
 const DecisionProcessor = lazy(() => import('../components/DecisionProcessor'));
 const About = lazy(() => import('../components/About'));
 const Experience = lazy(() => import('../components/Experience'));
-const Projects = lazy(() => import('../components/Projects'));
 const Contact = lazy(() => import('../components/Contact'));
 const ServerWakeupNotice = lazy(() => import('../components/ServerWakeupNotice'));
 const SocialRail = lazy(() => import('../components/SocialRail'));
+const FeaturedProjects = lazy(() => import('../components/FeaturedProjects'));
+const HiringSections = lazy(() => import('../components/HiringSections'));
 
 const SectionFallback = () => (
   <div className="flex h-24 w-full items-center justify-center text-xs font-mono tracking-widest text-app-muted opacity-40 animate-pulse">
@@ -63,16 +64,18 @@ export default function HomePage() {
       <SystemStatusBanner />
       <Hero />
       <Suspense fallback={<SectionFallback />}>
-        <About />
-        <LiveMetricsBento />
+        <FeaturedProjects />
+        <HiringSections section="proof" />
         <ArchitectureTradeoffs />
+        <HiringSections section="principles" />
+        <LiveMetricsBento />
+        <Experience />
+        <Contact />
+        <About />
         <ChaosPlayground />
         <TraceViewer />
         <LogStream />
         <FeaturedIncident />
-        <Experience />
-        <Projects />
-        <Contact />
         <ServerWakeupNotice />
       </Suspense>
     </>
