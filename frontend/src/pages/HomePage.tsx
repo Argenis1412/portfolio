@@ -1,20 +1,11 @@
 import { lazy, Suspense, useEffect } from 'react';
 import Hero from '../components/hero/Hero';
-import SystemStatusBanner from '../components/SystemStatusBanner';
-import LiveMetricsBento from '../components/LiveMetricsBento';
 import { scrollToSection } from '../utils/scrollToSection';
 
-const ChaosPlayground = lazy(() => import('../components/ChaosPlayground'));
 const ArchitectureTradeoffs = lazy(() => import('../components/ArchitectureTradeoffs'));
-const TraceViewer = lazy(() => import('../components/TraceViewer'));
-const LogStream = lazy(() => import('../components/LogStream'));
-const FeaturedIncident = lazy(() => import('../components/FeaturedIncident'));
-const ChaosModeBanner = lazy(() => import('../components/ChaosModeBanner'));
-const DecisionProcessor = lazy(() => import('../components/DecisionProcessor'));
 const About = lazy(() => import('../components/About'));
 const Experience = lazy(() => import('../components/Experience'));
 const Contact = lazy(() => import('../components/Contact'));
-const ServerWakeupNotice = lazy(() => import('../components/ServerWakeupNotice'));
 const SocialRail = lazy(() => import('../components/SocialRail'));
 const FeaturedProjects = lazy(() => import('../components/FeaturedProjects'));
 const HiringSections = lazy(() => import('../components/HiringSections'));
@@ -53,30 +44,17 @@ export default function HomePage() {
   return (
     <>
       <Suspense fallback={null}>
-        <ChaosModeBanner />
-      </Suspense>
-      <Suspense fallback={null}>
-        <DecisionProcessor />
-      </Suspense>
-      <Suspense fallback={null}>
         <SocialRail />
       </Suspense>
-      <SystemStatusBanner />
       <Hero />
       <Suspense fallback={<SectionFallback />}>
         <FeaturedProjects />
         <HiringSections section="proof" />
         <ArchitectureTradeoffs />
         <HiringSections section="principles" />
-        <LiveMetricsBento />
         <Experience />
         <Contact />
         <About />
-        <ChaosPlayground />
-        <TraceViewer />
-        <LogStream />
-        <FeaturedIncident />
-        <ServerWakeupNotice />
       </Suspense>
     </>
   );
