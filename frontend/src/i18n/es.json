@@ -397,5 +397,14 @@
   "incident.005.lesson_desc": "\"El contexto de build debe reflejar el root del repositorio para garantizar portabilidad entre entornos locales, de CI y cloud.\"",
   "incident.005.debt_title": "Correcciones de Ingeniería",
   "incident.005.debt_item1": "Sincronizado el contexto de Docker al root del repositorio.",
-  "incident.005.debt_item2": "Refactorizado el Dockerfile para usar rutas con prefijo relativo."
+  "incident.005.debt_item2": "Refactorizado el Dockerfile para usar rutas con prefijo relativo.",
+  "route.project.title": "Caso de estudio del proyecto",
+  "route.project.description": "El caso de estudio de {projectId} estará disponible aquí.",
+  "route.decision.title": "Decisión de ingeniería",
+  "route.decision.description": "El registro de decisión de {decisionId} estará disponible aquí.",
+  "route.evidence.title": "Evidencia de producción",
+  "route.evidence.description": "La evidencia operativa estará disponible aquí.",
+  "not_found.title": "Página no encontrada",
+  "not_found.description": "La página solicitada no existe o se ha movido.",
+  "not_found.home": "Volver al inicio"
 }

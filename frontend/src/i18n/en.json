@@ -398,5 +398,14 @@
   "incident.005.lesson_desc": "\"The build context must reflect the repository root to ensure portability across local, CI, and cloud environments.\"",
   "incident.005.debt_title": "Engineering Fixes",
   "incident.005.debt_item1": "Synchronized Docker context at repository root.",
-  "incident.005.debt_item2": "Refactored Dockerfile to use relative path mapping."
+  "incident.005.debt_item2": "Refactored Dockerfile to use relative path mapping.",
+  "route.project.title": "Project case study",
+  "route.project.description": "The case study for {projectId} will be available here.",
+  "route.decision.title": "Engineering decision",
+  "route.decision.description": "The decision record for {decisionId} will be available here.",
+  "route.evidence.title": "Production evidence",
+  "route.evidence.description": "Operational evidence will be available here.",
+  "not_found.title": "Page not found",
+  "not_found.description": "The page you requested does not exist or has moved.",
+  "not_found.home": "Back to home"
 }
