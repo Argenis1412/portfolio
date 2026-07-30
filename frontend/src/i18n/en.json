@@ -409,6 +409,8 @@
   "home.principles.title": "Reliability is a design constraint",
   "home.principles.body": "Prefer explicit failure modes, deterministic validation, and evidence that can be inspected.",
   "hero.eyebrow": "Backend engineer · reliability-minded systems",
+  "evidence.title": "Evidence",
+  "evidence.source": "Source",
   "route.eyebrow": "Portfolio",
   "route.project.title": "Project case study",
   "route.project.description": "The case study for {projectId} will be available here.",

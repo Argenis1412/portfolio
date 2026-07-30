@@ -408,6 +408,8 @@
   "home.principles.title": "La confiabilidad es una restricción de diseño",
   "home.principles.body": "Preferir modos de falla explícitos, validación determinista y evidencia inspeccionable.",
   "hero.eyebrow": "Ingeniero backend · sistemas orientados a la confiabilidad",
+  "evidence.title": "Evidencia",
+  "evidence.source": "Fuente",
   "route.eyebrow": "Portafolio",
   "route.project.title": "Caso de estudio del proyecto",
   "route.project.description": "El caso de estudio de {projectId} estará disponible aquí.",
