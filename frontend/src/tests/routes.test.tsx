@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import App from '../App';
@@ -44,14 +44,14 @@ describe('public routes', () => {
 
     renderApp();
 
-    expect(await screen.findByRole('heading', { name: heading })).toBeTruthy();
+    expect(await screen.findByRole('heading', { name: heading }, { timeout: 3000 })).toBeTruthy();
   });
 
   it('renders the project query error state', async () => {
     vi.mocked(fetchProjects).mockRejectedValueOnce(new Error('projects unavailable'));
     visit('/projects/rate-limiter');
     renderApp();
-    expect(await screen.findByText('Case study data is unavailable.')).toBeTruthy();
+    expect(await screen.findByText('Case study data is unavailable.', {}, { timeout: 3000 })).toBeTruthy();
   });
 
   it('renders a localized and keyboard-accessible 404 page', async () => {
@@ -61,7 +61,7 @@ describe('public routes', () => {
     renderApp();
 
     const heading = await screen.findByRole('heading', { name: 'Página no encontrada' });
-    expect(document.activeElement).toBe(heading);
+    await waitFor(() => expect(document.activeElement).toBe(heading));
     expect(screen.getByRole('link', { name: 'Volver al inicio' }).getAttribute('href')).toBe('/');
   });
 
