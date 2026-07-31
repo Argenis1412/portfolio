@@ -425,7 +425,7 @@
   "evidence.description": "Métricas inspecionáveis, experimentos de caos controlados, traces, logs e registros de incidentes.",
   "evidence.navigation.label": "Seções de evidência",
   "evidence.navigation.metrics": "Métricas",
-  "evidence.navigation.chaos": "Chaos",
+  "evidence.navigation.chaos": "Caos",
   "evidence.navigation.traces": "Traces",
   "evidence.navigation.logs": "Logs",
   "evidence.navigation.incidents": "Incidentes",

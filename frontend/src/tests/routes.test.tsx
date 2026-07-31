@@ -76,5 +76,9 @@ describe('public routes', () => {
     expect(screen.getByText('Confiabilidade operacional')).toBeTruthy();
     expect(screen.getByRole('navigation', { name: 'Seções de evidência' })).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Métricas' }).getAttribute('href')).toBe('#metrics');
+    expect(screen.getByRole('link', { name: 'Caos' }).getAttribute('href')).toBe('#chaos');
+    expect(screen.getByRole('link', { name: 'Traces' }).getAttribute('href')).toBe('#observability');
+    expect(screen.getByRole('link', { name: 'Logs' }).getAttribute('href')).toBe('#logs');
+    expect(screen.getByRole('link', { name: 'Incidentes' }).getAttribute('href')).toBe('#incident-history');
   });
 });
