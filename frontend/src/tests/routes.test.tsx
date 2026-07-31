@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import App from '../App';
 import { LanguageProvider } from '../context/LanguageContext';
 
@@ -23,11 +23,11 @@ const visit = (path: string) => window.history.pushState({}, '', path);
 describe('public routes', () => {
   afterEach(() => {
     localStorage.clear();
+    vi.unstubAllGlobals();
   });
 
   it.each([
-    ['/projects/rate-limiter', 'Project case study'],
-    ['/decisions/json-first', 'Engineering decision'],
+    ['/decisions/json-first', 'JSON-first reads'],
     ['/production-evidence', 'Production evidence'],
   ])('renders the %s deep link', async (path, heading) => {
     visit(path);
@@ -35,6 +35,13 @@ describe('public routes', () => {
     renderApp();
 
     expect(await screen.findByRole('heading', { name: heading })).toBeTruthy();
+  });
+
+  it('renders the project query error state', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('projects unavailable')));
+    visit('/projects/rate-limiter');
+    renderApp();
+    expect(await screen.findByText('Case study data is unavailable.')).toBeTruthy();
   });
 
   it('renders a localized and keyboard-accessible 404 page', async () => {
