@@ -24,6 +24,7 @@ export default function Navbar() {
   const desktopNavigationRef = useRef<HTMLButtonElement>(null);
   const navigationRef = useRef<HTMLElement>(null);
   const restoreDesktopNavigationRef = useRef(false);
+  const focusRestoreTargetRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -84,7 +85,7 @@ export default function Navbar() {
       const focusRestoreTarget = restoreDesktopNavigationRef.current && window.innerWidth >= 768
         ? desktopNavigation
         : menuTrigger;
-      focusRestoreTarget?.focus();
+      focusRestoreTargetRef.current = focusRestoreTarget;
     };
   }, [isOpen]);
 
@@ -189,7 +190,12 @@ export default function Navbar() {
       </div>
 
       {createPortal(
-        <AnimatePresence>
+        <AnimatePresence
+          onExitComplete={() => {
+            focusRestoreTargetRef.current?.focus();
+            focusRestoreTargetRef.current = null;
+          }}
+        >
           {isOpen && (
             <>
             <m.div

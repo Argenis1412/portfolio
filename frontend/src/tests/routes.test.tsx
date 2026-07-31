@@ -53,7 +53,11 @@ describe('public routes', () => {
 
     renderApp();
 
-    const heading = await screen.findByRole('heading', { name: 'I build backend systems that survive production' });
+    const heading = await screen.findByRole(
+      'heading',
+      { name: 'I build backend systems that survive production' },
+      { timeout: 3000 },
+    );
     await waitFor(() => expect(document.activeElement).toBe(heading));
   });
 

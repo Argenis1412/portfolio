@@ -15,7 +15,7 @@ export default defineConfig({
 
   use: {
     // Use BASE_URL from environment (CI/production) or fallback to local dev server
-    baseURL: process.env.BASE_URL ?? 'http://127.0.0.1:5173',
+    baseURL: process.env.BASE_URL || 'http://127.0.0.1:5173',
     trace: 'on-first-retry',
   },
 

@@ -4,7 +4,7 @@
  * Verifies rendering, navigation links, language selector and theme button.
  */
 
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -56,7 +56,7 @@ describe('Navbar - rendering', () => {
 });
 
 describe('Navbar - mobile drawer accessibility', () => {
-  it('traps focus and restores it to the menu trigger on dismissal', () => {
+  it('traps focus and restores it to the menu trigger on dismissal', async () => {
     renderNavbar();
 
     const trigger = screen.getByRole('button', { name: 'Open Menu' });
@@ -76,7 +76,7 @@ describe('Navbar - mobile drawer accessibility', () => {
 
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(screen.queryByRole('dialog', { name: 'Main navigation' })).toBeNull();
-    expect(document.activeElement).toBe(trigger);
+    await waitFor(() => expect(document.activeElement).toBe(trigger));
   });
 
   it('hides background controls from assistive technology while the drawer is open', () => {
@@ -88,7 +88,7 @@ describe('Navbar - mobile drawer accessibility', () => {
     expect(screen.queryByRole('button', { name: 'Toggle Theme' })).toBeNull();
   });
 
-  it('restores focus to desktop navigation after breakpoint dismissal', () => {
+  it('restores focus to desktop navigation after breakpoint dismissal', async () => {
     renderNavbar();
     const trigger = screen.getByRole('button', { name: 'Open Menu' });
     const originalInnerWidth = window.innerWidth;
@@ -97,10 +97,10 @@ describe('Navbar - mobile drawer accessibility', () => {
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 768 });
     fireEvent(window, new Event('resize'));
 
-    expect(screen.queryByRole('dialog', { name: 'Main navigation' })).toBeNull();
-    expect(document.activeElement).toBe(screen.getByTestId('nav-projects'));
-
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalInnerWidth });
+
+    expect(screen.queryByRole('dialog', { name: 'Main navigation' })).toBeNull();
+    await waitFor(() => expect(document.activeElement).toBe(screen.getByTestId('nav-projects')));
   });
 });
 
