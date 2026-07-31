@@ -24,6 +24,7 @@ export default function Navbar() {
   const desktopNavigationRef = useRef<HTMLButtonElement>(null);
   const navigationRef = useRef<HTMLElement>(null);
   const restoreDesktopNavigationRef = useRef(false);
+  const focusRestoreTargetRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -84,10 +85,15 @@ export default function Navbar() {
       const focusRestoreTarget = restoreDesktopNavigationRef.current && window.innerWidth >= 768
         ? desktopNavigation
         : menuTrigger;
-      window.requestAnimationFrame(() => {
-        focusRestoreTarget?.focus();
-      });
+      focusRestoreTargetRef.current = focusRestoreTarget;
     };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen || !focusRestoreTargetRef.current) return;
+
+    focusRestoreTargetRef.current.focus();
+    focusRestoreTargetRef.current = null;
   }, [isOpen]);
 
   const handleNavClick = (section: string) => {
