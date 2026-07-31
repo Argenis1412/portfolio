@@ -3,6 +3,15 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import App from '../App';
 import { LanguageProvider } from '../context/LanguageContext';
+import { fetchProjects } from '../api/portfolioService';
+
+vi.mock('../api/portfolioService', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../api/portfolioService')>();
+  return {
+    ...actual,
+    fetchProjects: vi.fn(actual.fetchProjects),
+  };
+});
 
 const renderApp = () => {
   const queryClient = new QueryClient({
@@ -24,6 +33,7 @@ describe('public routes', () => {
   afterEach(() => {
     localStorage.clear();
     vi.unstubAllGlobals();
+    vi.mocked(fetchProjects).mockClear();
   });
 
   it.each([
@@ -38,7 +48,7 @@ describe('public routes', () => {
   });
 
   it('renders the project query error state', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('projects unavailable')));
+    vi.mocked(fetchProjects).mockRejectedValueOnce(new Error('projects unavailable'));
     visit('/projects/rate-limiter');
     renderApp();
     expect(await screen.findByText('Case study data is unavailable.')).toBeTruthy();
@@ -55,7 +65,7 @@ describe('public routes', () => {
     expect(screen.getByRole('link', { name: 'Volver al inicio' }).getAttribute('href')).toBe('/');
   });
 
-  it('localizes and focuses placeholder route headings', async () => {
+  it('localizes and focuses the production evidence header and navigation', async () => {
     localStorage.setItem('portfolio_lang', 'pt');
     visit('/production-evidence');
 
@@ -63,6 +73,8 @@ describe('public routes', () => {
 
     const heading = await screen.findByRole('heading', { name: 'Evidência de produção' });
     expect(heading).toBe(document.activeElement);
-    expect(screen.getByText('Portfólio')).toBeTruthy();
+    expect(screen.getByText('Confiabilidade operacional')).toBeTruthy();
+    expect(screen.getByRole('navigation', { name: 'Seções de evidência' })).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Métricas' }).getAttribute('href')).toBe('#metrics');
   });
 });
