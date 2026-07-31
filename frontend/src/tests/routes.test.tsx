@@ -44,7 +44,17 @@ describe('public routes', () => {
 
     renderApp();
 
-    expect(await screen.findByRole('heading', { name: heading }, { timeout: 3000 })).toBeTruthy();
+    const routeHeading = await screen.findByRole('heading', { name: heading }, { timeout: 3000 });
+    await waitFor(() => expect(document.activeElement).toBe(routeHeading));
+  });
+
+  it('focuses the home page heading', async () => {
+    visit('/');
+
+    renderApp();
+
+    const heading = await screen.findByRole('heading', { name: 'I build backend systems that survive production' });
+    await waitFor(() => expect(document.activeElement).toBe(heading));
   });
 
   it('renders the project query error state', async () => {
@@ -52,6 +62,8 @@ describe('public routes', () => {
     visit('/projects/rate-limiter');
     renderApp();
     expect(await screen.findByText('Case study data is unavailable.', {}, { timeout: 3000 })).toBeTruthy();
+    const heading = screen.getByRole('heading', { name: 'Project case study' });
+    await waitFor(() => expect(document.activeElement).toBe(heading));
   });
 
   it('renders a localized and keyboard-accessible 404 page', async () => {

@@ -4,14 +4,10 @@ import { test, expect } from '@playwright/test';
  * Chaos Playground E2E Smoke Tests
  *
  * Verifies that each chaos action button (Drain, Retry, Latency) fires a
- * POST request to the backend that returns a 2xx response.
+ * POST request that receives an isolated, contract-compatible 2xx response.
  *
- * Strategy: intercept network calls with `page.waitForResponse` so we
- * validate the real network round-trip without relying on UI copy.
- *
- * Prerequisites:
- *  - The app must be running at BASE_URL (set env var or use local dev server)
- *  - VITE_ENABLE_CHAOS_PLAYGROUND=true must be set in the build
+ * Strategy: intercept mutating requests in the browser so release validation
+ * cannot alter production chaos state, metrics, queues, or incidents.
  */
 
 const CHAOS_ENDPOINTS = [
@@ -20,9 +16,24 @@ const CHAOS_ENDPOINTS = [
   { name: 'latency', path: '/api/v1/chaos/latency' },
 ] as const;
 
+const CHAOS_FIXTURES = {
+  drain: { status: 'completed', incident_type: 'queue_drain', tasks_purged: 0, elapsed_ms: 50 },
+  retry: { status: 'completed', incident_type: 'manual_retry' },
+  latency: { status: 'completed', incident_type: 'latency_injection', latency_ms: 3000 },
+} as const;
+
 test.describe('Chaos Playground — smoke tests', () => {
   test.beforeEach(async ({ page }) => {
-    // Chaos controls are part of the production evidence route.
+    await page.route(/\/api\/v1\/chaos\/(drain|retry|latency)$/, async (route) => {
+      const action = route.request().url().match(/\/chaos\/(drain|retry|latency)$/)?.[1] as keyof typeof CHAOS_FIXTURES;
+
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(CHAOS_FIXTURES[action]),
+      });
+    });
+
     await page.goto('/production-evidence');
     await page.waitForLoadState('networkidle');
   });
@@ -35,7 +46,7 @@ test.describe('Chaos Playground — smoke tests', () => {
       // Wait for the button to be visible (Chaos Playground section must be enabled)
       await expect(button).toBeVisible({ timeout: 10_000 });
 
-      // Intercept the network response BEFORE clicking the button
+      // Observe the intercepted response before clicking.
       const [response] = await Promise.all([
         page.waitForResponse(
           (res) => res.url().includes(path) && res.request().method() === 'POST',
@@ -46,6 +57,7 @@ test.describe('Chaos Playground — smoke tests', () => {
 
       // Assert the backend returned a successful status
       expect(response.status(), `Expected 2xx for ${path}`).toBeLessThan(300);
+      await expect(page.locator('#chaos').getByText('synthetic', { exact: true })).toBeVisible();
     });
   }
 });

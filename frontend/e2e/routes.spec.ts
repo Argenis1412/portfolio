@@ -40,3 +40,32 @@ test.describe('public routes', () => {
     expect(metricsTopAfter).toBe(metricsTopBefore);
   });
 });
+
+test.describe('mobile navigation', () => {
+  test.use({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
+
+  test('traps keyboard focus and restores it after dismissal', async ({ page }) => {
+    await page.goto('/');
+
+    const menuTrigger = page.getByRole('button', { name: 'Open Menu' });
+    await expect(menuTrigger).toBeVisible();
+    await menuTrigger.click();
+
+    const dialog = page.getByRole('dialog', { name: 'Main navigation' });
+    const closeButton = dialog.getByRole('button', { name: 'Close Menu' });
+    const contactButton = dialog.getByTestId('mobile-nav-contact');
+
+    await expect(dialog).toBeVisible();
+    await expect(closeButton).toBeFocused();
+
+    await page.keyboard.press('Shift+Tab');
+    await expect(contactButton).toBeFocused();
+
+    await page.keyboard.press('Tab');
+    await expect(closeButton).toBeFocused();
+
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+    await expect(menuTrigger).toBeFocused();
+  });
+});
