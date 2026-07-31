@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Sun, Moon, Languages, Menu, X } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
@@ -6,8 +6,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '../hooks/useApi';
 import { fetchAbout, fetchSkills } from '../api/portfolioService';
 import { scrollToSection } from '../utils/scrollToSection';
-import { m, AnimatePresence } from 'framer-motion';
+import { m, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -16,30 +17,74 @@ export default function Navbar() {
   const queryClient = useQueryClient();
   const location = useLocation();
   const navigate = useNavigate();
+  const prefersReducedMotion = useReducedMotion();
+  const menuTriggerRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const desktopNavigationRef = useRef<HTMLButtonElement>(null);
+  const navigationRef = useRef<HTMLElement>(null);
+  const restoreDesktopNavigationRef = useRef(false);
 
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    if (!isOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    restoreDesktopNavigationRef.current = false;
+    const appRoot = document.getElementById('root') ?? navigationRef.current?.parentElement;
+    const menuTrigger = menuTriggerRef.current;
+    const desktopNavigation = desktopNavigationRef.current;
+    document.body.style.overflow = 'hidden';
+    appRoot?.setAttribute('inert', '');
+    appRoot?.setAttribute('aria-hidden', 'true');
+    closeButtonRef.current?.focus();
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsOpen(false);
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setIsOpen(false);
+        return;
+      }
+
+      if (e.key !== 'Tab') return;
+
+      const focusableElements = drawerRef.current?.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], select, textarea, input:not([disabled]):not([type="hidden"]), [tabindex]:not([tabindex="-1"])',
+      );
+      if (!focusableElements?.length) return;
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+
+      if (e.shiftKey && document.activeElement === firstElement) {
+        e.preventDefault();
+        lastElement.focus();
+      } else if (!e.shiftKey && document.activeElement === lastElement) {
+        e.preventDefault();
+        firstElement.focus();
+      }
     };
 
     // Close drawer if viewport grows past the md breakpoint (768px) so that
     // CSS-hidden drawers do not keep the body scroll-locked.
     const handleResize = () => {
-      if (window.innerWidth >= 768 && isOpen) setIsOpen(false);
+      if (window.innerWidth >= 768 && isOpen) {
+        restoreDesktopNavigationRef.current = true;
+        setIsOpen(false);
+      }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
     window.addEventListener('resize', handleResize);
     return () => {
-      document.body.style.overflow = 'unset';
-      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      appRoot?.removeAttribute('inert');
+      appRoot?.removeAttribute('aria-hidden');
+      document.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('resize', handleResize);
+      const focusRestoreTarget = restoreDesktopNavigationRef.current && window.innerWidth >= 768
+        ? desktopNavigation
+        : menuTrigger;
+      focusRestoreTarget?.focus();
     };
   }, [isOpen]);
 
@@ -73,16 +118,19 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="fixed top-0 w-full z-50 overflow-visible glass border-b border-app-border/70">
+    <nav ref={navigationRef} className="fixed top-0 w-full z-50 overflow-visible glass border-b border-app-border/70">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
           {/* Mobile Menu Button */}
           <div className="flex-shrink-0 md:hidden flex items-center">
             <button
+              ref={menuTriggerRef}
               onClick={() => setIsOpen(true)}
               className="p-2 rounded-md text-app-text hover:bg-app-surface-hover transition-colors focus:outline-none focus:ring-2 focus:ring-app-primary"
               aria-label="Open Menu"
+              aria-expanded={isOpen}
+              aria-controls="mobile-navigation"
             >
               <Menu className="w-6 h-6" />
             </button>
@@ -94,10 +142,11 @@ export default function Navbar() {
 
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-1">
-              {navItems.map((item) => (
+              {navItems.map((item, index) => (
                 <button
                   key={item.id}
-                  data-testid={item.testId}
+                  ref={index === 0 ? desktopNavigationRef : undefined}
+                  data-testid={index === 0 ? 'nav-projects' : item.testId}
                   onClick={() => handleNavClick(item.id)}
                   onMouseEnter={item.prefetchFn}
                   className="hover:text-app-primary px-3 py-3 rounded-md text-xs font-mono uppercase tracking-widest transition-colors text-app-text"
@@ -139,15 +188,15 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Drawer */}
-      <AnimatePresence>
-        {isOpen && (
-          <>
+      {createPortal(
+        <AnimatePresence>
+          {isOpen && (
+            <>
             <m.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.2 }}
               className="fixed inset-0 z-[60] bg-black/60 backdrop-blur-sm md:hidden"
               onClick={() => setIsOpen(false)}
               aria-hidden="true"
@@ -156,12 +205,18 @@ export default function Navbar() {
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              transition={prefersReducedMotion ? { duration: 0 } : { type: 'spring', damping: 25, stiffness: 200 }}
               className="fixed inset-y-0 left-0 z-[70] h-dvh w-3/4 max-w-sm overflow-y-auto border-r border-app-border bg-app-bg shadow-2xl md:hidden"
+              id="mobile-navigation"
+              ref={drawerRef}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Main navigation"
             >
               <div className="flex items-center justify-between h-16 px-4 border-b border-app-border/50">
                 <span className="font-mono font-bold text-app-primary tracking-widest text-sm">MENU</span>
                 <button
+                  ref={closeButtonRef}
                   onClick={() => setIsOpen(false)}
                   className="p-2 rounded-md text-app-text hover:bg-app-surface-hover transition-colors focus:outline-none focus:ring-2 focus:ring-app-primary"
                   aria-label="Close Menu"
@@ -182,9 +237,11 @@ export default function Navbar() {
                 ))}
               </div>
             </m.div>
-          </>
-        )}
-      </AnimatePresence>
+            </>
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
     </nav>
   );
 }

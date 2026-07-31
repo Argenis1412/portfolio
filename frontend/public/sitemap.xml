@@ -1,9 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://portfolio-argenis1412s-projects.vercel.app/</loc>
-    <lastmod>2024-04-09</lastmod>
-    <changefreq>monthly</changefreq>
+    <loc>https://argenisbackend.com/</loc>
     <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://argenisbackend.com/production-evidence</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://argenisbackend.com/decisions/deterministic-validation</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://argenisbackend.com/decisions/json-first</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://argenisbackend.com/decisions/redis-streams-monolith</loc>
+    <priority>0.7</priority>
   </url>
 </urlset>

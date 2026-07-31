@@ -42,6 +42,7 @@
   /* Remaining specific theme tokens not in critical path */
   --theme-surface-hover:  #F0E4D5;
   --theme-muted:          #4B433B; /* Darkened from #5C5248 */
+  --theme-primary:        #8F5620;
   --theme-primary-hover:  #8F5620;
   --theme-secondary:      #C07A3A;
   --theme-section-alt:    #E9DDD0;
@@ -146,6 +147,15 @@ body {
   @apply bg-app-bg text-app-text antialiased transition-colors duration-300 selection:bg-app-primary/30;
   font-family: 'Inter', sans-serif;
   line-height: 1.55;
+}
+
+:focus-visible {
+  outline: 2px solid var(--theme-primary);
+  outline-offset: 3px;
+}
+
+h1[tabindex="-1"]:focus-visible {
+  outline: none;
 }
 
 h1, h2, h3, h4, h5 {
@@ -276,6 +286,15 @@ section[id] {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
   .animate-log-entry  { animation: none; opacity: 1; }
   .animate-error-pulse { animation: none; }
 }

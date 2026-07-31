@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom';
-import { LazyMotion, domAnimation } from 'framer-motion';
+import { LazyMotion, domAnimation, MotionConfig } from 'framer-motion';
 import Navbar from './components/Navbar';
 import { ThemeProvider } from './context/ThemeContext';
 import { LogProvider } from './context/LogContext';
@@ -40,19 +40,21 @@ function App() {
     <ThemeProvider>
       <LogProvider>
         <ChaosModeProvider>
-          <LazyMotion features={domAnimation}>
-            <BrowserRouter>
-              <Routes>
-                <Route element={<RouteShell />}>
-                  <Route index element={<HomePage />} />
-                  <Route path="projects/:projectId" element={<ProjectCasePage />} />
-                  <Route path="decisions/:decisionId" element={<DecisionPage />} />
-                  <Route path="production-evidence" element={<ProductionEvidencePage />} />
-                  <Route path="*" element={<NotFoundPage />} />
-                </Route>
-              </Routes>
-            </BrowserRouter>
-          </LazyMotion>
+          <MotionConfig reducedMotion="user">
+            <LazyMotion features={domAnimation}>
+              <BrowserRouter>
+                <Routes>
+                  <Route element={<RouteShell />}>
+                    <Route index element={<HomePage />} />
+                    <Route path="projects/:projectId" element={<ProjectCasePage />} />
+                    <Route path="decisions/:decisionId" element={<DecisionPage />} />
+                    <Route path="production-evidence" element={<ProductionEvidencePage />} />
+                    <Route path="*" element={<NotFoundPage />} />
+                  </Route>
+                </Routes>
+              </BrowserRouter>
+            </LazyMotion>
+          </MotionConfig>
         </ChaosModeProvider>
       </LogProvider>
     </ThemeProvider>

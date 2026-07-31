@@ -4,7 +4,7 @@
  * Verifies rendering, navigation links, language selector and theme button.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -52,6 +52,55 @@ describe('Navbar - rendering', () => {
   it('renders the <nav> element', () => {
     const { container } = renderNavbar();
     expect(container.querySelector('nav')).toBeTruthy();
+  });
+});
+
+describe('Navbar - mobile drawer accessibility', () => {
+  it('traps focus and restores it to the menu trigger on dismissal', () => {
+    renderNavbar();
+
+    const trigger = screen.getByRole('button', { name: 'Open Menu' });
+    fireEvent.click(trigger);
+
+    const dialog = screen.getByRole('dialog', { name: 'Main navigation' });
+    const closeButton = within(dialog).getByRole('button', { name: 'Close Menu' });
+    const contactButton = within(dialog).getByTestId('mobile-nav-contact');
+
+    expect(document.activeElement).toBe(closeButton);
+
+    fireEvent.keyDown(document, { key: 'Tab', shiftKey: true });
+    expect(document.activeElement).toBe(contactButton);
+
+    fireEvent.keyDown(document, { key: 'Tab' });
+    expect(document.activeElement).toBe(closeButton);
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByRole('dialog', { name: 'Main navigation' })).toBeNull();
+    expect(document.activeElement).toBe(trigger);
+  });
+
+  it('hides background controls from assistive technology while the drawer is open', () => {
+    renderNavbar();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open Menu' }));
+
+    expect(screen.getByRole('dialog', { name: 'Main navigation' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Toggle Theme' })).toBeNull();
+  });
+
+  it('restores focus to desktop navigation after breakpoint dismissal', () => {
+    renderNavbar();
+    const trigger = screen.getByRole('button', { name: 'Open Menu' });
+    const originalInnerWidth = window.innerWidth;
+
+    fireEvent.click(trigger);
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 768 });
+    fireEvent(window, new Event('resize'));
+
+    expect(screen.queryByRole('dialog', { name: 'Main navigation' })).toBeNull();
+    expect(document.activeElement).toBe(screen.getByTestId('nav-projects'));
+
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalInnerWidth });
   });
 });
 
