@@ -85,4 +85,17 @@ describe('ChaosModeBanner — lifecycle contradiction', () => {
     const { container } = render(<ChaosModeBanner />);
     expect(container.firstChild).toBeNull();
   });
+
+  it('renders the active banner as a fixed overlay outside document flow', () => {
+    vi.mocked(useChaosMode).mockReturnValue({
+      preset: 'mild',
+    } as unknown as ReturnType<typeof useChaosMode>);
+    vi.mocked(useMetricsDisplay).mockReturnValue(baseDisplayContext as unknown as ReturnType<typeof useMetricsDisplay>);
+
+    const { container } = render(<ChaosModeBanner />);
+
+    const banner = container.querySelector('.fixed');
+    expect(banner?.className).toContain('top-16');
+    expect(banner?.className).not.toContain('sticky');
+  });
 });

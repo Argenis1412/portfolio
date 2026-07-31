@@ -57,10 +57,10 @@ export default function ChaosModeBanner() {
   return (
     <AnimatePresence>
       <m.div
-        initial={{ height: 0, opacity: 0 }}
-        animate={{ height: 'auto', opacity: 1 }}
-        exit={{ height: 0, opacity: 0 }}
-        className="w-full overflow-hidden sticky top-16 z-40"
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        className="fixed inset-x-0 top-16 z-40"
       >
         {/* Collapsed pill — always visible when chaos is active */}
         <div className="bg-[var(--color-status-synthetic)]/90 backdrop-blur-sm border-y border-[var(--color-status-synthetic-border)] relative">

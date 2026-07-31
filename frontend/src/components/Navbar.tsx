@@ -67,7 +67,7 @@ export default function Navbar() {
 
   const navItems = [
     { id: 'projects', label: t('nav.projects'), prefetchFn: () => prefetch(queryKeys.about, fetchAbout) },
-    { id: 'production-evidence', label: t('nav.observability') },
+    { id: 'production-evidence', label: t('nav.production_evidence') },
     { id: 'about', label: t('nav.about'), prefetchFn: () => { prefetch(queryKeys.about, fetchAbout); prefetch(queryKeys.skills, fetchSkills); } },
     { id: 'contact', label: t('nav.contact'), testId: 'nav-contact' },
   ];
