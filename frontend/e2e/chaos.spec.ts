@@ -25,12 +25,34 @@ const CHAOS_FIXTURES = {
 test.describe('Chaos Playground — smoke tests', () => {
   test.beforeEach(async ({ page }) => {
     await page.route(/\/api\/v1\/chaos\/(drain|retry|latency)$/, async (route) => {
+      if (route.request().method() !== 'POST') {
+        await route.fallback();
+        return;
+      }
+
       const action = route.request().url().match(/\/chaos\/(drain|retry|latency)$/)?.[1] as keyof typeof CHAOS_FIXTURES;
 
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify(CHAOS_FIXTURES[action]),
+      });
+    });
+
+    await page.route(/\/api\/v1\/chaos\/(drain|retry|latency)$/, async (route) => {
+      if (route.request().method() !== 'OPTIONS') {
+        await route.fallback();
+        return;
+      }
+
+      await route.fulfill({
+        status: 204,
+        headers: {
+          'Access-Control-Allow-Origin': 'http://127.0.0.1:5173',
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
+          'Access-Control-Max-Age': '600',
+        },
       });
     });
 

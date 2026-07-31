@@ -78,6 +78,30 @@ describe('Navbar - mobile drawer accessibility', () => {
     expect(screen.queryByRole('dialog', { name: 'Main navigation' })).toBeNull();
     expect(document.activeElement).toBe(trigger);
   });
+
+  it('hides background controls from assistive technology while the drawer is open', () => {
+    renderNavbar();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open Menu' }));
+
+    expect(screen.getByRole('dialog', { name: 'Main navigation' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Toggle Theme' })).toBeNull();
+  });
+
+  it('restores focus to desktop navigation after breakpoint dismissal', () => {
+    renderNavbar();
+    const trigger = screen.getByRole('button', { name: 'Open Menu' });
+    const originalInnerWidth = window.innerWidth;
+
+    fireEvent.click(trigger);
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 768 });
+    fireEvent(window, new Event('resize'));
+
+    expect(screen.queryByRole('dialog', { name: 'Main navigation' })).toBeNull();
+    expect(document.activeElement).toBe(screen.getByTestId('nav-projects'));
+
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalInnerWidth });
+  });
 });
 
 // ─── Navigation links ────────────────────────────────────────────────────────

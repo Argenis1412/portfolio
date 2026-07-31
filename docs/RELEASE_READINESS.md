@@ -2,7 +2,7 @@
 
 ## Validation
 
-The release gate runs frontend linting, TypeScript compilation, Vitest, and Playwright. Playwright starts the local frontend with the production API base URL for read requests. Its mutating chaos endpoints are intercepted in the browser, so release validation does not write production state.
+The release gate runs frontend linting, TypeScript compilation, Vitest, and Playwright. Without `BASE_URL`, Playwright starts the local frontend with the production API base URL for read requests. When `BASE_URL` is set, Playwright skips the local web server and does not inject `VITE_API_URL`; the externally hosted frontend must already use the intended API configuration. Its mutating chaos endpoints are intercepted in the browser, so release validation does not write production state.
 
 Manual validation covers desktop and 390×844 mobile layouts, the navigation drawer, keyboard navigation, heading focus, visible focus states, screen-reader labels, contrast tokens, and reduced-motion behavior.
 

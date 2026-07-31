@@ -8,6 +8,7 @@ import { fetchAbout, fetchSkills } from '../api/portfolioService';
 import { scrollToSection } from '../utils/scrollToSection';
 import { m, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,13 +21,21 @@ export default function Navbar() {
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
+  const desktopNavigationRef = useRef<HTMLButtonElement>(null);
+  const navigationRef = useRef<HTMLElement>(null);
+  const restoreDesktopNavigationRef = useRef(false);
 
   useEffect(() => {
     if (!isOpen) return;
 
     const previousOverflow = document.body.style.overflow;
+    restoreDesktopNavigationRef.current = false;
+    const appRoot = document.getElementById('root') ?? navigationRef.current?.parentElement;
     const menuTrigger = menuTriggerRef.current;
+    const desktopNavigation = desktopNavigationRef.current;
     document.body.style.overflow = 'hidden';
+    appRoot?.setAttribute('inert', '');
+    appRoot?.setAttribute('aria-hidden', 'true');
     closeButtonRef.current?.focus();
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -58,16 +67,24 @@ export default function Navbar() {
     // Close drawer if viewport grows past the md breakpoint (768px) so that
     // CSS-hidden drawers do not keep the body scroll-locked.
     const handleResize = () => {
-      if (window.innerWidth >= 768 && isOpen) setIsOpen(false);
+      if (window.innerWidth >= 768 && isOpen) {
+        restoreDesktopNavigationRef.current = true;
+        setIsOpen(false);
+      }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     window.addEventListener('resize', handleResize);
     return () => {
       document.body.style.overflow = previousOverflow;
+      appRoot?.removeAttribute('inert');
+      appRoot?.removeAttribute('aria-hidden');
       document.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('resize', handleResize);
-      menuTrigger?.focus();
+      const focusRestoreTarget = restoreDesktopNavigationRef.current && window.innerWidth >= 768
+        ? desktopNavigation
+        : menuTrigger;
+      focusRestoreTarget?.focus();
     };
   }, [isOpen]);
 
@@ -101,7 +118,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="fixed top-0 w-full z-50 overflow-visible glass border-b border-app-border/70">
+    <nav ref={navigationRef} className="fixed top-0 w-full z-50 overflow-visible glass border-b border-app-border/70">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
@@ -125,10 +142,11 @@ export default function Navbar() {
 
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-1">
-              {navItems.map((item) => (
+              {navItems.map((item, index) => (
                 <button
                   key={item.id}
-                  data-testid={item.testId}
+                  ref={index === 0 ? desktopNavigationRef : undefined}
+                  data-testid={index === 0 ? 'nav-projects' : item.testId}
                   onClick={() => handleNavClick(item.id)}
                   onMouseEnter={item.prefetchFn}
                   className="hover:text-app-primary px-3 py-3 rounded-md text-xs font-mono uppercase tracking-widest transition-colors text-app-text"
@@ -170,10 +188,10 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Drawer */}
-      <AnimatePresence>
-        {isOpen && (
-          <>
+      {createPortal(
+        <AnimatePresence>
+          {isOpen && (
+            <>
             <m.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -219,9 +237,11 @@ export default function Navbar() {
                 ))}
               </div>
             </m.div>
-          </>
-        )}
-      </AnimatePresence>
+            </>
+          )}
+        </AnimatePresence>,
+        document.body,
+      )}
     </nav>
   );
 }

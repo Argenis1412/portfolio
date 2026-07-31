@@ -30,13 +30,13 @@ test.describe('public routes', () => {
   test('keeps evidence sections in place when mild chaos is activated', async ({ page }) => {
     await page.goto('/production-evidence');
 
-    const metricsHeading = page.locator('#metrics h2');
-    const metricsTopBefore = await metricsHeading.evaluate((element) => element.getBoundingClientRect().top + window.scrollY);
+    const metricsSection = page.locator('#metrics');
+    const metricsTopBefore = await metricsSection.evaluate((element) => element.getBoundingClientRect().top + window.scrollY);
 
     await page.getByRole('button', { name: 'MILD', exact: true }).click();
     await expect(page.getByText('Live chaos simulation active')).toBeVisible();
 
-    const metricsTopAfter = await metricsHeading.evaluate((element) => element.getBoundingClientRect().top + window.scrollY);
+    const metricsTopAfter = await metricsSection.evaluate((element) => element.getBoundingClientRect().top + window.scrollY);
     expect(metricsTopAfter).toBe(metricsTopBefore);
   });
 });
