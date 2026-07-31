@@ -46,7 +46,7 @@ jobs:
           cd frontend
           npm run e2e
         env:
-          BASE_URL: ${{ github.event.inputs.base_url || 'https://argenisbackend.com' }}
+          BASE_URL: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.base_url || '' }}
 
       - name: 📊 Upload Playwright report
         uses: actions/upload-artifact@v4
