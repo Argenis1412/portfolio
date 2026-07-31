@@ -84,7 +84,9 @@ export default function Navbar() {
       const focusRestoreTarget = restoreDesktopNavigationRef.current && window.innerWidth >= 768
         ? desktopNavigation
         : menuTrigger;
-      focusRestoreTarget?.focus();
+      window.requestAnimationFrame(() => {
+        focusRestoreTarget?.focus();
+      });
     };
   }, [isOpen]);
 
