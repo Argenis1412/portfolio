@@ -26,7 +26,6 @@ describe('public routes', () => {
   });
 
   it.each([
-    ['/projects/rate-limiter', 'Project case study'],
     ['/decisions/json-first', 'JSON-first reads'],
     ['/production-evidence', 'Production evidence'],
   ])('renders the %s deep link', async (path, heading) => {
@@ -35,6 +34,12 @@ describe('public routes', () => {
     renderApp();
 
     expect(await screen.findByRole('heading', { name: heading })).toBeTruthy();
+  });
+
+  it('renders the project query error state', async () => {
+    visit('/projects/rate-limiter');
+    renderApp();
+    expect(await screen.findByText('Case study data is unavailable.')).toBeTruthy();
   });
 
   it('renders a localized and keyboard-accessible 404 page', async () => {

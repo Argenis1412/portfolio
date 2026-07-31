@@ -411,6 +411,8 @@
   "hero.eyebrow": "Engenheiro backend · sistemas orientados à confiabilidade",
   "evidence.title": "Evidências",
   "evidence.source": "Fonte",
+  "case.loading": "Carregando estudo de caso…", "case.error": "Os dados do estudo de caso estão indisponíveis.", "case.section.problem": "Problema", "case.section.constraints": "Restrições", "case.section.solution": "Solução", "case.section.architecture": "Arquitetura", "case.section.testing": "Testes", "case.section.reliability": "Confiabilidade", "case.section.impact": "Impacto",
+  "decision.tradeoff": "Trade-off aceito", "decision.evidence": "REPRODUCED · Fonte: registro de decisões do repositório", "decision.deterministic-validation.title": "Validação determinística de mudanças", "decision.deterministic-validation.summary": "Validar mudanças com verificações repetíveis antes da entrega.", "decision.deterministic-validation.tradeoff": "Feedback mais lento é aceito em troca de reprodutibilidade.", "decision.json-first.title": "Leituras JSON-first", "decision.json-first.summary": "Leituras estáticas usam contratos JSON validados antes de caminhos dependentes de rede.", "decision.json-first.tradeoff": "A atualização é limitada para proteger a disponibilidade.", "decision.redis-streams-monolith.title": "Redis Streams duráveis e um monólito resiliente", "decision.redis-streams-monolith.summary": "Manter o fluxo operacional durável sem distribuir responsabilidade prematuramente.", "decision.redis-streams-monolith.tradeoff": "O monólito permanece deliberado até que limites de serviço justifiquem seu custo.",
   "route.eyebrow": "Portfólio",
   "route.project.title": "Estudo de caso do projeto",
   "route.project.description": "O estudo de caso de {projectId} estará disponível aqui.",
