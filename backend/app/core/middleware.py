@@ -10,7 +10,6 @@ Adds:
 
 import base64
 import hmac
-import json
 import time
 import uuid
 from typing import Callable
@@ -258,61 +257,3 @@ class MetricsAccessMiddleware(BaseHTTPMiddleware):
             status_code=401,
             headers={"WWW-Authenticate": 'Basic realm="metrics"'},
         )
-
-
-class ChaosMonkeyMiddleware(BaseHTTPMiddleware):
-    """
-    Middleware to simulate error and resilience scenarios.
-    Activated via 'X-Debug-Mode' header.
-    """
-
-    async def dispatch(self, request: Request, call_next: Callable) -> Response:
-        # Only active in non-production environments (settings.debug == True).
-        # In production, X-Debug-Mode headers are unconditionally ignored to prevent
-        # external actors from inducing synthetic 429/500 responses.
-        if not settings.debug:
-            return await call_next(request)
-
-        # Simulate Rate Limit (429)
-        if request.headers.get("X-Debug-Mode") == "simulate-429":
-            logger.warning(
-                "chaos_monkey_triggered",
-                simulation="rate_limit_429",
-                path=request.url.path,
-            )
-            return Response(
-                status_code=429,
-                content=json.dumps(
-                    {
-                        "error": {
-                            "code": "RATE_LIMIT_EXCEEDED",
-                            "message": "Chaos Monkey: Simulated rate limit exceeded",
-                            "details": {"retry_after": 30},
-                        }
-                    }
-                ),
-                media_type="application/json",
-                headers={"Retry-After": "30"},
-            )
-
-        # Simulate Internal Error (500)
-        if request.headers.get("X-Debug-Mode") == "simulate-500":
-            logger.error(
-                "chaos_monkey_triggered",
-                simulation="internal_error_500",
-                path=request.url.path,
-            )
-            return Response(
-                status_code=500,
-                content=json.dumps(
-                    {
-                        "error": {
-                            "code": "UNEXPECTED_ERROR",
-                            "message": "Chaos Monkey: Simulated internal server error",
-                        }
-                    }
-                ),
-                media_type="application/json",
-            )
-
-        return await call_next(request)

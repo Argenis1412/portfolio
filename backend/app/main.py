@@ -29,7 +29,6 @@ from app.core.handlers import register_exception_handlers
 from app.core.infrastructure import dispose_all
 from app.core.rate_limit import limiter
 from app.core.middleware import (
-    ChaosMonkeyMiddleware,
     MetricsAccessMiddleware,
     RequestMiddleware,
     SecurityHeadersMiddleware,
@@ -197,14 +196,14 @@ def _configure_cors(application: FastAPI) -> None:
         # Explicit allowlist instead of ["*"] to reduce attack surface.
         # Methods: GET (portfolio reads), POST (/contact), OPTIONS (CORS preflight).
         # Headers: Content-Type (JSON body), Idempotency-Key (contact dedup),
-        #          Authorization (Basic Auth for /metrics), X-Chaos-Preset (telemetry).
+        #          Authorization (Basic Auth for /metrics).
+        # X-Chaos-Preset is temporarily accepted for the frontend and ignored.
         allow_methods=["GET", "POST", "OPTIONS"],
         allow_headers=[
             "Content-Type",
             "Idempotency-Key",
             "Authorization",
             "X-Chaos-Preset",
-            "X-Debug-Mode",
         ],
         expose_headers=["X-Trace-ID", "X-Request-ID", "X-Response-Time"],
     )
@@ -218,7 +217,6 @@ def _configure_middleware(application: FastAPI) -> None:
     application.add_middleware(RequestMiddleware)
 
     # 1.5. Protect the /metrics endpoint in production
-    application.add_middleware(ChaosMonkeyMiddleware)
     application.add_middleware(MetricsAccessMiddleware)
 
     # 2. GZip compression (saves bandwidth, only for responses > 1KB)

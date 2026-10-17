@@ -10,6 +10,26 @@ This changelog separates three categories intentionally:
 
 ---
 
+## [Unreleased]
+
+### Removed
+- Backend simulation endpoints: `POST /api/v1/chaos/{spike,failure,drain,retry,latency,reset}` now return 404. Removed their controller, incident writes, request failure injection middleware, rate-limit helpers, queue injection script, and backend-only E2E workflow/tests.
+- Synthetic summary fields: `retries_1h`, `last_incident`, `last_incident_ago`, `worker_status`, `queue_backlog`, `cache_status`, `cache_ttl_s`, `active_path`, `system_lifecycle`, and `total_chaos_events_since_deploy`. Real worker metrics remain on `/metrics`.
+- Simulation-driven Prometheus resets and endpoint exclusions. Latency warmup still resets P95 samples once; request/error counters retain process-lifetime totals.
+
+### Frontend deployment dependency
+Keep this change on the cleanup branch until the frontend retirement is complete. Zod defaults prevent parsing failures but leave misleading status indicators; the current UI is not ready to deploy with this backend.
+
+| Pending consumer | Required frontend change |
+|---|---|
+| `frontend/src/api/chaosService.ts`, `useChaosActions`, playground controls | Remove simulation actions calling `/chaos/spike`, `/drain`, `/retry`, and `/latency`; retain contact submission. |
+| `frontend/src/api/schemas.ts`, `useLiveMetrics`, status/metrics banners | Remove synthetic summary fields and simulation-derived status, counters, and recovery logic. |
+| `frontend/src/api/client.ts` | Remove `X-Chaos-Preset`; then remove its temporary backend CORS allowance. `X-Debug-Mode` is already ignored and disallowed in CORS. |
+| `frontend/e2e/chaos.spec.ts`, `.github/workflows/e2e-smoke.yml` | Replace the simulation smoke scenarios before running against the updated API. |
+| Portfolio JSON content and architecture docs | Revise claims that describe the retired playground as a current feature during the content/documentation cleanup. |
+
+The historical SQL incident model and migrations are retained until the SQL cleanup block to keep migration metadata consistent. No database migration or production data deletion is performed.
+
 ## 🔥 Production Incidents
 
 ### INC-009 · Terraform Secret Identity Collision

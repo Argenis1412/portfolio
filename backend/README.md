@@ -156,9 +156,15 @@ Returns status for:
 - `GET /api/v1/experiences`: Professional timeline.
 - `GET /api/v1/formation`: Education history.
 
-### 🧪 Live Refactoring Features
+### Live Metrics
 - `GET /api/v1/metrics/summary`: Consolidated real-time telemetry for frontend evidence dashboard.
-- `ANY /any-endpoint` + `X-Debug-Mode: simulate-429`: Force immediate 429 response.
+
+The summary reports observed latency, request/error counts, uptime, and derived
+status. The P95 warmup reset leaves lifetime request/error counters intact.
+Worker processing, retry, and queue recovery metrics remain available on `/metrics`.
+Simulation endpoints and the `X-Debug-Mode` failure injection header have been
+removed. See the CHANGELOG's unreleased section for pending frontend changes;
+deploy this backend together with that frontend update.
 
 ---
 

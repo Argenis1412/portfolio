@@ -13,23 +13,18 @@ import pytest
 from fastapi import Response
 
 from app.controllers import api as api_module
-from app.controllers.chaos import ChaosIncident, chaos_state
 
 
 @pytest.fixture(autouse=True)
 def _reset_warmup_globals():
-    """Isolate the one-shot warmup state and chaos flag across tests."""
-    api_module._was_chaos_active = False
+    """Isolate the one-shot warmup state across tests."""
     api_module._baseline_established = False
-    chaos_state.reset()
     yield
-    api_module._was_chaos_active = False
     api_module._baseline_established = False
-    chaos_state.reset()
 
 
 def _patch_common(monkeypatch, *, total_samples, p95_seconds=0.5, app_start_offset_s):
-    """Monkeypatch the prometheus/chaos calls used by get_metrics_summary."""
+    """Monkeypatch the Prometheus calls used by get_metrics_summary."""
     calls = {"reset_p95_baseline": 0}
 
     def fake_compute_p95():
@@ -53,8 +48,8 @@ def _patch_common(monkeypatch, *, total_samples, p95_seconds=0.5, app_start_offs
 
 
 @pytest.mark.anyio
-async def test_warmup_reset_fires_once_grace_expired_no_chaos(monkeypatch):
-    """total_samples>=5, grace period (90s) expired, no chaos -> reset fires once."""
+async def test_warmup_reset_fires_once_grace_expired(monkeypatch):
+    """total_samples>=5, grace period (90s) expired -> reset fires once."""
     calls = _patch_common(monkeypatch, total_samples=5, app_start_offset_s=100)
 
     result = await api_module.get_metrics_summary(Response())
@@ -77,22 +72,6 @@ async def test_warmup_reset_does_not_fire_within_grace_period(monkeypatch):
 
 
 @pytest.mark.anyio
-async def test_warmup_reset_does_not_fire_during_active_chaos(monkeypatch):
-    """recent_incident_active=True -> chaos owns recovery, warmup guard skipped."""
-    calls = _patch_common(monkeypatch, total_samples=5, app_start_offset_s=100)
-    chaos_state.record_incident(
-        ChaosIncident(
-            type="latency_injection", timestamp=time.time(), error_triggered=False
-        )
-    )
-
-    result = await api_module.get_metrics_summary(Response())
-
-    assert calls["reset_p95_baseline"] == 0
-    assert result is not None
-
-
-@pytest.mark.anyio
 async def test_warmup_reset_is_one_shot(monkeypatch):
     """Calling the endpoint twice past grace period only resets once."""
     calls = _patch_common(monkeypatch, total_samples=5, app_start_offset_s=100)
@@ -101,3 +80,35 @@ async def test_warmup_reset_is_one_shot(monkeypatch):
     await api_module.get_metrics_summary(Response())
 
     assert calls["reset_p95_baseline"] == 1
+
+
+@pytest.mark.anyio
+async def test_warmup_waits_for_enough_samples(monkeypatch):
+    calls = _patch_common(monkeypatch, total_samples=4, app_start_offset_s=100)
+
+    result = await api_module.get_metrics_summary(Response())
+
+    assert calls["reset_p95_baseline"] == 0
+    assert result.p95_status == "warming_up"
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize(
+    ("requests", "errors", "rate", "status"),
+    [(0, 0, 0.0, "stable"), (100, 5, 0.05, "stable"), (100, 6, 0.06, "warning")],
+)
+async def test_summary_uses_observed_request_and_error_counts(
+    monkeypatch, requests, errors, rate, status
+):
+    _patch_common(
+        monkeypatch, total_samples=100, p95_seconds=0.03, app_start_offset_s=100
+    )
+    monkeypatch.setattr(api_module, "_baseline_established", True)
+    monkeypatch.setattr(api_module, "compute_request_stats", lambda: (requests, errors))
+
+    result = await api_module.get_metrics_summary(Response())
+
+    assert result.requests_since_deploy == requests
+    assert result.error_rate == rate
+    assert result.error_rate_status == status
+    assert result.system_status == ("degraded" if rate > 0.05 else "operational")
