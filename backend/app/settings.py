@@ -80,10 +80,15 @@ class Settings(BaseSettings):
         alias="SENTRY_TRACES_SAMPLE_RATE",
         description="Percentage of transactions sent to Sentry (0.0 to 1.0). 0.2 = 20%.",
     )
+    otel_enabled: bool = Field(
+        default=True,
+        alias="OTEL_ENABLED",
+        description="Enable OpenTelemetry instrumentation and trace export.",
+    )
     otlp_endpoint: str = Field(
         default="",
         alias="OTLP_ENDPOINT",
-        description="OTLP endpoint to export traces (e.g., http://jaeger:4318). Empty = ConsoleExporter.",
+        description="OTLP trace endpoint (e.g., http://jaeger:4318). Empty disables export in production and uses console export elsewhere.",
     )
     redis_socket_timeout_seconds: float = Field(
         default=5.0,

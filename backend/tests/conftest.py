@@ -6,9 +6,11 @@ Defines reusable fixtures for tests.
 
 import os
 
-# Force Redis to memory BEFORE any app imports
+# Isolate external services BEFORE any app imports.
 os.environ["REDIS_URL"] = "memory://"
 os.environ["WORKER_ENABLED"] = "false"
+os.environ["OTEL_ENABLED"] = "false"
+os.environ["SENTRY_DSN"] = ""
 
 from datetime import date
 from unittest.mock import AsyncMock, MagicMock

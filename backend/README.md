@@ -40,6 +40,7 @@ and background tasks; production requires Redis.
 | `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_TO_EMAIL` | Email delivery credentials and addresses. |
 | `METRICS_BASIC_AUTH_USERNAME`, `METRICS_BASIC_AUTH_PASSWORD` | Required protection for `/metrics` in production. |
 | `SENTRY_DSN`, `SENTRY_TRACES_SAMPLE_RATE`, `OTLP_ENDPOINT` | Optional error tracking and tracing. |
+| `OTEL_ENABLED` | Enable OpenTelemetry; defaults to `true`. Set `false` to disable instrumentation and trace export. Prometheus and Sentry are configured independently. |
 | `TRUSTED_PROXY_DEPTH`, `TRUSTED_PROXY_IPS` | Trusted proxy configuration for client IP extraction. |
 
 Only English configuration keys are supported. Valid environments are `local`,

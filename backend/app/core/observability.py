@@ -11,8 +11,6 @@ Deploy:
   - Vercel (frontend): not affected by this module
 """
 
-from typing import Any
-
 import structlog
 from fastapi import FastAPI
 
@@ -199,7 +197,7 @@ def _setup_opentelemetry(
         from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
         from opentelemetry.sdk.resources import SERVICE_NAME, SERVICE_VERSION, Resource
         from opentelemetry.sdk.trace import TracerProvider
-        from opentelemetry.sdk.trace.export import BatchSpanProcessor
+        from opentelemetry.sdk.trace.export import BatchSpanProcessor, SpanExporter
 
         # Resource with service metadata
         resource = Resource.create(
@@ -213,22 +211,7 @@ def _setup_opentelemetry(
         provider = TracerProvider(resource=resource)
 
         # Exporter based on environment
-        import io
-        import os
-        import sys
-
-        if "pytest" in sys.modules or os.environ.get("PYTEST_CURRENT_TEST"):
-            # During tests, we do not use BatchSpanProcessor to avoid
-            # the "ValueError: I/O operation on closed file." error at the end.
-            from opentelemetry.sdk.trace.export import (
-                ConsoleSpanExporter,
-                SimpleSpanProcessor,
-            )
-
-            exporter: Any = ConsoleSpanExporter(out=io.StringIO())
-            provider.add_span_processor(SimpleSpanProcessor(exporter))
-            logger.info("otel_exporter_mock", reason="Test execution detected")
-        elif otlp_endpoint:
+        if otlp_endpoint:
             from opentelemetry.exporter.otlp.proto.http.trace_exporter import (
                 OTLPSpanExporter,
             )
@@ -249,7 +232,7 @@ def _setup_opentelemetry(
                     else otlp_endpoint
                 )
 
-                exporter = OTLPSpanExporter(endpoint=final_endpoint)
+                exporter: SpanExporter = OTLPSpanExporter(endpoint=final_endpoint)
                 provider.add_span_processor(BatchSpanProcessor(exporter))
                 logger.info("otel_exporter_otlp", endpoint=final_endpoint)
 
@@ -329,12 +312,15 @@ def setup_observability(app: FastAPI, settings) -> None:
 
     _setup_prometheus(app)
 
-    _setup_opentelemetry(
-        app=app,
-        service_name=settings.app_name,
-        version=__version__,
-        environment=settings.environment,
-        otlp_endpoint=settings.otlp_endpoint,
-    )
+    if settings.otel_enabled:
+        _setup_opentelemetry(
+            app=app,
+            service_name=settings.app_name,
+            version=__version__,
+            environment=settings.environment,
+            otlp_endpoint=settings.otlp_endpoint,
+        )
+    else:
+        logger.info("opentelemetry_disabled", reason="OTEL_ENABLED is false")
 
     logger.info("observability_ready")

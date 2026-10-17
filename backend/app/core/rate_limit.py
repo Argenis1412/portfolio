@@ -3,7 +3,6 @@ Rate Limiter configuration for the application.
 """
 
 import hashlib
-import os
 
 from fastapi import Request
 from prometheus_client import Counter
@@ -68,16 +67,10 @@ def get_contact_fingerprint_key(request: Request) -> str:
 
 # Initialize limiter using client IP as the default key.
 # When REDIS_URL is set, uses Redis as the backend storage for horizontal scaling.
-_storage_uri = (
-    "memory://"
-    if os.environ.get("PYTEST_CURRENT_TEST")
-    else (settings.redis_url or "memory://")
-)
-
 limiter = Limiter(
     key_func=get_client_ip,
     strategy="fixed-window",
-    storage_uri=_storage_uri,
+    storage_uri=settings.redis_url or "memory://",
 )
 
 # Fallback in-memory limiter used when the primary backend (Redis) is
