@@ -7,6 +7,7 @@ Pure business logic with async operation, no FastAPI dependency.
 from app.adapters.email_adapter import EmailAdapter
 from app.adapters.logger_adapter import LoggerAdapter
 from app.entities.message import Message
+from app.core.spam_check import SCORE_LIKELY_SPAM
 
 
 class SendContactUseCase:
@@ -65,25 +66,20 @@ class SendContactUseCase:
         Raises:
             EmailDeliveryError: Provider failure propagated to the queue worker.
 
-        Example:
-            >>> email_adapter = FormspreeEmailAdapter(url, form_id)
-            >>> logger = LoggerEstruturado()
-            >>> uc = SendContactUseCase(email_adapter, logger)
-            >>> success = await uc.execute(
-            ...     "Maria",
-            ...     "maria@example.com",
-            ...     "Test",
-            ...     "Test message"
-            ... )
         """
-        # Ensure subject is non-empty — Formspree requires it
+        # Keep a readable subject when the optional form field is empty.
         subject_base = (
             subject.strip() if subject and subject.strip() else "Contact via Portfolio"
         )
 
         # Prefix subject with indicator when suspicious
+        warning_label = (
+            "LIKELY SPAM"
+            if spam_score is not None and spam_score >= SCORE_LIKELY_SPAM
+            else "POSSIBLE SPAM"
+        )
         subject_final = (
-            f"[⚠ POSSIBLE SPAM] {subject_base}" if is_suspicious else subject_base
+            f"[⚠ {warning_label}] {subject_base}" if is_suspicious else subject_base
         )
 
         if is_suspicious:

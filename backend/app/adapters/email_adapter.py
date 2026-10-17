@@ -5,6 +5,7 @@ Abstract interface + implementation with Resend.
 """
 
 from abc import ABC, abstractmethod
+from html import escape
 
 import httpx
 import structlog
@@ -62,12 +63,12 @@ class ResendEmailAdapter(EmailAdapter):
             # Prepare basic HTML message
             html_content = f"""
             <h3>New Contact from Portfolio</h3>
-            <p><strong>Name:</strong> {message.name}</p>
-            <p><strong>Email:</strong> {message.email}</p>
-            <p><strong>Subject:</strong> {message.subject}</p>
+            <p><strong>Name:</strong> {escape(message.name)}</p>
+            <p><strong>Email:</strong> {escape(message.email)}</p>
+            <p><strong>Subject:</strong> {escape(message.subject)}</p>
             <p><strong>Message:</strong></p>
             <div style="white-space: pre-wrap; background: #f4f4f4; padding: 15px; border-radius: 5px;">
-                {message.message}
+                {escape(message.message)}
             </div>
             """
 

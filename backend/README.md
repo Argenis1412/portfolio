@@ -102,6 +102,14 @@ publishes a retry or DLQ entry before acknowledging the original job. These
 automatic retries apply to Redis Streams delivery; the background fallback logs
 failures without retrying. Acceptance does not confirm delivery to the inbox.
 
+Contact scoring labels messages instead of dropping them: scores 30-69 use
+`POSSIBLE SPAM`, and 70-100 use `LIKELY SPAM` in the email subject. All scored
+submissions still pass deduplication and email/IP/fingerprint limits. Only filled
+honeypots are silently discarded, with the same acceptance response as a normal
+submission. Email format and field lengths are validated by Pydantic; blank names
+or messages return 422. International names and subjects are preserved, message
+paragraphs remain intact, and user fields are escaped in the email HTML.
+
 ```bash
 ruff check .
 ruff format --check .

@@ -15,7 +15,7 @@ class ContactRequest(BaseModel):
     Contact form data.
 
     Validations:
-        - name: 2-80 characters
+        - name: 1-80 characters after whitespace normalization
         - email: valid format
         - message: 1-3000 characters
     """
@@ -57,8 +57,11 @@ class ContactRequest(BaseModel):
     @field_validator("name")
     @classmethod
     def validate_name(cls, value: str) -> str:
-        """Sanitizes the name, allowing it to fail silently in the guard."""
-        return re.sub(r"\s+", " ", value).strip()
+        """Normalize whitespace while preserving international names."""
+        value = re.sub(r"\s+", " ", value).strip()
+        if not value:
+            raise ValueError("Name must not be blank")
+        return value
 
     @field_validator("email")
     @classmethod
@@ -69,7 +72,7 @@ class ContactRequest(BaseModel):
     @field_validator("subject")
     @classmethod
     def validate_subject(cls, value: Optional[str]) -> Optional[str]:
-        """Sanitizes the subject, allowing it to fail silently in the guard."""
+        """Collapse whitespace in the optional subject."""
         if value is None:
             return value
         return re.sub(r"\s+", " ", value).strip()
@@ -77,8 +80,11 @@ class ContactRequest(BaseModel):
     @field_validator("message")
     @classmethod
     def validate_message(cls, value: str) -> str:
-        """Sanitizes the message, allowing it to fail silently in the guard."""
-        return re.sub(r"\s+", " ", value).strip()
+        """Preserve message paragraphs and reject whitespace-only content."""
+        value = value.strip()
+        if not value:
+            raise ValueError("Message must not be blank")
+        return value
 
 
 class ContactResponse(BaseModel):
@@ -112,6 +118,6 @@ class ContactResponse(BaseModel):
     )
     downstream: str = Field(
         default="email_adapter",
-        examples=["formspree"],
+        examples=["resend"],
         description="Downstream provider or adapter selected by the backend",
     )

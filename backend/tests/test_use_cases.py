@@ -122,8 +122,17 @@ async def test_send_contact_success(email_adapter_mock, logger_mock):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("score", "label"),
+    [
+        (30, "POSSIBLE SPAM"),
+        (69, "POSSIBLE SPAM"),
+        (70, "LIKELY SPAM"),
+        (100, "LIKELY SPAM"),
+    ],
+)
 async def test_send_contact_suspicious_receives_visible_warning(
-    email_adapter_mock, logger_mock
+    email_adapter_mock, logger_mock, score, label
 ):
     """Tests that suspicious emails receive a strong warning in subject and body."""
     uc = SendContactUseCase(email_adapter_mock, logger_mock)
@@ -135,13 +144,13 @@ async def test_send_contact_suspicious_receives_visible_warning(
         subject="Security review",
         message="Please click this urgent link.",
         is_suspicious=True,
-        spam_score=45,
+        spam_score=score,
     )
 
     message_enviada = email_adapter_mock.send_message.call_args.args[0]
-    assert message_enviada.subject.startswith("[⚠ POSSIBLE SPAM]")
+    assert message_enviada.subject.startswith(f"[⚠ {label}]")
     assert "--- 🛡️ SECURITY WARNING (ANTI-SPAM FILTER) ---" in message_enviada.message
-    assert "Risk Level: 45/100" in message_enviada.message
+    assert f"Risk Level: {score}/100" in message_enviada.message
 
 
 @pytest.mark.asyncio

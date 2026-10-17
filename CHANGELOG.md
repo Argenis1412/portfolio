@@ -12,6 +12,11 @@ This changelog separates three categories intentionally:
 
 ## [Unreleased]
 
+### Contact filter cleanup
+- Spam scores no longer silently discard messages. Scores 30-69 are delivered with `POSSIBLE SPAM`, and 70-100 with `LIKELY SPAM`; all pass the existing deduplication and email/IP/fingerprint rate limits. Honeypots remain silent drops and now return the same acceptance fields as ordinary submissions.
+- Removed name/subject format scoring, redundant email regex validation, and broad recruitment/business keyword penalties. Pydantic continues validating email and field lengths; blank names/messages return 422. International names, typographic punctuation, and message paragraphs are preserved.
+- Escaped every user field inserted into the Resend HTML template. Subject and reply-to remain plain provider fields. Added regressions for Unicode, score boundaries, high-score delivery/limits, honeypot responses, and HTML injection.
+
 ### Email retry correction
 - Resend failures now carry an explicit retry policy through the contact use case to the worker. Timeouts, network errors, HTTP 429, and HTTP 5xx are transient; other rejected responses and missing provider configuration are permanent.
 - Removed classification by digits or keywords in exception text. Existing limits remain three transient retries, one unknown retry, and no permanent retries, followed by DLQ delivery. Backoff, age limits, and publish-before-ack ordering are preserved.
