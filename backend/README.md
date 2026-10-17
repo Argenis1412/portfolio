@@ -94,6 +94,14 @@ Redis Streams recovery. There is no standalone worker command or Compose service
 Capacity under this single-process configuration still needs a deployment-sized
 load test before changing the scaling model.
 
+Resend timeouts, network failures, HTTP 429, and HTTP 5xx failures receive up to
+three retries with exponential backoff and jitter. Other rejected HTTP responses
+and missing provider configuration go directly to `contact_jobs_dlq`. Unknown
+failures receive one retry. Jobs older than 15 minutes are not requeued. The worker
+publishes a retry or DLQ entry before acknowledging the original job. These
+automatic retries apply to Redis Streams delivery; the background fallback logs
+failures without retrying. Acceptance does not confirm delivery to the inbox.
+
 ```bash
 ruff check .
 ruff format --check .

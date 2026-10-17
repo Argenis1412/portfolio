@@ -17,6 +17,7 @@ from redis import asyncio as redis
 
 from app.controllers.dependencies import get_send_contact_use_case
 from app.core.queue import RedisStreamsQueue
+from app.core.exceptions import EmailDeliveryError
 from app.worker_metrics import (
     inc_dlq,
     inc_processed,
@@ -162,21 +163,12 @@ class StreamWorker:
     async def _handle_failure(self, job_id: str, body: dict[str, Any], exc: Exception):
         meta = body.get("meta", {})
         retry_count = int(meta.get("retry_count", 0))
-        message = str(exc).lower()
-        if (
-            isinstance(exc, (json.JSONDecodeError, KeyError, ValueError))
-            or "4" in message
-            or "schema" in message
-            or "invalid" in message
-        ):
-            failure_class = "permanent"
-        elif (
-            "timeout" in message
-            or "connection" in message
-            or "5" in message
-            or "reset" in message
-        ):
+        if isinstance(exc, EmailDeliveryError):
+            failure_class = "transient" if exc.transient else "permanent"
+        elif isinstance(exc, (TimeoutError, ConnectionError)):
             failure_class = "transient"
+        elif isinstance(exc, (json.JSONDecodeError, KeyError, ValueError)):
+            failure_class = "permanent"
         else:
             failure_class = "unknown"
 

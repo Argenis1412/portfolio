@@ -12,6 +12,11 @@ This changelog separates three categories intentionally:
 
 ## [Unreleased]
 
+### Email retry correction
+- Resend failures now carry an explicit retry policy through the contact use case to the worker. Timeouts, network errors, HTTP 429, and HTTP 5xx are transient; other rejected responses and missing provider configuration are permanent.
+- Removed classification by digits or keywords in exception text. Existing limits remain three transient retries, one unknown retry, and no permanent retries, followed by DLQ delivery. Backoff, age limits, and publish-before-ack ordering are preserved.
+- Provider acceptance no longer depends on decoding its response JSON. Failure logs omit provider response bodies; the manual send diagnostic handles classified failures, and the background fallback keeps its existing acceptance response.
+
 ### Worker execution cleanup
 - The API lifespan now owns the contact consumer. Removed the duplicate Compose worker and standalone signal-handling command; Docker runs one Uvicorn process so metrics and the consumer share the same process.
 - Added `WORKER_ENABLED` (default `true`) to explicitly disable consumption in tests or operations, replacing pytest detection in application code. Consumers use unique host/UUID identities.

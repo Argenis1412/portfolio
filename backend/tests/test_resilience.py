@@ -87,18 +87,24 @@ async def test_spam_store_redis_down_fallback():
 # ──────────────────────────────────────────────────────────────────────────────
 
 
-async def test_email_adapter_timeout_returns_200_backgrounded(client):
+@pytest.mark.parametrize("classified", [False, True])
+async def test_email_adapter_timeout_returns_200_backgrounded(client, classified):
     """
     A ConnectTimeout from the Email Adapter must produce HTTP 200 because the delivery
     happens in the background. The error is only logged.
     """
     from httpx import ConnectTimeout
+    from app.core.exceptions import EmailDeliveryError
 
     from app.use_cases import SendContactUseCase
     from app.controllers.dependencies import get_send_contact_use_case
 
     mock_uc = AsyncMock(spec=SendContactUseCase)
-    mock_uc.execute.side_effect = ConnectTimeout("Email timed out")
+    mock_uc.execute.side_effect = (
+        EmailDeliveryError("resend_transport_failure", transient=True)
+        if classified
+        else ConnectTimeout("Email timed out")
+    )
 
     app.dependency_overrides[get_send_contact_use_case] = lambda: mock_uc
 

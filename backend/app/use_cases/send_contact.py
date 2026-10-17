@@ -62,6 +62,9 @@ class SendContactUseCase:
         Returns:
             bool: True if delivered successfully, False otherwise.
 
+        Raises:
+            EmailDeliveryError: Provider failure propagated to the queue worker.
+
         Example:
             >>> email_adapter = FormspreeEmailAdapter(url, form_id)
             >>> logger = LoggerEstruturado()

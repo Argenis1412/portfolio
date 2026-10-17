@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from app.worker import StreamWorker
+from app.core.exceptions import EmailDeliveryError
 
 
 @pytest.fixture
@@ -77,3 +78,43 @@ class TestFirstSeenAtHandling:
 
         mock_dlq.assert_not_called()
         worker._redis.xadd.assert_called()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("exc", "retry_count", "expected_class", "requeues"),
+    [
+        (EmailDeliveryError("resend_http_429", transient=True), 2, "transient", True),
+        (EmailDeliveryError("resend_http_504", transient=True), 3, "transient", False),
+        (EmailDeliveryError("resend_http_422", transient=False), 0, "permanent", False),
+        (TimeoutError("opaque failure 4"), 0, "transient", True),
+        (ConnectionError("opaque failure"), 0, "transient", True),
+        (ValueError("payload 5"), 0, "permanent", False),
+        (RuntimeError("invalid schema 4 timeout 5 reset"), 0, "unknown", True),
+        (RuntimeError("invalid schema 4 timeout 5 reset"), 1, "unknown", False),
+    ],
+)
+async def test_failure_policy_uses_types_and_preserves_retry_limits(
+    worker, exc, retry_count, expected_class, requeues
+):
+    body = _build_body(retry_count=retry_count)
+    with (
+        patch.object(worker, "_move_to_dlq", new_callable=AsyncMock) as dlq,
+        patch("app.worker.asyncio.sleep", new_callable=AsyncMock) as sleep,
+        patch("app.worker.random.uniform", return_value=0),
+    ):
+        await worker._handle_failure("job-policy", body, exc)
+
+    assert body["meta"]["failure_class"] == expected_class
+    if requeues:
+        worker._redis.xadd.assert_awaited_once()
+        dlq.assert_not_awaited()
+        assert body["meta"]["retry_count"] == retry_count + 1
+        sleep.assert_awaited_once_with(
+            2**retry_count if expected_class == "transient" else 0.2
+        )
+    else:
+        worker._redis.xadd.assert_not_awaited()
+        dlq.assert_awaited_once()
+        sleep.assert_not_awaited()
+    worker._redis.xack.assert_awaited_once()

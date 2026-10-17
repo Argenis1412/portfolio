@@ -9,6 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.adapters.email_adapter import ResendEmailAdapter
 from app.entities.message import Message
+from app.core.exceptions import EmailDeliveryError
 from app.settings import settings
 
 
@@ -43,7 +44,10 @@ def main(argv: list[str] | None = None) -> int:
         subject="Portfolio - Resend configuration test",
         message="This test email was explicitly requested with check_resend.py --send.",
     )
-    success = asyncio.run(adapter.send_message(message))
+    try:
+        success = asyncio.run(adapter.send_message(message))
+    except EmailDeliveryError:
+        success = False
     print("Test email sent." if success else "Test email failed.")
     return 0 if success else 1
 

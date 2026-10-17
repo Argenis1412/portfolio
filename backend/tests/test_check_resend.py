@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from scripts import check_resend
+from app.core.exceptions import EmailDeliveryError
 
 
 @pytest.fixture
@@ -52,3 +53,15 @@ def test_explicit_send_reports_delivery_result(resend_config, success):
         config.resend_api_key, config.resend_from_email, config.resend_to_email
     )
     adapter.return_value.send_message.assert_awaited_once()
+
+
+@pytest.mark.parametrize("transient", [True, False])
+def test_explicit_send_handles_classified_provider_failure(
+    resend_config, capsys, transient
+):
+    _, adapter = resend_config
+    adapter.return_value.send_message.side_effect = EmailDeliveryError(
+        "provider failure", transient=transient
+    )
+    assert check_resend.main(["--send"]) == 1
+    assert "Test email failed." in capsys.readouterr().out
