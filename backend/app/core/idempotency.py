@@ -127,8 +127,7 @@ class IdempotencyStore:
                     ex=self.lock_ttl_seconds,  # Short TTL: crash won't block retries for 1h
                     nx=True,
                 )
-                if acquired:
-                    return True
+                return bool(acquired)
             except Exception as exc:
                 self._log_redis_fallback("set_in_progress", exc)
 

@@ -1,10 +1,11 @@
-"""Tests for IdempotencyStore Redis fallback warning debouncing."""
+"""Tests for Redis idempotency lock contention and outage fallback."""
 
+import time
 from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from app.core.idempotency import IdempotencyStore
+from app.core.idempotency import IdempotencyRecord, IdempotencyStore
 
 
 @pytest.fixture
@@ -19,6 +20,69 @@ def store():
             s = IdempotencyStore()
         s._redis = AsyncMock()
         yield s
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("acquired", [True, False, None])
+async def test_redis_lock_result_does_not_create_memory_lock(store, acquired):
+    store._redis.set.return_value = acquired
+
+    assert await store.set_in_progress("shared-key") is bool(acquired)
+    assert store._cache == {}
+    kwargs = store._redis.set.await_args.kwargs
+    assert kwargs == {"ex": store.lock_ttl_seconds, "nx": True}
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("error_type", [ConnectionError, TimeoutError])
+async def test_redis_exception_uses_memory_lock_and_rejects_duplicate(
+    store, error_type
+):
+    store._redis.set.side_effect = error_type("Redis unavailable")
+
+    assert await store.set_in_progress("fallback-key") is True
+    assert await store.set_in_progress("fallback-key") is False
+    assert store._cache["fallback-key"].in_progress is True
+
+
+@pytest.mark.parametrize("redis_result", [False, None])
+@pytest.mark.parametrize("record_state", ["missing", "in_progress", "finalized"])
+def test_contact_redis_lock_race(client, store, redis_result, record_state):
+    """Another request can reserve or finalize the key between GET and SET NX."""
+    record = IdempotencyRecord(
+        status_code=202,
+        content={"success": True, "message": "Previously accepted"},
+        timestamp=time.time(),
+        in_progress=record_state == "in_progress",
+    )
+    store._redis.get.side_effect = [
+        None,
+        None if record_state == "missing" else record.model_dump_json(),
+    ]
+    store._redis.set.return_value = redis_result
+
+    with patch("app.core.idempotency.store", store):
+        response = client.post(
+            "/api/v1/contact",
+            headers={"Idempotency-Key": "shared-key"},
+            json={
+                "name": "Test User",
+                "email": "test@example.com",
+                "subject": "Concurrent request",
+                "message": "This request must not acquire an occupied Redis key.",
+            },
+        )
+
+    if record_state == "finalized":
+        assert response.status_code == record.status_code
+        assert response.json() == record.content
+        assert response.headers["X-Cache-Idempotency"] == "HIT"
+    else:
+        assert response.status_code == 409
+        assert response.json()["error"]["message"] == "Request already in progress"
+    assert store._cache == {}
+    assert store._redis.get.await_count == 2
+    assert store._redis.set.await_count == 1
 
 
 class TestRedisWarningDebounce:

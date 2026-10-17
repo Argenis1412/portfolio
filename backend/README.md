@@ -125,9 +125,8 @@ updates deliberately when changing portfolio content or response mappings.
 `python scripts/check_resend.py` reports configuration presence without printing
 credentials or sending email. Add `--send` only to request a real test email.
 
-## Pending correctness review
+## Idempotency lock contention
 
-- Idempotency lock contention: `set_in_progress()` currently falls through to a
-  local lock when Redis declines `SET NX`. A Redis lock owned by another request
-  must remain a conflict rather than be treated as an outage. Review separately
-  from the Redis configuration refactor.
+When Redis declines `SET NX`, the request does not acquire a local lock. The
+dependency checks for a finalized response to replay; otherwise it returns HTTP
+409. In-memory lock fallback is used only when Redis is unavailable or disabled.
