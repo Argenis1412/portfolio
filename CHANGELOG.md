@@ -12,6 +12,11 @@ This changelog separates three categories intentionally:
 
 ## [Unreleased]
 
+### Redis configuration cleanup
+- Centralized async Redis client creation for the queue, idempotency store, deduplication store, and worker. The queue now honors both configured Redis timeouts instead of a hardcoded socket timeout and an unset connection timeout.
+- Preserved the worker's dedicated 60-second socket/10-second connection profile, store health checks, queue timeout retries, and existing client ownership and shutdown behavior.
+- An existing Redis lock-contention issue is recorded in `backend/README.md` for a separate correction; fallback and idempotency decisions are unchanged in this refactor.
+
 ### Contact filter cleanup
 - Spam scores no longer silently discard messages. Scores 30-69 are delivered with `POSSIBLE SPAM`, and 70-100 with `LIKELY SPAM`; all pass the existing deduplication and email/IP/fingerprint rate limits. Honeypots remain silent drops and now return the same acceptance fields as ordinary submissions.
 - Removed name/subject format scoring, redundant email regex validation, and broad recruitment/business keyword penalties. Pydantic continues validating email and field lengths; blank names/messages return 422. International names, typographic punctuation, and message paragraphs are preserved.

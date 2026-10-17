@@ -13,7 +13,9 @@ def store():
         mock_settings.redis_url = "redis://localhost:6379"
         mock_settings.redis_socket_timeout_seconds = 5
         mock_settings.redis_connect_timeout_seconds = 5
-        with patch("app.core.idempotency.redis.from_url", return_value=AsyncMock()):
+        with patch(
+            "app.core.idempotency.create_redis_client", return_value=AsyncMock()
+        ):
             s = IdempotencyStore()
         s._redis = AsyncMock()
         yield s

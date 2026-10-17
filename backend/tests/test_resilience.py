@@ -66,7 +66,7 @@ async def test_spam_store_redis_down_fallback():
     """
     from app.core.spam_store import SpamDedupStore
 
-    with patch("redis.asyncio.Redis.from_url") as mock_factory:
+    with patch("app.core.spam_store.create_redis_client") as mock_factory:
         mock_client = AsyncMock()
         mock_client.set.side_effect = redis.exceptions.ConnectionError("Redis down")
         mock_factory.return_value = mock_client

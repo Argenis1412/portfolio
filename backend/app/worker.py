@@ -18,6 +18,7 @@ from redis import asyncio as redis
 from app.controllers.dependencies import get_send_contact_use_case
 from app.core.queue import RedisStreamsQueue
 from app.core.exceptions import EmailDeliveryError
+from app.core.infrastructure import create_redis_client
 from app.worker_metrics import (
     inc_dlq,
     inc_processed,
@@ -70,13 +71,7 @@ class StreamWorker:
 
     async def _get_client(self) -> redis.Redis:
         if self._redis is None:
-            self._redis = redis.from_url(
-                self.redis_url,
-                encoding="utf-8",
-                decode_responses=True,
-                socket_connect_timeout=10,
-                socket_timeout=60,
-            )
+            self._redis = create_redis_client(self.redis_url, blocking=True)
         return self._redis
 
     async def setup(self) -> bool:

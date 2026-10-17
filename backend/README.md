@@ -35,6 +35,7 @@ and background tasks; production requires Redis.
 | `APP_NAME`, `ENVIRONMENT` | Service name and environment; use `production` in production. |
 | `ALLOWED_ORIGINS`, `REGEX_ALLOWED_ORIGINS` | Browser CORS origins and optional origin regex. |
 | `REDIS_URL` | Shared rate limiting, idempotency, deduplication, and contact queue. |
+| `REDIS_SOCKET_TIMEOUT_SECONDS`, `REDIS_CONNECT_TIMEOUT_SECONDS` | Timeouts for nonblocking application Redis clients; defaults are 5 seconds. The worker retains 60-second socket and 10-second connection timeouts for its blocking reads. |
 | `WORKER_ENABLED` | Start the contact consumer inside the API; defaults to `true`. Set `false` in tests or when deliberately pausing queue consumption. |
 | `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_TO_EMAIL` | Email delivery credentials and addresses. |
 | `METRICS_BASIC_AUTH_USERNAME`, `METRICS_BASIC_AUTH_PASSWORD` | Required protection for `/metrics` in production. |
@@ -123,3 +124,10 @@ updates deliberately when changing portfolio content or response mappings.
 
 `python scripts/check_resend.py` reports configuration presence without printing
 credentials or sending email. Add `--send` only to request a real test email.
+
+## Pending correctness review
+
+- Idempotency lock contention: `set_in_progress()` currently falls through to a
+  local lock when Redis declines `SET NX`. A Redis lock owned by another request
+  must remain a conflict rather than be treated as an outage. Review separately
+  from the Redis configuration refactor.
