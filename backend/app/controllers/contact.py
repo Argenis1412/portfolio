@@ -141,7 +141,7 @@ async def send_contact(
         )
 
         # ── 6. Delivery (Durable Queue vs Background Tasks) ──────────────────
-        delivery_mode = "stream"
+        delivery_mode = "background_fallback"
         if job_queue:
             # Durable delivery via Redis Streams
             try:
@@ -156,19 +156,11 @@ async def send_contact(
                         "spam_score": spam_score,
                     },
                 )
+                delivery_mode = "stream"
             except Exception as e:
                 logger.warning("queue_unavailable_fallback_background", error=str(e))
-                delivery_mode = "background_fallback"
-                background_tasks.add_task(
-                    _process_background_delivery,
-                    send_contact_uc,
-                    contact_request,
-                    is_suspicious,
-                    spam_score,
-                )
-        else:
-            # Fallback to non-durable BackgroundTasks (local dev)
-            delivery_mode = "background_fallback"
+
+        if delivery_mode == "background_fallback":
             background_tasks.add_task(
                 _process_background_delivery,
                 send_contact_uc,

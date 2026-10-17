@@ -161,6 +161,36 @@ def test_all_score_levels_are_queued_with_correct_flag(
     mock_use_case.execute.assert_not_awaited()
 
 
+@pytest.mark.parametrize("queue_state", ["disabled", "available", "unavailable"])
+def test_contact_delivery_runs_once(client, mock_use_case, queue_state):
+    queue = None if queue_state == "disabled" else AsyncMock()
+    if queue_state == "unavailable":
+        queue.enqueue.side_effect = ConnectionError("Redis unavailable")
+    app.dependency_overrides[get_job_queue] = lambda: queue
+    payload = {
+        "name": "Test User",
+        "email": "sender@example.com",
+        "subject": "Delivery test",
+        "message": "This message should be delivered exactly once.",
+    }
+
+    response = client.post("/api/v1/contact", json=payload)
+
+    assert response.status_code == 200
+    assert response.json()["success"] is True
+    assert response.json()["queue_status"] == "queued"
+    if queue is not None:
+        queue.enqueue.assert_awaited_once()
+    if queue_state == "available":
+        assert response.json()["delivery_mode"] == "stream"
+        mock_use_case.execute.assert_not_awaited()
+    else:
+        assert response.json()["delivery_mode"] == "background_fallback"
+        mock_use_case.execute.assert_awaited_once_with(
+            **payload, is_suspicious=False, spam_score=0
+        )
+
+
 @pytest.mark.parametrize("queued", [False, True])
 def test_honeypot_acceptance_matches_normal_submission_without_delivery(
     client, mock_use_case, queued
