@@ -68,7 +68,7 @@ jobs:
         run: |
           cd backend
           python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
+          pip install -r requirements.txt -r requirements-dev.txt
 
       - name: 🧹 Run ruff (lint + format)
         run: |
@@ -80,9 +80,7 @@ jobs:
       - name: 🛡️ Run mypy (gradual typing)
         run: |
           cd backend
-          # Gradual: core + use cases + controllers + adapters
-          mypy app/core app/use_cases app/controllers app/adapters \
-            --ignore-missing-imports --explicit-package-bases
+          python -m mypy --config-file pyproject.toml
 
   build:
     name: 🏗️ Docker Build

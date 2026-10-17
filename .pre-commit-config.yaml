@@ -18,16 +18,14 @@ repos:
         args: [ --fix ]
       - id: ruff-format
 
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.13.0
-    hooks:
-      - id: mypy
-        additional_dependencies: [types-redis, pydantic]
-        args: [--ignore-missing-imports, --explicit-package-bases]
-        files: ^backend/app/
-
   - repo: local
     hooks:
+      - id: mypy
+        name: Mypy (backend)
+        entry: python -m mypy --config-file backend/pyproject.toml
+        language: system
+        files: ^backend/(app/.*\.py|pyproject\.toml|requirements(-dev)?\.txt)$
+        pass_filenames: false
       - id: terraform-fmt
         name: Terraform fmt
         entry: terraform fmt -recursive

@@ -115,9 +115,16 @@ paragraphs remain intact, and user fields are escaped in the email HTML.
 ```bash
 ruff check .
 ruff format --check .
-mypy app/core app/use_cases app/controllers app/adapters --ignore-missing-imports --explicit-package-bases
+python -m mypy --config-file pyproject.toml
 pytest
 ```
+
+Mypy checks all of `app/` using the gradual configuration in `pyproject.toml`.
+Install both requirements files and activate the backend virtual environment so
+local checks and CI use the same dependencies. The optional pre-commit check
+uses this environment and configuration too; run it from the repository root
+with `python -m pre_commit run mypy --all-files`. The active Git hook is Husky
+and currently runs frontend lint-staged tasks only.
 
 Pytest enforces 80% coverage and mocks email delivery. Content snapshots in
 `tests/snapshots/content.json` protect the public JSON contract; review snapshot
