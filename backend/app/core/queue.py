@@ -36,8 +36,7 @@ class RedisStreamsQueue(JobQueue):
 
     DLQ_STREAM = "contact_jobs_dlq"
 
-    def __init__(self, redis_url: str, stream_name: str = "contact_jobs"):
-        self.redis_url = redis_url
+    def __init__(self, stream_name: str = "contact_jobs"):
         self.stream_name = stream_name
         self.max_stream_len = 10000
         self.max_dlq_len = 5000
@@ -125,4 +124,4 @@ class RedisStreamsQueue(JobQueue):
 
 
 # Global instance for easy access if needed, or inject via DI
-queue = RedisStreamsQueue(settings.redis_url) if settings.redis_url else None
+queue = RedisStreamsQueue() if settings.redis_url else None

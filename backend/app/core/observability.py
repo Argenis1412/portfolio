@@ -170,7 +170,6 @@ def _setup_opentelemetry(
     version: str,
     environment: str,
     otlp_endpoint: str,
-    sentry_dsn: str = "",
 ) -> None:
     """
     Configures the OpenTelemetry SDK for distributed tracing.
@@ -336,7 +335,6 @@ def setup_observability(app: FastAPI, settings) -> None:
         version=__version__,
         environment=settings.environment,
         otlp_endpoint=settings.otlp_endpoint,
-        sentry_dsn=settings.sentry_dsn,
     )
 
     logger.info("observability_ready")

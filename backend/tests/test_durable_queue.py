@@ -12,7 +12,7 @@ from app.worker import StreamWorker
 async def test_enqueue_includes_operational_metadata():
     mock_redis = AsyncMock()
     with patch("app.core.queue.get_redis", return_value=mock_redis):
-        queue = RedisStreamsQueue("redis://localhost", stream_name="test_stream")
+        queue = RedisStreamsQueue(stream_name="test_stream")
         await queue.enqueue("test_job", {"a": 1})
         args, kwargs = mock_redis.xadd.call_args
         data = args[1]
@@ -28,7 +28,7 @@ async def test_enqueue_includes_operational_metadata():
 async def test_enqueue_dlq_publishes_failure_context():
     mock_redis = AsyncMock()
     with patch("app.core.queue.get_redis", return_value=mock_redis):
-        queue = RedisStreamsQueue("redis://localhost")
+        queue = RedisStreamsQueue()
         await queue.enqueue_dlq(
             job_name="send_contact_email",
             payload={"name": "n"},

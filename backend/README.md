@@ -174,6 +174,19 @@ pytest --cov=app --cov-config=.coveragerc --cov-report=html
 pytest --cov=app --cov-config=.coveragerc --cov-fail-under=80
 ```
 
+Content snapshots in `tests/snapshots/content.json` freeze the JSON responses
+served by the static repository, including each project's details. Review and
+update them deliberately when portfolio content or the public contract changes.
+
+Check Resend configuration without sending an email:
+
+```bash
+python scripts/check_resend.py
+```
+
+Use `python scripts/check_resend.py --send` to explicitly send a real test email.
+The configuration check reports presence only and never prints credentials.
+
 ---
 
 ## 🎓 Technical Decisions

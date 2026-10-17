@@ -113,7 +113,7 @@ class StreamWorker:
     async def _move_to_dlq(
         self, job_id: str, body: dict[str, Any], reason: str, error_type: str
     ):
-        queue = RedisStreamsQueue(self.redis_url, stream_name=self.stream_name)
+        queue = RedisStreamsQueue(stream_name=self.stream_name)
         await queue.enqueue_dlq(
             job_name=body["job_name"],
             payload=body["payload"],

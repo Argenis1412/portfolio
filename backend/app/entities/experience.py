@@ -7,8 +7,6 @@ Represents a professional experience in the resume.
 from dataclasses import dataclass
 from datetime import date
 
-from dateutil.relativedelta import relativedelta
-
 
 @dataclass(frozen=True)
 class ProfessionalExperience:
@@ -38,30 +36,3 @@ class ProfessionalExperience:
     description: dict
     technologies: list[str]
     current: bool
-
-    @property
-    def duration_months(self) -> int:
-        """
-        Calculates the duration of the experience in months.
-
-        Returns:
-            int: Number of months of duration.
-
-        Example:
-            >>> exp = ProfessionalExperience(
-            ...     id="exp-1",
-            ...     role="Dev",
-            ...     company="Tech",
-            ...     location="Remote",
-            ...     start_date=date(2023, 1, 1),
-            ...     end_date=date(2023, 7, 1),
-            ...     description="...",
-            ...     technologies=["Python"],
-            ...     current=False
-            ... )
-            >>> exp.duration_months
-            6
-        """
-        final_date = self.end_date if self.end_date else date.today()
-        difference = relativedelta(final_date, self.start_date)
-        return difference.years * 12 + difference.months

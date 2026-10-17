@@ -80,17 +80,6 @@ class ResourceNotFoundError(DomainError):
     """
 
 
-class MissingIdempotencyKeyError(DomainError):
-    """
-    Exception for missing Idempotency-Key in protected routes.
-
-    Maps to HTTP 400 Bad Request.
-    """
-
-    def __init__(self, message: str = "Header 'Idempotency-Key' is required") -> None:
-        super().__init__(message, code="MISSING_IDEMPOTENCY_KEY")
-
-
 class DuplicateContactError(DomainError):
     """
     Raised when an identical contact message is submitted within the dedup window.

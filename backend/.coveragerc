@@ -1,7 +1,6 @@
 [run]
 source = app
 omit =
-    app/dados/*
     alembic/*
     scripts/*
 

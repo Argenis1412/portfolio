@@ -94,14 +94,6 @@ def reset_p95_baseline(registry: CollectorRegistry = REGISTRY) -> None:
         _baseline = merged
 
 
-def _incremental(sample_name: str, labels: dict, raw_value: float) -> float:
-    """Return raw_value minus the baseline for this sample, clamped to 0."""
-    key: tuple[str, frozenset] = (sample_name, frozenset(labels.items()))
-    with _baseline_lock:
-        base = _baseline.get(key, 0.0)
-    return max(0.0, raw_value - base)
-
-
 def compute_p95(
     registry: CollectorRegistry = REGISTRY,
     metric_name: str = "http_request_duration_seconds",
