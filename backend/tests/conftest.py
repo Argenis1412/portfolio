@@ -8,6 +8,7 @@ import os
 
 # Force Redis to memory BEFORE any app imports
 os.environ["REDIS_URL"] = "memory://"
+os.environ["WORKER_ENABLED"] = "false"
 
 from datetime import date
 from unittest.mock import AsyncMock, MagicMock

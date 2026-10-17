@@ -1,16 +1,15 @@
 """
-Worker process for consuming jobs from Redis Streams.
+Background consumer for contact jobs from Redis Streams.
 """
 
 import asyncio
 import json
-import os
-import signal
-import sys
+import socket
 import time
 import random
 from datetime import datetime, timezone
 from typing import Any, Dict
+from uuid import uuid4
 
 import sentry_sdk
 import structlog
@@ -18,7 +17,6 @@ from redis import asyncio as redis
 
 from app.controllers.dependencies import get_send_contact_use_case
 from app.core.queue import RedisStreamsQueue
-from app.settings import settings
 from app.worker_metrics import (
     inc_dlq,
     inc_processed,
@@ -47,13 +45,15 @@ class StreamWorker:
         redis_url: str,
         stream_name: str = "contact_jobs",
         group_name: str = "email_workers",
-        consumer_name: str = f"worker-{os.getpid()}",
+        consumer_name: str | None = None,
         recovery_interval: int = 300,
     ):
         self.redis_url = redis_url
         self.stream_name = stream_name
         self.group_name = group_name
-        self.consumer_name = consumer_name
+        self.consumer_name = (
+            consumer_name or f"worker-{socket.gethostname()}-{uuid4().hex}"
+        )
         self.recovery_interval = recovery_interval
         self.running = True
         self._redis: redis.Redis | None = None
@@ -300,6 +300,15 @@ class StreamWorker:
                 await asyncio.sleep(self.recovery_interval)
 
     async def run(self):
+        """Consume jobs and close the dedicated Redis connection on every exit."""
+        try:
+            await self._consume()
+        finally:
+            if self._redis is not None:
+                await self._redis.aclose()
+                self._redis = None
+
+    async def _consume(self):
         """Main consumption loop with separate recovery task."""
         setup_ok = await self.setup()
         if not setup_ok:
@@ -405,31 +414,3 @@ class StreamWorker:
 
     def stop(self):
         self.running = False
-
-
-async def main():
-    if not settings.redis_url:
-        print("REDIS_URL not configured. Worker exiting.")
-        return
-
-    worker = StreamWorker(settings.redis_url)
-
-    # Handle termination signals for graceful shutdown.
-    # loop.add_signal_handler is only available on Unix; use signal.signal as
-    # a fallback on Windows (which delivers the handler on the main thread).
-    loop = asyncio.get_running_loop()
-    if sys.platform != "win32":
-        for sig in (signal.SIGINT, signal.SIGTERM):
-            loop.add_signal_handler(sig, worker.stop)
-    else:
-        for sig in (signal.SIGINT, signal.SIGTERM):
-            signal.signal(sig, lambda _sig, _frame: worker.stop())
-
-    try:
-        await worker.run()
-    finally:
-        print("Worker stopped.")
-
-
-if __name__ == "__main__":
-    asyncio.run(main())

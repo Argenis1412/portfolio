@@ -63,6 +63,12 @@ class Settings(BaseSettings):
         description="Redis URL for cache and rate limiting (e.g., redis://localhost:6379/0).",
     )
 
+    worker_enabled: bool = Field(
+        default=True,
+        alias="WORKER_ENABLED",
+        description="Run the contact queue consumer inside the API process.",
+    )
+
     # --- Observability ---
     sentry_dsn: str = Field(
         default="",

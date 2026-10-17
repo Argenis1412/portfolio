@@ -18,7 +18,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from contextlib import asynccontextmanager
 import asyncio
-import os
 import structlog
 
 from app import __version__
@@ -47,25 +46,25 @@ async def _lifespan(app: FastAPI):
     Shutdown closes shared Redis connections.
     """
     worker_task = None
-    if settings.redis_url and not os.environ.get("PYTEST_CURRENT_TEST"):
+    if settings.redis_url and settings.worker_enabled:
         worker = StreamWorker(settings.redis_url)
         worker_task = asyncio.create_task(worker.run())
         app.state.worker = worker
 
-    yield  # Application running
-
-    # Shutdown
-    if worker_task:
-        app.state.worker.stop()
-        # Give some time for the loop to finish or cancel it
+    try:
+        yield
+    finally:
         try:
-            await asyncio.wait_for(worker_task, timeout=5.0)
-        except (asyncio.TimeoutError, asyncio.CancelledError):
-            pass
-        except Exception:
-            logger.warning("worker_task_exception_on_shutdown", exc_info=True)
-
-    await dispose_all()
+            if worker_task:
+                app.state.worker.stop()
+                try:
+                    await asyncio.wait_for(worker_task, timeout=5.0)
+                except (asyncio.TimeoutError, asyncio.CancelledError):
+                    pass
+                except Exception:
+                    logger.warning("worker_task_exception_on_shutdown", exc_info=True)
+        finally:
+            await dispose_all()
 
 
 def create_app() -> FastAPI:

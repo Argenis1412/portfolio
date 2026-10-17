@@ -12,6 +12,11 @@ This changelog separates three categories intentionally:
 
 ## [Unreleased]
 
+### Worker execution cleanup
+- The API lifespan now owns the contact consumer. Removed the duplicate Compose worker and standalone signal-handling command; Docker runs one Uvicorn process so metrics and the consumer share the same process.
+- Added `WORKER_ENABLED` (default `true`) to explicitly disable consumption in tests or operations, replacing pytest detection in application code. Consumers use unique host/UUID identities.
+- Worker Redis connections close on normal exit, setup failure, and cancellation. API shutdown also cleans up when the lifespan body raises. Queue/retry semantics are unchanged; a deployment-sized capacity test remains pending.
+
 ### Removed
 - Backend simulation endpoints: `POST /api/v1/chaos/{spike,failure,drain,retry,latency,reset}` now return 404. Removed their controller, incident writes, request failure injection middleware, rate-limit helpers, queue injection script, and backend-only E2E workflow/tests.
 - Synthetic summary fields: `retries_1h`, `last_incident`, `last_incident_ago`, `worker_status`, `queue_backlog`, `cache_status`, `cache_ttl_s`, `active_path`, `system_lifecycle`, and `total_chaos_events_since_deploy`. Real worker metrics remain on `/metrics`.

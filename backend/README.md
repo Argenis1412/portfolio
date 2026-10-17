@@ -35,6 +35,7 @@ and background tasks; production requires Redis.
 | `APP_NAME`, `ENVIRONMENT` | Service name and environment; use `production` in production. |
 | `ALLOWED_ORIGINS`, `REGEX_ALLOWED_ORIGINS` | Browser CORS origins and optional origin regex. |
 | `REDIS_URL` | Shared rate limiting, idempotency, deduplication, and contact queue. |
+| `WORKER_ENABLED` | Start the contact consumer inside the API; defaults to `true`. Set `false` in tests or when deliberately pausing queue consumption. |
 | `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_TO_EMAIL` | Email delivery credentials and addresses. |
 | `METRICS_BASIC_AUTH_USERNAME`, `METRICS_BASIC_AUTH_PASSWORD` | Required protection for `/metrics` in production. |
 | `SENTRY_DSN`, `SENTRY_TRACES_SAMPLE_RATE`, `OTLP_ENDPOINT` | Optional error tracking and tracing. |
@@ -53,8 +54,8 @@ instead of `desenvolvimento`, `production` instead of `producao`/`producción`, 
 The real Koyeb environment value remains to be verified before deployment.
 
 For Compose, copy the same root example to the root `.env` and set
-`GRAFANA_ADMIN_PASSWORD`. Compose passes that file to the API and worker, overrides
-their environment to `development`, and points them to the internal Redis service.
+`GRAFANA_ADMIN_PASSWORD`. Compose passes that file to the API, overrides its
+environment to `development`, and points it to the internal Redis service.
 
 ## API
 
@@ -84,8 +85,14 @@ changes together.
 Controllers handle HTTP, use cases retrieve/sort content and submit messages,
 entities describe domain data, and adapters implement JSON reads and delivery.
 `app/core/` contains shared request protection and telemetry; `app/worker.py`
-consumes contact jobs. Docker Compose currently also defines a standalone worker;
-the worker cleanup will consolidate execution.
+consumes contact jobs inside the API lifespan when Redis is configured and
+`WORKER_ENABLED=true`. Docker runs one Uvicorn process, so each API instance owns
+one consumer and one process-local metrics registry. Consumer names are unique
+across instances. Shutdown stops the consumer, allows up to five seconds to finish,
+then cancels it and closes its Redis connection. Pending jobs remain available for
+Redis Streams recovery. There is no standalone worker command or Compose service.
+Capacity under this single-process configuration still needs a deployment-sized
+load test before changing the scaling model.
 
 ```bash
 ruff check .
