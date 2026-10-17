@@ -79,6 +79,23 @@ async def test_get_stack_groups_by_category(repository_mock):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("error_type", [FileNotFoundError, ValueError])
+async def test_get_stack_propagates_repository_failure(repository_mock, error_type):
+    repository_mock.get_stack.side_effect = error_type("Stack data unavailable")
+    uc = GetStackUseCase(repository_mock)
+
+    with pytest.raises(error_type, match="Stack data unavailable"):
+        await uc.execute()
+
+
+@pytest.mark.asyncio
+async def test_get_stack_accepts_empty_content(repository_mock):
+    repository_mock.get_stack.return_value = []
+
+    assert await GetStackUseCase(repository_mock).execute() == {}
+
+
+@pytest.mark.asyncio
 async def test_get_experiences_orders_chronologically(repository_mock):
     """Tests that experiences are ordered (current first)."""
     uc = GetExperiencesUseCase(repository_mock)

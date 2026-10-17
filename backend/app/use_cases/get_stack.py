@@ -42,11 +42,7 @@ class GetStackUseCase:
             dict: Technologies grouped by category.
             Format: {"backend": [...], "frontend": [...], ...}
         """
-        try:
-            stack = await self.repository.get_stack()
-        except Exception as e:
-            logger.error("repository_get_stack_failed", error=str(e))
-            return {}
+        stack = await self.repository.get_stack()
 
         # Group by category
         by_category: dict[str, list[dict]] = {}

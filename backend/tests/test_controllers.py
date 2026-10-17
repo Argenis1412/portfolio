@@ -15,6 +15,7 @@ from app.controllers import dependencies
 from app.controllers.dependencies import get_send_contact_use_case
 from app.main import app
 from app.use_cases.get_projects import GetProjectsUseCase
+from app.use_cases.get_stack import GetStackUseCase
 
 
 @pytest.fixture
@@ -22,6 +23,21 @@ def client():
     """Fixture that provides a TestClient for the application."""
     with TestClient(app) as c:
         yield c
+
+
+@pytest.mark.parametrize("file_state", ["missing", "invalid_json"])
+def test_get_stack_repository_failure_returns_500(tmp_path, file_state):
+    if file_state == "invalid_json":
+        (tmp_path / "stack.json").write_text("{invalid", encoding="utf-8")
+    app.dependency_overrides[dependencies.dep_stack] = lambda: GetStackUseCase(
+        JsonRepository(tmp_path)
+    )
+
+    with TestClient(app, raise_server_exceptions=False) as client:
+        response = client.get("/api/v1/stack")
+
+    assert response.status_code == 500
+    assert "ETag" not in response.headers
 
 
 def test_health_returns_ok(client):
