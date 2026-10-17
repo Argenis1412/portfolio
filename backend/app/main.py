@@ -266,14 +266,10 @@ def _register_routes(application: FastAPI) -> None:
     # still pointing to the Portuguese/Spanish endpoints.
     # Canonical endpoint: GET /health
     # Planned removal: v1.9.3
-    import structlog as _structlog
-
-    _dep_logger = _structlog.get_logger(__name__)
-
     @application.get("/saude", include_in_schema=False, deprecated=True)
     @application.get("/salud", include_in_schema=False, deprecated=True)
     async def legacy_health_alias():
-        _dep_logger.warning(
+        logger.warning(
             "deprecated_endpoint_called",
             path="/saude (or /salud)",
             canonical="/health",
