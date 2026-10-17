@@ -66,7 +66,7 @@ def test_validate_production_does_not_require_a_database(monkeypatch, database_u
 def test_docs_accessible_in_local(client):
     """
     /openapi.json must be accessible in local/dev environments.
-    The test client runs with AMBIENTE=local (default), so the app was
+    The test client runs with ENVIRONMENT=local (default), so the app was
     created with docs_url/redoc_url/openapi_url set — 200 expected.
     """
     response = client.get("/openapi.json")

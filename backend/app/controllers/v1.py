@@ -7,6 +7,7 @@ Prefix: /api/v1
 
 from fastapi import APIRouter
 
+from app import __version__
 from app.controllers import api, contact
 
 # Main v1 router
@@ -24,7 +25,7 @@ async def v1_root():
     return {
         "status": "ok",
         "message": "Welcome to Portfolio API v1",
-        "version": "1.0.0",
+        "version": __version__,
     }
 
 

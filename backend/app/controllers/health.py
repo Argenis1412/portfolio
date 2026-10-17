@@ -9,6 +9,7 @@ import time
 
 from fastapi import APIRouter, Depends
 
+from app import __version__
 from app.adapters.repository import PortfolioRepository
 from app.settings import settings
 from app.controllers.dependencies import get_static_repository
@@ -65,7 +66,7 @@ async def check_health(
             if is_healthy
             else "API degraded (portfolio data unavailable)"
         ),
-        api_version="1.8.2",
+        api_version=__version__,
         environment=settings.environment,
         uptime_seconds=uptime,
         details=details,

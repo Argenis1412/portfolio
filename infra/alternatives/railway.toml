@@ -13,20 +13,17 @@ restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 
 [[deploy.environmentVariables]]
-name = "AMBIENTE"
+name = "ENVIRONMENT"
 value = "production"
-
-[[deploy.environmentVariables]]
-name = "VERSAO_API"
-value = "1.0.0"
-
-[[deploy.environmentVariables]]
-name = "PORT"
-value = "${{ PORT }}"
 
 # Secret variables must be configured in the Railway dashboard:
 # - RESEND_API_KEY
-# - ORIGENS_PERMITIDAS
+# - RESEND_FROM_EMAIL
+# - RESEND_TO_EMAIL
+# - REDIS_URL
+# - METRICS_BASIC_AUTH_USERNAME
+# - METRICS_BASIC_AUTH_PASSWORD
+# - ALLOWED_ORIGINS
 
 [service]
 name = "portfolio-backend"

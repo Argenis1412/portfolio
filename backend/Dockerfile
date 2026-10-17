@@ -36,16 +36,12 @@ RUN pip install --no-cache-dir --upgrade pip && \
 FROM python:3.12-slim
 
 # Metadata
-LABEL maintainer="seuemail@exemplo.com"
-LABEL description="API FastAPI para Portfólio Profissional"
-LABEL version="1.0.0"
+LABEL description="FastAPI portfolio API"
 
 # Environment variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    ENVIRONMENT=production \
-    API_HOST=0.0.0.0 \
-    API_PORT=8000
+    ENVIRONMENT=production
 
 # Create non-root user for security
 RUN useradd -m -u 1000 appuser && \

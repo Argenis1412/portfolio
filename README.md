@@ -176,7 +176,9 @@ Service: still serving (fail-silent)
 ```bash
 git clone https://github.com/Argenis1412/portfolio.git
 cd portfolio
-docker-compose up --build
+cp .env.example .env  # PowerShell: Copy-Item .env.example .env
+# Set GRAFANA_ADMIN_PASSWORD and any email credentials in .env
+docker compose up --build
 ```
 
 ### Manual Setup
@@ -185,6 +187,7 @@ docker-compose up --build
 cd backend
 py -3.12 -m venv .venv && .venv\Scripts\activate  # Windows
 pip install -r requirements.txt
+cp ../.env.example .env  # PowerShell: Copy-Item ../.env.example .env
 uvicorn app.main:app --reload --port 8000
 
 # Frontend (separate terminal)

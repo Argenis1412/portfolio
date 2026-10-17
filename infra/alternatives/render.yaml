@@ -6,7 +6,7 @@ services:
     name: portfolio-backend
     env: docker
     dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    dockerContext: .
     plan: free
     region: oregon
 
@@ -15,20 +15,29 @@ services:
 
     # Environment Variables
     envVars:
-      - key: AMBIENTE
+      - key: ENVIRONMENT
         value: production
-
-      - key: VERSAO_API
-        value: 1.0.0
-
-      - key: PORT
-        value: 10000
 
       # Secrets (configure in Render dashboard)
       - key: RESEND_API_KEY
         sync: false
 
-      - key: ORIGENS_PERMITIDAS
+      - key: RESEND_FROM_EMAIL
+        sync: false
+
+      - key: RESEND_TO_EMAIL
+        sync: false
+
+      - key: REDIS_URL
+        sync: false
+
+      - key: METRICS_BASIC_AUTH_USERNAME
+        sync: false
+
+      - key: METRICS_BASIC_AUTH_PASSWORD
+        sync: false
+
+      - key: ALLOWED_ORIGINS
         sync: false # Configure in Render dashboard with frontend domain
 
     # Auto-deploy

@@ -16,7 +16,8 @@ python -m venv .venv
 pip install -r requirements.txt -r requirements-dev.txt
 ```
 
-Copy `.env.example` to `.env`, configure email if needed, then run:
+Copy `../.env.example` to `.env` (PowerShell: `Copy-Item ../.env.example .env`),
+configure email if needed, then run:
 
 ```bash
 python -m uvicorn app.main:app --reload --port 8000
@@ -39,9 +40,21 @@ and background tasks; production requires Redis.
 | `SENTRY_DSN`, `SENTRY_TRACES_SAMPLE_RATE`, `OTLP_ENDPOINT` | Optional error tracking and tracing. |
 | `TRUSTED_PROXY_DEPTH`, `TRUSTED_PROXY_IPS` | Trusted proxy configuration for client IP extraction. |
 
-Portuguese configuration aliases remain temporarily supported; the configuration
-cleanup will migrate the example files. Legacy `DATABASE_URL` and `DB_*` settings
-are ignored. See `app/settings.py` for defaults and production guards.
+Only English configuration keys are supported. Valid environments are `local`,
+`development`, `testing`, `staging`, and `production`; unknown values fail validation.
+Legacy `DATABASE_URL` and `DB_*` settings are ignored. See `app/settings.py` for
+defaults and production guards.
+
+Before running this branch with an existing `.env`, rename `AMBIENTE` to
+`ENVIRONMENT`, `NOME_APP` to `APP_NAME`, `ORIGENS_PERMITIDAS` to `ALLOWED_ORIGINS`,
+and `REGEX_ORIGENS_PERMITIDAS` to `REGEX_ALLOWED_ORIGINS`. Use `development`
+instead of `desenvolvimento`, `production` instead of `producao`/`producción`, and
+`staging` instead of `homologação`. Preserve credential values when renaming keys.
+The real Koyeb environment value remains to be verified before deployment.
+
+For Compose, copy the same root example to the root `.env` and set
+`GRAFANA_ADMIN_PASSWORD`. Compose passes that file to the API and worker, overrides
+their environment to `development`, and points them to the internal Redis service.
 
 ## API
 

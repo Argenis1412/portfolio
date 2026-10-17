@@ -2,16 +2,14 @@
 # DOCKER COMPOSE - FULL-STACK PORTFOLIO
 # ============================================
 #
-# This file is a MINIMAL STRUCTURE for future development
-# Uncomment and configure as needed
+# Local API, contact worker, Redis, and monitoring services.
+# Copy .env.example to .env and configure local values before starting.
 #
 # Usage:
 #   docker-compose up -d          # Start all services
 #   docker-compose down           # Stop all services
 #   docker-compose logs -f api    # View backend logs
 # ============================================
-
-version: '3.8'
 
 services:
   # ===========================
@@ -25,6 +23,7 @@ services:
     restart: unless-stopped
     ports:
       - "8000:8000"
+    env_file: .env
     environment:
       - ENVIRONMENT=development
       - REDIS_URL=redis://redis:6379/0
@@ -53,10 +52,10 @@ services:
     container_name: portafolio-worker
     restart: unless-stopped
     command: ["python", "-m", "app.worker"]
+    env_file: .env
     environment:
       - ENVIRONMENT=development
       - REDIS_URL=redis://redis:6379/0
-      - RESEND_API_KEY=${RESEND_API_KEY:-}
     depends_on:
       redis:
         condition: service_healthy

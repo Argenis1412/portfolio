@@ -28,6 +28,12 @@ Keep this change on the cleanup branch until the frontend retirement is complete
 | `frontend/e2e/chaos.spec.ts`, `.github/workflows/e2e-smoke.yml` | Replace the simulation smoke scenarios before running against the updated API. |
 | Portfolio JSON content and architecture docs | Revise claims that describe the retired playground as a current feature during the content/documentation cleanup. |
 
+### Configuration cleanup
+- Backend settings now use English names only. `ENVIRONMENT` accepts `local`, `development`, `testing`, `staging`, and `production`; other values fail validation.
+- The root `.env.example` is the shared backend/Compose template; the duplicate backend example and obsolete SMTP, API host/port, and speculative settings were removed. Compose passes the root `.env` to the API and worker while using its internal Redis address.
+- Public API versions now read `app.__version__` (`1.9.2`). Removed stale Docker version/maintainer labels and unused Docker host/port variables. Terraform secret identities, moved blocks, and GitHub secret names are unchanged.
+- Before deployment: migrate existing local configuration keys using `backend/README.md` and verify Koyeb's actual `ENVIRONMENT=production`. External monitor verification is pending, so `/saude` and `/salud` remain available. Production deployment remains blocked by the frontend retirement as well.
+
 ### SQL retirement
 - Removed SQL repositories/models, Alembic tooling/history from the working tree, the seed script, SQL tests, connection settings/pools, and SQL driver dependencies. Migration history remains in Git.
 - `/health.details` now exposes `data`, `data_details`, and `email` instead of `database` and `db_details`. Required JSON files are checked for readability, syntax, and top-level type; the optional case-study sidecar is checked when present. Missing/invalid/unreadable data produces HTTP 200 with `status="degraded"`. Email configuration remains informational; `/live` is unchanged.
