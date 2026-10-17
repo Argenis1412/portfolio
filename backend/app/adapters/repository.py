@@ -96,21 +96,44 @@ class JsonRepository(PortfolioRepository):
         self._cache: dict[str, Any] = {}
 
     async def check_health(self) -> dict:
-        """
-        Verifies if basic JSON files exist and are readable.
-        """
-        files = ["about.json", "projects.json", "stack.json"]
-        details = {}
-        all_ok = True
+        """Check readable JSON and top-level types without relying on the cache."""
 
-        for filename in files:
-            path = self.data_directory / filename
-            exists = path.exists()
-            details[filename] = "ok" if exists else "missing"
-            if not exists:
-                all_ok = False
+        def check_files() -> dict:
+            files = {
+                "about.json": dict,
+                "projects.json": list,
+                "stack.json": list,
+                "experiences.json": list,
+                "formation.json": list,
+                "philosophy.json": list,
+            }
+            sidecar = self.data_directory / "project_case_studies.json"
+            if sidecar.exists():
+                files[sidecar.name] = dict
 
-        return {"status": "ok" if all_ok else "error", "details": details}
+            details = {}
+            for filename, expected_type in files.items():
+                try:
+                    with (self.data_directory / filename).open(
+                        encoding="utf-8"
+                    ) as file:
+                        data = json.load(file)
+                    details[filename] = (
+                        "ok" if isinstance(data, expected_type) else "invalid"
+                    )
+                except FileNotFoundError:
+                    details[filename] = "missing"
+                except (ValueError, UnicodeError):
+                    details[filename] = "invalid"
+                except OSError:
+                    details[filename] = "unreadable"
+
+            return {
+                "status": "ok" if all(v == "ok" for v in details.values()) else "error",
+                "details": details,
+            }
+
+        return await anyio.to_thread.run_sync(check_files)
 
     async def _read_json(self, filename: str) -> Any:
         """

@@ -58,12 +58,6 @@ def repository_mock() -> PortfolioRepository:
         "availability": {"pt": "Remoto", "en": "Remote", "es": "Remoto"},
     }
 
-    # Mock check_health
-    mock.check_health.return_value = {
-        "status": "ok",
-        "details": "Mock Database connected",
-    }
-
     # Mock get_projects
     mock.get_projects.return_value = [
         Project(
@@ -181,110 +175,6 @@ def repository_mock() -> PortfolioRepository:
     return mock
 
 
-@pytest.fixture(scope="session")
-def setup_database():
-    """
-    Creates and initializes a temporary SQLite database for the test session.
-    """
-    import os
-    import tempfile
-
-    from sqlmodel import Session, SQLModel, create_engine
-
-    from app.adapters.sql_models import (
-        ExperienceModel,
-        FormationModel,
-        ProjectModel,
-        AboutModel,
-        StackModel,
-    )
-
-    fd, db_path = tempfile.mkstemp(suffix=".db")
-    os.close(fd)
-
-    sync_url = f"sqlite:///{db_path}"
-    async_url = f"sqlite+aiosqlite:///{db_path}"
-
-    engine = create_engine(sync_url)
-    SQLModel.metadata.create_all(engine)
-
-    # Populate minimum data for integration tests to pass
-    with Session(engine) as session:
-        session.add(
-            AboutModel(
-                name="Test Silva",
-                title="Developer",
-                location="São Paulo, SP",
-                email="test@example.com",
-                phone="(11) 99999-9999",
-                github="https://github.com/test",
-                linkedin="https://linkedin.com/in/test",
-                description={
-                    "pt": "Descrição",
-                    "en": "Description",
-                    "es": "Descripción",
-                },
-                availability={"pt": "Remoto", "en": "Remote", "es": "Remoto"},
-            )
-        )
-
-        session.add(
-            ProjectModel(
-                id="project-1",
-                name="Project A",
-                short_description={"pt": "Curta", "en": "Short", "es": "Corta"},
-                full_description={"pt": "Longa", "en": "Long", "es": "Larga"},
-                technologies=["Python"],
-                features=[],
-                learnings=[],
-                repository="https://github.com/test/a",
-                demo=None,
-                highlighted=True,
-                image=None,
-            )
-        )
-
-        session.add(
-            StackModel(name="Python", category="backend", level=4, icon="python")
-        )
-
-        session.add(
-            ExperienceModel(
-                id="exp-1",
-                role={"pt": "Dev", "en": "Dev", "es": "Dev"},
-                company="Company",
-                location="Remote",
-                start_date=date(2023, 1, 1),
-                end_date=None,
-                description={"pt": "Desc", "en": "Desc", "es": "Desc"},
-                technologies=["Python"],
-                current=True,
-            )
-        )
-
-        session.add(
-            FormationModel(
-                id="edu-1",
-                course={"pt": "Curso", "en": "Course", "es": "Curso"},
-                institution="Uni",
-                location="SP",
-                start_date=date(2020, 1, 1),
-                end_date=date(2023, 1, 1),
-                description={"pt": "Fim", "en": "End", "es": "Fin"},
-                current=False,
-            )
-        )
-
-        session.commit()
-
-    yield async_url
-
-    try:
-        os.unlink(db_path)
-    except OSError:
-        pass
-
-
 @pytest.fixture
 def email_adapter_mock() -> EmailAdapter:
     """
@@ -346,12 +236,10 @@ def reset_global_state():
 
 
 @pytest.fixture(autouse=True)
-def override_dependencies(setup_database):
+def override_dependencies(repository_mock):
     """
-    Overrides FastAPI dependencies to use the real temporary database.
-    Clears provider caches to ensure the new SqlRepository is used.
+    Override content providers and email delivery with isolated test doubles.
     """
-    from app.adapters.sql_repository import SqlRepository
     from app.use_cases import (
         GetExperiencesUseCase,
         GetFormationUseCase,
@@ -362,33 +250,26 @@ def override_dependencies(setup_database):
     )
     from app.controllers import dependencies
 
-    repo_real_test = SqlRepository(database_url=setup_database)
+    repo = repository_mock
 
-    # Override individual providers
-    app.dependency_overrides[dependencies.get_repository] = lambda: repo_real_test
-
-    app.dependency_overrides[dependencies.dep_about] = lambda: GetAboutUseCase(
-        repo_real_test
-    )
+    app.dependency_overrides[dependencies.dep_about] = lambda: GetAboutUseCase(repo)
 
     app.dependency_overrides[dependencies.dep_projects] = lambda: GetProjectsUseCase(
-        repo_real_test
+        repo
     )
 
     app.dependency_overrides[dependencies.dep_project_by_id] = lambda: (
-        GetProjectByIdUseCase(repo_real_test)
+        GetProjectByIdUseCase(repo)
     )
 
-    app.dependency_overrides[dependencies.dep_stack] = lambda: GetStackUseCase(
-        repo_real_test
-    )
+    app.dependency_overrides[dependencies.dep_stack] = lambda: GetStackUseCase(repo)
 
     app.dependency_overrides[dependencies.dep_experiences] = lambda: (
-        GetExperiencesUseCase(repo_real_test)
+        GetExperiencesUseCase(repo)
     )
 
     app.dependency_overrides[dependencies.dep_formation] = lambda: GetFormationUseCase(
-        repo_real_test
+        repo
     )
 
     # Mock for email sending to avoid real calls in tests
@@ -402,7 +283,6 @@ def override_dependencies(setup_database):
     )
 
     # Clear caches for safety
-    dependencies.get_repository.cache_clear()
     dependencies.dep_about.cache_clear()
     dependencies.dep_projects.cache_clear()
     dependencies.dep_project_by_id.cache_clear()

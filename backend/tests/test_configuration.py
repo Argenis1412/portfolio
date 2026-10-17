@@ -32,50 +32,32 @@ def test_debug_enabled_in_local():
         del os.environ["ENVIRONMENT"]
 
 
-def test_validate_production_fails_without_redis_and_metrics_auth():
-    os.environ["ENVIRONMENT"] = "production"
-    os.environ["DATABASE_URL"] = (
-        "postgresql+asyncpg://postgres:secret@db.example.com:5432/postgres"
-    )
-    os.environ.pop("REDIS_URL", None)
-    os.environ.pop("METRICS_BASIC_AUTH_USERNAME", None)
-    os.environ.pop("METRICS_BASIC_AUTH_PASSWORD", None)
+def test_validate_production_fails_without_redis_and_metrics_auth(monkeypatch):
+    monkeypatch.setenv("REDIS_URL", "")
+    monkeypatch.setenv("METRICS_BASIC_AUTH_USERNAME", "")
+    monkeypatch.setenv("METRICS_BASIC_AUTH_PASSWORD", "")
+    settings = Settings(_env_file=None, ENVIRONMENT="production")
 
-    settings = Settings()
-
-    with pytest.raises(RuntimeError):
+    with pytest.raises(RuntimeError, match="REDIS_URL is required"):
         settings.validate_production()
 
-    for key in [
-        "ENVIRONMENT",
-        "DATABASE_URL",
-        "REDIS_URL",
-        "METRICS_BASIC_AUTH_USERNAME",
-        "METRICS_BASIC_AUTH_PASSWORD",
-    ]:
-        os.environ.pop(key, None)
 
-
-def test_validate_production_accepts_supabase_and_metrics_auth():
-    os.environ["ENVIRONMENT"] = "production"
-    os.environ["DATABASE_URL"] = (
-        "postgresql+asyncpg://postgres:secret@db.example.com:5432/postgres"
+@pytest.mark.parametrize(
+    "database_url", [None, "sqlite:///unused.db", "invalid-unused-url"]
+)
+def test_validate_production_does_not_require_a_database(monkeypatch, database_url):
+    if database_url is None:
+        monkeypatch.delenv("DATABASE_URL", raising=False)
+    else:
+        monkeypatch.setenv("DATABASE_URL", database_url)
+    settings = Settings(
+        _env_file=None,
+        ENVIRONMENT="production",
+        REDIS_URL="redis://localhost:6379/0",
+        METRICS_BASIC_AUTH_USERNAME="metrics",
+        METRICS_BASIC_AUTH_PASSWORD="test-password",
     )
-    os.environ["REDIS_URL"] = "redis://localhost:6379/0"
-    os.environ["METRICS_BASIC_AUTH_USERNAME"] = "metrics"
-    os.environ["METRICS_BASIC_AUTH_PASSWORD"] = "secret"
-
-    settings = Settings()
     settings.validate_production()
-
-    for key in [
-        "ENVIRONMENT",
-        "DATABASE_URL",
-        "REDIS_URL",
-        "METRICS_BASIC_AUTH_USERNAME",
-        "METRICS_BASIC_AUTH_PASSWORD",
-    ]:
-        os.environ.pop(key, None)
 
 
 # --- A1: Security — API docs must be disabled in production ---

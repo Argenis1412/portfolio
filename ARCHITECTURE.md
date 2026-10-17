@@ -8,9 +8,9 @@ This document details the reasoning behind the architectural choices found in th
 ## 2. Decoupled Frontend and Strict API Consumer
 **Why?** The React frontend never connects directly to a database, and the FastAPI backend does not serve HTML. Keeping these completely separate ensures proper CORS enforcement, prevents accidental tightly-coupled logic, and mirrors real-world enterprise architectures where mobile devices could consume the same backend.
 
-## 3. Managed Database and One-Off Seeding
-**Decision**: In production, the managed PostgreSQL database is not committed to Git and is not reseeded on every boot.
-**Why?** Committing databases is an anti-pattern, and reseeding on every Koyeb cold start increases readiness time. Schema migrations should run during deploy/release steps, while `python backend/scripts/migrate_data.py` should be used as a one-off refresh task only when static SQL data needs to be rebuilt.
+## 3. JSON Content Without SQL
+**Decision**: Remove SQL adapters, connection pools, drivers, and migration tooling after retiring simulation incident writes. Portfolio content is served from `backend/data/`; `/health` checks JSON readability and email configuration without querying a database.
+**Why?** SQL had no remaining application use beyond a probe query. Removing it reduces runtime dependencies and deployment steps. Existing external database resources and data remain untouched; migration history is available in Git.
 
 ## 4. Observability and Protected Metrics
 **Decision**: Exposing Prometheus metrics at `/metrics` but requiring Basic Auth in production.
@@ -18,7 +18,7 @@ This document details the reasoning behind the architectural choices found in th
 
 ## 5. Performance: JSON-First Read Path
 **Decision**: Prioritizing `JSONRepository` for all portfolio-related reads (about, projects, stack, etc.) in production.
-**Why?** Using a managed PostgreSQL database for static data in a serverless/ephemeral environment adds significant cold-start latency and increases the risk of transient connection failures. By serving the portfolio data directly from memory-cached JSON files (Clean Architecture allows swapping adapters seamlessly), we achieve P95 latencies < 50ms and eliminate PostgreSQL as a single point of failure for the main application view. PostgreSQL remains reserved for transactional or future dynamic needs.
+**Why?** Using a managed PostgreSQL database for static data in a serverless/ephemeral environment adds significant cold-start latency and increases the risk of transient connection failures. By serving the portfolio data directly from memory-cached JSON files (Clean Architecture allows swapping adapters seamlessly), we achieve P95 latencies < 50ms and eliminate PostgreSQL as a single point of failure for the main application view. The backend no longer requires PostgreSQL.
 
 ## 6. Security Regex over Allow-Lists
 **Decision**: The CORS Policy uses a regex rule (`^https://argenisbackend\.com|https://portfolio.*-argenis1412s-projects\.vercel\.app$`) instead of exact strings or `*`.
@@ -41,9 +41,9 @@ This document details the reasoning behind the architectural choices found in th
 **Decision**: Implementing `SecurityHeadersMiddleware` and `GZipMiddleware`.
 **Why?** Browsers rely on specific headers (HSTS, NoSniff, X-Frame-Options) to enforce security policies. While the frontend had these in Vercel, the backend API was unprotected if accessed directly. Adding these headers at the middleware level ensures that every response is hardened by default. Additionally, GZip compression for payloads >1KB significantly improves UI performance on low-bandwidth networks.
 
-## 11. External Storage for Distributed State
-**Decision**: Migrating Rate Limiting and Persistence from local Memory/SQLite to Redis and PostgreSQL for production.
-**Why?** In "ephemeral" cloud environments like Koyeb, local file storage (SQLite) and in-memory caches (Rate limiting counters) are wiped on every container restart. By decoupling state into managed PostgreSQL (recommended: Supabase via `asyncpg`) and Redis (via `Upstash`), the application achieves true horizontal scalability and persistent antispam protection across multiple replicas.
+## 11. Redis for Distributed State
+**Decision**: Redis provides shared rate limiting, idempotency, contact deduplication, and the contact job queue. Portfolio reads use JSON files.
+**Why?** Shared Redis state survives application process restarts and coordinates contact processing. No SQL database is required.
 
 ## 12. Future Strategy: Scalability via Multi-Deploy (FastAPI & Go)
 **Decision**: A full rewrite of the backend to Go is officially discarded as over-engineering. Instead, any future expansion will follow a **multi-deploy strategy**: keeping Python (FastAPI) for the primary endpoints and expanding with Go only for specific, high-performance microservices.

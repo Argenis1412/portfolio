@@ -7,11 +7,11 @@ Used by load balancers, Kubernetes probes, and monitoring.
 
 import time
 
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends
 
 from app.adapters.repository import PortfolioRepository
 from app.settings import settings
-from app.controllers.dependencies import get_repository
+from app.controllers.dependencies import get_static_repository
 from app.core.uptime import APP_START_TIME
 from app.schemas.health import HealthResponse
 
@@ -32,40 +32,38 @@ async def check_liveness() -> dict:
     "/health",
     response_model=HealthResponse,
     summary="API health check",
-    description="Returns OK if the API is running. Includes version, environment, and detailed status of database and services.",
+    description="Checks portfolio JSON files and reports email configuration, version, and uptime without external requests.",
     responses={
         200: {"description": "API is healthy and running, or degraded but serving"},
     },
 )
 async def check_health(
-    response: Response,
-    repository: PortfolioRepository = Depends(get_repository),
+    repository: PortfolioRepository = Depends(get_static_repository),
 ) -> HealthResponse:
     """
     Verifies if the API and its dependencies are healthy.
     """
     uptime = int(time.time() - APP_START_TIME)
 
-    # Check database
-    db_health = await repository.check_health()
+    data_health = await repository.check_health()
 
     # Check email configuration
     email_configured = bool(settings.resend_api_key and settings.resend_api_key.strip())
 
     details = {
-        "database": db_health["status"],
+        "data": data_health["status"],
         "email": "configured" if email_configured else "pending",
-        "db_details": db_health["details"],
+        "data_details": data_health["details"],
     }
 
-    is_healthy = db_health["status"] == "ok"
+    is_healthy = data_health["status"] == "ok"
 
     return HealthResponse(
         status="ok" if is_healthy else "degraded",
         message=(
             "API functioning normally"
             if is_healthy
-            else "API degraded (fail-silent mode active)"
+            else "API degraded (portfolio data unavailable)"
         ),
         api_version="1.8.2",
         environment=settings.environment,

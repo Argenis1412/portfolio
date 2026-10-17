@@ -153,7 +153,7 @@ Circuit breaker: OPEN → CLOSED
 Recovery: 8.1s
 
 FAILURE → PASS
-Dependencies down (DB, Redis)
+Dependency down (Redis)
 Service: still serving (fail-silent)
 ```
 
@@ -185,7 +185,6 @@ docker-compose up --build
 cd backend
 py -3.12 -m venv .venv && .venv\Scripts\activate  # Windows
 pip install -r requirements.txt
-python -m alembic upgrade head
 uvicorn app.main:app --reload --port 8000
 
 # Frontend (separate terminal)
@@ -193,7 +192,7 @@ cd frontend
 npm install && npm run dev
 ```
 
-> Run database migrations as part of deploy/release automation, not on every Koyeb application boot.
+> Portfolio content is served from `backend/data/`. No database migration or seed step is required.
 >
 > **Note**: Interactive documentation (Swagger/ReDoc) is disabled in production for security. To view the API contract, run the project locally in `development` mode and access `localhost:8000/docs`.
 

@@ -13,7 +13,6 @@ from app.adapters.email_adapter import (
 )
 from app.adapters.logger_adapter import StructuredLogger
 from app.adapters.repository import PortfolioRepository, JsonRepository
-from app.adapters.sql_repository import SqlRepository
 from app.use_cases.get_about import GetAboutUseCase
 from app.use_cases.get_projects import GetProjectsUseCase, GetProjectByIdUseCase
 from app.use_cases.get_stack import GetStackUseCase
@@ -35,12 +34,6 @@ def get_job_queue() -> JobQueue | None:
 def get_static_repository() -> PortfolioRepository:
     """Returns shared data repository for JSON static reading."""
     return JsonRepository()
-
-
-@lru_cache
-def get_repository() -> PortfolioRepository:
-    """Returns transactional repository (SQL) for forms and rate limits."""
-    return SqlRepository()
 
 
 @lru_cache

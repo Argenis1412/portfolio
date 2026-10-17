@@ -11,7 +11,7 @@ from app.settings import settings
 
 
 class SpamDedupStore:
-    """Stores short-lived contact hashes outside PostgreSQL."""
+    """Stores short-lived contact hashes in Redis with an in-memory fallback."""
 
     def __init__(self, redis_url: str | None):
         self._redis_client: Redis | None = (

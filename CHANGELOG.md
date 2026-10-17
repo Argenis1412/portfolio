@@ -28,7 +28,11 @@ Keep this change on the cleanup branch until the frontend retirement is complete
 | `frontend/e2e/chaos.spec.ts`, `.github/workflows/e2e-smoke.yml` | Replace the simulation smoke scenarios before running against the updated API. |
 | Portfolio JSON content and architecture docs | Revise claims that describe the retired playground as a current feature during the content/documentation cleanup. |
 
-The historical SQL incident model and migrations are retained until the SQL cleanup block to keep migration metadata consistent. No database migration or production data deletion is performed.
+### SQL retirement
+- Removed SQL repositories/models, Alembic tooling/history from the working tree, the seed script, SQL tests, connection settings/pools, and SQL driver dependencies. Migration history remains in Git.
+- `/health.details` now exposes `data`, `data_details`, and `email` instead of `database` and `db_details`. Required JSON files are checked for readability, syntax, and top-level type; the optional case-study sidecar is checked when present. Missing/invalid/unreadable data produces HTTP 200 with `status="degraded"`. Email configuration remains informational; `/live` is unchanged.
+- Removed the Compose database service, its dependency/volume declaration, and SQL environment variables. The API healthcheck now uses Python's standard library.
+- Existing production tables (`about`, `projects`, `experiences`, `formacoes`, `stack`, `chaos_incidents`, `alembic_version`), database resources, and volumes are not deleted. No migration is executed. Terraform's existing `DATABASE_URL` secret may remain; the application ignores it. Database decommissioning is a separate infrastructure operation.
 
 ## 🔥 Production Incidents
 

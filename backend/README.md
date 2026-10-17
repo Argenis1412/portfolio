@@ -1,221 +1,89 @@
-# 🎯 Portfolio Backend API
+# Portfolio Backend
 
-> **Live API Status:** [Healthy (JSON) →](https://api.argenisbackend.com/health)
+Python 3.12 and FastAPI serve portfolio content from memory-cached JSON files in
+`data/`. Contact messages use Redis Streams and Resend, with background delivery
+when the queue is unavailable. SQL, database drivers, migrations, and seeding are
+no longer required.
 
-REST API built with **FastAPI** and **Clean Architecture** — engineered with a **language-agnostic core** so that the system remains portable, testable, and framework-independent.
+## Run locally
 
-## 📝 Description
+From `backend/`:
 
-Professional backend for a developer portfolio, implementing:
-- ✅ **Clean Architecture** (Controllers → Use Cases → Entities → Adapters)
-- ✅ **Versioned API** (/api/v1/*)
-- ✅ **SQL Database** with **SQLModel** (SQLAlchemy + Pydantic)
-- ✅ **Database Migrations** with **Alembic**
-- ✅ **Global Error Handling** with custom exceptions
-- ✅ **Middleware** with request_id, logging, and performance measurement
-- ✅ **Professional Health Check** with database connectivity and uptime
-- ✅ **Clear separation** of responsibilities
-- ✅ **Automatic validation** with Pydantic V2
-- ✅ **Interactive Documentation** with OpenAPI/Swagger
-- ✅ **Automated Tests** with pytest
-- ✅ **Quality Gate**: GitHub Actions enforces a **80% minimum coverage** threshold and verified Docker builds on every push.
-- ✅ **Layered contact protection**: `ContactGuard` service orchestrating honeypot, spam scoring, content dedup (Redis → in-memory fallback, 30-min window), and multi-tier rate limiting (10/day email, 20/min email, 30/hour IP, 30/hour fingerprint).
-- ✅ **Rate Limiting**: Enforced via slowapi with Redis backend (fails open on Redis outage).
-- ✅ **API Observability**: Full integration with OpenTelemetry, Prometheus, and Sentry.
-- ✅ **Live Evidence Support**: Built-in Chaos Monkey simulations and real-time metrics for interactive frontend dashboards.
-
----
-
-## 🏗️ Architecture
-
-### Simplified Clean Architecture
-```mermaid
-graph TD
-    subgraph Interface Layer
-        C[Controllers / HTTP Layer]
-        C -.- note1[Receives requests<br>Validates input<br>Returns HTTP responses]
-    end
-
-    subgraph Use Case Layer
-        UC[Use Cases / Business Logic]
-        UC -.- note2[Orchestrates business logic<br>NO framework dependencies<br>Testable in isolation]
-    end
-
-    subgraph Domain Layer
-        E[Entities / Domain Models]
-        E -.- note3[Immutable domain models<br>Pure business logic<br>Python Dataclasses]
-    end
-
-    subgraph External Layer
-        A[Adapters / External Services]
-        A -.- note4[Email Resend<br>PostgreSQL / Redis<br>Observability Stack]
-    end
-
-    C -->|Calls| UC
-    UC -->|Uses| E
-    UC -->|Interfaces with| A
-```
-
-### Request Flow
-
-1. HTTP Request
-2. **Middleware**: Assigns `X-Request-ID`, logs entry.
-3. **Controller**: Pydantic validation.
-4. **Use Case**: Executes business logic.
-5. **Adapter**: Interacts with **SQL Database** via **SQLModel**.
-6. Returns Response.
-7. **Middleware**: Logs exit, adds `X-Request-ID` and `X-Response-Time` headers.
-
----
-
-## 🚀 How to Run
-
-### 1. Installation
 ```bash
-git clone https://github.com/Argenis1412/portfolio.git
-cd portfolio/backend
-
-# Create virtual environment
-# Windows:
-py -3.12 -m venv .venv
-# Linux/macOS:
 python -m venv .venv
-
-# Activate virtual environment
-# Windows:
-.\.venv\Scripts\activate
-# Linux/macOS:
-source .venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
+# Windows: .venv\Scripts\activate
+# Linux/macOS: source .venv/bin/activate
+pip install -r requirements.txt -r requirements-dev.txt
 ```
 
-### 2. Database Setup (New)
-```bash
-# 1. Apply schema migrations
-python -m alembic upgrade head
+Copy `.env.example` to `.env`, configure email if needed, then run:
 
-# 2. Seed data from JSON to SQL
-python ./scripts/migrate_data.py
-```
-
-### 3. Execution
 ```bash
-# Start the server
 python -m uvicorn app.main:app --reload --port 8000
 ```
-- **Production Docs**: `https://api.argenisbackend.com/docs`
-- **Production Status**: `https://api.argenisbackend.com/health`
-- **Production Health**: `https://api.argenisbackend.com/health`
 
----
+Local API documentation is available at `/docs`. Interactive documentation is
+disabled in production. Without Resend credentials, local delivery is logged by
+the console adapter. Without Redis, contact processing uses in-memory protection
+and background tasks; production requires Redis.
 
-## 🐒 Living Dashboard (Live Evidence)
+## Configuration
 
-This backend is designed to feed an interactive "Living Dashboard" frontend. It includes specific instrumentation for demonstrating backend health under load:
+| Variables | Purpose |
+|---|---|
+| `APP_NAME`, `ENVIRONMENT` | Service name and environment; use `production` in production. |
+| `ALLOWED_ORIGINS`, `REGEX_ALLOWED_ORIGINS` | Browser CORS origins and optional origin regex. |
+| `REDIS_URL` | Shared rate limiting, idempotency, deduplication, and contact queue. |
+| `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_TO_EMAIL` | Email delivery credentials and addresses. |
+| `METRICS_BASIC_AUTH_USERNAME`, `METRICS_BASIC_AUTH_PASSWORD` | Required protection for `/metrics` in production. |
+| `SENTRY_DSN`, `SENTRY_TRACES_SAMPLE_RATE`, `OTLP_ENDPOINT` | Optional error tracking and tracing. |
+| `TRUSTED_PROXY_DEPTH`, `TRUSTED_PROXY_IPS` | Trusted proxy configuration for client IP extraction. |
 
-- **Chaos Monkey Simulation**: Triggered via `X-Debug-Mode` header.
-  - `simulate-429`: Simulates rate limit threshold hit (returns 429 with `Retry-After`).
-  - `simulate-500`: Simulates unexpected internal server error.
-- **Real-time API Metrics**: Dedicated endpoint providing a "pulse" of the API (latency P95, requests/24h, errors).
-- **Trace Accountability**: Every error response includes a `trace_id` for immediate debugging transparency.
+Portuguese configuration aliases remain temporarily supported; the configuration
+cleanup will migrate the example files. Legacy `DATABASE_URL` and `DB_*` settings
+are ignored. See `app/settings.py` for defaults and production guards.
 
----
+## API
 
-## 📊 Observability & Metrics
+| Endpoint | Behavior |
+|---|---|
+| `GET /live` | Process liveness with no dependency or file checks. |
+| `GET /health` | JSON file checks, email configuration, version, and uptime. |
+| `GET /api/v1/{about,projects,stack,experiences,formation,philosophy}` | Portfolio content with ETag caching. |
+| `GET /api/v1/projects/{id}` | Project details; 404 for an unknown ID. |
+| `POST /api/v1/contact` | Validated, rate-limited contact submission with deduplication and optional idempotency key. |
+| `GET /api/v1/metrics/summary` | Observed P95, request/error counts, uptime, and derived status. |
+| `GET /metrics` | Prometheus HTTP and worker metrics; Basic Auth in production. |
 
-The API exposes a Prometheus-compatible metrics endpoint at `/metrics`.
+`/health` returns HTTP 200 with `status="ok"` or `status="degraded"`. Its details
+contain `data`, per-file `data_details`, and informational `email` configuration.
+It reads required JSON files, checks syntax and top-level types, and checks the
+optional project case-study sidecar when present. It does not validate every
+content field or contact Redis, Resend, or a database.
 
-> [!IMPORTANT]
-> **Security Note**: `/metrics` is **protected by HTTP Basic Auth in production**
-> (`METRICS_BASIC_AUTH_USERNAME` / `METRICS_BASIC_AUTH_PASSWORD` env vars).
-> It is accessible without authentication only in local / development environments.
+The P95 warmup reset preserves lifetime request/error counters. Metrics are local
+to each API process. Simulation endpoints and failure injection have been removed;
+the pending frontend retirement is listed in the root CHANGELOG. Deploy both
+changes together.
 
-Supported metrics:
-- `http_requests_total`: Counter of all requests by status code.
-- `http_request_duration_seconds`: Response latency (P95/P99).
-- `process_cpu_seconds_total`: Resource utilization.
+## Code and checks
 
----
+Controllers handle HTTP, use cases retrieve/sort content and submit messages,
+entities describe domain data, and adapters implement JSON reads and delivery.
+`app/core/` contains shared request protection and telemetry; `app/worker.py`
+consumes contact jobs. Docker Compose currently also defines a standalone worker;
+the worker cleanup will consolidate execution.
 
-## 📡 Endpoints
-
-### 🔍 Health Check & Observability
-`GET /health`
-Returns status for:
-- API connectivity
-- **Database connection**
-- **External service config (Email: Resend)**
-- **Uptime** and versioning.
-
-### 📁 Portfolio Data
-- `GET /api/v1/about`: Internationalized "About Me" data.
-- `GET /api/v1/projects`: Projects with tags and links.
-- `GET /api/v1/stack`: Tech stack by categories.
-- `GET /api/v1/experiences`: Professional timeline.
-- `GET /api/v1/formation`: Education history.
-
-### Live Metrics
-- `GET /api/v1/metrics/summary`: Consolidated real-time telemetry for frontend evidence dashboard.
-
-The summary reports observed latency, request/error counts, uptime, and derived
-status. The P95 warmup reset leaves lifetime request/error counters intact.
-Worker processing, retry, and queue recovery metrics remain available on `/metrics`.
-Simulation endpoints and the `X-Debug-Mode` failure injection header have been
-removed. See the CHANGELOG's unreleased section for pending frontend changes;
-deploy this backend together with that frontend update.
-
----
-
-## 🧪 Tests
 ```bash
-# Run all tests
+ruff check .
+ruff format --check .
+mypy app/core app/use_cases app/controllers app/adapters --ignore-missing-imports --explicit-package-bases
 pytest
-
-# With coverage report (HTML)
-pytest --cov=app --cov-config=.coveragerc --cov-report=html
-
-# CI/CD Quality Gate (local simulation — must reach 80%)
-pytest --cov=app --cov-config=.coveragerc --cov-fail-under=80
 ```
 
-Content snapshots in `tests/snapshots/content.json` freeze the JSON responses
-served by the static repository, including each project's details. Review and
-update them deliberately when portfolio content or the public contract changes.
+Pytest enforces 80% coverage and mocks email delivery. Content snapshots in
+`tests/snapshots/content.json` protect the public JSON contract; review snapshot
+updates deliberately when changing portfolio content or response mappings.
 
-Check Resend configuration without sending an email:
-
-```bash
-python scripts/check_resend.py
-```
-
-Use `python scripts/check_resend.py --send` to explicitly send a real test email.
-The configuration check reports presence only and never prints credentials.
-
----
-
-## 🎓 Technical Decisions
-
-### Why SQL Database (SQLModel)?
-- **Professionalism**: Real-world apps use SQL for relationships and performance.
-- **Robustness**: Typing consistency between database models and Pydantic schemas.
-- **Evolution**: **Alembic** allows managed schema changes.
-- **Scalability**: Easy migration from SQLite to PostgreSQL by changing the `DATABASE_URL`.
-
-### Future-Ready & Language Agnostic
-The **Domain Logic (Use Cases)** is strictly isolated from the framework (FastAPI) and external libraries. This means:
-- **Portability**: The business rules could be migrated to another Python framework (like Starlette or Litestar) or even serve as a blueprint for a rewrite in a high-performance language (like Go or Rust) with minimal logic re-engineering.
-- **Stability**: Changes in infrastructure (DB, Email, Cloud Provider) only require new **Adapters**, leaving the core logic untouched.
-
----
-
-## 🗺️ Future Roadmap
-
-This backend is designed to evolve into a full-scale enterprise system:
-- **🚀 Advanced Simulation**: Transactional logic for a mock "Financial Ledger" (ACID compliance testing).
-- **🔐 Identity Research**: Role-Based Access Control (RBAC) implementation.
-
-### Why Manual JSON Serialization (SQLite Compatibility)?
-- SQLite doesn't always have native JSON support in all environments.
-- Implemented an adapter layer in `sql_models.py` and `SqlRepository` to handle internationalization (dicts/lists) as TEXT, ensuring extreme reliability across all platforms.
+`python scripts/check_resend.py` reports configuration presence without printing
+credentials or sending email. Add `--send` only to request a real test email.

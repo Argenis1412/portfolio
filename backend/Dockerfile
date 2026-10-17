@@ -63,8 +63,6 @@ ENV PATH=/home/appuser/.local/bin:$PATH
 # Copy application code
 COPY --chown=appuser:appuser backend/app/ ./app/
 COPY --chown=appuser:appuser backend/data/ ./data/
-COPY --chown=appuser:appuser backend/alembic/ ./alembic/
-COPY --chown=appuser:appuser backend/alembic.ini .
 
 # Switch to non-root user
 USER appuser

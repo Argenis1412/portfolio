@@ -13,7 +13,7 @@ SNAPSHOT_PATH = Path(__file__).parent / "snapshots" / "content.json"
 
 @pytest.fixture
 def json_content_client(override_dependencies, client):
-    """Use production JSON providers instead of the global SQL test overrides."""
+    """Use production JSON providers instead of the global mock content overrides."""
     providers = (
         dependencies.dep_about,
         dependencies.dep_projects,

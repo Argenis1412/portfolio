@@ -35,7 +35,7 @@ def test_health_returns_ok(client):
 
 
 def test_live_returns_ok_without_dependencies(client):
-    """Tests GET /live returns status ok without consulting DB."""
+    """Tests GET /live returns status ok without checking dependencies."""
     response = client.get("/live")
 
     assert response.status_code == 200

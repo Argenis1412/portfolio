@@ -1,5 +1,5 @@
 """
-Resilience tests: Redis failures, Supabase transient errors,
+Resilience tests: Redis failures,
 email adapter timeouts, and concurrent idempotency conflicts.
 """
 
@@ -80,40 +80,6 @@ async def test_spam_store_redis_down_fallback():
         # Second reservation with same hash must fail (duplicate in memory)
         result2 = await store.reserve("abc123", ttl_seconds=60)
         assert result2 is False
-
-
-# ──────────────────────────────────────────────────────────────────────────────
-# Supabase / database transient failure
-# ──────────────────────────────────────────────────────────────────────────────
-
-
-async def test_supabase_transient_failure_health_check(client):
-    """
-    When the database layer raises an exception, the /health endpoint must
-    return HTTP 200 with status='erro' in the body — NOT a 500 crash.
-    This validates that SqlRepository.check_health() catches exceptions.
-    """
-    from app.adapters.sql_repository import SqlRepository
-    from app.controllers import dependencies
-
-    mock_repo = AsyncMock(spec=SqlRepository)
-    mock_repo.check_health.return_value = {
-        "status": "erro",
-        "details": "Simulated transient DB failure",
-    }
-
-    app.dependency_overrides[dependencies.get_repository] = lambda: mock_repo
-
-    try:
-        resp = client.get("/health")
-        # When a dependency is degraded, the health endpoint returns 503 Service Unavailable
-        # (HTTP 200 is only returned when all checks pass).
-        assert resp.status_code in (200, 503)
-        body = resp.json()
-        # The service must not crash — a structured body is always returned
-        assert isinstance(body, dict)
-    finally:
-        app.dependency_overrides.pop(dependencies.get_repository, None)
 
 
 # ──────────────────────────────────────────────────────────────────────────────

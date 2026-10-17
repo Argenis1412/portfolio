@@ -44,8 +44,7 @@ async def _lifespan(app: FastAPI):
     """FastAPI lifespan context: startup → yield → shutdown.
 
     Starts the background job worker (Redis Streams) if configured.
-    Shutdown: disposes the SQLAlchemy connection pool to avoid dangling
-    connections during container restarts/rolling deploys.
+    Shutdown closes shared Redis connections.
     """
     worker_task = None
     if settings.redis_url and not os.environ.get("PYTEST_CURRENT_TEST"):

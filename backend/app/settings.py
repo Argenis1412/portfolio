@@ -55,10 +55,6 @@ class Settings(BaseSettings):
         default="",
         alias="RESEND_TO_EMAIL",
     )
-    database_url: str = Field(
-        default="sqlite+aiosqlite:///./dev.db",
-        alias="DATABASE_URL",
-    )
     redis_url: str | None = Field(
         default=None,
         alias="REDIS_URL",
@@ -88,37 +84,6 @@ class Settings(BaseSettings):
     redis_connect_timeout_seconds: float = Field(
         default=5.0,
         alias="REDIS_CONNECT_TIMEOUT_SECONDS",
-    )
-    db_connect_timeout_seconds: float = Field(
-        default=5.0,
-        alias="DB_CONNECT_TIMEOUT_SECONDS",
-    )
-    db_command_timeout_seconds: float = Field(
-        default=10.0,
-        alias="DB_COMMAND_TIMEOUT_SECONDS",
-    )
-    db_pool_size: int = Field(
-        default=2,
-        alias="DB_POOL_SIZE",
-        description="SQLAlchemy pool size (default 2 for serverless/small instances).",
-    )
-    db_max_overflow: int = Field(
-        default=2,
-        alias="DB_MAX_OVERFLOW",
-        description="SQLAlchemy max overflow connections.",
-    )
-    db_pool_recycle_seconds: int = Field(
-        default=300,
-        alias="DB_POOL_RECYCLE_SECONDS",
-    )
-    db_pool_timeout_seconds: float = Field(
-        default=30.0,
-        alias="DB_POOL_TIMEOUT_SECONDS",
-    )
-    db_pool_use_lifo: bool = Field(
-        default=True,
-        alias="DB_POOL_USE_LIFO",
-        description="Use LIFO for pool connections (better for serverless).",
     )
     metrics_basic_auth_username: str = Field(
         default="",
@@ -197,12 +162,6 @@ class Settings(BaseSettings):
             return
 
         errors: list[str] = []
-
-        if self.database_url.startswith("sqlite"):
-            errors.append("SQLite is not allowed in production")
-
-        if not self.database_url.startswith("postgresql+asyncpg://"):
-            errors.append("DATABASE_URL must use postgresql+asyncpg in production")
 
         if not self.redis_url:
             errors.append("REDIS_URL is required in production")
