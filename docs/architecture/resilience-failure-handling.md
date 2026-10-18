@@ -1,44 +1,46 @@
 # Resilience and Failure Handling
 
-This document outlines the strategies and mechanisms implemented to ensure the portfolio remains robust and provides a good user experience even when facing infrastructure limitations or transient failures.
+This document describes the cleanup branch, not a deployed release. Frontend
+retirement remains a [release prerequisite](../../CHANGELOG.md#frontend-deployment-dependency).
+Historical PostgreSQL and Chaos designs are indexed in the
+[failure model](FAILURE_MODEL.md).
 
-## 1. Infrastructure Context
-The portfolio is hosted on free-tier services which introduce specific challenges:
-- **Koyeb (Managed PostgreSQL)**: Our primary persistent store. While highly reliable, it may experience brief "cold starts" on the free tier after long periods of inactivity.
-- **Upstash (Serverless Redis)**: Used for distributed rate limiting and state-aware anti-abuse. Designed for low latency and high availability.
-- **Koyeb (Backend API)**: Instances spin down on the free tier. The first request triggers a restart.
+## Runtime boundaries
 
-## 2. Failure Modes and Mitigation
+Portfolio reads use local JSON files; the application has no SQL dependency.
+Redis supports shared contact protection and the delivery stream. Resend handles
+email delivery. One Uvicorn process owns the consumer through the API lifespan
+when `WORKER_ENABLED=true`; no separate worker service is required.
 
-### A. Database/API Cold Starts
-**Problem**: The user hits a section (e.g., Projects) and the request hangs while the infrastructure wakes up.
-**Mitigation**:
-- **Proactive UX (ServerWakeupNotice)**: A global listener monitors active fetches. If any request takes longer than **2.5 seconds**, a "Waking up server..." toast appears to inform the user.
-- **Backend Keep-Alive**: (Optional/Planned) Periodic pings to keep the database warm during peak hours.
+## Degradation policy
 
-### B. API Timeouts and Network Errors
-**Problem**: Transient network issues or high latency cause requests to fail.
-**Mitigation**:
-- **React Query Retries**: Configured to retry failed fetches automatically (default: 3 times with exponential backoff).
-- **Graceful Error States**: Each section (`Skills`, `Experience`, `Projects`) implements a dedicated error view (`ServerWakeupError`) allowing the user to retry manually without losing page context.
+| Failure | Current behavior | Limit |
+|---|---|---|
+| Missing, unreadable, or malformed required JSON | `/health` reports file details and degraded status; failed content reads propagate errors. | HTTP 200 from `/health` alone does not establish usable content. Health checks validate top-level types, not every field. |
+| Redis rate-limit storage unavailable | Contact checks use a local memory limiter; read-only checks fail open. | Local counters reset on restart and are not shared. If the memory limiter also fails, contact checks allow through as a last resort. |
+| Redis deduplication/idempotency unavailable | Stores use process-local memory fallback on Redis exceptions. | This cannot guarantee coordination across replicas or through restarts. A refused Redis lock remains contention, not a reason to acquire a local lock. |
+| Stream enqueue unavailable or queue disabled | Contact delivery uses one FastAPI background task. | No durable storage or automatic delivery retries in this mode; process exit can lose accepted work. |
+| Stream consumer/provider failure | Retry policy classifies transient, permanent, and unknown errors; exhausted jobs go to the DLQ. | At-least-once processing can duplicate delivery. Acceptance is not inbox delivery. |
+| Process unavailable | Requests cannot reach the API. | JSON removes database connection costs, not process startup or hosting/network failures. |
 
-- **Zod Schema Validation**: All API responses are validated at the edge (in `api.ts`) using Zod. If the contract is violated, a controlled error is thrown, preventing the "White Screen of Death".
+Spam scores flag delivered email rather than dropping it. Honeypots remain
+silent drops; validation, duplicate submissions, and exhausted rate limits remain
+observable rejections. These policies should not be described as universal
+fail-open or fail-silent behavior.
 
-### D. Anti-Abuse Persistence
-**Problem**: In-memory rate limiting fails when the backend restarts (cold start), allowing bots to bypass limits during the "warm-up" phase.
-**Mitigation**:
-- **Redis Storage**: Rate limit counters and deduplication state are stored in **Upstash Redis**. This ensures that antispam policies persist across backend restarts and are shared across all API replicas.
+For retry counts, age limits, shutdown behavior, and triage, use the
+[operations runbook](production-operations.md). The
+[JSON read decision](JSON_FIRST_READ_PATH.md) explains cache and update behavior.
 
-## 3. UI/UX Resilience Patterns
+## Verification and user experience
 
-### The "Retry" Loop
-When a critical fetch fails, the UI displays a clear message (`server.wakeup.error`) and a retry button.
-1. **Manual Retry**: Encourages the user to refresh or click "Retry".
-2. **Deterministic Fallbacks**: If the API is completely down, sections show a skeleton or a friendly "Service temporarily unavailable" message instead of breaking the layout.
+Backend tests exercise degradation and delivery decisions without proving live
+provider health. Docker validation and a deployment-sized load test remain
+pending. Review frontend retries, loading/error views, and contract consumption
+as part of frontend retirement; older descriptions of UI defaults are not
+backend availability guarantees.
 
-## 4. Monitoring and Observability
-- **Sentry**: Tracks frontend exceptions and API failures in real-time.
-- **Prometheus/Grafana**: Monitors backend health, latency buckets, and error rates to identify if "cold starts" are becoming a significant UX hurdle.
-
----
-*Last updated: April 2026*
+Prometheus, structured logs, and optional Sentry/OpenTelemetry provide evidence
+for diagnosis. Verify actual alert rules and external monitor targets before
+claiming coverage. See the [SLO targets](SLO_DEFINITIONS.md); no current production
+compliance is established by this documentation.

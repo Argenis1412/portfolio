@@ -72,8 +72,11 @@ incidents and versioned releases below retain their original historical context.
 - Updated the root guide, operations runbook, root architecture index, and
   engineering playbook to distinguish current backend behavior from historical
   SQL/Chaos designs. Preserved numbered decision references and historical sources;
-  removed the obsolete completed roadmap from current operating guidance. Detailed
-  architecture/case-study review and portfolio JSON corrections remain separate work.
+  removed the obsolete completed roadmap from current operating guidance. Updated
+  the failure model, resilience policy, JSON read decision, and SLO measurement
+  limits; retained targets and historical incident evidence without claiming current
+  compliance. Remaining detailed documents, case studies, and portfolio JSON
+  corrections remain separate work.
 
 ### Frontend deployment dependency
 
