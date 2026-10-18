@@ -1,5 +1,12 @@
 # Benchmarks
 
+For the cleanup branch, use the [isolated single-process procedure](LOCAL_VALIDATION.md).
+The [current attempt](results/8a73bb4/validation-status.md) was blocked by Docker
+Desktop startup; no current image build or load result is claimed. The scripts,
+claims, and results below predate this validation procedure and must be read in
+their historical context. Do not run the contact benchmark against production
+without explicit authorization to send email.
+
 Load testing scripts using [k6](https://k6.io/) to measure and track API performance over time.
 
 ## Why this exists

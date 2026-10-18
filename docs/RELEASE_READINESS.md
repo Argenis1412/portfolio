@@ -57,6 +57,10 @@ Keep future content changes tied to deliberate snapshot review.
 
 These items remain pending. No production settings, secret values, infrastructure,
 or monitor targets were changed or verified in this documentation block.
+The [local Docker attempt](../benchmarks/results/8a73bb4/validation-status.md)
+failed during Desktop startup, before building an image. The
+[isolated procedure](../benchmarks/LOCAL_VALIDATION.md) and k6 scenario are prepared;
+their runtime checks remain pending until the engine starts successfully.
 
 ## Evidence and discoverability
 

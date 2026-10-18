@@ -89,6 +89,10 @@ incidents and versioned releases below retain their original historical context.
   validation. Deliberately updated only that project in list/detail snapshots;
   other projects, endpoint payloads, and schemas are unchanged. Frontend retirement
   and operational release checks remain pending.
+- Restricted Docker build context to backend runtime inputs. Added a loopback-only
+  single-process validation scenario and isolated Redis/console-delivery procedure.
+  Docker Desktop failed to initialize its Inference-manager socket, so image build
+  and load execution remain blocked; no performance measurements are claimed.
 
 ### Frontend deployment dependency
 
