@@ -118,8 +118,10 @@ Earlier architecture wording is available with
 `git show 615c9a5:ARCHITECTURE.md`; retired decisions remain indexed above rather
 than being relabeled as current features.
 
-Detailed documents under `docs/architecture/`, the historical failure model, and
-case studies still need a context/consistency pass. Portfolio JSON and content
-snapshots are unchanged. Use the current backend guide and operations runbook for
+The failure model, resilience policy, JSON read decision, SLO definitions, and
+observability/logging guides now distinguish current behavior from historical
+designs. Security, HTTP caching, remaining detailed documents, and case studies
+still need a consistency pass. Portfolio JSON and content snapshots are unchanged.
+Use the current backend guide and operations runbook for
 runtime behavior; use [SLO definitions](docs/architecture/SLO_DEFINITIONS.md) and
 versioned benchmarks as targets and historical evidence, not newly verified results.

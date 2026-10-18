@@ -115,9 +115,10 @@ current, retired, and deferred decisions. The
 [engineering playbook](ENGINEERING_PLAYBOOK.md) defines development and review rules.
 [CHANGELOG](CHANGELOG.md) retains release history and production incidents.
 The [failure model](docs/architecture/FAILURE_MODEL.md), resilience policy, JSON
-read decision, and SLO targets distinguish current behavior from historical
-evidence. Case studies and remaining detailed documents still need a consistency
-pass; read their SQL, Chaos, and old configuration references in version context.
+read decision, SLO targets, and observability/logging guides distinguish current
+behavior from historical evidence. Case studies and remaining detailed documents
+still need a consistency pass; read their SQL, Chaos, and old configuration
+references in version context.
 
 The [SLO definitions](docs/architecture/SLO_DEFINITIONS.md) state targets; the
 [recorded benchmark](benchmarks/results/02c08d3/summary.md) is historical evidence,

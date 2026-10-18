@@ -75,8 +75,9 @@ incidents and versioned releases below retain their original historical context.
   removed the obsolete completed roadmap from current operating guidance. Updated
   the failure model, resilience policy, JSON read decision, and SLO measurement
   limits; retained targets and historical incident evidence without claiming current
-  compliance. Remaining detailed documents, case studies, and portfolio JSON
-  corrections remain separate work.
+  compliance. Corrected observability ownership, optional tracing/export behavior,
+  log masking limits, and unsupported automation examples. Remaining detailed
+  documents, case studies, and portfolio JSON corrections remain separate work.
 
 ### Frontend deployment dependency
 
