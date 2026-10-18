@@ -110,12 +110,13 @@ still needs a deployment-sized load test.
 
 ## Design history and evidence
 
+[ARCHITECTURE](ARCHITECTURE.md) describes current backend boundaries and indexes
+current, retired, and deferred decisions. The
+[engineering playbook](ENGINEERING_PLAYBOOK.md) defines development and review rules.
 [CHANGELOG](CHANGELOG.md) retains release history and production incidents.
-[ARCHITECTURE](ARCHITECTURE.md), the
-[engineering playbook](ENGINEERING_PLAYBOOK.md), and the
-[failure model](docs/architecture/FAILURE_MODEL.md) include earlier designs and
-remain pending a detailed documentation review. References to SQL, Chaos, or old
-configuration there must be read in their version context.
+The [failure model](docs/architecture/FAILURE_MODEL.md), case studies, and other
+detailed architecture documents remain pending a consistency pass; references to
+SQL, Chaos, or old configuration there must be read in their version context.
 
 The [SLO definitions](docs/architecture/SLO_DEFINITIONS.md) state targets; the
 [recorded benchmark](benchmarks/results/02c08d3/summary.md) is historical evidence,

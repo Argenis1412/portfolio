@@ -69,9 +69,11 @@ incidents and versioned releases below retain their original historical context.
 - Centralized gradual mypy options for all of `app/`; aligned CI, the local script,
   and optional pre-commit configuration. Dependencies are unchanged. The active
   Husky hook still runs frontend lint-staged tasks only.
-- Updated the root guide and operations runbook to distinguish current backend
-  behavior from historical SQL/Chaos designs. Detailed architecture/playbook
-  review and portfolio JSON corrections remain separate work.
+- Updated the root guide, operations runbook, root architecture index, and
+  engineering playbook to distinguish current backend behavior from historical
+  SQL/Chaos designs. Preserved numbered decision references and historical sources;
+  removed the obsolete completed roadmap from current operating guidance. Detailed
+  architecture/case-study review and portfolio JSON corrections remain separate work.
 
 ### Frontend deployment dependency
 
@@ -84,7 +86,7 @@ Zod defaults avoid parsing failures but do not remove misleading UI behavior.
 | `frontend/src/api/schemas.ts`, `useLiveMetrics`, status/metrics banners | Remove synthetic fields and simulation-derived status, counters, and recovery logic. |
 | `frontend/src/api/client.ts` | Remove `X-Chaos-Preset`, then its temporary backend CORS allowance. `X-Debug-Mode` is already ignored and disallowed. |
 | `frontend/e2e/chaos.spec.ts`, `.github/workflows/e2e-smoke.yml` | Replace simulation smoke scenarios before targeting the updated API. |
-| Portfolio JSON content and remaining architecture/playbook documents | Review retired-feature claims; deliberately review content snapshots. |
+| Portfolio JSON content and detailed architecture documents | Review retired-feature claims; deliberately review content snapshots. |
 
 Before any future release, migrate existing local keys using the
 [backend guide](backend/README.md#configuration), confirm the GitHub secret

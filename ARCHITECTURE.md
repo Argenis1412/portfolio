@@ -1,140 +1,125 @@
-# 🏛️ Architecture & Technical Decisions
+# Architecture and Decision Index
 
-This document details the reasoning behind the architectural choices found in this repository. Since this is a personal portfolio showcasing engineering practices, it serves as a lightweight Architecture Decision Record (ADR).
+This document describes the backend cleanup branch. **Deployment remains blocked
+by frontend retirement**; see [remaining consumers](CHANGELOG.md#frontend-deployment-dependency).
+The [backend guide](backend/README.md) defines configuration and API behavior;
+the [operations runbook](docs/architecture/production-operations.md) defines triage
+and release prerequisites. Neither this document nor historical benchmarks
+establishes the state of the deployed service.
 
-## 1. Clean Architecture in the Backend
-**Why?** The backend is structured using Clean Architecture (Controllers -> Use Cases -> Entities -> Adapters). While a "simple portfolio" might not strictly need it, demonstrating language-agnostic boundary isolation shows scaling potential and separation of concerns.
+## Current backend design
 
-## 2. Decoupled Frontend and Strict API Consumer
-**Why?** The React frontend never connects directly to a database, and the FastAPI backend does not serve HTML. Keeping these completely separate ensures proper CORS enforcement, prevents accidental tightly-coupled logic, and mirrors real-world enterprise architectures where mobile devices could consume the same backend.
+| Boundary | Responsibility |
+|---|---|
+| `app/controllers/` | HTTP routing, dependency composition, response mapping, and contact orchestration. |
+| `app/use_cases/` | Retrieve/sort content and construct/deliver contact messages through injected repository, email, and logger adapters. |
+| `app/entities/` | Domain data; architecture tests protect its framework/import boundaries. |
+| `app/adapters/` | Repository interface and JSON implementation, email adapters, structured logger. |
+| `app/core/` | Request protection, caching, Redis clients, queue, middleware, and telemetry. |
+| `app/worker.py` | Redis Streams consumption and recovery inside the API lifespan. |
 
-## 3. JSON Content Without SQL
-**Decision**: Remove SQL adapters, connection pools, drivers, and migration tooling after retiring simulation incident writes. Portfolio content is served from `backend/data/`; `/health` checks JSON readability and email configuration without querying a database.
-**Why?** SQL had no remaining application use beyond a probe query. Removing it reduces runtime dependencies and deployment steps. Existing external database resources and data remain untouched; migration history is available in Git.
+The repository interface currently lives in the adapters package. Use cases accept
+these injected adapters; tests use doubles at those boundaries. This is the
+implemented dependency structure, not a claim of complete infrastructure
+independence. The frontend consumes HTTP rather than accessing backend storage.
 
-## 4. Observability and Protected Metrics
-**Decision**: Exposing Prometheus metrics at `/metrics` but requiring Basic Auth in production.
-**Why?** While the metrics are intentionally accessible to reviewers, exposing a public `/metrics` endpoint on the open internet (even for a portfolio) is a non-standard practice that could be seen as a security oversight. Adding `METRICS_BASIC_AUTH` ensures that only authorized clients (or reviewers with the provided credentials) can see the live stack's health, throughput, and latencies.
+### Content and caching
 
-## 5. Performance: JSON-First Read Path
-**Decision**: Prioritizing `JSONRepository` for all portfolio-related reads (about, projects, stack, etc.) in production.
-**Why?** Using a managed PostgreSQL database for static data in a serverless/ephemeral environment adds significant cold-start latency and increases the risk of transient connection failures. By serving the portfolio data directly from memory-cached JSON files (Clean Architecture allows swapping adapters seamlessly), we achieve P95 latencies < 50ms and eliminate PostgreSQL as a single point of failure for the main application view. The backend no longer requires PostgreSQL.
+`JsonRepository` reads checked-in JSON on demand and caches successful reads in
+memory until process restart. Files are not preloaded at startup. Content changes
+require a new deployed artifact/process; there is no SQL adapter, migration, seed
+step, or runtime content editor. Existing external database resources remain intact.
+HTTP content responses use ETag/304 with a 300-second cache lifetime and a
+60-second stale-while-revalidate window.
 
-## 6. Security Regex over Allow-Lists
-**Decision**: The CORS Policy uses a regex rule (`^https://argenisbackend\.com|https://portfolio.*-argenis1412s-projects\.vercel\.app$`) instead of exact strings or `*`.
-**Why?** Vercel creates dynamic preview domains per PR. Doing hardcoded allowed lists blocks PR testing. Using a wide open `*` disables secure credential-passing. The precise regex allows only our generated subdomains to seamlessly interact with the API, blocking impersonation from other `*.vercel.app` sites.
+The JSON health check bypasses that cache, checks required files and expected
+top-level types, and checks the optional sidecar when present. It does not validate
+every content field. File failures can therefore leave cached reads available
+while `/health` reports degradation. A failed uncached stack read propagates as
+an error rather than a successful empty response.
 
-## 7. Global Consistency: Unified English Codebase
-**Decision**: Migrating all remaining Portuguese identifiers, including the `/saude` endpoint, to English (`/health`).
-**Why?** Although the project started with some Portuguese core models, maintaining a bilingual codebase creates cognitive load and technical debt. We renamed all backend directories (`controladores` → `controllers`, etc.) to adhere to international industry standards.
-*Status Update (v1.9.2):* The `/saude` and `/salud` endpoints are currently **deprecated** and kept alive strictly as fallback aliases with warning logs to prevent breaking legacy probes. Final removal is scheduled for `v1.9.3`.
+### Contact protection and delivery
 
-## 8. Frontend State Architecture
-**Decision**: React + TanStack Query instead of Redux/Zustand for most data mapping.
-**Why?** A portfolio is a read-heavy application. TanStack Query treats remote data precisely as it is — a cache of server state. Local state is kept minimal, leaving data fetching, prefetching on hover, and cache invalidation entirely to the asynchronous fetching layer.
+Honeypots silently accept/drop bot submissions. Spam scoring labels messages;
+it does not discard them. Deduplication and email/IP/fingerprint limits can reject
+requests. Optional idempotency keys replay finalized responses or reject concurrent
+requests with 409. A Redis lock refusal never becomes a memory acquisition.
 
-## 9. Full-Stack Error Tracking (Sentry)
-**Decision**: Using Sentry for both React and FastAPI.
-**Why?** Observability is more than just metrics; it's about context. Sentry provides the "why" behind failures, capturing breadcrumbs, request metadata, and stack traces that Prometheus metrics (`/metrics`) can't show. By using `VITE_SENTRY_DSN` on the frontend and `SENTRY_DSN` on the backend, we achieve unified error correlation across the entire user journey.
+Redis shares protection state and accepted stream jobs across processes. Redis
+exceptions activate local protection fallbacks; these reset on restart and cannot
+coordinate replicas. Missing/failed queues use non-durable background delivery.
+The API's HTTP acceptance response does not confirm provider or inbox delivery.
 
-## 10. Security Hardening (Defense-in-Depth)
-**Decision**: Implementing `SecurityHeadersMiddleware` and `GZipMiddleware`.
-**Why?** Browsers rely on specific headers (HSTS, NoSniff, X-Frame-Options) to enforce security policies. While the frontend had these in Vercel, the backend API was unprotected if accessed directly. Adding these headers at the middleware level ensures that every response is hardened by default. Additionally, GZip compression for payloads >1KB significantly improves UI performance on low-bandwidth networks.
+Docker uses one Uvicorn process, with the consumer controlled by `WORKER_ENABLED`.
+Stream processing provides at-least-once semantics, bounded retries, DLQ handling,
+and pending-entry recovery; duplicate processing is possible. Retry/DLQ publication
+precedes acknowledgment of the original job. Background fallback has no automatic
+retries. Shutdown cancels remaining work after its grace period and closes the
+consumer connection. A deployment-sized capacity test remains pending.
 
-## 11. Redis for Distributed State
-**Decision**: Redis provides shared rate limiting, idempotency, contact deduplication, and the contact job queue. Portfolio reads use JSON files.
-**Why?** Shared Redis state survives application process restarts and coordinates contact processing. No SQL database is required.
+### Configuration, telemetry, and security
 
-## 12. Future Strategy: Scalability via Multi-Deploy (FastAPI & Go)
-**Decision**: A full rewrite of the backend to Go is officially discarded as over-engineering. Instead, any future expansion will follow a **multi-deploy strategy**: keeping Python (FastAPI) for the primary endpoints and expanding with Go only for specific, high-performance microservices.
-**Why?** Currently, the system is stable, P95 latency sits at ~79ms against a <100ms SLO, and error rates are exceptionally low. The only previous penalty was cold starts, which was efficiently resolved with a cron-based keep-alive strategy. The true bottleneck is the hardware limitation of the Koyeb free tier, a constraint that no language change can magically fix.
-Migrating entirely to Go simply to gain speed before a real problem exists is an anti-pattern. That approach introduces more infrastructure, more points of failure, and less clarity, all to fix something that is already working perfectly.
-If Go is integrated in the future, it will only be under real necessity signals (e.g., CPU constantly saturated, P95 rising under load, or heavy concurrent tasks) following this intelligent workflow:
-1.  **Create a minimal Go service** (e.g., isolated deploy) for specific tasks.
-2.  **FastAPI acts as the consumer** (`Client -> FastAPI -> Go Service`).
-3.  **Measure** the real latency, consumption, and added complexity before deciding to expand further.
+Settings use English keys and validated environment names. Redis client creation
+is shared, with longer blocking-read timeouts retained for the worker. Production
+requires Redis, metrics Basic Auth credentials, and restricted CORS configuration.
+CORS combines configured origins with an optional regex; CSP is separately defined
+for the frontend. Review both sides when changing browser origins.
 
-## 13. Frontend Observability Enhancements
-**Decision**: Enhanced frontend observability with real-time telemetry, failure visibility, and end-to-end traceability.
-**Why?** To provide engineers with actionable insights into system behavior, making failure/recovery visible and ensuring strong correlation in logs.
-- Added MetricsSparkline component with linear line, threshold lines, and vertical incident markers for real-time P95 latency telemetry.
-- Extended useLiveMetrics hook to keep timestamped samples, baseline P95, recent traces, latest event, circuit-breaker and timeout states.
-- Rewrote LiveMetricsBento to show delta vs previous, delta vs baseline, failure-model panel, and telemetry timeline.
-- Updated Hero sidecar to render real sparkline, circuit state, and latest trace.
-- Modified ChaosPlayground to emit trace_id and include richer log fields (retry_triggered, circuit_breaker, timeout_ms).
-- Enhanced TraceViewer and LogStream to display both request_id and trace_id for end-to-end correlation.
-- Fixed LogStream auto-scroll to stay inside the terminal and removed global window.scrollTo in App.tsx.
-- Added missing i18n keys for metrics, failure model, and telemetry legend.
+Prometheus reports HTTP and worker metrics per process. The summary uses observed
+latency/request/error data; retired synthetic fields are absent. Sentry and
+OpenTelemetry are optional. `OTEL_ENABLED=false` disables OpenTelemetry without
+disabling Prometheus or Sentry. Tests select external-service behavior explicitly.
+Logs use shared email masking; this does not imply arbitrary log fields or
+exception text are automatically scrubbed. HSTS is conditional on production or
+HTTPS; security headers are not evidence that every middleware error path is covered.
 
-## 14. Modular Frontend API & Component Decomposition
-**Decision**: Restructuring the monolithic `api.ts` into a layered `src/api/` directory and decomposing large UI components into focused hooks and sub-components.
-**Why?** As the frontend complexity grew, the single `api.ts` file became a bottleneck for readability and type safety. Moving to a modular structure (`client`, `schemas`, `services`) ensures better separation of concerns. Similarly, extracting logic into custom hooks (`useChaosActions`, `useContactForm`) and UI into atomic components (`ChaosTerminal`, `ChaosActionCard`) improves testability and adheres to the Single Responsibility Principle.
+Terraform manages Koyeb while GitHub Actions supplies secret values. Stable
+internal identities and moved blocks are preserved. Application SQL removal does
+not authorize external database deletion or secret renaming. `/saude` and `/salud`
+remain deprecated static liveness-style routes pending monitor verification.
 
-## 15. Production Resilience & Infrastructure Hardening
+## Numbered decision index
 
-Building for production introduced real-world challenges that were addressed with SRE principles:
+Numbers retain the original root-document references. Dedicated ADR filenames
+sometimes use different numbers; use the title and release context when following
+older citations. Frontend entries record context, not a new frontend audit.
 
-### 15.1 Resilient Chaos Persistence
-**Decision**: Chaos actions (latency, spikes) must not depend on database availability to complete their primary task (the simulation).
-**Implementation**: We implemented a "Fail-Silent" pattern in `chaos.py`. If the database fails to record an incident (due to missing tables or connection issues), the system logs the error but continues the chaos simulation. This ensures the playground remains functional even under partial infrastructure failure.
+| ID | Decision | Status and retained rationale |
+|---|---|---|
+| 1 | Backend layers | Current: isolate HTTP concerns and inject adapters; actual boundaries are described above. |
+| 2 | Decoupled frontend/API | Current: browser HTTP contract, independent deployment artifacts, explicit CORS. |
+| 3 | JSON without SQL | Current: remove unused persistence dependencies; retained external resources are a separate concern. |
+| 4 | Protected metrics | Current: production `/metrics` requires Basic Auth; telemetry is local to each process. |
+| 5 | JSON-first reads | Current: avoid database round-trips for static content; earlier latency numbers are historical measurements. |
+| 6 | Browser origin policy | Current: configured allowlist plus optional regex, with separate frontend CSP. |
+| 7 | English identifiers | Current: English settings/code; deprecated health routes remain until monitor migration is verified. |
+| 8 | TanStack Query/server state | Frontend context: cache remote data separately from local UI state. Frontend cleanup remains pending. |
+| 9 | Sentry | Current optional backend integration; frontend configuration is separate. Cross-service correlation requires actual configuration/evidence. |
+| 10 | Headers/compression | Current middleware: conditional HSTS, browser security headers, gzip. No universal response-path guarantee. |
+| 11 | Redis shared state | Current: rate limits, idempotency, deduplication, and stream queue; local fallback is process-bound. |
+| 12 | Possible Go expansion | Deferred proposal, not an approved service or roadmap commitment. Measure a real bottleneck before adding another deployment. |
+| 13 | Frontend telemetry overlays | Historical/current UI context: real and synthetic samples must be distinguishable; removed backend fields require UI retirement. |
+| 14 | Modular frontend API | Frontend context: client, schemas, services, business hooks, and presentational components. Chaos-specific pieces remain pending cleanup. |
+| 15.1 | Fail-silent Chaos SQL writes | Retired: simulation endpoints and incident writes were removed. See INC-003 for the original failure. |
+| 15.2 | Root Docker build context | Current: build `backend/Dockerfile` from the repository root to keep COPY paths consistent. Current image verification is pending. |
+| 15.3 | CSP/CORS coordination | Current: review API origins and frontend connect-src together; see INC-004. |
+| 16 | English contracts/localized content | Current: English API identifiers with localized content. JSON claims/snapshots require deliberate review. |
+| 17 | Separate error/latency alerts | Design rule: distinguish symptoms and align buckets/SLOs. Verify actual deployed alert rules and labels rather than assuming they match older prose. |
+| 18 | Local Chaos E2E | Retired backend strategy: its workflow/endpoints were removed. Remaining frontend smoke scenarios are a release blocker. |
+| 19 | Minimum IaC | Current: Terraform-managed Koyeb and externally provisioned stateful services; preserve ownership and identities. |
+| 20 | Redis Streams delivery | Current, with explicit limits: at-least-once processing, bounded retries/DLQ, PEL recovery, and non-durable fallback. |
+| 21 | Simulated 503 UI traces | Historical UI convention, not proof of an HTTP failure or current backend behavior. |
+| 22 | Hiring home/evidence separation | Frontend/content design context: concise home, detailed evidence route, stable links, explicit evidence labels. See the [content contract](docs/architecture/PORTFOLIO_CONTENT_CONTRACT.md). |
 
-### 15.2 Monorepo Build Standardization
-**Decision**: Unify build context for Docker across all environments (Koyeb, GitHub Actions, Local).
-**Implementation**: The `Dockerfile` is designed to be "Root-Aware". By building from the repository root and using prefixed `COPY` commands (e.g., `COPY backend/requirements.txt`), we eliminate path mismatches between different CI/CD runners.
+## History and remaining review
 
-### 15.3 Security Header & CORS Synchronization
-**Decision**: Use a single source of truth for allowed origins and strictly sync CSP with production subdomains.
-**Implementation**:
-- **CORS**: Managed via Regex in `settings.py` to support dynamic subdomains (api.*, www.*).
-- **CSP**: Implemented in `vercel.json` to explicitly whitelist `api.argenisbackend.com`, preventing browser-level blocks during frontend-backend communication.
+[CHANGELOG](CHANGELOG.md) preserves released behavior and incident narratives.
+Earlier architecture wording is available with
+`git show 615c9a5:ARCHITECTURE.md`; retired decisions remain indexed above rather
+than being relabeled as current features.
 
-## 16. Internationalization (i18n) & API Contracts
-**Decision**: Enforce "English-First" API contracts while maintaining multi-language content.
-**Reasoning**: All internal identifiers, routes, and database keys were migrated from Portuguese to English to ensure the codebase follows global engineering standards, while still serving localized content via the `/api` responses.
-
-## 17. SRE Alerting Coherence (A2 Basic)
-**Decision**: Separating Error Rate alerts from Latency alerts and optimizing histogram buckets for SLO tracking.
-**Why?** Generic "High Latency" alerts that actually trigger on 5xx errors (the previous state) create noise and confuse incident response. By separating them, we achieve:
-1. **Actionable Alerts**: `HighErrorRate` points to code bugs or database failures; `HighLatencyP95` points to resource exhaustion or N+1 queries.
-2. **SLO Alignment**: Histogram buckets in the backend include a `100ms` boundary that coincides exactly with the P95 SLO cutoff defined in the Engineering Playbook, so the healthy/degraded decision doesn't depend on interpolation.
-3. **Traceability**: All alerts and metrics now include `app_version` as a label, allowing instant correlation between a new deployment and a performance degradation.
-
-## 18. Chaos E2E Testing Strategy
-**Decision**: Executing Chaos E2E tests against a local `docker-compose` environment in CI rather than production/staging, and preserving `/health` endpoint availability (`200 OK (Degraded)`) during simulated failures.
-**Why?**
-1. **Trade-off**: CI tests validate system behavior deterministically (local environment). They do not simulate real network conditions or provider-level variability. This ensures the CI is 100% reproducible and avoids network flakiness.
-2. **Semantics of /health**: During a `FAILURE` scenario, returning `503` would cause the orchestrator (Koyeb) to kill and restart the container, defeating the "Fail-Silent" pattern. Returning `200 OK (Degraded)` ensures the system survives and continues serving cached portfolio data. *200 OK does not imply full system health. It indicates the service is still serving responses under degraded conditions.*
-
-## 19. Infrastructure as Code Strategy
-**Decision**: Provisioning a Minimum Viable IaC setup with Terraform, strictly scoped to the Koyeb application and environment variables, while intentionally leaving third-party stateful services (Upstash Redis, Supabase) as manual steps.
-**Why?** This setup prioritizes reproducibility of the backend service, not full infrastructure parity. Automating the free-tier setups of external providers often requires complex modules or unsupported providers, violating the goal of a clear, readable codebase. By provisioning only Koyeb, any developer can understand the deployment topology in 5 minutes and bootstrap the backend with `< 10 commands`.
-
-## 20. Resilient Background Processing (Redis Streams)
-**Decision**: Migrating from in-process volatile background tasks to a durable worker based on Redis Streams with explicit error classification and PEL recovery.
-**Why?** In Phase 3 (Operational Health), we transitioned from "best effort" task processing to "at-least-once" delivery. This ensures no contact submissions are lost due to transient provider failures or process restarts.
-- **Error Classification**: The worker distinguishes between transient (retry with backoff), permanent (DLQ), and unknown errors, preventing "poison pill" messages from blocking the queue.
-- **Self-Healing (XAUTOCLAIM)**: By scanning the Pending Entries List (PEL) at startup, the worker can automatically recover jobs that were assigned to a previous instance that crashed.
-- **Observability**: Real-time visibility into queue depth, retry rates, and DLQ size through Prometheus metrics, allowing proactive incident response before users report issues.
-- **Resilient Testing**: To maintain CI speed and stability, we use a "force-memory" strategy in tests, mocking Redis behavior while strictly validating the state machine logic of the worker.
-
-## 21. UI/UX Resilience & Observability
-**Decision**: In the TraceViewer and ChaosPlayground, a simulated "Latency Injection" explicitly emits a `503 ERR` trace rather than `200 OK`, even though the backend successfully handled the chaos request itself.
-**Why?** This demonstrates realistic system behavior and circuit breaker patterns. A timeout in a highly available architecture is an error that should trigger fallback mechanisms, not just a "slow success". Emitting a `503` in the observability trace proves the monitoring system can correctly identify SLA breaches and SLA-driven failure states.
-
-## 22. Hiring Home and Production Evidence Separation
-**Decision**: Separate the hiring-oriented home page from the detailed
-operational demonstration at `/production-evidence`.
-
-**Why?** Recruiters and hiring managers need a concise, evidence-led narrative
-before they need a live observability console. The home page therefore presents
-identity, selected projects, engineering proof, decisions, and a compact
-production snapshot. Detailed metrics, chaos controls, traces, logs, and
-incident narratives remain available through progressive disclosure.
-
-**Consequences**:
-- Production and synthetic signals must remain explicitly labeled.
-- The home page must not preload interactive-lab components or data.
-- Project and decision evidence must be reachable through stable, shareable
-  routes.
-- The canonical copy and evidence rules live in
-  `docs/architecture/PORTFOLIO_CONTENT_CONTRACT.md`.
+Detailed documents under `docs/architecture/`, the historical failure model, and
+case studies still need a context/consistency pass. Portfolio JSON and content
+snapshots are unchanged. Use the current backend guide and operations runbook for
+runtime behavior; use [SLO definitions](docs/architecture/SLO_DEFINITIONS.md) and
+versioned benchmarks as targets and historical evidence, not newly verified results.
