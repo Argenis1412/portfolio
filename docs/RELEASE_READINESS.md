@@ -48,19 +48,22 @@ Portfolio JSON claims and the affected list/detail response snapshots have been
 reviewed for backend cleanup. Other project records remain outside that review.
 Keep future content changes tied to deliberate snapshot review.
 
-1. Build the Docker image from repository-root context with a running daemon.
-2. Run a deployment-sized load test for the single-process API/consumer setup.
+1. Docker image build from repository-root context: complete in local validation.
+2. Deployment-sized single-process API/consumer load: executed twice; latency
+   acceptance failed. Profile/resolve capacity and obtain a passing rerun.
 3. Confirm `AMBIENTE` contains exactly `production` and Koyeb receives
    `ENVIRONMENT=production`; preserve secret/resource identities.
 4. Verify external monitors using `/saude` or `/salud` before removing aliases.
    Inspect `/health` bodies because degraded JSON still returns HTTP 200.
 
-These items remain pending. No production settings, secret values, infrastructure,
-or monitor targets were changed or verified in this documentation block.
-The [local Docker attempt](../benchmarks/results/8a73bb4/validation-status.md)
-failed during Desktop startup, before building an image. The
-[isolated procedure](../benchmarks/LOCAL_VALIDATION.md) and k6 scenario are prepared;
-their runtime checks remain pending until the engine starts successfully.
+The [local results](../benchmarks/results/f9eaa7f-local-20261017/README.md) retain
+image/resource evidence and both failed latency summaries. All 334 functional
+checks per run passed, with twenty total console jobs and no pending/DLQ entries.
+This does not establish production SLO compliance. The earlier
+[startup failure](../benchmarks/results/8a73bb4/validation-status.md) is historical;
+the [isolated procedure](../benchmarks/LOCAL_VALIDATION.md) now uses container-local
+k6 networking. Production environment and monitor verification remain pending;
+no production settings, secret values, infrastructure, or monitor targets changed.
 
 ## Evidence and discoverability
 

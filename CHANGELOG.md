@@ -91,8 +91,11 @@ incidents and versioned releases below retain their original historical context.
   and operational release checks remain pending.
 - Restricted Docker build context to backend runtime inputs. Added a loopback-only
   single-process validation scenario and isolated Redis/console-delivery procedure.
-  Docker Desktop failed to initialize its Inference-manager socket, so image build
-  and load execution remain blocked; no performance measurements are claimed.
+  The initial Docker startup failed; after local recovery, the image built and two
+  deployment-sized load runs completed. Each passed 334 functional checks and ten
+  console jobs, but all five latency thresholds failed. Recorded image/resource
+  evidence and raw summaries; performance acceptance remains open. Corrected the
+  procedure to run k6 in the API network namespace without host port publishing.
 
 ### Frontend deployment dependency
 
@@ -110,8 +113,10 @@ Before any future release, migrate existing local keys using the
 [backend guide](backend/README.md#configuration), confirm the GitHub secret
 `AMBIENTE` is exactly `production`, and verify Koyeb receives
 `ENVIRONMENT=production`. Preserve existing infrastructure/secret identities.
-Monitor checks for `/saude` and `/salud`, a Docker image build with a running
-daemon, and a deployment-sized single-process load test remain pending.
+Monitor checks for `/saude` and `/salud` remain pending. The Docker image built;
+two deployment-sized load runs failed latency acceptance. See the
+[local report](benchmarks/results/f9eaa7f-local-20261017/README.md) before claiming
+capacity or approving a release.
 
 ## 🔥 Production Incidents
 
