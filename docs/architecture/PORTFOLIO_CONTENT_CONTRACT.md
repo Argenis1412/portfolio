@@ -4,8 +4,9 @@
 
 This is the retained content/design contract, not proof that every current UI
 consumer matches the cleanup backend. Chaos retirement still blocks release; see
-the [release prerequisites](../RELEASE_READINESS.md). JSON copy and public-response
-snapshots require a separate deliberate review and are unchanged in this block.
+the [release prerequisites](../RELEASE_READINESS.md). Portfolio copy and its
+list/detail snapshots now reflect backend cleanup. Future content changes still
+require deliberate snapshot review; this does not retire existing UI consumers.
 
 The portfolio is a hiring artifact first and a system demonstration second.
 Its home page must answer, in order: who the engineer is, what they build,

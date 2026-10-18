@@ -123,8 +123,9 @@ observability/logging, security, CORS, and HTTP caching guides now distinguish
 current behavior from historical designs. Incident reports, case studies, and
 Chaos/IaC decisions retain their version context and stable links. Content/release
 guidance reflects the deployment blocker; the old frontend refinement plan is
-marked superseded. Portfolio JSON claims, content snapshots, frontend retirement,
-and the operational release checks remain pending.
+marked superseded. Portfolio JSON claims and affected list/detail snapshots now
+reflect the cleanup. Frontend retirement and operational release checks remain
+pending.
 Use the current backend guide and operations runbook for
 runtime behavior; use [SLO definitions](docs/architecture/SLO_DEFINITIONS.md) and
 versioned benchmarks as targets and historical evidence, not newly verified results.

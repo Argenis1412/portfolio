@@ -82,8 +82,13 @@ incidents and versioned releases below retain their original historical context.
   historical incident reports and Chaos/IaC decisions; clarified the standalone
   rate-limit audit identifier collision without renaming its links. Updated the
   content/release guidance, marked the old frontend refinement plan superseded,
-  and corrected the INC-006 summary against the preserved incident entry. Portfolio
-  JSON and snapshots, frontend retirement, and operational release checks remain.
+  and corrected the INC-006 summary against the preserved incident entry.
+- Corrected the portfolio project JSON in EN/PT/ES: removed active Chaos/SQL claims,
+  unverified sub-45 ms latency and total spam-blocking guarantees, and stale
+  evidence sources. Described current contact fallback limits and pending capacity
+  validation. Deliberately updated only that project in list/detail snapshots;
+  other projects, endpoint payloads, and schemas are unchanged. Frontend retirement
+  and operational release checks remain pending.
 
 ### Frontend deployment dependency
 
@@ -96,7 +101,6 @@ Zod defaults avoid parsing failures but do not remove misleading UI behavior.
 | `frontend/src/api/schemas.ts`, `useLiveMetrics`, status/metrics banners | Remove synthetic fields and simulation-derived status, counters, and recovery logic. |
 | `frontend/src/api/client.ts` | Remove `X-Chaos-Preset`, then its temporary backend CORS allowance. `X-Debug-Mode` is already ignored and disallowed. |
 | `frontend/e2e/chaos.spec.ts`, `.github/workflows/e2e-smoke.yml` | Replace simulation smoke scenarios before targeting the updated API. |
-| Portfolio JSON content | Review retired-feature claims; deliberately review content snapshots. |
 
 Before any future release, migrate existing local keys using the
 [backend guide](backend/README.md#configuration), confirm the GitHub secret

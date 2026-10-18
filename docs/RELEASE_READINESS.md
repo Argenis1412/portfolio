@@ -44,12 +44,15 @@ These are validation criteria, not a record that this review has been completed.
 
 ## Backend and operational prerequisites
 
-1. Review portfolio JSON claims and deliberately review changed response snapshots.
-2. Build the Docker image from repository-root context with a running daemon.
-3. Run a deployment-sized load test for the single-process API/consumer setup.
-4. Confirm `AMBIENTE` contains exactly `production` and Koyeb receives
+Portfolio JSON claims and the affected list/detail response snapshots have been
+reviewed for backend cleanup. Other project records remain outside that review.
+Keep future content changes tied to deliberate snapshot review.
+
+1. Build the Docker image from repository-root context with a running daemon.
+2. Run a deployment-sized load test for the single-process API/consumer setup.
+3. Confirm `AMBIENTE` contains exactly `production` and Koyeb receives
    `ENVIRONMENT=production`; preserve secret/resource identities.
-5. Verify external monitors using `/saude` or `/salud` before removing aliases.
+4. Verify external monitors using `/saude` or `/salud` before removing aliases.
    Inspect `/health` bodies because degraded JSON still returns HTTP 200.
 
 These items remain pending. No production settings, secret values, infrastructure,

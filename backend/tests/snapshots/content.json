@@ -29,9 +29,9 @@
           "es": "Proyecto de Portafolio Full-Stack con FastAPI y React 19, enfocado en Clean Architecture y UX premium"
         },
         "full_description": {
-          "pt": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problema</div><p>Portfólios convencionais falam de qualidade, mas raramente mostram evidência operacional de backend, observabilidade e degradação controlada.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Restrição</div><p>A experiência precisava permanecer rápida no frontend enquanto consumia telemetria real, suportava i18n e expunha falhas sem virar uma demo enganosa.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decisão</div><p>Conectei FastAPI em Clean Architecture a um frontend React 19 com TanStack Query, trilhas de caos, rastreamento estruturado e narrativa operacional acima da dobra.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>A estrutura ficou mais complexa do que um portfolio padrão, mas isso permitiu mostrar circuit breaker, fallback, histerese e telemetria com contexto.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Impacto</div><p>O project passou de vitrine estática para caso de estudo interativo, com P95 abaixo de 45ms em modo normal e falhas controladas expostas com recuperação visível.</p></div>",
-          "en": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problem</div><p>Standard portfolios are static promises of code quality rather than demonstrable evidence of system resilience.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Challenge</div><p>Deliver a production-ready system demo integrating an active observability pipeline, anti-abuse layers, and real-time backend state inside a performant SPA.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decision</div><p>Built a FastAPI backend using Clean Architecture (Domain, Use Cases, Interfaces) connected to a React 19 frontend utilizing TanStack Query for optimal request batching.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>Sacrificed rapid prototyping and simplified UI code for a robust DDD structure and strict anti-abuse mechanisms.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Impact</div><p>P95 latency strictly under 45ms. Contact form spam and malicious payloads fully isolated (100% block rate).</p></div>",
-          "es": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problema</div><p>Los portafolios convencionales hablan de calidad, pero casi nunca muestran evidencia operativa de backend, observabilidad y degradación controlada.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Restricción</div><p>La experience debía seguir siendo rápida en frontend mientras consumía telemetría real, soportaba i18n y exponía fallos sin convertirse en una demo engañosa.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decisión</div><p>Conecté FastAPI en Clean Architecture con un frontend React 19 usando TanStack Query, recorridos de chaos, trazabilidad estructurada y narrativa operativa above the fold.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>La estructura quedó más compleja que un portfolio estándar, pero permitió mostrar circuit breaker, fallback, hysteresis y telemetría con contexto.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Impacto</div><p>El proyecto pasó de vitrina estática a caso de estudio interactivo, con P95 por debajo de 45ms en modo normal y fallos controlados visibles con recuperación explícita.</p></div>"
+          "pt": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problema</div><p>Um portfolio backend precisa de evidências verificáveis da implementação e limites claros para afirmações operacionais.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Restrição</div><p>A API deve servir o conteúdo do portfolio e aceitar mensagens de contato sem depender de SQL.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decisão</div><p>Usar casos de uso e adaptadores FastAPI, leituras JSON em cache, métricas HTTP e entrega de contato por Redis Streams com novas tentativas conforme o tipo de falha e fila de falhas.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>Falhas no Redis reduzem a proteção compartilhada a estado local; a entrega alternativa em segundo plano não é durável e não tem novas tentativas automáticas.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Resultado</div><p>A limpeza remove simulações Chaos e caminhos SQL do backend. Aceitar um contato não comprova entrega na caixa de entrada; latência e capacidade atuais ainda precisam ser medidas.</p></div>",
+          "en": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problem</div><p>A backend portfolio needs verifiable implementation evidence and clear limits on operational claims.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Constraint</div><p>The API must serve portfolio content and accept contact messages without a SQL dependency.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decision</div><p>Use FastAPI use cases and adapters, cached JSON reads, HTTP metrics, and Redis Streams contact delivery with classified retries and a dead-letter queue.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>Redis failures reduce shared protection to local state; background delivery fallback is not durable and has no automatic retries.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Outcome</div><p>The cleanup removes backend Chaos simulations and SQL paths. Contact acceptance does not prove inbox delivery; current latency and capacity still require measurement.</p></div>",
+          "es": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problema</div><p>Un portfolio backend necesita evidencias verificables de implementación y límites claros para las afirmaciones operativas.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Restricción</div><p>La API debe servir el contenido del portfolio y aceptar mensajes de contacto sin depender de SQL.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decisión</div><p>Usar casos de uso y adaptadores FastAPI, lecturas JSON en caché, métricas HTTP y entrega de contactos por Redis Streams con reintentos clasificados y cola de fallos.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>Los fallos de Redis reducen la protección compartida a estado local; la entrega alternativa en segundo plano no es duradera ni tiene reintentos automáticos.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Resultado</div><p>La limpieza retira las simulaciones Chaos y las rutas SQL del backend. Aceptar un contacto no demuestra entrega en la bandeja de entrada; la latencia y capacidad actuales aún necesitan medición.</p></div>"
         },
         "technologies": [
           "Python",
@@ -49,13 +49,13 @@
         ],
         "features": [
           "Multilingual support (PT, EN, ES) with dynamic switching",
-          "Advanced Contact Form security (Honeypots, Rate Limiting, Idempotency)",
-          "High-Performance UX (Predictive Prefetching, Background Sync)",
+          "Contact validation, honeypots, rate limits, and optional idempotency",
+          "Cached JSON content reads with ETag revalidation",
           "Clean Architecture implementation (Backend & Frontend approach)",
-          "Automatic OpenAPI/Swagger documentation",
+          "OpenAPI/Swagger documentation outside production",
           "Interactive Project and Experience showcases",
           "Responsive and Animated UI with Dark/Light modes",
-          "CI/CD with automated quality gates (Tests & Linting)"
+          "Configured CI quality checks with branch and path filters"
         ],
         "learnings": [
           "Full-Stack architecture and integration patterns",
@@ -72,69 +72,69 @@
         "image": null,
         "case_study": {
           "problem": {
-            "pt": "Um portfolio backend precisa de evidencia operacional verificavel em vez de promessas estaticas de qualidade.",
             "en": "A backend portfolio needs verifiable operational evidence instead of static quality claims.",
+            "pt": "Um portfolio backend precisa de evidencia operacional verificavel em vez de promessas estaticas de qualidade.",
             "es": "Un portfolio backend necesita evidencia operativa verificable en lugar de promesas estaticas de calidad."
           },
           "constraints": {
-            "pt": "A SPA precisa permanecer util durante cold starts e distinguir claramente sinais reais de simulados.",
-            "en": "The SPA must remain useful during backend cold starts and clearly distinguish live from simulated signals.",
-            "es": "La SPA debe seguir siendo util durante cold starts y distinguir claramente las senales reales de las simuladas."
+            "en": "Serve content and accept contact without SQL; distinguish implementation evidence from production measurements.",
+            "pt": "Servir conteúdo e aceitar contatos sem SQL; distinguir evidências de implementação de medições em produção.",
+            "es": "Servir contenido y aceptar contactos sin SQL; distinguir evidencias de implementación de mediciones en producción."
           },
           "solution": {
-            "pt": "Clean Architecture com FastAPI e combinada com cliente React, etiquetas explicitas de telemetria e falhas documentadas.",
-            "en": "FastAPI Clean Architecture is paired with a React client, explicit telemetry labels, and documented failure behavior.",
-            "es": "Clean Architecture con FastAPI se combina con un cliente React, etiquetas explicitas de telemetria y fallos documentados."
+            "en": "FastAPI use cases and adapters provide JSON content reads, HTTP telemetry, and asynchronous contact delivery.",
+            "pt": "Casos de uso e adaptadores FastAPI oferecem leituras JSON, telemetria HTTP e entrega assíncrona de contatos.",
+            "es": "Casos de uso y adaptadores FastAPI ofrecen lecturas JSON, telemetría HTTP y entrega asíncrona de contactos."
           },
           "architecture": {
-            "pt": "Controllers chamam casos de uso e entidades por portas de repositorio; leituras estaticas usam JSON e mutacoes usam armazenamento transacional.",
-            "en": "Controllers call use cases and entities through repository ports; static reads use a JSON repository and mutations use transactional storage.",
-            "es": "Los controllers llaman casos de uso y entidades mediante puertos de repositorio; las lecturas estaticas usan JSON y las mutaciones almacenamiento transaccional."
+            "en": "Controllers call use cases wired to adapters. Reads use cached JSON; contact uses Redis protection and stream delivery with a background fallback.",
+            "pt": "Controllers chamam casos de uso conectados a adaptadores. Leituras usam JSON em cache; contatos usam proteção Redis e entrega por stream com alternativa em segundo plano.",
+            "es": "Los controllers llaman casos de uso conectados a adaptadores. Las lecturas usan JSON en caché; los contactos usan protección Redis y entrega por stream con alternativa en segundo plano."
           },
           "testing": {
-            "pt": "Backend, frontend e comportamento de chaos sao cobertos por testes unitarios, integracao e E2E local em CI.",
-            "en": "Backend, frontend, and chaos behavior are covered by unit, integration, and local CI end-to-end checks.",
-            "es": "Backend, frontend y comportamiento de chaos estan cubiertos por pruebas unitarias, de integracion y E2E local en CI."
+            "en": "Backend tests cover content contracts, contact protection, delivery retries, and retired Chaos routes returning 404. Frontend compatibility and deployment-sized load testing remain pending.",
+            "pt": "Testes backend cobrem contratos de conteúdo, proteção de contatos, novas tentativas de entrega e rotas Chaos retiradas retornando 404. A compatibilidade frontend e os testes de carga na escala do deploy continuam pendentes.",
+            "es": "Las pruebas backend cubren contratos de contenido, protección de contactos, reintentos de entrega y rutas Chaos retiradas con respuesta 404. La compatibilidad frontend y las pruebas de carga a escala de despliegue siguen pendientes."
           },
           "reliability": {
-            "pt": "Entrega de contato usa idempotencia, controles de abuso, mascaramento de PII, retries Redis Streams, DLQ e recuperacao PEL.",
-            "en": "Contact delivery uses idempotency, abuse controls, PII masking, Redis Streams retries, DLQ handling, and PEL recovery.",
-            "es": "La entrega de contacto usa idempotencia, controles de abuso, enmascaramiento de PII, reintentos Redis Streams, DLQ y recuperacion PEL."
+            "en": "Stream delivery supports classified retries, DLQ handling, and pending recovery. Local protection resets on restart; background fallback has no automatic retries. Acceptance is not inbox delivery.",
+            "pt": "A entrega por stream oferece novas tentativas conforme o tipo de falha, DLQ e recuperação de pendências. A proteção local reinicia com o processo; a alternativa em segundo plano não tem novas tentativas automáticas. Aceitação não comprova entrega na caixa de entrada.",
+            "es": "La entrega por stream ofrece reintentos clasificados, DLQ y recuperación de pendientes. La protección local se reinicia con el proceso; la alternativa en segundo plano no tiene reintentos automáticos. La aceptación no demuestra entrega en la bandeja de entrada."
           },
           "impact": {
-            "pt": "O caminho JSON-first remove o round trip PostgreSQL de leituras estaticas e preserva armazenamento transacional para mutacoes.",
-            "en": "The JSON-first path removes the PostgreSQL round trip from static reads while preserving transactional storage for mutations.",
-            "es": "La ruta JSON-first elimina el round trip de PostgreSQL de las lecturas estaticas y conserva almacenamiento transaccional para mutaciones."
+            "en": "The cleanup removes SQL application paths and backend simulations while retaining content reads, contact delivery, and observed HTTP/worker metrics. Current latency and capacity still need measurement.",
+            "pt": "A limpeza remove caminhos SQL e simulações backend, mantendo leituras de conteúdo, entrega de contatos e métricas HTTP/worker observadas. Latência e capacidade atuais ainda precisam ser medidas.",
+            "es": "La limpieza retira las rutas SQL y simulaciones backend, conservando lecturas de contenido, entrega de contactos y métricas HTTP/worker observadas. La latencia y capacidad actuales aún necesitan medición."
           },
           "evidence": [
             {
               "label": {
-                "pt": "Cobertura de CI",
-                "en": "CI coverage",
-                "es": "Cobertura de CI"
+                "en": "Backend regression tests",
+                "pt": "Testes de regressão backend",
+                "es": "Pruebas de regresión backend"
               },
-              "value": "Backend, frontend, and local chaos checks",
-              "classification": "REPRODUCED",
-              "source": "docs/architecture/ADR-17-chaos-e2e-strategy.md"
+              "value": "Repository tests cover public JSON snapshots and retired Chaos routes; this is not live production evidence",
+              "classification": "REAL",
+              "source": "backend/tests/test_content_snapshots.py; backend/tests/test_chaos_retirement.py"
             },
             {
               "label": {
-                "pt": "Confiabilidade de contato",
                 "en": "Contact reliability",
+                "pt": "Confiabilidade de contato",
                 "es": "Fiabilidad de contacto"
               },
-              "value": "Redis Streams retries, DLQ handling, and PEL recovery",
+              "value": "Stream retries, DLQ, and pending recovery; background fallback has no automatic retries",
               "classification": "REAL",
-              "source": "ARCHITECTURE.md#20-resilient-background-processing-redis-streams"
+              "source": "docs/architecture/production-operations.md#runtime-and-health-signals"
             },
             {
               "label": {
-                "pt": "Incidente de cold start",
-                "en": "Cold-start incident",
-                "es": "Incidente de cold start"
+                "en": "JSON content reads",
+                "pt": "Leituras de conteúdo JSON",
+                "es": "Lecturas de contenido JSON"
               },
-              "value": "JSON-first read path removes the PostgreSQL round trip",
-              "classification": "REPRODUCED",
+              "value": "On-demand JSON reads remove the SQL dependency; historical timings do not establish current performance",
+              "classification": "REAL",
               "source": "docs/architecture/JSON_FIRST_READ_PATH.md"
             }
           ]
@@ -398,9 +398,9 @@
       "es": "Proyecto de Portafolio Full-Stack con FastAPI y React 19, enfocado en Clean Architecture y UX premium"
     },
     "full_description": {
-      "pt": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problema</div><p>Portfólios convencionais falam de qualidade, mas raramente mostram evidência operacional de backend, observabilidade e degradação controlada.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Restrição</div><p>A experiência precisava permanecer rápida no frontend enquanto consumia telemetria real, suportava i18n e expunha falhas sem virar uma demo enganosa.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decisão</div><p>Conectei FastAPI em Clean Architecture a um frontend React 19 com TanStack Query, trilhas de caos, rastreamento estruturado e narrativa operacional acima da dobra.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>A estrutura ficou mais complexa do que um portfolio padrão, mas isso permitiu mostrar circuit breaker, fallback, histerese e telemetria com contexto.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Impacto</div><p>O project passou de vitrine estática para caso de estudo interativo, com P95 abaixo de 45ms em modo normal e falhas controladas expostas com recuperação visível.</p></div>",
-      "en": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problem</div><p>Standard portfolios are static promises of code quality rather than demonstrable evidence of system resilience.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Challenge</div><p>Deliver a production-ready system demo integrating an active observability pipeline, anti-abuse layers, and real-time backend state inside a performant SPA.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decision</div><p>Built a FastAPI backend using Clean Architecture (Domain, Use Cases, Interfaces) connected to a React 19 frontend utilizing TanStack Query for optimal request batching.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>Sacrificed rapid prototyping and simplified UI code for a robust DDD structure and strict anti-abuse mechanisms.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Impact</div><p>P95 latency strictly under 45ms. Contact form spam and malicious payloads fully isolated (100% block rate).</p></div>",
-      "es": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problema</div><p>Los portafolios convencionales hablan de calidad, pero casi nunca muestran evidencia operativa de backend, observabilidad y degradación controlada.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Restricción</div><p>La experience debía seguir siendo rápida en frontend mientras consumía telemetría real, soportaba i18n y exponía fallos sin convertirse en una demo engañosa.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decisión</div><p>Conecté FastAPI en Clean Architecture con un frontend React 19 usando TanStack Query, recorridos de chaos, trazabilidad estructurada y narrativa operativa above the fold.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>La estructura quedó más compleja que un portfolio estándar, pero permitió mostrar circuit breaker, fallback, hysteresis y telemetría con contexto.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Impacto</div><p>El proyecto pasó de vitrina estática a caso de estudio interactivo, con P95 por debajo de 45ms en modo normal y fallos controlados visibles con recuperación explícita.</p></div>"
+      "pt": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problema</div><p>Um portfolio backend precisa de evidências verificáveis da implementação e limites claros para afirmações operacionais.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Restrição</div><p>A API deve servir o conteúdo do portfolio e aceitar mensagens de contato sem depender de SQL.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decisão</div><p>Usar casos de uso e adaptadores FastAPI, leituras JSON em cache, métricas HTTP e entrega de contato por Redis Streams com novas tentativas conforme o tipo de falha e fila de falhas.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>Falhas no Redis reduzem a proteção compartilhada a estado local; a entrega alternativa em segundo plano não é durável e não tem novas tentativas automáticas.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Resultado</div><p>A limpeza remove simulações Chaos e caminhos SQL do backend. Aceitar um contato não comprova entrega na caixa de entrada; latência e capacidade atuais ainda precisam ser medidas.</p></div>",
+      "en": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problem</div><p>A backend portfolio needs verifiable implementation evidence and clear limits on operational claims.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Constraint</div><p>The API must serve portfolio content and accept contact messages without a SQL dependency.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decision</div><p>Use FastAPI use cases and adapters, cached JSON reads, HTTP metrics, and Redis Streams contact delivery with classified retries and a dead-letter queue.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>Redis failures reduce shared protection to local state; background delivery fallback is not durable and has no automatic retries.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Outcome</div><p>The cleanup removes backend Chaos simulations and SQL paths. Contact acceptance does not prove inbox delivery; current latency and capacity still require measurement.</p></div>",
+      "es": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problema</div><p>Un portfolio backend necesita evidencias verificables de implementación y límites claros para las afirmaciones operativas.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Restricción</div><p>La API debe servir el contenido del portfolio y aceptar mensajes de contacto sin depender de SQL.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decisión</div><p>Usar casos de uso y adaptadores FastAPI, lecturas JSON en caché, métricas HTTP y entrega de contactos por Redis Streams con reintentos clasificados y cola de fallos.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>Los fallos de Redis reducen la protección compartida a estado local; la entrega alternativa en segundo plano no es duradera ni tiene reintentos automáticos.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Resultado</div><p>La limpieza retira las simulaciones Chaos y las rutas SQL del backend. Aceptar un contacto no demuestra entrega en la bandeja de entrada; la latencia y capacidad actuales aún necesitan medición.</p></div>"
     },
     "technologies": [
       "Python",
@@ -418,13 +418,13 @@
     ],
     "features": [
       "Multilingual support (PT, EN, ES) with dynamic switching",
-      "Advanced Contact Form security (Honeypots, Rate Limiting, Idempotency)",
-      "High-Performance UX (Predictive Prefetching, Background Sync)",
+      "Contact validation, honeypots, rate limits, and optional idempotency",
+      "Cached JSON content reads with ETag revalidation",
       "Clean Architecture implementation (Backend & Frontend approach)",
-      "Automatic OpenAPI/Swagger documentation",
+      "OpenAPI/Swagger documentation outside production",
       "Interactive Project and Experience showcases",
       "Responsive and Animated UI with Dark/Light modes",
-      "CI/CD with automated quality gates (Tests & Linting)"
+      "Configured CI quality checks with branch and path filters"
     ],
     "learnings": [
       "Full-Stack architecture and integration patterns",
@@ -441,69 +441,69 @@
     "image": null,
     "case_study": {
       "problem": {
-        "pt": "Um portfolio backend precisa de evidencia operacional verificavel em vez de promessas estaticas de qualidade.",
         "en": "A backend portfolio needs verifiable operational evidence instead of static quality claims.",
+        "pt": "Um portfolio backend precisa de evidencia operacional verificavel em vez de promessas estaticas de qualidade.",
         "es": "Un portfolio backend necesita evidencia operativa verificable en lugar de promesas estaticas de calidad."
       },
       "constraints": {
-        "pt": "A SPA precisa permanecer util durante cold starts e distinguir claramente sinais reais de simulados.",
-        "en": "The SPA must remain useful during backend cold starts and clearly distinguish live from simulated signals.",
-        "es": "La SPA debe seguir siendo util durante cold starts y distinguir claramente las senales reales de las simuladas."
+        "en": "Serve content and accept contact without SQL; distinguish implementation evidence from production measurements.",
+        "pt": "Servir conteúdo e aceitar contatos sem SQL; distinguir evidências de implementação de medições em produção.",
+        "es": "Servir contenido y aceptar contactos sin SQL; distinguir evidencias de implementación de mediciones en producción."
       },
       "solution": {
-        "pt": "Clean Architecture com FastAPI e combinada com cliente React, etiquetas explicitas de telemetria e falhas documentadas.",
-        "en": "FastAPI Clean Architecture is paired with a React client, explicit telemetry labels, and documented failure behavior.",
-        "es": "Clean Architecture con FastAPI se combina con un cliente React, etiquetas explicitas de telemetria y fallos documentados."
+        "en": "FastAPI use cases and adapters provide JSON content reads, HTTP telemetry, and asynchronous contact delivery.",
+        "pt": "Casos de uso e adaptadores FastAPI oferecem leituras JSON, telemetria HTTP e entrega assíncrona de contatos.",
+        "es": "Casos de uso y adaptadores FastAPI ofrecen lecturas JSON, telemetría HTTP y entrega asíncrona de contactos."
       },
       "architecture": {
-        "pt": "Controllers chamam casos de uso e entidades por portas de repositorio; leituras estaticas usam JSON e mutacoes usam armazenamento transacional.",
-        "en": "Controllers call use cases and entities through repository ports; static reads use a JSON repository and mutations use transactional storage.",
-        "es": "Los controllers llaman casos de uso y entidades mediante puertos de repositorio; las lecturas estaticas usan JSON y las mutaciones almacenamiento transaccional."
+        "en": "Controllers call use cases wired to adapters. Reads use cached JSON; contact uses Redis protection and stream delivery with a background fallback.",
+        "pt": "Controllers chamam casos de uso conectados a adaptadores. Leituras usam JSON em cache; contatos usam proteção Redis e entrega por stream com alternativa em segundo plano.",
+        "es": "Los controllers llaman casos de uso conectados a adaptadores. Las lecturas usan JSON en caché; los contactos usan protección Redis y entrega por stream con alternativa en segundo plano."
       },
       "testing": {
-        "pt": "Backend, frontend e comportamento de chaos sao cobertos por testes unitarios, integracao e E2E local em CI.",
-        "en": "Backend, frontend, and chaos behavior are covered by unit, integration, and local CI end-to-end checks.",
-        "es": "Backend, frontend y comportamiento de chaos estan cubiertos por pruebas unitarias, de integracion y E2E local en CI."
+        "en": "Backend tests cover content contracts, contact protection, delivery retries, and retired Chaos routes returning 404. Frontend compatibility and deployment-sized load testing remain pending.",
+        "pt": "Testes backend cobrem contratos de conteúdo, proteção de contatos, novas tentativas de entrega e rotas Chaos retiradas retornando 404. A compatibilidade frontend e os testes de carga na escala do deploy continuam pendentes.",
+        "es": "Las pruebas backend cubren contratos de contenido, protección de contactos, reintentos de entrega y rutas Chaos retiradas con respuesta 404. La compatibilidad frontend y las pruebas de carga a escala de despliegue siguen pendientes."
       },
       "reliability": {
-        "pt": "Entrega de contato usa idempotencia, controles de abuso, mascaramento de PII, retries Redis Streams, DLQ e recuperacao PEL.",
-        "en": "Contact delivery uses idempotency, abuse controls, PII masking, Redis Streams retries, DLQ handling, and PEL recovery.",
-        "es": "La entrega de contacto usa idempotencia, controles de abuso, enmascaramiento de PII, reintentos Redis Streams, DLQ y recuperacion PEL."
+        "en": "Stream delivery supports classified retries, DLQ handling, and pending recovery. Local protection resets on restart; background fallback has no automatic retries. Acceptance is not inbox delivery.",
+        "pt": "A entrega por stream oferece novas tentativas conforme o tipo de falha, DLQ e recuperação de pendências. A proteção local reinicia com o processo; a alternativa em segundo plano não tem novas tentativas automáticas. Aceitação não comprova entrega na caixa de entrada.",
+        "es": "La entrega por stream ofrece reintentos clasificados, DLQ y recuperación de pendientes. La protección local se reinicia con el proceso; la alternativa en segundo plano no tiene reintentos automáticos. La aceptación no demuestra entrega en la bandeja de entrada."
       },
       "impact": {
-        "pt": "O caminho JSON-first remove o round trip PostgreSQL de leituras estaticas e preserva armazenamento transacional para mutacoes.",
-        "en": "The JSON-first path removes the PostgreSQL round trip from static reads while preserving transactional storage for mutations.",
-        "es": "La ruta JSON-first elimina el round trip de PostgreSQL de las lecturas estaticas y conserva almacenamiento transaccional para mutaciones."
+        "en": "The cleanup removes SQL application paths and backend simulations while retaining content reads, contact delivery, and observed HTTP/worker metrics. Current latency and capacity still need measurement.",
+        "pt": "A limpeza remove caminhos SQL e simulações backend, mantendo leituras de conteúdo, entrega de contatos e métricas HTTP/worker observadas. Latência e capacidade atuais ainda precisam ser medidas.",
+        "es": "La limpieza retira las rutas SQL y simulaciones backend, conservando lecturas de contenido, entrega de contactos y métricas HTTP/worker observadas. La latencia y capacidad actuales aún necesitan medición."
       },
       "evidence": [
         {
           "label": {
-            "pt": "Cobertura de CI",
-            "en": "CI coverage",
-            "es": "Cobertura de CI"
+            "en": "Backend regression tests",
+            "pt": "Testes de regressão backend",
+            "es": "Pruebas de regresión backend"
           },
-          "value": "Backend, frontend, and local chaos checks",
-          "classification": "REPRODUCED",
-          "source": "docs/architecture/ADR-17-chaos-e2e-strategy.md"
+          "value": "Repository tests cover public JSON snapshots and retired Chaos routes; this is not live production evidence",
+          "classification": "REAL",
+          "source": "backend/tests/test_content_snapshots.py; backend/tests/test_chaos_retirement.py"
         },
         {
           "label": {
-            "pt": "Confiabilidade de contato",
             "en": "Contact reliability",
+            "pt": "Confiabilidade de contato",
             "es": "Fiabilidad de contacto"
           },
-          "value": "Redis Streams retries, DLQ handling, and PEL recovery",
+          "value": "Stream retries, DLQ, and pending recovery; background fallback has no automatic retries",
           "classification": "REAL",
-          "source": "ARCHITECTURE.md#20-resilient-background-processing-redis-streams"
+          "source": "docs/architecture/production-operations.md#runtime-and-health-signals"
         },
         {
           "label": {
-            "pt": "Incidente de cold start",
-            "en": "Cold-start incident",
-            "es": "Incidente de cold start"
+            "en": "JSON content reads",
+            "pt": "Leituras de conteúdo JSON",
+            "es": "Lecturas de contenido JSON"
           },
-          "value": "JSON-first read path removes the PostgreSQL round trip",
-          "classification": "REPRODUCED",
+          "value": "On-demand JSON reads remove the SQL dependency; historical timings do not establish current performance",
+          "classification": "REAL",
           "source": "docs/architecture/JSON_FIRST_READ_PATH.md"
         }
       ]

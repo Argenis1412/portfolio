@@ -20,8 +20,8 @@ retirement work must be completed before deploying the combined change. See the
 
 SQL adapters and simulation endpoints have been removed from the backend.
 Existing production databases, tables, volumes, Terraform resources, and secret
-identities have not been removed or renamed. Portfolio JSON claims about Chaos
-and their snapshots still require a separate review.
+identities have not been removed or renamed. The portfolio JSON now describes
+the cleanup backend; its list/detail response snapshots were reviewed together.
 
 ## Current backend behavior
 
@@ -119,7 +119,8 @@ read decision, SLO targets, observability/logging, security, CORS, and HTTP cach
 guides distinguish current behavior from historical evidence. Incident reports,
 case studies, and Chaos/IaC decisions preserve their version context and stable
 links. Content/release guidance records outstanding checks, and the old frontend
-refinement plan is superseded. Portfolio JSON and snapshots still need review.
+refinement plan is superseded. Portfolio JSON and snapshots reflect the cleanup;
+frontend retirement and operational release checks remain pending.
 
 The [SLO definitions](docs/architecture/SLO_DEFINITIONS.md) state targets; the
 [recorded benchmark](benchmarks/results/02c08d3/summary.md) is historical evidence,
