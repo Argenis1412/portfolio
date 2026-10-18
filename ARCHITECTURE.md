@@ -120,9 +120,10 @@ than being relabeled as current features.
 
 The failure model, resilience policy, JSON read decision, SLO definitions, and
 observability/logging, security, CORS, and HTTP caching guides now distinguish
-current behavior from historical designs. Remaining detailed documents and case
-studies still need a consistency pass. Portfolio JSON and content snapshots are
-unchanged.
+current behavior from historical designs. Incident reports, case studies, and
+Chaos/IaC decisions retain their version context and stable links. Content/release
+guidance and the frontend refinement plan remain for a separate consistency pass.
+Portfolio JSON and content snapshots are unchanged.
 Use the current backend guide and operations runbook for
 runtime behavior; use [SLO definitions](docs/architecture/SLO_DEFINITIONS.md) and
 versioned benchmarks as targets and historical evidence, not newly verified results.

@@ -1,31 +1,40 @@
 # ADR-18: Infrastructure as Code Strategy
 
-**Status:** Accepted
-**Date:** 2026-05-04
-**Version:** v1.7.0
+**Status:** Accepted scope, with historical database context.
+**Original date:** 2026-05-04. **Version:** v1.7.0.
+The root architecture index uses decision 19 for this topic; this identifier
+remains stable for existing references.
 
-## Context
+## Decision and retained boundary
 
-To demonstrate operational excellence, the portfolio required an Infrastructure as Code (IaC) layer. However, the system relies on multiple third-party SaaS providers (Koyeb for compute, Supabase for PostgreSQL, Upstash for Redis) that have varying levels of support for Terraform, especially regarding their free tiers.
+Terraform manages Koyeb application/service configuration and secret-backed
+application settings. Third-party stateful services were deliberately outside
+that provisioning scope. The original design included manually provisioned
+Supabase PostgreSQL and Upstash Redis; the cleanup application now uses JSON
+content, Redis, and Resend without SQL.
 
-Attempting to fully automate the provisioning of all these services often leads to overly complex modules, unsupported providers, or brittle scripts that are difficult for reviewers to run.
+Existing database resources and secret identities are retained. Their presence
+in Terraform does not mean a new backend needs SQL or authorize deleting them.
+Resource decommissioning is a separate operation.
 
-## Decision
+## Consequences and verification limits
 
-We will provision a Minimum Viable IaC setup using Terraform. This setup is strictly scoped to:
-- The Koyeb application and service configuration.
-- Environment variable injection (`TF_VAR_*`).
+The scope keeps compute configuration reviewable but does not reproduce every
+external account, provider setting, credential, or operational dependency.
+Claims that a reviewer can deploy in fewer than ten commands or understand the
+entire environment in five minutes are not acceptance criteria or measured facts.
+A Terraform apply is not an atomic transaction and does not prove complete
+infrastructure parity or ongoing reliability.
 
-We are intentionally leaving third-party stateful services (Upstash Redis, Supabase) as manual setup steps.
+GitHub Actions passes values to Terraform, which configures Koyeb. Preserve stable
+internal identities while exposing English application keys. Review a plan for
+unexpected changes; no infrastructure changes are part of this documentation
+cleanup. The application no longer needs database initialization, but existing
+infrastructure variables/resources remain a separate concern.
 
-## Rationale
-
-1. **Clarity over Automation:** The primary goal of this repository is to serve as an engineering portfolio. A clear, readable Terraform configuration that provisions the core compute layer in `< 10 commands` is more valuable than a complex, fragile script that attempts to automate everything.
-2. **Reproducibility Focus:** This setup prioritizes the reproducibility of the backend service (how the container runs, scaling, health checks, ports) over full infrastructure parity.
-3. **Free Tier Limitations:** Automating the free-tier setups of external database providers often violates the goal of a clean codebase due to provider constraints or lack of official support.
-
-## Consequences
-
-- **Positive:** Any developer or reviewer can understand the deployment topology in 5 minutes by reading `infrastructure/main.tf`.
-- **Positive:** The IaC layer remains simple, maintainable, and highly reliable.
-- **Negative:** Bootstrapping a completely new environment from scratch still requires manual intervention to create the database and Redis instances before running Terraform. This is an accepted trade-off documented in `infrastructure/README.md`.
+See the [operations runbook](production-operations.md) for release prerequisites,
+[INC-007](INCIDENT_KOYEB_TERRAFORM.md),
+[INC-008](INCIDENT_DESTRUCTIVE_IAC_MIGRATION.md), and
+[INC-009](INC-009-terraform-resource-collision.md) for recorded migration failures.
+Original wording remains available with
+`git show bb3ff44:docs/architecture/ADR-18-iac-strategy.md`.

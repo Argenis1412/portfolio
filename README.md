@@ -116,9 +116,9 @@ current, retired, and deferred decisions. The
 [CHANGELOG](CHANGELOG.md) retains release history and production incidents.
 The [failure model](docs/architecture/FAILURE_MODEL.md), resilience policy, JSON
 read decision, SLO targets, observability/logging, security, CORS, and HTTP caching
-guides distinguish current behavior from historical evidence. Case studies and
-remaining detailed documents still need a consistency pass; read their SQL,
-Chaos, and old configuration references in version context.
+guides distinguish current behavior from historical evidence. Incident reports,
+case studies, and Chaos/IaC decisions preserve their version context and stable
+links. Content/release guidance and the frontend refinement plan remain for review.
 
 The [SLO definitions](docs/architecture/SLO_DEFINITIONS.md) state targets; the
 [recorded benchmark](benchmarks/results/02c08d3/summary.md) is historical evidence,

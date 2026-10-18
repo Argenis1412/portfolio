@@ -1,34 +1,36 @@
 # Case Study: INC-004 (CSP Blocking)
 
-**Confidence Score**: `High` (Real production data: browser console logs, Vercel edge telemetry).
-**Tag**: `REAL`
+**Historical period:** v1.3.x to v1.4.0, production domain cutover.
+**Recorded classification:** `REAL`. The original report cited browser console
+logs and Vercel telemetry; raw evidence was not revalidated for this cleanup.
 
-### 1. Context
-- **Service**: Frontend (Vercel) and Backend (Koyeb) integration.
-- **Timeline**: v1.3.x to v1.4.0 (Production domain cutover).
-- **Impact**: 100% failure rate for all client-side API requests in the production environment.
+## Recorded incident
 
-### 2. Symptom
-Upon accessing the production domain (`argenisbackend.com`), the browser actively blocked all API network requests. The browser console explicitly reported Content Security Policy (CSP) violations, specifically restricting the `connect-src` directive.
+After the custom-domain cutover, the browser blocked API requests because the
+frontend CSP `connect-src` policy did not permit the API origin. Initial suspicion
+focused on backend CORS, but the reported console violations identified the
+browser policy. Local and preview behavior had not established production-policy
+compatibility.
 
-### 3. Initial Hypotheses
-Assumed the backend CORS policy in Koyeb was rejecting the requests from the new frontend custom domain.
+The original report described client success improving from 0% to 100% after
+synchronizing frontend and backend settings. Treat those figures as historical
+claims without an attached sample window here, not current availability evidence.
+Backend traffic metrics alone cannot account for requests blocked by the browser
+before transmission.
 
-### 4. Partial/Human Cause
-Infrastructure silos and environmental drift. The frontend and backend managed security headers independently without a single source of truth. The incident bypassed QA because `localhost` and Vercel preview URLs (staging) utilized relaxed CSP templates. The restrictive production CSP was only evaluated post-cutover.
+## Current relevance
 
-### 5. Before vs After [REAL]
+Review frontend `connect-src` and backend origin settings together when changing
+domains. They are distinct controls: a CSP fix does not prove CORS is correct,
+and a successful preflight does not prove the browser permits the connection.
+Update whichever policy needs changing and test the intended deployed origin;
+the same regex edit is not required for every possible domain change.
 
-| Metric | Before (Production Cutover) | After (v1.4.0) |
-| :--- | :--- | :--- |
-| **API Client Success Rate** | 0% | 100% |
-| **Header Configuration** | Desynced (Siloed configs) | Synced (`vercel.json` + `settings.py`) |
-| **CORS Preflight Failures**| N/A (Blocked client-side) | 0 |
+The former guide claimed automated preflight assertions in CI without identifying
+the job or artifact. This document makes no current coverage claim from that
+statement. See the [CORS policy](../architecture/cors-policy.md) and
+[security controls](../architecture/security-hardening.md).
 
-### 6. Real vs Reproduced
-- **Source**: `REAL`.
-- **Limitations**: Sourced directly from production incident logs. The failure occurred before backend ingestion, meaning standard backend metrics recorded 0 traffic.
-
-### 7. Lessons & Guardrails
-- **Lesson**: Environment parity must strictly include security headers. Validating against staging environments with relaxed CSP/CORS profiles yields false positive deployment confidence.
-- **Guardrail**: Established explicit configuration synchronization (ADR-15.3). Modifying `connect-src` in `vercel.json` mandates a matching update to the CORS regex in `settings.py`. Added automated `OPTIONS` preflight assertions in the CI pipeline.
+The [changelog](../../CHANGELOG.md) preserves the incident history. Original
+wording remains available with
+`git show bb3ff44:docs/case_studies/INC-004_csp_blocking.md`.

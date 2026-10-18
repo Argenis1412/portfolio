@@ -1,22 +1,33 @@
 # Incident Post-Mortem: INC-009
 
-## 🛑 Secret Identity Collision (Rename Race Condition)
+## Secret Identity Collision
 
-**Date**: 2026-05-08
-**Version**: v1.8.1
-**Component**: Infrastructure (Terraform / Koyeb)
-**Impact**: Deployment failure in CI/CD pipeline (Blocked `terraform apply`).
+**Recorded date:** 2026-05-08. **Affected release:** v1.8.1.
+**Historical resolution:** v1.8.2. **Impact:** Blocked Terraform apply in CI/CD.
 
-### Summary
-During the "English-First" standardization, several Terraform resource keys in the `secrets_registry` were renamed (e.g., `ENVIRONMENT` → `AMBIENTE`). While the application-facing keys were correctly updated, the change in Terraform resource IDs triggered a `destroy + create` cycle. Since both the old and new resources mapped to the same physical secret name in Koyeb, the creation of the new secret failed because the name already existed.
+## Recorded failure and resolution
 
-### Root Cause
-Terraform does not recognize a key change in a `for_each` map as a "rename". It treats it as the deletion of one instance and the creation of another. In parallel execution, the "create" step often hits the API before the "destroy" step is fully processed, or simply conflicts with the existing resource.
+Renaming `for_each` resource keys, including `ENVIRONMENT` to `AMBIENTE`, changed
+Terraform addresses while still targeting the same physical Koyeb secret names.
+The resulting create/destroy operations collided with existing names.
 
-### Resolution
-Implemented Terraform `moved` blocks to explicitly map the old resource IDs to the new ones in the state. This converted the `destroy + create` operation into a safe `rename` (state-only update), resulting in "0 to destroy" in the plan.
+Explicit `moved` blocks recorded the address changes in state. The historical
+report described a resulting plan with zero resources to destroy. That result
+belongs to the recorded reconciliation, not every future plan.
 
-### Lessons Learned
-- **Renaming is Destructive**: In Terraform, renaming a resource key is a destructive operation by default.
-- **"Zero to Destroy" Principle**: Any unexpected `destroy` in a plan for stable resources (secrets, DBs) must be treated as a critical risk.
-- **State Migration**: Use `moved` blocks whenever refactoring resource keys in maps.
+## Current boundary
+
+`infrastructure/main.tf` retains the move declarations and stable legacy registry
+keys, while `app_key` supplies English environment names. Resource identity,
+physical secret name, and application key are distinct. Renaming an address
+without state continuity can schedule replacement; a `moved` declaration does not
+prevent replacement caused by other resource-attribute changes.
+
+Preserve existing identities and inspect each plan for unexpected destruction.
+This cleanup does not rename/delete resources, reconcile live state, or verify
+secret values. Confirming `AMBIENTE=production` remains an operational prerequisite.
+
+See the [IaC decision](ADR-18-iac-strategy.md),
+[operations runbook](production-operations.md), and [changelog](../../CHANGELOG.md).
+Original wording remains available with
+`git show bb3ff44:docs/architecture/INC-009-terraform-resource-collision.md`.
