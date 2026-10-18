@@ -41,7 +41,7 @@ Original narratives, detection details, and release history remain in the
 | INC-003, v1.4.x | A secondary Chaos database write crashed the simulation during a connectivity issue; observed manually. | Persistence exceptions were isolated (root ADR-15.1). Both Chaos and SQL application paths are now retired. |
 | INC-004, v1.3.x to v1.4.0 | Browser CSP blocked the custom API domain; console violations exposed the mismatch. | Coordinate CSP and CORS (root ADR-15.3). Domain changes still require checking both policies. |
 | INC-005, v1.6.0 | Different Docker build contexts broke Koyeb and CI builds. | Standardize repository-root context (root ADR-15.2). Build validation remains a release prerequisite. |
-| INC-006, v1.7.x to v1.8.0 | URL matching undercounted delimiter-separated links; found during static review. | Correct extraction and normalization, recorded in the changelog. Current scores flag messages rather than suppress delivery. |
+| INC-006, v1.7.0 to v1.8.0 | Separate link/domain extraction mishandled mixed `https://` and bare `www.` links to different sites, adding an incorrect spam penalty; found during static review. | Unified URL extraction and normalization, recorded in the changelog. Current scores flag messages rather than suppress delivery. |
 | INC-007, v1.7.0 to v1.8.1 | Koyeb provider v0.1.11 could not send required literal-environment metadata; apply returned HTTP 400. | Secret-first orchestration bypassed that schema limitation. This is version-specific evidence, not a claim about current provider capabilities. |
 | INC-008, v1.7.1 to v1.8.1 | A recorded ownership/domain migration involved deleting the manual service and 14 hours of downtime. | Cold migration was accepted for that event. It is not a standing policy permitting service deletion or downtime in this cleanup. |
 | INC-009, v1.8.1 to v1.8.2 | Terraform key renames mapped to the same physical secret, causing create/destroy collisions; apply failed. | State continuity through `moved` blocks avoided replacement. Preserve existing resource/secret identities and review plans. |
@@ -58,6 +58,6 @@ must be read in their own context rather than silently renumbered.
 - [SLO definitions](SLO_DEFINITIONS.md): targets and measurement limits
 - [Engineering playbook](../../ENGINEERING_PLAYBOOK.md): scoped changes and evidence standards
 
-Detailed incident reports and remaining architecture documents still require a
-consistency pass. Preserve their historical evidence while correcting claims
-about current behavior.
+Detailed incident reports retain their version context and stable paths. Their
+recorded observations are historical evidence, not current production verification.
+See the [release guide](../RELEASE_READINESS.md) for outstanding validation.

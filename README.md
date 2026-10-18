@@ -118,7 +118,8 @@ The [failure model](docs/architecture/FAILURE_MODEL.md), resilience policy, JSON
 read decision, SLO targets, observability/logging, security, CORS, and HTTP caching
 guides distinguish current behavior from historical evidence. Incident reports,
 case studies, and Chaos/IaC decisions preserve their version context and stable
-links. Content/release guidance and the frontend refinement plan remain for review.
+links. Content/release guidance records outstanding checks, and the old frontend
+refinement plan is superseded. Portfolio JSON and snapshots still need review.
 
 The [SLO definitions](docs/architecture/SLO_DEFINITIONS.md) state targets; the
 [recorded benchmark](benchmarks/results/02c08d3/summary.md) is historical evidence,

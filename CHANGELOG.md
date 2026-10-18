@@ -80,8 +80,10 @@ incidents and versioned releases below retain their original historical context.
   headers, proxy trust, CORS, and cache guidance with implemented behavior, including
   the current limits on cross-origin manual ETag revalidation. Contextualized
   historical incident reports and Chaos/IaC decisions; clarified the standalone
-  rate-limit audit identifier collision without renaming its links. Content/release
-  guidance, the frontend refinement plan, and portfolio JSON remain separate work.
+  rate-limit audit identifier collision without renaming its links. Updated the
+  content/release guidance, marked the old frontend refinement plan superseded,
+  and corrected the INC-006 summary against the preserved incident entry. Portfolio
+  JSON and snapshots, frontend retirement, and operational release checks remain.
 
 ### Frontend deployment dependency
 
@@ -94,7 +96,7 @@ Zod defaults avoid parsing failures but do not remove misleading UI behavior.
 | `frontend/src/api/schemas.ts`, `useLiveMetrics`, status/metrics banners | Remove synthetic fields and simulation-derived status, counters, and recovery logic. |
 | `frontend/src/api/client.ts` | Remove `X-Chaos-Preset`, then its temporary backend CORS allowance. `X-Debug-Mode` is already ignored and disallowed. |
 | `frontend/e2e/chaos.spec.ts`, `.github/workflows/e2e-smoke.yml` | Replace simulation smoke scenarios before targeting the updated API. |
-| Portfolio JSON content and detailed architecture documents | Review retired-feature claims; deliberately review content snapshots. |
+| Portfolio JSON content | Review retired-feature claims; deliberately review content snapshots. |
 
 Before any future release, migrate existing local keys using the
 [backend guide](backend/README.md#configuration), confirm the GitHub secret

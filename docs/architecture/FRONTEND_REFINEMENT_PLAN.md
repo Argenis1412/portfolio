@@ -1,31 +1,34 @@
-# Frontend Refinement Implementation Plan
+# Frontend Refinement Plan: Historical Context
 
-**State**: In Execution
-**Branch**: `refactor/frontend-chaos-refinement`
+**Status:** Superseded by backend cleanup and pending frontend retirement.
+**Original branch reference:** `refactor/frontend-chaos-refinement`.
+That reference records the earlier plan; it does not identify the active checkout
+or prove which planned items were implemented.
 
-This document outlines the structured attack plan for refining the SRE portfolio's UI, focusing on clarity under pressure, reading hierarchies, and strengthening the "Chaos Playground" as the flagship feature.
+## Earlier design intent
 
-## PHASE 1 & 2 — Credibility Basics and Hierarchy
-- **Fix PRO-TIP bug**: Remove the duplicated `PRO-TIP:` text from translation files.
-- **Fix `1,011` format**: Ensure thousands-separated metrics use the comma format via `toLocaleString('en-US')`.
-- **Centralized DEGRADED state**: Make `SystemStatusBanner.tsx` the single source of truth for degradation status, avoiding repetition in individual cards.
-- **STABLE without Cause**: Ensure a `STABLE` state in the banner does not show an incident cause.
-- **Global synthetic declaration**: Declare only once at the global level that the dashboard uses synthetic data (`~52% synthetic`), removing repetitions on individual cards.
-- **Confidence as metadata**: Move the confidence indicator away from primary KPIs to subtle metadata.
+The plan focused on copy density, metric formatting, a single status banner,
+architecture narrative, semantic colors, and more prominent Chaos feedback/logs.
+It proposed global synthetic percentages, stress/failure button emphasis, and
+synthetic lifecycle transitions as the main demonstration experience.
 
-## PHASE 3 — Narrative and Flow (Architecture Trade-offs)
-- **Visual Order**: Audit and fix the CSS context to guarantee the `ArchitectureTradeoffs` section renders visually above `ChaosPlayground` in the final DOM.
+These were UI proposals, not backend capabilities or production measurements.
+The proposed synthetic percentage was not measured evidence. The backend now
+retires Chaos routes and simulation fields, so this plan must not be used as an
+active instruction to strengthen those controls or restore the removed contract.
 
-## PHASE 4 — Chaos as Star Feature
-- **Dramatic visual feedback**: Add quick flashes to metric cards (P95, Error Rate) immediately upon activating a chaos mode.
-- **Aggressive buttons**: Increase the visual weight and styling for stress/failure buttons.
-- **Keyword colorized logs**: Apply keyword highlighting (`TIMEOUT`, `RETRY`, `OPEN`) in the terminal/event stream.
-- **Prominent Incident History**: Increase the visibility and contrast of post-mortems within the `FeaturedIncident.tsx` component.
+## Remaining frontend work
 
-## PHASE 5 — Color Discipline
-- **Global Audit**: Clean up arbitrary use of semantic colors across `index.css` and React components, strictly enforcing:
-  - 🔴 Red: `DEGRADED` / `ERROR`
-  - 🟡 Yellow: `WARNING` / `RECOVERING`
-  - 🟢 Green: `STABLE` / `OK`
-  - 🟣 Purple: Chaos / Synthetic
-  - ⬜ Neutral: Everything else
+Follow the [current consumer list](../../CHANGELOG.md#frontend-deployment-dependency)
+for retirement of actions, schemas, hooks, status/metrics projections, request
+headers, and smoke scenarios. Preserve contact and use the existing architecture;
+business-hook changes need a scoped plan as required by the repository rules.
+
+The [content contract](PORTFOLIO_CONTENT_CONTRACT.md) retains the hiring narrative,
+route structure, copy budgets, and evidence standards. The
+[release guide](../RELEASE_READINESS.md) distinguishes required checks from actual
+completed validation. This historical-plan update does not implement or verify
+any frontend changes.
+
+Original phases remain available with
+`git show e7cd8a0:docs/architecture/FRONTEND_REFINEMENT_PLAN.md`.
