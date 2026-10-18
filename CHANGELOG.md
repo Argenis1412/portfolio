@@ -76,7 +76,9 @@ incidents and versioned releases below retain their original historical context.
   the failure model, resilience policy, JSON read decision, and SLO measurement
   limits; retained targets and historical incident evidence without claiming current
   compliance. Corrected observability ownership, optional tracing/export behavior,
-  log masking limits, and unsupported automation examples. Remaining detailed
+  log masking limits, and unsupported automation examples. Aligned security
+  headers, proxy trust, CORS, and cache guidance with implemented behavior, including
+  the current limits on cross-origin manual ETag revalidation. Remaining detailed
   documents, case studies, and portfolio JSON corrections remain separate work.
 
 ### Frontend deployment dependency

@@ -119,9 +119,10 @@ Earlier architecture wording is available with
 than being relabeled as current features.
 
 The failure model, resilience policy, JSON read decision, SLO definitions, and
-observability/logging guides now distinguish current behavior from historical
-designs. Security, HTTP caching, remaining detailed documents, and case studies
-still need a consistency pass. Portfolio JSON and content snapshots are unchanged.
+observability/logging, security, CORS, and HTTP caching guides now distinguish
+current behavior from historical designs. Remaining detailed documents and case
+studies still need a consistency pass. Portfolio JSON and content snapshots are
+unchanged.
 Use the current backend guide and operations runbook for
 runtime behavior; use [SLO definitions](docs/architecture/SLO_DEFINITIONS.md) and
 versioned benchmarks as targets and historical evidence, not newly verified results.
