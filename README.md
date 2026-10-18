@@ -1,254 +1,129 @@
-# 🏛️ Backend-Focused Full-Stack System
-[![License: MIT](https://img.shields.io/badge/License-MIT-gold.svg)](LICENSE)
-[![Backend CI](https://github.com/Argenis1412/portfolio/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/Argenis1412/portfolio/actions)
-[![Frontend CI](https://github.com/Argenis1412/portfolio/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/Argenis1412/portfolio/actions)
-[![Python](https://img.shields.io/badge/Python-3.12-blue.svg)](https://www.python.org/downloads/)
-[![React](https://img.shields.io/badge/React-19-61DAFB.svg)](https://react.dev/)
+# Backend-Focused Portfolio
 
-## 🌐 Live Demo
-**Frontend:** [argenisbackend.com](https://argenisbackend.com) · **API Status:** [Healthy (JSON)](https://api.argenisbackend.com/health)
+[![Backend CI](https://github.com/Argenis1412/portfolio/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/Argenis1412/portfolio/actions/workflows/backend-ci.yml)
+[![Frontend CI](https://github.com/Argenis1412/portfolio/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/Argenis1412/portfolio/actions/workflows/frontend-ci.yml)
 
----
+A React portfolio backed by FastAPI, JSON content, Redis Streams, and Resend.
+The backend emphasizes explicit failure handling, contact protection, and
+observable delivery rather than simulated infrastructure behavior.
 
-A **Cloud-Native SRE Portfolio System** focused on resiliency, idempotency, and infrastructure automation. This isn't just a portfolio; it's a system built to survive and be managed at scale:
+Published links: [Frontend](https://argenisbackend.com) ·
+[API health](https://api.argenisbackend.com/health). These links may run an earlier
+release; this README describes the cleanup branch.
 
-- 🏗️ **Infrastructure as Code (IaC)** — Fully managed via Terraform with automated CI/CD provisioning.
-- 🌪️ **Chaos-Tested** — Automated weekly E2E stress tests to verify degradation and recovery.
-- ✅ **Secret-First Orchestration** — All environment variables managed as Koyeb Secrets for maximum security.
-- ✅ **Observability stack** — Sentry + Prometheus + OpenTelemetry for full system transparency.
-- ✅ **Multi-layer anti-abuse** — Honeypot + Spam Scoring + Redis-backed deduplication + Rate Limiting.
-- ✅ **JSON-First Read Path** — Eliminates Database cold-starts for public-facing data.
-- ✅ **React 19 + TanStack Query** — Optimized frontend with zero-refetch and 15min caching.
-- ✅ **Resilient Mobile Navigation** — Accessible drawer menu with scroll-lock, Esc support, and focus trap.
-- ✅ **UI Resilience Observability** — Circuit-breaker `503 ERR` traces surfaced in real-time Chaos Playground.
+## Branch status
 
----
+**Do not merge or deploy the backend cleanup yet.** The frontend still calls
+retired Chaos endpoints and consumes removed synthetic summary fields. Its
+retirement work must be completed before deploying the combined change. See the
+[remaining consumers](CHANGELOG.md#frontend-deployment-dependency).
 
-## 🔄 Evolution: How This System Grew
+SQL adapters and simulation endpoints have been removed from the backend.
+Existing production databases, tables, volumes, Terraform resources, and secret
+identities have not been removed or renamed. Portfolio JSON claims about Chaos
+and their snapshots still require a separate review.
 
-This project didn't start production-ready. It evolved through real production incidents:
+## Current backend behavior
 
-| Version | Milestone | Key Change |
-|---|---|---|
-| **v1.5.0** | Chaos Engineering | Deterministic chaos presets + stateful decision engine (ADR-14) |
-| **v1.5.1** | Honest Telemetry | Synthetic vs. real labels + confidence indicator (ADR-13) |
-| **v1.6.0** | Build Standardization | Modular API layer + root-context Dockerfile (ADR-15.2) — fixed INC-005 |
-| **v1.7.0** | SRE Evidence | Minimum Viable IaC (Terraform) + Weekly Chaos CI (ADR-18/19) |
-| **v1.8.0** | System Closure | Typography audit + Anti-spam accuracy fix (INC-006) |
-| **v1.9.0** | Operational Health | Resilient Redis Streams worker with at-least-once delivery (ADR-20) |
-| **v1.9.1** | UI/UX Resilience | Stacked PR overhaul — mobile nav, banner animations, typography, social rail (ADR-21) |
-
-See [CHANGELOG.md](CHANGELOG.md) for full details.
-
----
-
-## 🏗️ Infrastructure & Reliability
-This project follows a **Failure-Resilient** deployment model where infrastructure is treated as code.
-
-- **Terraform-Managed Infrastructure**: Every resource (App, Service, Domain, Secrets) is provisioned via HCL code.
-- **Secret-First Orchestration**: By-passing provider limitations through a pivot to Koyeb Secrets vault for all configuration.
-- **Resilient Provisioning**: CI/CD pipelines that automatically filter missing/optional secrets to prevent deployment locks.
-- **HCP Terraform Local Execution**: Optimized execution boundary where secrets are injected safely via GitHub Actions runners.
-- **Automated Chaos E2E**: Weekly suites validating system survival during simulated dependency failures.
-
-## 🧠 Engineering Highlights
-
-### 🔐 Security Decisions
-- **DDoS Protection**: Multi-layer rate limiting enforced per IP, email, and fingerprint.
-- **Bot Mitigation**: Silent honeypot rejection without revealing detection to attackers.
-- **State Resilience**: Idempotency keys prevent duplicate executions on network retries.
-- **API Hardening**: HSTS, NoSniff, and strict CORS regex mapping to ephemeral environments.
-
-| Decision | ADR | Rationale |
-|---|---|---|
-| Rate limiting enforced at middleware layer | ADR-10 | Ensures limits apply before business logic execution |
-| Idempotency required for contact endpoint | ADR-11 | Prevents duplicate side-effects during network retries |
-| CORS via regex, not allowlist | ADR-06 | Secures Vercel dynamic preview domains without wildcard `*` |
-| Metrics endpoint behind Basic Auth | ADR-04 | Prevents public intelligence gathering on system health |
-
-### 1. JSON-First & Scalable Persistence
-[Architecture Decision Record: JSON-First Read Path](docs/architecture/JSON_FIRST_READ_PATH.md)
-
-### 2. HTTP Caching Strategy
-[Architecture Decision Record: HTTP Caching](docs/architecture/HTTP_CACHING.md)
-
-### 3. Automated Quality Gate
-- **Static Analysis**: `ruff` for linting/formatting and `mypy` for gradual typing.
-- **CI/CD**: 80% coverage threshold enforced on every push — no exceptions.
-- **Dockerized Builds**: Verified in CI, not just locally.
-
-### 4. Observability & Chaos Control
-[Architecture Decision Record: Observability](docs/architecture/observability.md)
-- Stateful decision engine with hysteresis-based threshold monitoring
-- Deterministic chaos presets (MILD, STRESS, FAILURE) for reproducible failure analysis
-- Honest telemetry overlay distinguishing synthetic vs. real samples with confidence indicator
-- **Automated Chaos CI**: Weekly E2E suite validating real system recovery times (ADR-18)
-
-> [!TIP]
-> **Latest Chaos CI Run**: [![Chaos E2E](https://github.com/Argenis1412/portfolio/actions/workflows/chaos-e2e.yml/badge.svg)](https://github.com/Argenis1412/portfolio/actions/workflows/chaos-e2e.yml)
-> *The system is automatically stressed every Monday to verify it still degrades and recovers as advertised.*
-
----
-
-## 🛠️ Tech Stack
-
-| Layer | Technology |
+| Area | Behavior and limits |
 |---|---|
-| **Backend** | FastAPI · Pydantic V2 · structlog · slowapi · **Sentry** |
-| **Frontend** | React 19 · TypeScript · Vite · TanStack Query · Tailwind CSS v4 · **Sentry** · Framer Motion |
-| **Testing** | Pytest (Resilience + Perf + Chaos) · Vitest + Testing Library |
-| **CI/CD** | GitHub Actions (Lint + Test + Build + E2E Chaos) |
-| **Data** | **JSON/Memory** (Read Path) · **PostgreSQL** (DB) · **Redis** (Upstash) |
-| **Deployment** | Koyeb (Backend via Dockerfile) · Vercel (Frontend) · Terraform (IaC) |
-| **Performance & DX** | Predictive prefetching, background sync, scalable i18n (PT/EN/ES) |
+| Portfolio content | Memory-cached files in `backend/data/`; no SQL queries, migrations, or seed step. Content responses support ETag/304 caching. |
+| Contact protection | Honeypots, scoring, Redis-backed deduplication, and email/IP/fingerprint rate limits. Scoring flags messages rather than dropping them. |
+| Idempotency | Optional `Idempotency-Key` or legacy `X-Idempotency-Key`; completed responses are replayed, concurrent requests receive 409. Redis contention does not acquire a memory lock. |
+| Delivery | The API lifespan owns the Redis Streams consumer. Docker runs one Uvicorn process. Resend failures have bounded retries and a dead-letter queue. HTTP acceptance does not confirm inbox delivery. |
+| Redis outage | In-memory idempotency, deduplication, and contact rate-limit fallback provide protection within one process. State is not shared across replicas and is lost on restart. Queue failure falls back to background delivery without automatic retries. |
+| Health | `/live` reports process liveness. `/health` checks JSON files and reports email configuration; it does not test Redis or Resend connectivity. A degraded result still uses HTTP 200. |
+| Observability | Prometheus HTTP/worker metrics, optional Sentry and OpenTelemetry. `/metrics` requires Basic Auth in production; summary metrics belong to each API process. |
 
----
+The [backend guide](backend/README.md) is the reference for API routes,
+configuration, retry limits, and development checks. The
+[operations runbook](docs/architecture/production-operations.md) covers deployment
+prerequisites, triage, and recovery.
 
-## 📊 Production Incident Track Record
-*9 real production incidents documented with post-mortems:*
+## Stack and layout
 
-| Incident | Failure | Detection | Resolution |
-|---|---|---|---|
-| **INC-001** | Rate limiter silently disabled (in-memory reset) | Manual discovery | Redis-backed rate limiting (v1.3.0) |
-| **INC-002** | Cold start latency 280-400ms despite keep-alive | Metrics gap | JSON-First Read Path (v1.4.1) |
-| **INC-003** | Chaos Playground crash on DB unavailability | Manual testing | Fail-silent persistence (v1.4.x) |
-| **INC-004** | CSP blocking all API calls in production | Browser console | CSP/CORS synchronization (v1.4.0) |
-| **INC-005** | Docker build context mismatch across environments | CI/CD failure | Root-context standardization (v1.6.0) |
-| **INC-006** | Spam filter false positive on mixed-protocol links | Static analysis | Unified URL hostname normalization (v1.8.0) |
-| **INC-007** | Koyeb Terraform Provider Schema Incompatibility | API 400 Bad Request | [Architectural pivot to Secret-First Orchestration](docs/architecture/INCIDENT_KOYEB_TERRAFORM.md) |
-| **INC-008** | Destructive IaC Migration (Free Tier Constraints) | 14-hour Downtime | [Cold migration for operational consistency](docs/architecture/INCIDENT_DESTRUCTIVE_IAC_MIGRATION.md) |
-| **INC-009** | Terraform Secret Identity Collision (Rename Race) | Deployment Blocked | [State migration via moved blocks](docs/architecture/INC-009-terraform-resource-collision.md) |
+| Path | Purpose |
+|---|---|
+| `backend/` | Python 3.12, FastAPI, Pydantic, structlog, Redis, Resend; pytest, Ruff, mypy. |
+| `frontend/` | React 19, TypeScript, Vite, TanStack Query, Tailwind CSS 4, Framer Motion; Vitest and Playwright. |
+| `infrastructure/` | Terraform-managed Koyeb configuration. GitHub Actions supplies secret values. |
+| `infra/monitoring/` | Local Prometheus and Grafana configuration. |
+| `docs/` | Architecture, operating guidance, and historical incident reports. |
+| `benchmarks/` | Load scripts and version-specific measurement artifacts. |
 
-See [FAILURE_MODEL.md](docs/architecture/FAILURE_MODEL.md) for full degradation behaviors and governing ADRs (INC-001–INC-009).
+## Local development
 
----
-
-## 📊 Performance Baseline (SLO Targets)
-*From [SLO_DEFINITIONS.md](docs/architecture/SLO_DEFINITIONS.md) — targets calibrated against production (Koyeb + PostgreSQL):*
-
-| Endpoint | SLO Target | Benchmark Result |
-|----------|-----------|------------------|
-| `/about`, `/projects`, `/stack` | P95 < 100ms | [local baseline: ~820ms P95](benchmarks/results/02c08d3/summary.md) — SQLite/single-worker; prod run pending |
-| `/contact` | P95 < 200ms | **P95 = 37ms** ✅ (local, in-memory anti-abuse stack) |
-| `/health` | P99 < 100ms | **P95 Cold: ~3.5s** (infra spin-up) / **P95 Warm: ~1.3s** (shared hypervisor) |
-| Error Rate | < 0.5% 5xx | **0%** (steady) / **~9%** (ramp-up DoS) — Koyeb Free Tier limits observed ✅ |
-
-> See [`benchmarks/results/02c08d3/summary.md`](benchmarks/results/02c08d3/summary.md) for full analysis including why local breaches are expected.
-> Reproduce: `k6 run --env BASE_URL=https://api.argenisbackend.com benchmarks/scripts/health.js`
-
----
-
-## 🌪️ Chaos Engineering (E2E in CI)
-
-The resilience of the system is automatically verified in GitHub Actions. The CI pipeline spins up the backend and triggers intentional degradation to ensure the system survives and recovers automatically.
-
-**Latest Chaos CI Run:**
-```text
-MILD → PASS
-Latency spike: +320ms
-Recovery: 4.2s
-
-STRESS → PASS
-Circuit breaker: OPEN → CLOSED
-Recovery: 8.1s
-
-FAILURE → PASS
-Dependency down (Redis)
-Service: still serving (fail-silent)
-```
-
----
-
-## 🛠️ Development Commands
-| Command | Linux/macOS | Windows |
-|---------|-------------|---------|
-| Lint all | `make lint` | `.\make.ps1 lint` |
-| Test all | `make test` | `.\make.ps1 test` |
-| Backend only | `make lint-back` | `.\make.ps1 lint-back` |
-| Frontend only | `make lint-front` | `.\make.ps1 lint-front` |
-| Format backend | `make format-back` | `.\make.ps1 format-back` |
-
----
-
-## 🚀 Quick Start
-
-### Using Docker (Recommended)
-```bash
-git clone https://github.com/Argenis1412/portfolio.git
-cd portfolio
-cp .env.example .env  # PowerShell: Copy-Item .env.example .env
-# Set GRAFANA_ADMIN_PASSWORD and any email credentials in .env
-docker compose up --build
-```
-
-### Manual Setup
-```bash
-# Backend
-cd backend
-py -3.12 -m venv .venv && .venv\Scripts\activate  # Windows
-pip install -r requirements.txt
-cp ../.env.example .env  # PowerShell: Copy-Item ../.env.example .env
-uvicorn app.main:app --reload --port 8000
-
-# Frontend (separate terminal)
-cd frontend
-npm install && npm run dev
-```
-
-> Portfolio content is served from `backend/data/`. No database migration or seed step is required.
->
-> **Note**: Interactive documentation (Swagger/ReDoc) is disabled in production for security. To view the API contract, run the project locally in `development` mode and access `localhost:8000/docs`.
-
----
-
-## 🧪 Tests
+Use Python 3.12. From `backend/`, create and activate a virtual environment, install
+both requirements files, and copy the shared environment example:
 
 ```bash
-# Backend — with coverage
-cd backend && pytest --cov=app --cov-config=.coveragerc --cov-report=html
-
-# Frontend
-cd frontend && npm run test
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+# Linux/macOS: source .venv/bin/activate
+python -m pip install -r requirements.txt -r requirements-dev.txt
+cp ../.env.example .env
+python -m uvicorn app.main:app --reload --port 8000
 ```
 
-Key tests that demonstrate production-level reliability:
-- ✅ **Persistent Anti-Spam**: Duplicate messages are blocked even after server restart (Redis → in-memory fallback).
-- ✅ **Distributed Rate Limiting**: Limits enforced per email, per IP, and per browser fingerprint.
-- ✅ **Honeypot Resilience**: Silent drop of bot submissions without revealing protection mechanisms.
-- ✅ **Clean Architecture Boundary**: Automated checks — domain logic has zero dependencies on infrastructure.
-- ✅ **Redis Failure Fallback**: `IdempotencyStore` and `SpamDedupStore` both fall back to memory if Redis is unreachable.
-- ✅ **Concurrent Idempotency**: A second in-flight request with the same key receives HTTP 409 Conflict.
+PowerShell copy command: `Copy-Item ../.env.example .env`. Local API documentation
+is at `/docs`; it is disabled in production. Without Redis, contact protection and
+delivery use local fallbacks. Without Resend credentials, the local console
+adapter does not send real email.
 
----
+For the frontend, use a separate terminal in `frontend/`:
 
-## 📁 Repository Structure
-```
-portfolio/
-├── backend/              # FastAPI backend (Clean Architecture)
-├── frontend/             # React 19 + TypeScript frontend
-├── infrastructure/       # Terraform IaC (main.tf, variables.tf, outputs.tf)
-├── infra/
-│   └── monitoring/       # Prometheus + Grafana configs (mounted by docker-compose)
-├── docs/
-│   └── architecture/
-│       ├── SLO_DEFINITIONS.md    # Per-endpoint SLOs with measurement methods
-│       └── FAILURE_MODEL.md      # Production incident failure model (INC-001–INC-008)
-├── .github/              # GitHub Actions CI/CD workflows
-├── ARCHITECTURE.md       # ADR-01 through ADR-21
-├── CHANGELOG.md          # Release history + 9 production incidents
-├── ENGINEERING_PLAYBOOK.md  # SLOs, standards, incident protocol
-└── docker-compose.yml
+```bash
+npm ci
+npm run dev
 ```
 
-For more details: [`backend/README.md`](backend/README.md) · [`frontend/README.md`](frontend/README.md)
+See the [frontend guide](frontend/README.md) for its architecture and configuration.
+For the Compose stack, copy `.env.example` to the root `.env`, set
+`GRAFANA_ADMIN_PASSWORD`, configure email if needed, and run
+`docker compose up --build` from the repository root. The current Docker image
+build still requires verification with a running daemon.
 
----
+## Required checks before a commit
 
-## 👨‍💻 Author
+From `backend/`, with its virtual environment active:
 
-**Argenis Lopez** — Backend Developer · [LinkedIn](https://www.linkedin.com/in/argenis1412/) · [GitHub](https://github.com/Argenis1412)
+```bash
+python -m ruff check .
+python -m ruff format --check .
+python -m mypy --config-file pyproject.toml
+python -m pytest
+```
 
----
+From `frontend/`:
 
-## 📜 License
+```bash
+npm run lint
+npx tsc -b
+npm run test -- --run
+```
+
+Pytest enforces 80% coverage. Public content snapshots must be reviewed
+deliberately when changing JSON or response mappings. The configured CI workflow
+filters determine when jobs run; a badge is not evidence that this branch or the
+current Docker image passed. Capacity under the single-process configuration
+still needs a deployment-sized load test.
+
+## Design history and evidence
+
+[CHANGELOG](CHANGELOG.md) retains release history and production incidents.
+[ARCHITECTURE](ARCHITECTURE.md), the
+[engineering playbook](ENGINEERING_PLAYBOOK.md), and the
+[failure model](docs/architecture/FAILURE_MODEL.md) include earlier designs and
+remain pending a detailed documentation review. References to SQL, Chaos, or old
+configuration there must be read in their version context.
+
+The [SLO definitions](docs/architecture/SLO_DEFINITIONS.md) state targets; the
+[recorded benchmark](benchmarks/results/02c08d3/summary.md) is historical evidence,
+not a measurement of this cleanup branch. No new load test or live production
+verification is implied by this documentation update.
+
+## Author and license
+
+**Argenis Lopez** · [GitHub](https://github.com/Argenis1412) ·
+[LinkedIn](https://www.linkedin.com/in/argenis1412/).
 Licensed under the [MIT License](LICENSE).

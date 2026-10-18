@@ -1,231 +1,104 @@
-# Production Operations Runbook
+# Backend Operations Runbook
 
-This document defines the minimum operational requirements for a secure and scalable
-production deployment, and provides step-by-step runbooks for the most common
-operational tasks.
+This runbook describes the cleanup branch. **Deployment is blocked until the
+frontend retirement is complete**; see the
+[remaining consumers](../../CHANGELOG.md#frontend-deployment-dependency).
+A working local backend does not establish compatibility with the current UI.
 
----
+## Configuration and deployment prerequisites
 
-## 1. Required Production Variables
+Use the [backend configuration reference](../../backend/README.md#configuration)
+and the shared [environment example](../../.env.example). The application expects
+`ENVIRONMENT=production`, Redis, metrics Basic Auth credentials, and restricted
+CORS origins. Resend delivery also needs its API key and sender/recipient settings.
+SQL configuration and migrations are no longer part of application startup.
 
-The backend requires the following variables when `AMBIENTE=producao`:
+GitHub Actions passes secret values to Terraform; Terraform configures Koyeb.
+Internal identities such as `AMBIENTE` remain stable while the application receives
+English keys such as `ENVIRONMENT`. Confirm that the GitHub secret `AMBIENTE`
+contains exactly `production` and verify the resulting application setting before
+any future deployment. Do not rename secret identities, remove existing database
+resources, or edit managed Koyeb settings as part of this cleanup.
 
-| Variable | Required | Notes |
+Before a separately authorized release:
+
+1. Complete frontend retirement and deliberately review JSON content snapshots.
+2. Run the backend and frontend checks in the [root guide](../../README.md#required-checks-before-a-commit).
+3. Build the Docker image with a running daemon and run a deployment-sized load
+   test for the single-process API/consumer configuration. Both remain pending.
+4. Verify monitor targets before removing `/saude` or `/salud`; both remain active.
+5. Review the Terraform plan and preserve existing resource/secret identities.
+   The infrastructure workflow applies on pushes to `main`; keep this work on
+   the cleanup branch until the release is approved.
+
+## Runtime and health signals
+
+Docker runs one Uvicorn process. `WORKER_ENABLED=true` starts the Redis Streams
+consumer inside the API lifespan. Each consumer has a unique identity; shutdown
+allows up to five seconds before cancellation and closes its Redis connection.
+Pending jobs remain available for stream recovery. There is no separate worker
+command or Compose worker service.
+
+| Signal | What it establishes | What it does not establish |
 |---|---|---|
-| `DATABASE_URL` | ✅ | Must use `postgresql+asyncpg://` |
-| `REDIS_URL` | ✅ | Required for rate limiting, idempotency, and dedup |
-| `METRICS_BASIC_AUTH_USERNAME` | ✅ | Basic auth for `/metrics` |
-| `METRICS_BASIC_AUTH_PASSWORD` | ✅ | Basic auth for `/metrics` |
-| `RESEND_API_KEY` | ⚠️ | Required for contact delivery |
-| `REDIS_SOCKET_TIMEOUT_SECONDS` | Optional | Default: 5s |
-| `REDIS_CONNECT_TIMEOUT_SECONDS` | Optional | Default: 5s |
-| `DB_CONNECT_TIMEOUT_SECONDS` | Optional | Default: 5s |
-| `DB_COMMAND_TIMEOUT_SECONDS` | Optional | Default: 10s |
-| `SENTRY_DSN` | Optional | Enables Sentry error tracking |
-| `OTLP_ENDPOINT` | Optional | Enables OTLP trace export |
+| `/live` | The process responds. | Content availability or external provider health. |
+| `/health` | Required JSON files are readable, parseable, and have expected top-level types; optional sidecar checked when present. Email configuration is informational. | Redis/Resend connectivity, inbox delivery, or validity of every content field. |
+| `/metrics` | HTTP and worker telemetry for this API process. Basic Auth is required in production. | Aggregated metrics across replicas. |
+| `/api/v1/metrics/summary` | Observed latency, request/error counts, uptime, and derived status. | Retired simulation state or proof that a contact message was delivered. |
 
----
+`/health` returns HTTP 200 even when `status="degraded"`; inspect the body and
+`details.data_details`. The deprecated `/saude` and `/salud` routes return static
+liveness-style responses, not the JSON checks performed by `/health`.
 
-## 2. Deploy Runbook
+## Triage
 
-**Trigger:** after merging a PR to `main`.
-
-```
-Step 1 — Verify CI
-  - Confirm all GitHub Actions jobs (test, lint, build) are green on main.
-  - Do not deploy from a branch or from a failing pipeline.
-
-Step 2 — Push to Koyeb
-  - Koyeb is configured for auto-deploy on push to main.
-  - If auto-deploy is disabled, trigger manually:
-    koyeb service redeploy <service-name>
-
-Step 3 — Monitor startup
-  - Watch Koyeb deployment logs for errors.
-  - Startup should complete in < 30s.
-  - Look for: "Application startup complete."
-
-Step 4 — Validate readiness
-  - GET /live    → must return HTTP 200
-  - GET /health  → must return {"status": "ok"} with all deps healthy
-
-Step 5 — Smoke test
-  - Submit a test contact form and verify it is received.
-  - Check /metrics is protected (must require Basic Auth in production).
-```
-
----
-
-## 3. Rollback Runbook
-
-**Trigger:** after a deploy that causes regressions (5xx spike, startup failure, broken contact form).
-
-```
-Step 1 — Identify the last good commit
-  git log --oneline -10          # find the last known-good SHA
-
-Step 2 — Rollback in Koyeb (preferred)
-  - Go to Koyeb dashboard → Service → Deployments
-  - Click the previous green deployment → "Redeploy"
-  - This re-deploys the previous Docker image without a code push.
-
-Step 3 — Alternatively: revert and push
-  git revert HEAD                # or git revert <bad-sha>
-  git push origin main
-  # Koyeb auto-deploys the reverted commit.
-
-Step 4 — Validate recovery
-  - GET /live    → HTTP 200
-  - GET /health  → {"status": "ok"}
-  - Verify 5xx rate returns to baseline in Prometheus/Sentry.
-
-Step 5 — Post-rollback
-  - Open a GitHub Issue with the revert reason.
-  - Do NOT close the incident until root cause is identified.
-```
-
----
-
-## 4. Secret Rotation Runbook
-
-Rotate secrets **immediately** when a value is exposed in logs, screenshots, chat
-history, or browser history.
-
-```
-Step 1 — Rotate at the provider
-  - Supabase: Settings → Database → Reset password
-  - Redis (Upstash): Console → Reset token
-  - Metrics auth: generate new random credentials locally
-  - Resend: Dashboard → Revoke API Key if compromised
-
-Step 2 — Update Koyeb environment variables
-  - Koyeb dashboard → Service → Environment
-  - Update the affected variable.
-  - Do NOT commit secrets to the repository.
-
-Step 3 — Redeploy
-  koyeb service redeploy <service-name>
-
-Step 4 — Validate
-  - GET /live    → HTTP 200
-  - GET /health  → {"status": "ok", ...} with database/redis showing "ok"
-  - Try the contact form end-to-end.
-  - Verify old credentials no longer work.
-
-Step 5 — Close incident
-  - Only after confirming old credentials are inactive.
-  - Add a note to the incident report.
-```
-
-Priority order for rotation:
-
-1. Supabase database password
-2. Redis token / password
-3. Metrics Basic Auth credentials
-4. Resend API Key (if the form received spam or was leaked)
-5. Sentry DSN (only if project scope changes)
-
----
-
-## 5. Incident Response
-
-### Triage Checklist
-
-```
-1. Check /live          → if DOWN: Koyeb instance is crashed. Rollback immediately.
-2. Check /health        → if degraded: identify which dependency (db/redis) is failing.
-3. Check Sentry        → look for new exceptions or error rate spikes.
-4. Check Prometheus    → check 5xx rate, P95 latency, contact delivery failures.
-5. Check Koyeb logs    → look for OOM kills, timeout errors, startup failures.
-```
-
-### Escalation
-
-| Severity | Condition | Action |
-|---|---|---|
-| P1 | /live returns non-200 | Rollback immediately |
-| P2 | /health shows DB or Redis error | Investigate provider status, rotate if needed |
-| P3 | 5xx rate > 2% for 5 min | Check Sentry for root cause |
-| P4 | Contact form not delivering | Check Resend status / credentials |
-
-### Post-Mortem Template
-
-```markdown
-## Incident: <title>
-
-**Date:** YYYY-MM-DD
-**Duration:** N minutes
-**Severity:** P1 / P2 / P3 / P4
-
-### What happened
-<Brief factual description>
-
-### Timeline
-- HH:MM: First alert / detection
-- HH:MM: Diagnosis
-- HH:MM: Mitigation applied
-- HH:MM: Service recovered
-
-### Root cause
-<Technical root cause>
-
-### Impact
-<Who was affected and how>
-
-### Action items
-- [ ] Item 1
-- [ ] Item 2
-```
-
----
-
-## 6. Metrics Access Policy
-
-`/metrics` must not be public in production.
-
-| Environment | Access |
+| Symptom | First checks |
 |---|---|
-| local / test | Open (no auth) |
-| production | HTTP Basic Auth required |
+| `/live` unavailable | Confirm the failing target, network, deployment/startup logs, and restart/OOM evidence before choosing recovery. |
+| `/health` degraded | Inspect per-file results and the deployed content artifact. Redeploy corrected content if needed; rotating Redis credentials cannot repair a missing JSON file. |
+| Content route returns 500 | Inspect application errors and JSON content. A failed stack read returns 500 rather than a successful empty stack. |
+| Redis errors | Check provider availability, configured URL, connection limits, and timeouts. Contact protection falls back to local memory; read-only rate limits fail open. |
+| Contact accepted but not received | Check delivery mode, worker logs, pending/retry/DLQ state, and Resend configuration. HTTP 200 acknowledges acceptance, not inbox delivery. |
+| Elevated 5xx or latency | Correlate deployment version, traffic, Sentry, process metrics, and logs. Compare against version-appropriate SLOs and baselines. |
 
----
+When Redis is unavailable, memory fallback is limited to one process and resets
+on restart. It cannot provide distributed idempotency or shared rate limits.
+A Redis `SET NX` refusal remains a conflict; it does not activate a local lock.
 
-## 7. Minimum Alert Thresholds
+For contact delivery, transient Resend errors receive up to three retries,
+unknown errors one, and permanent errors none. Jobs older than 15 minutes are not
+requeued. Retry/DLQ publication precedes acknowledgment. Background fallback logs
+failure without automatic retries. See the
+[backend guide](../../backend/README.md#code-and-checks) for classification details.
 
-Recommended thresholds:
+Alert rules must reflect these signals. Track HTTP failures/latency, Redis
+fallbacks, and worker delivery failures with defined windows and routing. Treat
+thresholds in older documents as proposals or historical configuration until
+verified against the actual monitors; `/health` alone cannot alert on Redis or
+Resend outages.
 
-1. `5xx rate > 2% for 5 minutes`
-2. `P95 latency > 1.5s for 10 minutes`
-3. `contact delivery failures > 5 in 10 minutes`
-4. `database connection errors > 3 in 5 minutes`
-5. `redis connection errors > 3 in 5 minutes`
+## Recovery and secret rotation
 
-Suggested sinks:
-- Sentry for exceptions and contact delivery failures
-- Prometheus / Grafana for latency, traffic, and infrastructure thresholds
+For a confirmed deployment regression, identify the last known-good release and
+use the established deployment workflow to restore a compatible frontend/backend
+pair. Review resource changes before applying a rollback; do not assume rolling
+back an image also rolls back Terraform or secret values. Validate `/live`, the
+`/health` body, protected metrics, and delivery evidence after recovery. A real
+contact smoke test requires explicit authorization because it sends email.
 
----
+For an exposed credential, rotate at the provider, update its existing GitHub
+secret, and propagate it through the Terraform/Koyeb workflow. Verify the old
+credential is inactive. Do not commit or log credential values. Database cleanup
+and credential retirement for retained infrastructure are separate operations.
 
-## 8. Readiness and Liveness Probes
+Record detection, affected release, impact, timeline, evidence, recovery, and
+follow-up actions. Preserve historical incident reports rather than rewriting
+past behavior to match the new design.
 
-| Endpoint | Purpose | Use |
-|---|---|---|
-| `/live` | Process liveness only (no deps) | Koyeb liveness probe |
-| `/health` | Readiness with real dependency checks | Koyeb readiness probe / diagnostics |
+## Tracing
 
-Use `/live` for lightweight keep-alive probes.
-Use `/health` in production diagnostics and incident triage.
-
-> **Note:** `/saude` and `/salud` remain active as deprecated aliases (since v1.9.2).
-> Canonical endpoint is `/health`. Aliases will be removed in v1.9.3.
-
----
-
-## 9. Tracing (Jaeger/OTLP) Notes
-
-- Sentry tracing works automatically via `SENTRY_DSN` (do not also set `OTLP_ENDPOINT`
-  to a Sentry URL — they are separate pipelines).
-- If `OTLP_ENDPOINT` is empty in production, spans are not exported (Console exporter
-  is disabled to avoid noise).
-- For Jaeger/Tempo, configure `OTLP_ENDPOINT` with an accessible HTTP endpoint
-  (e.g. `https://<host>:4318`). Localhost Jaeger is not reachable from Koyeb.
+`OTEL_ENABLED=false` disables OpenTelemetry instrumentation and export without
+disabling Prometheus or Sentry. With OpenTelemetry enabled, an empty
+`OTLP_ENDPOINT` disables export in production and uses console export elsewhere.
+Use an accessible OTLP/HTTP collector for Jaeger/Tempo; Sentry uses its own SDK
+configuration and must not be configured as the OTLP endpoint.
