@@ -26,7 +26,8 @@ python -m uvicorn app.main:app --reload --port 8000
 Local API documentation is available at `/docs`. Interactive documentation is
 disabled in production. Without Resend credentials, local delivery is logged by
 the console adapter. Without Redis, contact processing uses in-memory protection
-and background tasks; production requires Redis.
+and background tasks; production requires Redis and nonblank `RESEND_API_KEY`
+and `RESEND_TO_EMAIL`. Missing production delivery credentials fail startup.
 
 ## Configuration
 
@@ -37,7 +38,7 @@ and background tasks; production requires Redis.
 | `REDIS_URL` | Shared rate limiting, idempotency, deduplication, and contact queue. |
 | `REDIS_SOCKET_TIMEOUT_SECONDS`, `REDIS_CONNECT_TIMEOUT_SECONDS` | Timeouts for nonblocking application Redis clients; defaults are 5 seconds. The worker retains 60-second socket and 10-second connection timeouts for its blocking reads. |
 | `WORKER_ENABLED` | Start the contact consumer inside the API; defaults to `true`. Set `false` in tests or when deliberately pausing queue consumption. |
-| `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_TO_EMAIL` | Email delivery credentials and addresses. |
+| `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_TO_EMAIL` | API key and recipient are required in production; sender has a default. Console delivery remains available locally. |
 | `METRICS_BASIC_AUTH_USERNAME`, `METRICS_BASIC_AUTH_PASSWORD` | Required protection for `/metrics` in production. |
 | `SENTRY_DSN`, `SENTRY_TRACES_SAMPLE_RATE`, `OTLP_ENDPOINT` | Optional error tracking and tracing. |
 | `OTEL_ENABLED` | Enable OpenTelemetry; defaults to `true`. Set `false` to disable instrumentation and trace export. Prometheus and Sentry are configured independently. |

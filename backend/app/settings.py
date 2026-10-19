@@ -176,6 +176,11 @@ class Settings(BaseSettings):
 
         errors: list[str] = []
 
+        if not self.resend_api_key.strip():
+            errors.append("RESEND_API_KEY is required in production")
+        if not self.resend_to_email.strip():
+            errors.append("RESEND_TO_EMAIL is required in production")
+
         if not self.redis_url:
             errors.append("REDIS_URL is required in production")
 

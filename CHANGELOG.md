@@ -12,6 +12,11 @@ This changelog separates three categories intentionally:
 
 ## [Unreleased]
 
+### Fixed
+
+- Fail startup in production when the Resend API key or recipient is blank;
+  retain console delivery for local, development, and testing environments.
+
 These changes describe the cleanup branch, not a deployed release. Production
 incidents and versioned releases below retain their original historical context.
 

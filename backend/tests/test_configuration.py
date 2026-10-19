@@ -56,6 +56,8 @@ def test_validate_production_does_not_require_a_database(monkeypatch, database_u
         REDIS_URL="redis://localhost:6379/0",
         METRICS_BASIC_AUTH_USERNAME="metrics",
         METRICS_BASIC_AUTH_PASSWORD="test-password",
+        RESEND_API_KEY="test-key",
+        RESEND_TO_EMAIL="owner@example.com",
     )
     settings.validate_production()
 

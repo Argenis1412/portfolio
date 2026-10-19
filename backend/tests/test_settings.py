@@ -64,3 +64,39 @@ def test_public_version_endpoints_use_the_same_source(client):
     assert client.get("/api/v1/").json()["version"] == __version__
     assert client.get("/health").json()["api_version"] == __version__
     assert client.get("/openapi.json").json()["info"]["version"] == __version__
+
+
+def production_settings(**overrides):
+    values = dict(
+        ENVIRONMENT="production",
+        REDIS_URL="redis://localhost:6379/0",
+        METRICS_BASIC_AUTH_USERNAME="metrics",
+        METRICS_BASIC_AUTH_PASSWORD="test-password",
+        ALLOWED_ORIGINS="https://example.com",
+        REGEX_ALLOWED_ORIGINS="",
+        RESEND_API_KEY="test-key",
+        RESEND_TO_EMAIL="owner@example.com",
+    )
+    values.update(overrides)
+    return Settings(_env_file=None, **values)
+
+
+@pytest.mark.parametrize("variable", ["RESEND_API_KEY", "RESEND_TO_EMAIL"])
+@pytest.mark.parametrize("value", ["", "   "])
+def test_production_requires_resend(variable, value):
+    with pytest.raises(RuntimeError, match=f"{variable} is required in production"):
+        production_settings(**{variable: value}).validate_production()
+
+
+def test_production_accepts_resend_without_explicit_sender():
+    production_settings().validate_production()
+
+
+@pytest.mark.parametrize("environment", ["local", "development", "testing"])
+def test_nonproduction_allows_console_delivery(environment):
+    Settings(
+        _env_file=None,
+        ENVIRONMENT=environment,
+        RESEND_API_KEY="",
+        RESEND_TO_EMAIL="",
+    ).validate_production()
