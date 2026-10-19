@@ -111,6 +111,21 @@ publishes a retry or DLQ entry before acknowledging the original job. These
 automatic retries apply to Redis Streams delivery; the background fallback logs
 failures without retrying. Acceptance does not confirm delivery to the inbox.
 
+Stream delivery is **at least once**: a crash after sending but before `XACK`
+can duplicate an email to the owner. Startup and periodic recovery process claimed
+pending entries through the same handler as new jobs. Reclaim requires 60 seconds
+idle; entries delivered more than five times are published to DLQ before ACK.
+Malformed JSON is retained as raw payload in the DLQ.
+After the immediate startup scan, the first periodic scan runs after 60 seconds;
+subsequent scans run every 300 seconds. These intervals are not delivery deadlines:
+Redis outages, quota cooldown, and active processing can delay recovery.
+
+Real-Redis tests use the `redis_integration` marker and skip when `REDIS_TEST_URL`
+is absent. To run locally, set it to a disposable instance such as
+`redis://127.0.0.1:16379/15` before pytest. The fixture rejects remote hosts,
+credentials, and databases other than `/15`; it flushes only that selected database
+before and after each integration test. CI supplies a disposable Redis service.
+
 Contact scoring labels messages instead of dropping them: scores 30-69 use
 `POSSIBLE SPAM`, and 70-100 use `LIKELY SPAM` in the email subject. All scored
 submissions still pass deduplication and email/IP/fingerprint limits. Only filled

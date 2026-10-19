@@ -43,6 +43,7 @@ async def test_worker_cancellation_stops_recovery_and_closes_redis(monkeypatch):
     client = AsyncMock()
     worker._redis = client
     monkeypatch.setattr(worker, "setup", AsyncMock(return_value=True))
+    monkeypatch.setattr(worker, "_reclaim_pending", AsyncMock(return_value=0))
     reading = asyncio.Event()
     recovering = asyncio.Event()
     recovery_stopped = asyncio.Event()

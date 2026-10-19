@@ -14,6 +14,12 @@ This changelog separates three categories intentionally:
 
 ### Fixed
 
+- Process reclaimed contact jobs through the normal delivery/ACK handler, scan
+  all pending-entry pages, and move over-delivered poison jobs to DLQ before ACK.
+  Preserve malformed payloads and document at-least-once delivery and duplicate
+  email risk after interrupted acknowledgements.
+  Scan immediately at startup, again after 60 seconds, then every 300 seconds.
+
 - Supervise the lifespan contact worker with restart backoff, interruptible quota
   cooldown, client cleanup, and worker availability/restart metrics. Cover startup
   Redis recovery with isolated real-Redis tests in local runs and backend CI.

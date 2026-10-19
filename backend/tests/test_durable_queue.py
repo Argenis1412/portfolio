@@ -295,7 +295,8 @@ async def test_worker_reclaims_pel():
         "meta": {"retry_count": 0},
     }
     mock_redis.xpending.return_value = {"pending": 1}
-    mock_redis.xautoclaim.return_value = [
+    mock_redis.xpending_range.return_value = [{"times_delivered": 2}]
+    claimed = [
         "0",
         [
             (
@@ -307,10 +308,17 @@ async def test_worker_reclaims_pel():
 
     worker = StreamWorker("redis://localhost", recovery_interval=0.01)
 
+    def reclaim(*args, **kwargs):
+        worker.stop()
+        return claimed
+
+    mock_redis.xautoclaim.side_effect = reclaim
+
     uc_mock = AsyncMock()
     uc_mock.execute.return_value = True
 
     with (
+        patch("app.worker._RECLAIM_MIN_IDLE_MS", 0),
         patch("redis.asyncio.from_url", return_value=mock_redis),
         patch("app.worker.get_send_contact_use_case", return_value=uc_mock),
     ):
@@ -322,6 +330,10 @@ async def test_worker_reclaims_pel():
 
         mock_redis.xpending.assert_called()
         mock_redis.xautoclaim.assert_called()
+        uc_mock.execute.assert_awaited_once()
+        mock_redis.xack.assert_awaited_once_with(
+            "contact_jobs", "email_workers", "job-pel-1"
+        )
 
 
 @pytest.mark.asyncio
@@ -334,6 +346,7 @@ async def test_worker_recovery_reports_pending():
     worker = StreamWorker("redis://localhost", recovery_interval=0.01)
 
     with (
+        patch("app.worker._RECLAIM_MIN_IDLE_MS", 0),
         patch("redis.asyncio.from_url", return_value=mock_redis),
         patch("app.worker.inc_recovery_run") as inc_mock,
     ):

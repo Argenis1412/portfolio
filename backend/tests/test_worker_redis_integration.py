@@ -164,3 +164,49 @@ async def test_worker_survives_closed_port_then_consumes_real_redis(
         for relay_task in active:
             relay_task.cancel()
         await asyncio.gather(*active, return_exceptions=True)
+
+
+@pytest.mark.redis_integration
+@pytest.mark.asyncio
+@pytest.mark.parametrize("poison", [False, True])
+async def test_worker_recovers_previous_consumers_pending_jobs(
+    real_redis, monkeypatch, poison
+):
+    url, client, use_case = real_redis
+    worker = StreamWorker(url)
+    await client.xgroup_create(
+        worker.stream_name, worker.group_name, id="0", mkstream=True
+    )
+    job_id = await RedisStreamsQueue().enqueue(
+        "send_contact_email",
+        {"name": "Interrupted", "email": "test@example.com", "message": "Test"},
+    )
+    await client.xreadgroup(
+        worker.group_name, "crashed-consumer", {worker.stream_name: ">"}, count=1
+    )
+    if poison:
+        for _ in range(5):
+            await client.xclaim(
+                worker.stream_name, worker.group_name, "crashed-consumer", 0, [job_id]
+            )
+    assert (await client.xpending(worker.stream_name, worker.group_name))[
+        "pending"
+    ] == 1
+    monkeypatch.setattr(module, "_RECLAIM_MIN_IDLE_MS", 0, raising=False)
+    task = asyncio.create_task(worker.run())
+    try:
+
+        async def handled():
+            return (await client.xpending(worker.stream_name, worker.group_name))[
+                "pending"
+            ] == 0
+
+        await eventually(handled)
+        if poison:
+            use_case.execute.assert_not_awaited()
+            assert await client.xlen("contact_jobs_dlq") == 1
+        else:
+            use_case.execute.assert_awaited_once()
+            assert await client.xlen("contact_jobs_dlq") == 0
+    finally:
+        await stop_worker(worker, task)

@@ -34,6 +34,8 @@ from app.worker_metrics import (
 
 logger = structlog.get_logger(__name__)
 MAX_RETRIES = 3
+MAX_DELIVERIES = 5
+_RECLAIM_MIN_IDLE_MS = 60_000
 _RECOVERY_INTERVAL = 300
 _QUOTA_COOLDOWN_HOURS = 1
 _QUOTA_COOLDOWN_SLEEP = 30
@@ -53,7 +55,7 @@ class StreamWorker:
         stream_name: str = "contact_jobs",
         group_name: str = "email_workers",
         consumer_name: str | None = None,
-        recovery_interval: int = 300,
+        recovery_interval: int = _RECOVERY_INTERVAL,
     ):
         self.redis_url = redis_url
         self.stream_name = stream_name
@@ -246,16 +248,104 @@ class StreamWorker:
         client = await self._get_client()
         await client.xack(self.stream_name, self.group_name, job_id)
 
+    @staticmethod
+    def _message_body(data: dict[str, Any]) -> dict[str, Any]:
+        """Preserve malformed input in the DLQ rather than discarding its payload."""
+        raw = data.get("payload")
+        try:
+            body = json.loads(raw) if isinstance(raw, (str, bytes, bytearray)) else None
+        except (ValueError, TypeError):
+            body = None
+        if not isinstance(body, dict) or not isinstance(body.get("payload"), dict):
+            return {
+                "job_name": data.get("job_name") or "unknown",
+                "payload": {"raw_payload": raw},
+                "meta": {},
+            }
+        body.setdefault("job_name", data.get("job_name") or "unknown")
+        if not isinstance(body.get("meta"), dict):
+            body["meta"] = {}
+        return body
+
+    async def _reclaim_pending(self) -> int:
+        """Process every eligible PEL page, preserving publish-before-ACK ordering."""
+        client = await self._get_client()
+        cursor = "0-0"
+        processed = 0
+        while True:
+            claimed = await client.xautoclaim(
+                self.stream_name,
+                self.group_name,
+                self.consumer_name,
+                min_idle_time=_RECLAIM_MIN_IDLE_MS,
+                start_id=cursor,
+                count=10,
+            )
+            cursor, messages = claimed[0], claimed[1]
+            for job_id, data in messages:
+                if not data:
+                    await client.xack(self.stream_name, self.group_name, job_id)
+                    continue
+                pending = await client.xpending_range(
+                    self.stream_name, self.group_name, min=job_id, max=job_id, count=1
+                )
+                if pending and pending[0]["times_delivered"] > MAX_DELIVERIES:
+                    await self._move_to_dlq(
+                        job_id,
+                        self._message_body(data),
+                        reason="max_deliveries_exceeded",
+                        error_type="RuntimeError",
+                    )
+                    await client.xack(self.stream_name, self.group_name, job_id)
+                    continue
+                await self._handle_message(job_id, data)
+                processed += 1
+            if cursor in {"0", "0-0"}:
+                break
+        inc_reclaimed(processed)
+        return processed
+
+    async def _handle_message(self, job_id: str, data: dict[str, Any]) -> None:
+        """Deliver at least once; a crash after sending but before ACK may duplicate email."""
+        client = await self._get_client()
+        try:
+            started = time.perf_counter()
+            logger.info("job_processing_started", job_id=job_id)
+            await self.process_job(job_id, data)
+            await client.xack(self.stream_name, self.group_name, job_id)
+            set_pel_size(self.group_name, self.consumer_name, 0)
+            observe_job_duration(time.perf_counter() - started)
+            inc_processed("success", "ok")
+            logger.info("job_acked", job_id=job_id)
+        except Exception as e:
+            body = self._message_body(data)
+            try:
+                await self._handle_failure(job_id, body, e)
+            except Exception:
+                logger.error(
+                    "job_processing_crash",
+                    job_id=job_id,
+                    error=str(e),
+                )
+                return
+            inc_processed("failed", type(e).__name__)
+            logger.error(
+                "job_processing_crash",
+                job_id=job_id,
+                error=str(e),
+            )
+
     async def _recovery_loop(self):
         """Periodically reclaims messages stuck in PEL.
 
-        Runs every 5 minutes, independent of the main consumption loop.
+        First checks after 60 seconds, then every 5 minutes, independently of reads.
         This separation keeps the hot path lean and recovery observable.
         """
+        await self._sleep_or_stop(_RECLAIM_MIN_IDLE_MS / 1000)
         while self.running:
             try:
                 if self._is_redis_disabled():
-                    await asyncio.sleep(self.recovery_interval)
+                    await self._sleep_or_stop(self.recovery_interval)
                     continue
 
                 client = await self._get_client()
@@ -267,30 +357,19 @@ class StreamWorker:
                     pending_count = int(pel[0])
 
                 inc_recovery_run(pending_count)
+                set_pel_size(self.group_name, self.consumer_name, pending_count)
 
                 if pending_count > 0:
                     logger.info("recovery_check_pel", pending=pending_count)
-                    claimed = await client.xautoclaim(
-                        self.stream_name,
-                        self.group_name,
-                        self.consumer_name,
-                        min_idle_time=300000,
-                        start_id="0",
-                        count=10,
-                    )
-                    if claimed and len(claimed) > 1 and claimed[1]:
-                        reclaimed_count = len(claimed[1])
-                        inc_reclaimed(reclaimed_count)
-                        logger.info(
-                            "recovery_reclaimed",
-                            count=reclaimed_count,
-                        )
-                await asyncio.sleep(self.recovery_interval)
+                reclaimed_count = await self._reclaim_pending()
+                if reclaimed_count:
+                    logger.info("recovery_reclaimed", count=reclaimed_count)
+                await self._sleep_or_stop(self.recovery_interval)
             except asyncio.CancelledError:
                 break
             except Exception as e:
                 logger.error("recovery_loop_error", error=str(e))
-                await asyncio.sleep(self.recovery_interval)
+                await self._sleep_or_stop(self.recovery_interval)
 
     async def _close_client(self) -> None:
         client, self._redis = self._redis, None
@@ -351,6 +430,7 @@ class StreamWorker:
 
         client = await self._get_client()
         set_worker_up(True)
+        await self._reclaim_pending()
         recovery_task = asyncio.create_task(self._recovery_loop())
 
         logger.info("worker_started", consumer=self.consumer_name)
@@ -373,41 +453,7 @@ class StreamWorker:
 
                     for stream, stream_messages in response:
                         for job_id, data in stream_messages:
-                            try:
-                                started = time.perf_counter()
-                                logger.info("job_processing_started", job_id=job_id)
-                                await self.process_job(job_id, data)
-                                await client.xack(
-                                    self.stream_name, self.group_name, job_id
-                                )
-                                set_pel_size(self.group_name, self.consumer_name, 0)
-                                observe_job_duration(time.perf_counter() - started)
-                                inc_processed("success", "ok")
-                                logger.info("job_acked", job_id=job_id)
-                            except Exception as e:
-                                try:
-                                    body = json.loads(data.get("payload", "{}"))
-                                except Exception:
-                                    body = {
-                                        "job_name": data.get("job_name", "unknown"),
-                                        "payload": {},
-                                        "meta": {},
-                                    }
-                                try:
-                                    await self._handle_failure(job_id, body, e)
-                                except Exception:
-                                    logger.error(
-                                        "job_processing_crash",
-                                        job_id=job_id,
-                                        error=str(e),
-                                    )
-                                    continue
-                                inc_processed("failed", type(e).__name__)
-                                logger.error(
-                                    "job_processing_crash",
-                                    job_id=job_id,
-                                    error=str(e),
-                                )
+                            await self._handle_message(job_id, data)
 
                 except asyncio.CancelledError:
                     raise
