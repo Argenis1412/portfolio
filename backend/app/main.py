@@ -49,6 +49,19 @@ async def _lifespan(app: FastAPI):
     if settings.redis_url and settings.worker_enabled:
         worker = StreamWorker(settings.redis_url)
         worker_task = asyncio.create_task(worker.run())
+
+        def report_worker_exit(task: asyncio.Task) -> None:
+            error = None if task.cancelled() else task.exception()
+            if worker.running:
+                logger.error(
+                    "worker_task_exited_unexpectedly",
+                    exc_info=(type(error), error, error.__traceback__)
+                    if error
+                    else None,
+                    cancelled=task.cancelled(),
+                )
+
+        worker_task.add_done_callback(report_worker_exit)
         app.state.worker = worker
 
     try:

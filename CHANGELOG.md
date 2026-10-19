@@ -14,6 +14,10 @@ This changelog separates three categories intentionally:
 
 ### Fixed
 
+- Supervise the lifespan contact worker with restart backoff, interruptible quota
+  cooldown, client cleanup, and worker availability/restart metrics. Cover startup
+  Redis recovery with isolated real-Redis tests in local runs and backend CI.
+
 - Fail startup in production when the Resend API key or recipient is blank;
   retain console delivery for local, development, and testing environments.
 

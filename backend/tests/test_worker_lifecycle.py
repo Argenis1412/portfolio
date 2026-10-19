@@ -64,7 +64,8 @@ async def test_worker_cancellation_stops_recovery_and_closes_redis(monkeypatch):
     await asyncio.wait_for(reading.wait(), timeout=1)
     await asyncio.wait_for(recovering.wait(), timeout=1)
     task.cancel()
-    await asyncio.wait_for(task, timeout=1)
+    with pytest.raises(asyncio.CancelledError):
+        await asyncio.wait_for(task, timeout=1)
 
     assert recovery_stopped.is_set()
     client.aclose.assert_awaited_once()
@@ -73,14 +74,24 @@ async def test_worker_cancellation_stops_recovery_and_closes_redis(monkeypatch):
 @pytest.mark.asyncio
 async def test_worker_setup_exception_closes_redis(monkeypatch):
     worker = StreamWorker("redis://localhost")
-    client = AsyncMock()
-    worker._redis = client
-    monkeypatch.setattr(
-        worker, "setup", AsyncMock(side_effect=ConnectionError("offline"))
-    )
-    with pytest.raises(ConnectionError):
-        await worker.run()
-    client.aclose.assert_awaited_once()
+    clients = [AsyncMock(), AsyncMock()]
+    attempts = 0
+
+    async def setup():
+        nonlocal attempts
+        worker._redis = clients[attempts]
+        attempts += 1
+        if attempts == 2:
+            worker.stop()
+        raise ConnectionError("offline")
+
+    monkeypatch.setattr(worker, "setup", setup)
+    monkeypatch.setattr(worker, "_sleep_or_stop", AsyncMock())
+    await worker.run()
+    assert attempts == 2
+    for client in clients:
+        client.aclose.assert_awaited_once()
+    assert worker._redis is None
 
 
 @pytest.mark.asyncio
@@ -140,3 +151,22 @@ async def test_lifespan_starts_once_and_cleans_up_even_on_body_error(
     worker.run.assert_awaited_once()
     worker.stop.assert_called_once()
     dispose.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_lifespan_logs_unexpected_worker_exit_immediately(monkeypatch):
+    monkeypatch.setattr(main.settings, "worker_enabled", True)
+    monkeypatch.setattr(main.settings, "redis_url", "redis://localhost")
+    error = RuntimeError("worker failed")
+    worker = Mock(running=True, run=AsyncMock(side_effect=error))
+    monkeypatch.setattr(main, "StreamWorker", Mock(return_value=worker))
+    monkeypatch.setattr(main, "dispose_all", AsyncMock())
+    logger = Mock()
+    monkeypatch.setattr(main, "logger", logger)
+    async with main._lifespan(FastAPI()):
+        await asyncio.sleep(0)
+        await asyncio.sleep(0)
+        logger.error.assert_called_once()
+        args, kwargs = logger.error.call_args
+        assert args == ("worker_task_exited_unexpectedly",)
+        assert kwargs["exc_info"][1] is error

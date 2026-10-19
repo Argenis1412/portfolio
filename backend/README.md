@@ -94,6 +94,12 @@ one consumer and one process-local metrics registry. Consumer names are unique
 across instances. Shutdown stops the consumer, allows up to five seconds to finish,
 then cancels it and closes its Redis connection. Pending jobs remain available for
 Redis Streams recovery. There is no standalone worker command or Compose service.
+Worker startup and consumption failures restart with exponential backoff (1-60
+seconds, with jitter), resetting after 120 seconds of stable operation. Redis quota
+cooldown pauses attempts instead of terminating the task. `contact_worker_up`
+is 1 while consuming and 0 during backoff or shutdown;
+`contact_worker_restarts_total` counts crash restarts. These metrics do not change
+the `/health` response.
 Capacity under this single-process configuration still needs a deployment-sized
 load test before changing the scaling model.
 

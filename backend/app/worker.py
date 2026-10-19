@@ -28,6 +28,8 @@ from app.worker_metrics import (
     inc_retry,
     observe_job_duration,
     set_pel_size,
+    set_worker_up,
+    inc_worker_restart,
 )
 
 logger = structlog.get_logger(__name__)
@@ -35,6 +37,9 @@ MAX_RETRIES = 3
 _RECOVERY_INTERVAL = 300
 _QUOTA_COOLDOWN_HOURS = 1
 _QUOTA_COOLDOWN_SLEEP = 30
+_RESTART_BACKOFF_MIN = 1.0
+_RESTART_BACKOFF_MAX = 60.0
+_STABLE_AFTER = 120
 
 
 class StreamWorker:
@@ -58,6 +63,7 @@ class StreamWorker:
         )
         self.recovery_interval = recovery_interval
         self.running = True
+        self._stop_event = asyncio.Event()
         self._redis: redis.Redis | None = None
         self.redis_disabled_until: float | None = None
 
@@ -104,7 +110,7 @@ class StreamWorker:
                     )
                 return False
             logger.error("worker_setup_failed", error=error_msg)
-            return False
+            raise
 
     async def _move_to_dlq(
         self, job_id: str, body: dict[str, Any], reason: str, error_type: str
@@ -286,14 +292,50 @@ class StreamWorker:
                 logger.error("recovery_loop_error", error=str(e))
                 await asyncio.sleep(self.recovery_interval)
 
-    async def run(self):
-        """Consume jobs and close the dedicated Redis connection on every exit."""
+    async def _close_client(self) -> None:
+        client, self._redis = self._redis, None
+        if client is not None:
+            try:
+                await client.aclose()  # type: ignore[attr-defined]  # redis-py 5 API
+            except Exception:
+                logger.warning("worker_client_close_failed", exc_info=True)
+
+    async def _sleep_or_stop(self, seconds: float) -> None:
         try:
-            await self._consume()
+            await asyncio.wait_for(self._stop_event.wait(), timeout=seconds)
+        except TimeoutError:
+            pass
+
+    async def run(self) -> None:
+        """Supervise consumption with bounded backoff and prompt shutdown."""
+        backoff = _RESTART_BACKOFF_MIN
+        try:
+            while self.running:
+                if self._is_redis_disabled():
+                    await self._sleep_or_stop(_QUOTA_COOLDOWN_SLEEP)
+                    continue
+                started = time.monotonic()
+                try:
+                    await self._consume()
+                except asyncio.CancelledError:
+                    raise
+                except Exception:
+                    logger.error("worker_crashed", exc_info=True, restart_in=backoff)
+                    inc_worker_restart()
+                finally:
+                    set_worker_up(False)
+                    await self._close_client()
+                if not self.running:
+                    break
+                if self._is_redis_disabled():
+                    continue
+                if time.monotonic() - started > _STABLE_AFTER:
+                    backoff = _RESTART_BACKOFF_MIN
+                await self._sleep_or_stop(backoff * random.uniform(0.8, 1.2))
+                backoff = min(backoff * 2, _RESTART_BACKOFF_MAX)
         finally:
-            if self._redis is not None:
-                await self._redis.aclose()
-                self._redis = None
+            set_worker_up(False)
+            await self._close_client()
 
     async def _consume(self):
         """Main consumption loop with separate recovery task."""
@@ -308,6 +350,7 @@ class StreamWorker:
             return
 
         client = await self._get_client()
+        set_worker_up(True)
         recovery_task = asyncio.create_task(self._recovery_loop())
 
         logger.info("worker_started", consumer=self.consumer_name)
@@ -315,8 +358,7 @@ class StreamWorker:
         try:
             while self.running:
                 if self._is_redis_disabled():
-                    await asyncio.sleep(_QUOTA_COOLDOWN_SLEEP)
-                    continue
+                    return
 
                 try:
                     response = await client.xreadgroup(
@@ -368,7 +410,7 @@ class StreamWorker:
                                 )
 
                 except asyncio.CancelledError:
-                    break
+                    raise
                 except redis.ResponseError as e:
                     error_msg = str(e)
                     if "max requests limit exceeded" in error_msg:
@@ -386,12 +428,9 @@ class StreamWorker:
                             sentry_sdk.capture_message(
                                 "upstash_quota_exceeded", level="warning"
                             )
+                        return
                     else:
-                        logger.error("worker_redis_response_error", error=error_msg)
-                    await asyncio.sleep(5)
-                except Exception as e:
-                    logger.error("worker_loop_error", error=str(e))
-                    await asyncio.sleep(1)
+                        raise
         finally:
             recovery_task.cancel()
             try:
@@ -401,3 +440,4 @@ class StreamWorker:
 
     def stop(self):
         self.running = False
+        self._stop_event.set()
