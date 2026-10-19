@@ -1,0 +1,1106 @@
+{"environment": "production", "event": "observability_initializing", "level": "info", "timestamp": "2026-10-19T00:11:27.357338Z"}
+{"reason": "SENTRY_DSN not configured", "event": "sentry_disabled", "level": "info", "timestamp": "2026-10-19T00:11:27.357738Z"}
+{"endpoint": "/metrics", "event": "prometheus_configured", "level": "info", "timestamp": "2026-10-19T00:11:27.560498Z"}
+{"reason": "OTEL_ENABLED is false", "event": "opentelemetry_disabled", "level": "info", "timestamp": "2026-10-19T00:11:27.560619Z"}
+{"event": "observability_ready", "level": "info", "timestamp": "2026-10-19T00:11:27.560660Z"}
+{"event": "Exception handlers registered successfully", "level": "info", "timestamp": "2026-10-19T00:11:27.560748Z"}
+{"group": "email_workers", "event": "consumer_group_created", "level": "info", "timestamp": "2026-10-19T00:11:28.658354Z"}
+{"consumer": "worker-1c7a3c63d2e7-74760799f414411185876bb3bb9cdd4d", "event": "worker_started", "level": "info", "timestamp": "2026-10-19T00:11:28.658529Z"}
+{"query": null, "client_ip": "127.0.0.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "521d0cc5-6ee9-4d31-bd36-7215b42e7dad", "level": "info", "timestamp": "2026-10-19T00:11:30.365207Z"}
+{"status_code": 200, "duration_ms": 104.29, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "521d0cc5-6ee9-4d31-bd36-7215b42e7dad", "level": "info", "timestamp": "2026-10-19T00:11:30.864021Z"}
+INFO:     127.0.0.1:54298 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "127.0.0.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "6b98e6b7-6bbc-4c01-bf1e-43ce2b24910f", "level": "info", "timestamp": "2026-10-19T00:11:37.338940Z"}
+{"status_code": 200, "duration_ms": 2.01, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "6b98e6b7-6bbc-4c01-bf1e-43ce2b24910f", "level": "info", "timestamp": "2026-10-19T00:11:37.340926Z"}
+INFO:     127.0.0.1:48436 - "GET /health HTTP/1.1" 200 OK
+{"client_ip": "127.0.0.1", "event": "metrics_access_denied", "level": "warning", "timestamp": "2026-10-19T00:11:37.342640Z"}
+INFO:     127.0.0.1:48436 - "GET /metrics HTTP/1.1" 401 Unauthorized
+{"query": null, "client_ip": "127.0.0.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/metrics", "request_id": "d940853c-a640-40ed-9141-25eecd1f7777", "level": "info", "timestamp": "2026-10-19T00:11:37.345145Z"}
+{"status_code": 200, "duration_ms": 1.83, "event": "response_sent", "method": "GET", "path": "/metrics", "request_id": "d940853c-a640-40ed-9141-25eecd1f7777", "level": "info", "timestamp": "2026-10-19T00:11:37.346995Z"}
+INFO:     127.0.0.1:48436 - "GET /metrics HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "dbd736e2-4178-46a1-9cbe-2be2be445b94", "level": "info", "timestamp": "2026-10-19T00:11:37.352057Z"}
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "6e148573-f9df-4373-affb-96c71f9d615a", "level": "info", "timestamp": "2026-10-19T00:11:37.357924Z"}
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "a2906803-a393-4bea-a5dd-015f8fc7f930", "level": "info", "timestamp": "2026-10-19T00:11:37.358683Z"}
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "85fd2499-1b3f-414a-bc58-98e935cfaf16", "level": "info", "timestamp": "2026-10-19T00:11:37.359506Z"}
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "3d7e91fd-83f7-46f2-bb7a-5462e45a3253", "level": "info", "timestamp": "2026-10-19T00:11:37.360806Z"}
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "20323c68-dccb-488c-b9fe-c6df0082ad71", "level": "info", "timestamp": "2026-10-19T00:11:37.361545Z"}
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "262d3f4c-2d92-45b9-ac19-2a3292e34b79", "level": "info", "timestamp": "2026-10-19T00:11:37.362694Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "f23bdf09-2deb-4eae-83d2-7b271fb7e1fa", "level": "info", "timestamp": "2026-10-19T00:11:37.364300Z"}
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "1de747ff-4e5d-4766-8edc-8d6ad0678a3a", "level": "info", "timestamp": "2026-10-19T00:11:37.459673Z"}
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "270a1be7-ddcf-4e88-92ea-432d63b65000", "level": "info", "timestamp": "2026-10-19T00:11:37.466542Z"}
+{"status_code": 200, "duration_ms": 208.3, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "6e148573-f9df-4373-affb-96c71f9d615a", "level": "info", "timestamp": "2026-10-19T00:11:37.566287Z"}
+{"status_code": 200, "duration_ms": 295.66, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "20323c68-dccb-488c-b9fe-c6df0082ad71", "level": "info", "timestamp": "2026-10-19T00:11:37.657258Z"}
+{"status_code": 200, "duration_ms": 305.46, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "dbd736e2-4178-46a1-9cbe-2be2be445b94", "level": "info", "timestamp": "2026-10-19T00:11:37.657502Z"}
+{"status_code": 200, "duration_ms": 295.03, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "262d3f4c-2d92-45b9-ac19-2a3292e34b79", "level": "info", "timestamp": "2026-10-19T00:11:37.657697Z"}
+{"status_code": 200, "duration_ms": 299.26, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "a2906803-a393-4bea-a5dd-015f8fc7f930", "level": "info", "timestamp": "2026-10-19T00:11:37.657968Z"}
+{"status_code": 200, "duration_ms": 293.93, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "f23bdf09-2deb-4eae-83d2-7b271fb7e1fa", "level": "info", "timestamp": "2026-10-19T00:11:37.658191Z"}
+{"status_code": 200, "duration_ms": 201.6, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "1de747ff-4e5d-4766-8edc-8d6ad0678a3a", "level": "info", "timestamp": "2026-10-19T00:11:37.661193Z"}
+{"status_code": 200, "duration_ms": 194.92, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "270a1be7-ddcf-4e88-92ea-432d63b65000", "level": "info", "timestamp": "2026-10-19T00:11:37.661359Z"}
+{"status_code": 200, "duration_ms": 300.67, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "3d7e91fd-83f7-46f2-bb7a-5462e45a3253", "level": "info", "timestamp": "2026-10-19T00:11:37.661469Z"}
+{"status_code": 200, "duration_ms": 302.08, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "85fd2499-1b3f-414a-bc58-98e935cfaf16", "level": "info", "timestamp": "2026-10-19T00:11:37.661570Z"}
+INFO:     198.18.1.3:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.1:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.6:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.10:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.7:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.8:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.2:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.4:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.9:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.5:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "d7272d01-235f-400b-bc77-641f4706204f", "level": "info", "timestamp": "2026-10-19T00:11:37.758830Z"}
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "e7e14bf5-ab5f-48d0-ad3a-0547c04ed3e0", "level": "info", "timestamp": "2026-10-19T00:11:37.759051Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "6c433350-687a-4ba5-870c-d39bc48bdfec", "level": "info", "timestamp": "2026-10-19T00:11:37.759298Z"}
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "f4dccff0-8ec0-420d-b5b9-9e0476115cf6", "level": "info", "timestamp": "2026-10-19T00:11:37.759878Z"}
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "8d5521ee-4549-4d6f-abc0-33baf281ec58", "level": "info", "timestamp": "2026-10-19T00:11:37.760180Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "37b20094-5f64-49cc-b1c2-185a6e429b3a", "level": "info", "timestamp": "2026-10-19T00:11:37.760843Z"}
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "c8dd8cb8-6744-43e9-a89f-f60d51eb4703", "level": "info", "timestamp": "2026-10-19T00:11:37.762679Z"}
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "1b1f5a2d-6dd4-4a64-95af-db42d6f3fd96", "level": "info", "timestamp": "2026-10-19T00:11:37.763367Z"}
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "9d74d2c5-00a8-44a0-a2d1-d31b900ef795", "level": "info", "timestamp": "2026-10-19T00:11:37.763562Z"}
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "021e6b58-3966-4b21-9a01-52bad64dd5dc", "level": "info", "timestamp": "2026-10-19T00:11:37.763722Z"}
+{"status_code": 200, "duration_ms": 298.97, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "6c433350-687a-4ba5-870c-d39bc48bdfec", "level": "info", "timestamp": "2026-10-19T00:11:38.058276Z"}
+{"status_code": 200, "duration_ms": 296.44, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "021e6b58-3966-4b21-9a01-52bad64dd5dc", "level": "info", "timestamp": "2026-10-19T00:11:38.060179Z"}
+{"status_code": 200, "duration_ms": 302.46, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "d7272d01-235f-400b-bc77-641f4706204f", "level": "info", "timestamp": "2026-10-19T00:11:38.061271Z"}
+{"status_code": 200, "duration_ms": 298.72, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "c8dd8cb8-6744-43e9-a89f-f60d51eb4703", "level": "info", "timestamp": "2026-10-19T00:11:38.061385Z"}
+{"status_code": 200, "duration_ms": 301.6, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "f4dccff0-8ec0-420d-b5b9-9e0476115cf6", "level": "info", "timestamp": "2026-10-19T00:11:38.061445Z"}
+{"status_code": 200, "duration_ms": 299.07, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "1b1f5a2d-6dd4-4a64-95af-db42d6f3fd96", "level": "info", "timestamp": "2026-10-19T00:11:38.062427Z"}
+{"status_code": 200, "duration_ms": 303.15, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "8d5521ee-4549-4d6f-abc0-33baf281ec58", "level": "info", "timestamp": "2026-10-19T00:11:38.063323Z"}
+{"status_code": 200, "duration_ms": 302.61, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "37b20094-5f64-49cc-b1c2-185a6e429b3a", "level": "info", "timestamp": "2026-10-19T00:11:38.063451Z"}
+{"status_code": 200, "duration_ms": 304.81, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "e7e14bf5-ab5f-48d0-ad3a-0547c04ed3e0", "level": "info", "timestamp": "2026-10-19T00:11:38.063852Z"}
+{"status_code": 200, "duration_ms": 300.41, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "9d74d2c5-00a8-44a0-a2d1-d31b900ef795", "level": "info", "timestamp": "2026-10-19T00:11:38.063962Z"}
+INFO:     198.18.1.6:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.5:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.3:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.2:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.10:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.4:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.7:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.8:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.1:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.9:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "1c24bb3f-573f-4173-8ae0-5b26a3f9358c", "level": "info", "timestamp": "2026-10-19T00:11:38.163650Z"}
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "79b45bda-a6e3-45d4-8230-e6252e4ce479", "level": "info", "timestamp": "2026-10-19T00:11:38.164183Z"}
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "04d9f926-22ff-4705-95a2-a79449433dd3", "level": "info", "timestamp": "2026-10-19T00:11:38.165195Z"}
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "8cad395d-8cd4-4a54-9398-6fad6f788bb8", "level": "info", "timestamp": "2026-10-19T00:11:38.165533Z"}
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "45418254-5d5c-4fc2-b688-0a56cc0170ce", "level": "info", "timestamp": "2026-10-19T00:11:38.165803Z"}
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "58eb6cdb-9c26-46c8-b1c5-25d410178b44", "level": "info", "timestamp": "2026-10-19T00:11:38.259122Z"}
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "35fa259c-7947-40d8-b206-aec82b5147f1", "level": "info", "timestamp": "2026-10-19T00:11:38.260492Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "becc0393-b28c-40b2-9a3f-013c55aa1f48", "level": "info", "timestamp": "2026-10-19T00:11:38.262232Z"}
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "af58d4f6-707f-48c5-8ff3-211d0991b784", "level": "info", "timestamp": "2026-10-19T00:11:38.264698Z"}
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "9551f7b2-0631-4b1e-8310-ae67967bdcb3", "level": "info", "timestamp": "2026-10-19T00:11:38.357774Z"}
+{"status_code": 200, "duration_ms": 198.32, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "79b45bda-a6e3-45d4-8230-e6252e4ce479", "level": "info", "timestamp": "2026-10-19T00:11:38.362511Z"}
+{"status_code": 200, "duration_ms": 197.17, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "8cad395d-8cd4-4a54-9398-6fad6f788bb8", "level": "info", "timestamp": "2026-10-19T00:11:38.362694Z"}
+INFO:     198.18.1.5:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 292.2, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "04d9f926-22ff-4705-95a2-a79449433dd3", "level": "info", "timestamp": "2026-10-19T00:11:38.457395Z"}
+{"status_code": 200, "duration_ms": 198.53, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "58eb6cdb-9c26-46c8-b1c5-25d410178b44", "level": "info", "timestamp": "2026-10-19T00:11:38.457569Z"}
+{"status_code": 200, "duration_ms": 291.88, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "45418254-5d5c-4fc2-b688-0a56cc0170ce", "level": "info", "timestamp": "2026-10-19T00:11:38.457664Z"}
+{"status_code": 200, "duration_ms": 100.04, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "9551f7b2-0631-4b1e-8310-ae67967bdcb3", "level": "info", "timestamp": "2026-10-19T00:11:38.457755Z"}
+INFO:     198.18.1.2:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 296.59, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "1c24bb3f-573f-4173-8ae0-5b26a3f9358c", "level": "info", "timestamp": "2026-10-19T00:11:38.460173Z"}
+{"status_code": 200, "duration_ms": 199.83, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "35fa259c-7947-40d8-b206-aec82b5147f1", "level": "info", "timestamp": "2026-10-19T00:11:38.460290Z"}
+{"status_code": 200, "duration_ms": 195.79, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "af58d4f6-707f-48c5-8ff3-211d0991b784", "level": "info", "timestamp": "2026-10-19T00:11:38.460484Z"}
+INFO:     198.18.1.3:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.4:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.10:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.9:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "4ad187e7-04f8-46d6-a0f9-b2015e6fe508", "level": "info", "timestamp": "2026-10-19T00:11:38.463704Z"}
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "8ce1a47c-74fb-41ec-a200-9b3952e517c3", "level": "info", "timestamp": "2026-10-19T00:11:38.464116Z"}
+INFO:     198.18.1.6:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.7:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 202.71, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "becc0393-b28c-40b2-9a3f-013c55aa1f48", "level": "info", "timestamp": "2026-10-19T00:11:38.464932Z"}
+INFO:     198.18.1.1:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "fad19a4f-f546-417e-a804-9b55d91b7a42", "level": "info", "timestamp": "2026-10-19T00:11:38.558997Z"}
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "7f492b24-b47d-47a6-a598-65f2647f72db", "level": "info", "timestamp": "2026-10-19T00:11:38.559303Z"}
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "85218e1d-6bce-4ee0-8078-f1f8f0495b9c", "level": "info", "timestamp": "2026-10-19T00:11:38.559763Z"}
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "b03d1c7e-7ca1-462f-bb0c-7ef3dc343c78", "level": "info", "timestamp": "2026-10-19T00:11:38.560073Z"}
+INFO:     198.18.1.8:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "984c9d8b-fa59-4082-bade-41675125db18", "level": "info", "timestamp": "2026-10-19T00:11:38.563669Z"}
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "b379e32f-cc7e-4a48-b596-7f75b53fa6d5", "level": "info", "timestamp": "2026-10-19T00:11:38.563940Z"}
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "d44b1ebc-1453-4d42-aaf0-9d9116db9962", "level": "info", "timestamp": "2026-10-19T00:11:38.564270Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "ff4429b1-8b1f-4b32-aa07-db893f1b4951", "level": "info", "timestamp": "2026-10-19T00:11:38.565726Z"}
+{"status_code": 200, "duration_ms": 99.73, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "85218e1d-6bce-4ee0-8078-f1f8f0495b9c", "level": "info", "timestamp": "2026-10-19T00:11:38.659502Z"}
+{"status_code": 200, "duration_ms": 100.75, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "fad19a4f-f546-417e-a804-9b55d91b7a42", "level": "info", "timestamp": "2026-10-19T00:11:38.659706Z"}
+INFO:     198.18.1.10:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.3:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 396.08, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "4ad187e7-04f8-46d6-a0f9-b2015e6fe508", "level": "info", "timestamp": "2026-10-19T00:11:38.859804Z"}
+{"status_code": 200, "duration_ms": 300.7, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "b03d1c7e-7ca1-462f-bb0c-7ef3dc343c78", "level": "info", "timestamp": "2026-10-19T00:11:38.860771Z"}
+{"status_code": 200, "duration_ms": 301.59, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "7f492b24-b47d-47a6-a598-65f2647f72db", "level": "info", "timestamp": "2026-10-19T00:11:38.860876Z"}
+{"status_code": 200, "duration_ms": 295.89, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "ff4429b1-8b1f-4b32-aa07-db893f1b4951", "level": "info", "timestamp": "2026-10-19T00:11:38.861610Z"}
+{"status_code": 200, "duration_ms": 297.77, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "b379e32f-cc7e-4a48-b596-7f75b53fa6d5", "level": "info", "timestamp": "2026-10-19T00:11:38.861697Z"}
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "POST", "path": "/api/v1/contact", "request_id": "7047599d-49ac-42d1-8d1a-8082bf462b19", "level": "info", "timestamp": "2026-10-19T00:11:38.862616Z"}
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "POST", "path": "/api/v1/contact", "request_id": "80e8e497-3b4f-4819-853b-d2f57c24bf3a", "level": "info", "timestamp": "2026-10-19T00:11:38.862891Z"}
+{"status_code": 200, "duration_ms": 298.96, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "d44b1ebc-1453-4d42-aaf0-9d9116db9962", "level": "info", "timestamp": "2026-10-19T00:11:38.863222Z"}
+{"status_code": 200, "duration_ms": 299.67, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "984c9d8b-fa59-4082-bade-41675125db18", "level": "info", "timestamp": "2026-10-19T00:11:38.863300Z"}
+INFO:     198.18.1.5:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.9:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 399.75, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "8ce1a47c-74fb-41ec-a200-9b3952e517c3", "level": "info", "timestamp": "2026-10-19T00:11:38.863848Z"}
+INFO:     198.18.1.4:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.8:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.7:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.1:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.6:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.2:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "POST", "path": "/api/v1/contact", "request_id": "b8088d42-3210-4d52-8834-dab1cfd8f99c", "level": "info", "timestamp": "2026-10-19T00:11:39.057070Z"}
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "POST", "path": "/api/v1/contact", "request_id": "734f949a-44ed-436a-967c-df38e910f1a0", "level": "info", "timestamp": "2026-10-19T00:11:39.058268Z"}
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "POST", "path": "/api/v1/contact", "request_id": "26c29a6b-d70a-42a3-990c-04498185855c", "level": "info", "timestamp": "2026-10-19T00:11:39.059055Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "POST", "path": "/api/v1/contact", "request_id": "65837813-60a2-4b53-a20e-880c21cafa23", "level": "info", "timestamp": "2026-10-19T00:11:39.060880Z"}
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "POST", "path": "/api/v1/contact", "request_id": "0b656838-ad71-45a4-b569-069f4667ca1e", "level": "info", "timestamp": "2026-10-19T00:11:39.061145Z"}
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "POST", "path": "/api/v1/contact", "request_id": "aab193ed-d6be-43ba-bcde-372898902d60", "level": "info", "timestamp": "2026-10-19T00:11:39.063922Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "POST", "path": "/api/v1/contact", "request_id": "dd0ac9f1-4353-4102-a572-623e437d5390", "level": "info", "timestamp": "2026-10-19T00:11:39.064150Z"}
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "POST", "path": "/api/v1/contact", "request_id": "7fd02fb2-5001-4e9f-ab8a-d43ec33fa5b9", "level": "info", "timestamp": "2026-10-19T00:11:39.064349Z"}
+{"classification": "NORMAL", "action": "deliver", "spam_score": 0, "email_domain": "example.com", "event": "contact_classified", "method": "POST", "path": "/api/v1/contact", "request_id": "65837813-60a2-4b53-a20e-880c21cafa23", "level": "info", "timestamp": "2026-10-19T00:11:39.360799Z"}
+{"event": "redis_client_initialized", "method": "POST", "path": "/api/v1/contact", "request_id": "65837813-60a2-4b53-a20e-880c21cafa23", "level": "info", "timestamp": "2026-10-19T00:11:39.361396Z"}
+{"classification": "NORMAL", "action": "deliver", "spam_score": 0, "email_domain": "example.com", "event": "contact_classified", "method": "POST", "path": "/api/v1/contact", "request_id": "734f949a-44ed-436a-967c-df38e910f1a0", "level": "info", "timestamp": "2026-10-19T00:11:39.457990Z"}
+{"classification": "NORMAL", "action": "deliver", "spam_score": 0, "email_domain": "example.com", "event": "contact_classified", "method": "POST", "path": "/api/v1/contact", "request_id": "b8088d42-3210-4d52-8834-dab1cfd8f99c", "level": "info", "timestamp": "2026-10-19T00:11:39.460385Z"}
+{"classification": "NORMAL", "action": "deliver", "spam_score": 0, "email_domain": "example.com", "event": "contact_classified", "method": "POST", "path": "/api/v1/contact", "request_id": "26c29a6b-d70a-42a3-990c-04498185855c", "level": "info", "timestamp": "2026-10-19T00:11:39.462673Z"}
+{"classification": "NORMAL", "action": "deliver", "spam_score": 0, "email_domain": "example.com", "event": "contact_classified", "method": "POST", "path": "/api/v1/contact", "request_id": "80e8e497-3b4f-4819-853b-d2f57c24bf3a", "level": "info", "timestamp": "2026-10-19T00:11:39.464554Z"}
+{"classification": "NORMAL", "action": "deliver", "spam_score": 0, "email_domain": "example.com", "event": "contact_classified", "method": "POST", "path": "/api/v1/contact", "request_id": "7047599d-49ac-42d1-8d1a-8082bf462b19", "level": "info", "timestamp": "2026-10-19T00:11:39.466206Z"}
+{"classification": "NORMAL", "action": "deliver", "spam_score": 0, "email_domain": "example.com", "event": "contact_classified", "method": "POST", "path": "/api/v1/contact", "request_id": "aab193ed-d6be-43ba-bcde-372898902d60", "level": "info", "timestamp": "2026-10-19T00:11:39.467423Z"}
+{"classification": "NORMAL", "action": "deliver", "spam_score": 0, "email_domain": "example.com", "event": "contact_classified", "method": "POST", "path": "/api/v1/contact", "request_id": "0b656838-ad71-45a4-b569-069f4667ca1e", "level": "info", "timestamp": "2026-10-19T00:11:39.468544Z"}
+{"classification": "NORMAL", "action": "deliver", "spam_score": 0, "email_domain": "example.com", "event": "contact_classified", "method": "POST", "path": "/api/v1/contact", "request_id": "dd0ac9f1-4353-4102-a572-623e437d5390", "level": "info", "timestamp": "2026-10-19T00:11:39.560039Z"}
+{"job_id": "1792368699563-0", "event": "job_processing_started", "level": "info", "timestamp": "2026-10-19T00:11:39.565370Z"}
+{"job_id": "1792368699563-0", "sender": "local-run1-vu8@example.com", "event": "processing_email_job", "level": "info", "timestamp": "2026-10-19T00:11:39.565486Z"}
+{"sender": "Local Benchmark", "email_domain": "example.com", "event": "contact_delivery_attempt", "level": "info", "timestamp": "2026-10-19T00:11:39.565537Z"}
+{"name": "Local Benchmark", "email": "l***@example.com", "subject": "Isolated console delivery", "message_length": 75, "status": "intercepted_by_console", "event": "contact_received_console", "level": "info", "timestamp": "2026-10-19T00:11:39.565570Z"}
+{"sender": "Local Benchmark", "event": "contact_message_sent", "level": "info", "timestamp": "2026-10-19T00:11:39.565611Z"}
+{"job_name": "send_contact_email", "job_id": "1792368699563-0", "event": "job_enqueued", "method": "POST", "path": "/api/v1/contact", "request_id": "65837813-60a2-4b53-a20e-880c21cafa23", "level": "info", "timestamp": "2026-10-19T00:11:39.565716Z"}
+{"is_suspicious": false, "email_domain": "example.com", "delivery_mode": "stream", "event": "contact_queued", "method": "POST", "path": "/api/v1/contact", "request_id": "65837813-60a2-4b53-a20e-880c21cafa23", "level": "info", "timestamp": "2026-10-19T00:11:39.565768Z"}
+{"job_name": "send_contact_email", "job_id": "1792368699565-6", "event": "job_enqueued", "method": "POST", "path": "/api/v1/contact", "request_id": "0b656838-ad71-45a4-b569-069f4667ca1e", "level": "info", "timestamp": "2026-10-19T00:11:39.565919Z"}
+{"is_suspicious": false, "email_domain": "example.com", "delivery_mode": "stream", "event": "contact_queued", "method": "POST", "path": "/api/v1/contact", "request_id": "0b656838-ad71-45a4-b569-069f4667ca1e", "level": "info", "timestamp": "2026-10-19T00:11:39.565971Z"}
+{"job_name": "send_contact_email", "job_id": "1792368699565-5", "event": "job_enqueued", "method": "POST", "path": "/api/v1/contact", "request_id": "aab193ed-d6be-43ba-bcde-372898902d60", "level": "info", "timestamp": "2026-10-19T00:11:39.566100Z"}
+{"is_suspicious": false, "email_domain": "example.com", "delivery_mode": "stream", "event": "contact_queued", "method": "POST", "path": "/api/v1/contact", "request_id": "aab193ed-d6be-43ba-bcde-372898902d60", "level": "info", "timestamp": "2026-10-19T00:11:39.566145Z"}
+{"job_name": "send_contact_email", "job_id": "1792368699565-4", "event": "job_enqueued", "method": "POST", "path": "/api/v1/contact", "request_id": "7047599d-49ac-42d1-8d1a-8082bf462b19", "level": "info", "timestamp": "2026-10-19T00:11:39.566222Z"}
+{"is_suspicious": false, "email_domain": "example.com", "delivery_mode": "stream", "event": "contact_queued", "method": "POST", "path": "/api/v1/contact", "request_id": "7047599d-49ac-42d1-8d1a-8082bf462b19", "level": "info", "timestamp": "2026-10-19T00:11:39.566265Z"}
+{"job_name": "send_contact_email", "job_id": "1792368699565-3", "event": "job_enqueued", "method": "POST", "path": "/api/v1/contact", "request_id": "80e8e497-3b4f-4819-853b-d2f57c24bf3a", "level": "info", "timestamp": "2026-10-19T00:11:39.566338Z"}
+{"is_suspicious": false, "email_domain": "example.com", "delivery_mode": "stream", "event": "contact_queued", "method": "POST", "path": "/api/v1/contact", "request_id": "80e8e497-3b4f-4819-853b-d2f57c24bf3a", "level": "info", "timestamp": "2026-10-19T00:11:39.566393Z"}
+{"classification": "NORMAL", "action": "deliver", "spam_score": 0, "email_domain": "example.com", "event": "contact_classified", "method": "POST", "path": "/api/v1/contact", "request_id": "7fd02fb2-5001-4e9f-ab8a-d43ec33fa5b9", "level": "info", "timestamp": "2026-10-19T00:11:39.567707Z"}
+{"job_name": "send_contact_email", "job_id": "1792368699565-2", "event": "job_enqueued", "method": "POST", "path": "/api/v1/contact", "request_id": "26c29a6b-d70a-42a3-990c-04498185855c", "level": "info", "timestamp": "2026-10-19T00:11:39.567848Z"}
+{"is_suspicious": false, "email_domain": "example.com", "delivery_mode": "stream", "event": "contact_queued", "method": "POST", "path": "/api/v1/contact", "request_id": "26c29a6b-d70a-42a3-990c-04498185855c", "level": "info", "timestamp": "2026-10-19T00:11:39.567878Z"}
+{"job_name": "send_contact_email", "job_id": "1792368699565-1", "event": "job_enqueued", "method": "POST", "path": "/api/v1/contact", "request_id": "b8088d42-3210-4d52-8834-dab1cfd8f99c", "level": "info", "timestamp": "2026-10-19T00:11:39.568066Z"}
+{"is_suspicious": false, "email_domain": "example.com", "delivery_mode": "stream", "event": "contact_queued", "method": "POST", "path": "/api/v1/contact", "request_id": "b8088d42-3210-4d52-8834-dab1cfd8f99c", "level": "info", "timestamp": "2026-10-19T00:11:39.568092Z"}
+{"job_name": "send_contact_email", "job_id": "1792368699565-0", "event": "job_enqueued", "method": "POST", "path": "/api/v1/contact", "request_id": "734f949a-44ed-436a-967c-df38e910f1a0", "level": "info", "timestamp": "2026-10-19T00:11:39.568180Z"}
+{"is_suspicious": false, "email_domain": "example.com", "delivery_mode": "stream", "event": "contact_queued", "method": "POST", "path": "/api/v1/contact", "request_id": "734f949a-44ed-436a-967c-df38e910f1a0", "level": "info", "timestamp": "2026-10-19T00:11:39.568218Z"}
+{"status_code": 200, "duration_ms": 507.95, "event": "response_sent", "method": "POST", "path": "/api/v1/contact", "request_id": "65837813-60a2-4b53-a20e-880c21cafa23", "level": "info", "timestamp": "2026-10-19T00:11:39.568864Z"}
+{"status_code": 200, "duration_ms": 508.07, "event": "response_sent", "method": "POST", "path": "/api/v1/contact", "request_id": "0b656838-ad71-45a4-b569-069f4667ca1e", "level": "info", "timestamp": "2026-10-19T00:11:39.569229Z"}
+{"status_code": 200, "duration_ms": 505.83, "event": "response_sent", "method": "POST", "path": "/api/v1/contact", "request_id": "aab193ed-d6be-43ba-bcde-372898902d60", "level": "info", "timestamp": "2026-10-19T00:11:39.569796Z"}
+{"status_code": 200, "duration_ms": 707.47, "event": "response_sent", "method": "POST", "path": "/api/v1/contact", "request_id": "7047599d-49ac-42d1-8d1a-8082bf462b19", "level": "info", "timestamp": "2026-10-19T00:11:39.570041Z"}
+{"status_code": 200, "duration_ms": 707.21, "event": "response_sent", "method": "POST", "path": "/api/v1/contact", "request_id": "80e8e497-3b4f-4819-853b-d2f57c24bf3a", "level": "info", "timestamp": "2026-10-19T00:11:39.570092Z"}
+{"status_code": 200, "duration_ms": 511.35, "event": "response_sent", "method": "POST", "path": "/api/v1/contact", "request_id": "26c29a6b-d70a-42a3-990c-04498185855c", "level": "info", "timestamp": "2026-10-19T00:11:39.570369Z"}
+{"status_code": 200, "duration_ms": 607.97, "event": "response_sent", "method": "POST", "path": "/api/v1/contact", "request_id": "b8088d42-3210-4d52-8834-dab1cfd8f99c", "level": "info", "timestamp": "2026-10-19T00:11:39.570454Z"}
+{"status_code": 200, "duration_ms": 512.3, "event": "response_sent", "method": "POST", "path": "/api/v1/contact", "request_id": "734f949a-44ed-436a-967c-df38e910f1a0", "level": "info", "timestamp": "2026-10-19T00:11:39.570497Z"}
+{"job_id": "1792368699563-0", "event": "job_acked", "level": "info", "timestamp": "2026-10-19T00:11:39.657353Z"}
+{"job_name": "send_contact_email", "job_id": "1792368699569-0", "event": "job_enqueued", "method": "POST", "path": "/api/v1/contact", "request_id": "dd0ac9f1-4353-4102-a572-623e437d5390", "level": "info", "timestamp": "2026-10-19T00:11:39.657838Z"}
+{"is_suspicious": false, "email_domain": "example.com", "delivery_mode": "stream", "event": "contact_queued", "method": "POST", "path": "/api/v1/contact", "request_id": "dd0ac9f1-4353-4102-a572-623e437d5390", "level": "info", "timestamp": "2026-10-19T00:11:39.657924Z"}
+{"job_name": "send_contact_email", "job_id": "1792368699570-0", "event": "job_enqueued", "method": "POST", "path": "/api/v1/contact", "request_id": "7fd02fb2-5001-4e9f-ab8a-d43ec33fa5b9", "level": "info", "timestamp": "2026-10-19T00:11:39.658144Z"}
+{"is_suspicious": false, "email_domain": "example.com", "delivery_mode": "stream", "event": "contact_queued", "method": "POST", "path": "/api/v1/contact", "request_id": "7fd02fb2-5001-4e9f-ab8a-d43ec33fa5b9", "level": "info", "timestamp": "2026-10-19T00:11:39.658221Z"}
+{"status_code": 200, "duration_ms": 595.35, "event": "response_sent", "method": "POST", "path": "/api/v1/contact", "request_id": "dd0ac9f1-4353-4102-a572-623e437d5390", "level": "info", "timestamp": "2026-10-19T00:11:39.659511Z"}
+{"status_code": 200, "duration_ms": 595.27, "event": "response_sent", "method": "POST", "path": "/api/v1/contact", "request_id": "7fd02fb2-5001-4e9f-ab8a-d43ec33fa5b9", "level": "info", "timestamp": "2026-10-19T00:11:39.659609Z"}
+INFO:     198.18.1.8:0 - "POST /api/v1/contact HTTP/1.1" 200 OK
+INFO:     198.18.1.4:0 - "POST /api/v1/contact HTTP/1.1" 200 OK
+INFO:     198.18.1.1:0 - "POST /api/v1/contact HTTP/1.1" 200 OK
+INFO:     198.18.1.10:0 - "POST /api/v1/contact HTTP/1.1" 200 OK
+INFO:     198.18.1.3:0 - "POST /api/v1/contact HTTP/1.1" 200 OK
+INFO:     198.18.1.9:0 - "POST /api/v1/contact HTTP/1.1" 200 OK
+INFO:     198.18.1.5:0 - "POST /api/v1/contact HTTP/1.1" 200 OK
+INFO:     198.18.1.7:0 - "POST /api/v1/contact HTTP/1.1" 200 OK
+{"job_id": "1792368699565-0", "event": "job_processing_started", "level": "info", "timestamp": "2026-10-19T00:11:39.661697Z"}
+{"job_id": "1792368699565-0", "sender": "local-run1-vu7@example.com", "event": "processing_email_job", "level": "info", "timestamp": "2026-10-19T00:11:39.661828Z"}
+{"sender": "Local Benchmark", "email_domain": "example.com", "event": "contact_delivery_attempt", "level": "info", "timestamp": "2026-10-19T00:11:39.661862Z"}
+{"name": "Local Benchmark", "email": "l***@example.com", "subject": "Isolated console delivery", "message_length": 75, "status": "intercepted_by_console", "event": "contact_received_console", "level": "info", "timestamp": "2026-10-19T00:11:39.661882Z"}
+{"sender": "Local Benchmark", "event": "contact_message_sent", "level": "info", "timestamp": "2026-10-19T00:11:39.661911Z"}
+INFO:     198.18.1.6:0 - "POST /api/v1/contact HTTP/1.1" 200 OK
+INFO:     198.18.1.2:0 - "POST /api/v1/contact HTTP/1.1" 200 OK
+{"job_id": "1792368699565-0", "event": "job_acked", "level": "info", "timestamp": "2026-10-19T00:11:39.663527Z"}
+{"job_id": "1792368699565-1", "event": "job_processing_started", "level": "info", "timestamp": "2026-10-19T00:11:39.664422Z"}
+{"job_id": "1792368699565-1", "sender": "local-run1-vu5@example.com", "event": "processing_email_job", "level": "info", "timestamp": "2026-10-19T00:11:39.664495Z"}
+{"sender": "Local Benchmark", "email_domain": "example.com", "event": "contact_delivery_attempt", "level": "info", "timestamp": "2026-10-19T00:11:39.664524Z"}
+{"name": "Local Benchmark", "email": "l***@example.com", "subject": "Isolated console delivery", "message_length": 75, "status": "intercepted_by_console", "event": "contact_received_console", "level": "info", "timestamp": "2026-10-19T00:11:39.664543Z"}
+{"sender": "Local Benchmark", "event": "contact_message_sent", "level": "info", "timestamp": "2026-10-19T00:11:39.664558Z"}
+{"job_id": "1792368699565-1", "event": "job_acked", "level": "info", "timestamp": "2026-10-19T00:11:39.664953Z"}
+{"job_id": "1792368699565-2", "event": "job_processing_started", "level": "info", "timestamp": "2026-10-19T00:11:39.757645Z"}
+{"job_id": "1792368699565-2", "sender": "local-run1-vu9@example.com", "event": "processing_email_job", "level": "info", "timestamp": "2026-10-19T00:11:39.757929Z"}
+{"sender": "Local Benchmark", "email_domain": "example.com", "event": "contact_delivery_attempt", "level": "info", "timestamp": "2026-10-19T00:11:39.758099Z"}
+{"name": "Local Benchmark", "email": "l***@example.com", "subject": "Isolated console delivery", "message_length": 75, "status": "intercepted_by_console", "event": "contact_received_console", "level": "info", "timestamp": "2026-10-19T00:11:39.758213Z"}
+{"sender": "Local Benchmark", "event": "contact_message_sent", "level": "info", "timestamp": "2026-10-19T00:11:39.758290Z"}
+{"job_id": "1792368699565-2", "event": "job_acked", "level": "info", "timestamp": "2026-10-19T00:11:39.759968Z"}
+{"job_id": "1792368699565-3", "event": "job_processing_started", "level": "info", "timestamp": "2026-10-19T00:11:39.761029Z"}
+{"job_id": "1792368699565-3", "sender": "local-run1-vu3@example.com", "event": "processing_email_job", "level": "info", "timestamp": "2026-10-19T00:11:39.761240Z"}
+{"sender": "Local Benchmark", "email_domain": "example.com", "event": "contact_delivery_attempt", "level": "info", "timestamp": "2026-10-19T00:11:39.761315Z"}
+{"name": "Local Benchmark", "email": "l***@example.com", "subject": "Isolated console delivery", "message_length": 75, "status": "intercepted_by_console", "event": "contact_received_console", "level": "info", "timestamp": "2026-10-19T00:11:39.761367Z"}
+{"sender": "Local Benchmark", "event": "contact_message_sent", "level": "info", "timestamp": "2026-10-19T00:11:39.761418Z"}
+{"job_id": "1792368699565-3", "event": "job_acked", "level": "info", "timestamp": "2026-10-19T00:11:39.762222Z"}
+{"job_id": "1792368699565-4", "event": "job_processing_started", "level": "info", "timestamp": "2026-10-19T00:11:39.763096Z"}
+{"job_id": "1792368699565-4", "sender": "local-run1-vu10@example.com", "event": "processing_email_job", "level": "info", "timestamp": "2026-10-19T00:11:39.763264Z"}
+{"sender": "Local Benchmark", "email_domain": "example.com", "event": "contact_delivery_attempt", "level": "info", "timestamp": "2026-10-19T00:11:39.763331Z"}
+{"name": "Local Benchmark", "email": "l***@example.com", "subject": "Isolated console delivery", "message_length": 76, "status": "intercepted_by_console", "event": "contact_received_console", "level": "info", "timestamp": "2026-10-19T00:11:39.763377Z"}
+{"sender": "Local Benchmark", "event": "contact_message_sent", "level": "info", "timestamp": "2026-10-19T00:11:39.763419Z"}
+{"job_id": "1792368699565-4", "event": "job_acked", "level": "info", "timestamp": "2026-10-19T00:11:39.764008Z"}
+{"job_id": "1792368699565-5", "event": "job_processing_started", "level": "info", "timestamp": "2026-10-19T00:11:39.764933Z"}
+{"job_id": "1792368699565-5", "sender": "local-run1-vu1@example.com", "event": "processing_email_job", "level": "info", "timestamp": "2026-10-19T00:11:39.765096Z"}
+{"sender": "Local Benchmark", "email_domain": "example.com", "event": "contact_delivery_attempt", "level": "info", "timestamp": "2026-10-19T00:11:39.765158Z"}
+{"name": "Local Benchmark", "email": "l***@example.com", "subject": "Isolated console delivery", "message_length": 75, "status": "intercepted_by_console", "event": "contact_received_console", "level": "info", "timestamp": "2026-10-19T00:11:39.765203Z"}
+{"sender": "Local Benchmark", "event": "contact_message_sent", "level": "info", "timestamp": "2026-10-19T00:11:39.765272Z"}
+{"job_id": "1792368699565-5", "event": "job_acked", "level": "info", "timestamp": "2026-10-19T00:11:39.765812Z"}
+{"job_id": "1792368699565-6", "event": "job_processing_started", "level": "info", "timestamp": "2026-10-19T00:11:39.766662Z"}
+{"job_id": "1792368699565-6", "sender": "local-run1-vu4@example.com", "event": "processing_email_job", "level": "info", "timestamp": "2026-10-19T00:11:39.766786Z"}
+{"sender": "Local Benchmark", "email_domain": "example.com", "event": "contact_delivery_attempt", "level": "info", "timestamp": "2026-10-19T00:11:39.766837Z"}
+{"name": "Local Benchmark", "email": "l***@example.com", "subject": "Isolated console delivery", "message_length": 75, "status": "intercepted_by_console", "event": "contact_received_console", "level": "info", "timestamp": "2026-10-19T00:11:39.766876Z"}
+{"sender": "Local Benchmark", "event": "contact_message_sent", "level": "info", "timestamp": "2026-10-19T00:11:39.766939Z"}
+{"job_id": "1792368699565-6", "event": "job_acked", "level": "info", "timestamp": "2026-10-19T00:11:39.767416Z"}
+{"job_id": "1792368699569-0", "event": "job_processing_started", "level": "info", "timestamp": "2026-10-19T00:11:39.768173Z"}
+{"job_id": "1792368699569-0", "sender": "local-run1-vu6@example.com", "event": "processing_email_job", "level": "info", "timestamp": "2026-10-19T00:11:39.768308Z"}
+{"sender": "Local Benchmark", "email_domain": "example.com", "event": "contact_delivery_attempt", "level": "info", "timestamp": "2026-10-19T00:11:39.768357Z"}
+{"name": "Local Benchmark", "email": "l***@example.com", "subject": "Isolated console delivery", "message_length": 75, "status": "intercepted_by_console", "event": "contact_received_console", "level": "info", "timestamp": "2026-10-19T00:11:39.768393Z"}
+{"sender": "Local Benchmark", "event": "contact_message_sent", "level": "info", "timestamp": "2026-10-19T00:11:39.768422Z"}
+{"job_id": "1792368699569-0", "event": "job_acked", "level": "info", "timestamp": "2026-10-19T00:11:39.769460Z"}
+{"job_id": "1792368699570-0", "event": "job_processing_started", "level": "info", "timestamp": "2026-10-19T00:11:39.857771Z"}
+{"job_id": "1792368699570-0", "sender": "local-run1-vu2@example.com", "event": "processing_email_job", "level": "info", "timestamp": "2026-10-19T00:11:39.858127Z"}
+{"sender": "Local Benchmark", "email_domain": "example.com", "event": "contact_delivery_attempt", "level": "info", "timestamp": "2026-10-19T00:11:39.858246Z"}
+{"name": "Local Benchmark", "email": "l***@example.com", "subject": "Isolated console delivery", "message_length": 75, "status": "intercepted_by_console", "event": "contact_received_console", "level": "info", "timestamp": "2026-10-19T00:11:39.858410Z"}
+{"sender": "Local Benchmark", "event": "contact_message_sent", "level": "info", "timestamp": "2026-10-19T00:11:39.858482Z"}
+{"job_id": "1792368699570-0", "event": "job_acked", "level": "info", "timestamp": "2026-10-19T00:11:39.859990Z"}
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "2a9c8e4f-feb8-4475-8d17-0bf3f3c395b7", "level": "info", "timestamp": "2026-10-19T00:11:41.667241Z"}
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "547a4bd8-3843-4b55-8045-da12fd946998", "level": "info", "timestamp": "2026-10-19T00:11:41.667764Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "7bb1678a-d3f2-498d-9a53-42c245240b4a", "level": "info", "timestamp": "2026-10-19T00:11:41.668084Z"}
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "e52aed29-b7be-4fc0-b385-005a19d46c7f", "level": "info", "timestamp": "2026-10-19T00:11:41.668348Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "2bf9207e-f1a2-4dfa-99f1-289e08c6a026", "level": "info", "timestamp": "2026-10-19T00:11:41.668568Z"}
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "2e2e8c14-c68e-4f4c-a586-3fdc7855f499", "level": "info", "timestamp": "2026-10-19T00:11:41.669994Z"}
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "e173f650-b7a4-4780-b397-18ad261fa33b", "level": "info", "timestamp": "2026-10-19T00:11:41.670223Z"}
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "86825581-a3ca-4ae0-935b-174848f10b3c", "level": "info", "timestamp": "2026-10-19T00:11:41.670361Z"}
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "d5492016-02a1-4c82-89c7-8f0c43705c0a", "level": "info", "timestamp": "2026-10-19T00:11:41.670528Z"}
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "8ce1fadf-4bdb-40a3-bf04-708b9e5fcdb6", "level": "info", "timestamp": "2026-10-19T00:11:41.670826Z"}
+{"status_code": 200, "duration_ms": 4.46, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "2bf9207e-f1a2-4dfa-99f1-289e08c6a026", "level": "info", "timestamp": "2026-10-19T00:11:41.673031Z"}
+{"status_code": 200, "duration_ms": 6.59, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "2a9c8e4f-feb8-4475-8d17-0bf3f3c395b7", "level": "info", "timestamp": "2026-10-19T00:11:41.673762Z"}
+{"status_code": 200, "duration_ms": 5.62, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "2e2e8c14-c68e-4f4c-a586-3fdc7855f499", "level": "info", "timestamp": "2026-10-19T00:11:41.675603Z"}
+{"status_code": 200, "duration_ms": 87.11, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "e173f650-b7a4-4780-b397-18ad261fa33b", "level": "info", "timestamp": "2026-10-19T00:11:41.757408Z"}
+{"status_code": 200, "duration_ms": 89.92, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "547a4bd8-3843-4b55-8045-da12fd946998", "level": "info", "timestamp": "2026-10-19T00:11:41.757673Z"}
+{"status_code": 200, "duration_ms": 89.5, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "e52aed29-b7be-4fc0-b385-005a19d46c7f", "level": "info", "timestamp": "2026-10-19T00:11:41.757857Z"}
+{"status_code": 200, "duration_ms": 87.49, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "d5492016-02a1-4c82-89c7-8f0c43705c0a", "level": "info", "timestamp": "2026-10-19T00:11:41.758029Z"}
+{"status_code": 200, "duration_ms": 87.36, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "8ce1fadf-4bdb-40a3-bf04-708b9e5fcdb6", "level": "info", "timestamp": "2026-10-19T00:11:41.758194Z"}
+{"status_code": 200, "duration_ms": 90.28, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "7bb1678a-d3f2-498d-9a53-42c245240b4a", "level": "info", "timestamp": "2026-10-19T00:11:41.758481Z"}
+INFO:     198.18.1.6:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.1:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 92.44, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "86825581-a3ca-4ae0-935b-174848f10b3c", "level": "info", "timestamp": "2026-10-19T00:11:41.762857Z"}
+INFO:     198.18.1.3:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.10:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.4:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.2:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.7:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.9:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.8:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "52ca722f-5894-4641-9730-f524b0ce8ba7", "level": "info", "timestamp": "2026-10-19T00:11:41.861401Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "1b0a2196-94f3-4a47-a9c9-5c74c5171ebf", "level": "info", "timestamp": "2026-10-19T00:11:41.861923Z"}
+INFO:     198.18.1.5:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "c4f24216-cbed-454a-a563-5b482181c43b", "level": "info", "timestamp": "2026-10-19T00:11:41.866499Z"}
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "af0091c2-6df9-46de-9710-9a03f20dffb3", "level": "info", "timestamp": "2026-10-19T00:11:41.866847Z"}
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "61f085d5-ac6a-4c6f-8159-7b7ca57fae12", "level": "info", "timestamp": "2026-10-19T00:11:41.959259Z"}
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "1e6b98c8-c4c6-48b5-be01-c581d45d4d15", "level": "info", "timestamp": "2026-10-19T00:11:41.960402Z"}
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "fac32eae-0afc-497f-adcf-ea7cefaa19c9", "level": "info", "timestamp": "2026-10-19T00:11:41.961150Z"}
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "aaa1c311-7ee5-42a1-9904-b45ca5bc7d51", "level": "info", "timestamp": "2026-10-19T00:11:41.961625Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "238a4a9d-e141-49bd-89fe-61819e4697bc", "level": "info", "timestamp": "2026-10-19T00:11:41.962072Z"}
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "29cebd06-01b8-4120-ba85-6e43b140a0a7", "level": "info", "timestamp": "2026-10-19T00:11:42.059642Z"}
+{"status_code": 200, "duration_ms": 198.7, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "1b0a2196-94f3-4a47-a9c9-5c74c5171ebf", "level": "info", "timestamp": "2026-10-19T00:11:42.060599Z"}
+{"status_code": 200, "duration_ms": 199.4, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "52ca722f-5894-4641-9730-f524b0ce8ba7", "level": "info", "timestamp": "2026-10-19T00:11:42.060713Z"}
+{"status_code": 200, "duration_ms": 299.01, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "af0091c2-6df9-46de-9710-9a03f20dffb3", "level": "info", "timestamp": "2026-10-19T00:11:42.165896Z"}
+{"status_code": 200, "duration_ms": 205.78, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "1e6b98c8-c4c6-48b5-be01-c581d45d4d15", "level": "info", "timestamp": "2026-10-19T00:11:42.166099Z"}
+{"status_code": 200, "duration_ms": 205.35, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "fac32eae-0afc-497f-adcf-ea7cefaa19c9", "level": "info", "timestamp": "2026-10-19T00:11:42.166483Z"}
+{"status_code": 200, "duration_ms": 205.3, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "aaa1c311-7ee5-42a1-9904-b45ca5bc7d51", "level": "info", "timestamp": "2026-10-19T00:11:42.166904Z"}
+{"status_code": 200, "duration_ms": 205.0, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "238a4a9d-e141-49bd-89fe-61819e4697bc", "level": "info", "timestamp": "2026-10-19T00:11:42.167038Z"}
+{"status_code": 200, "duration_ms": 300.69, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "c4f24216-cbed-454a-a563-5b482181c43b", "level": "info", "timestamp": "2026-10-19T00:11:42.167171Z"}
+{"status_code": 200, "duration_ms": 208.46, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "61f085d5-ac6a-4c6f-8159-7b7ca57fae12", "level": "info", "timestamp": "2026-10-19T00:11:42.167289Z"}
+INFO:     198.18.1.6:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.1:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.10:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 200.89, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "29cebd06-01b8-4120-ba85-6e43b140a0a7", "level": "info", "timestamp": "2026-10-19T00:11:42.260541Z"}
+INFO:     198.18.1.2:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.7:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.9:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.8:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.3:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.4:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "6249d004-0a08-4acf-a937-5e7ca3e8880e", "level": "info", "timestamp": "2026-10-19T00:11:42.264061Z"}
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "77ffe285-b511-4484-a599-f4129412b85d", "level": "info", "timestamp": "2026-10-19T00:11:42.264271Z"}
+INFO:     198.18.1.5:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "1c65f7a6-6599-4ba2-bc7b-24e35b52974c", "level": "info", "timestamp": "2026-10-19T00:11:42.357773Z"}
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "a7a7ebe0-0a38-4dee-9aaa-bbe407c2e4e9", "level": "info", "timestamp": "2026-10-19T00:11:42.358096Z"}
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "c47d265b-e1a2-4c17-b26b-f72c11d14ad1", "level": "info", "timestamp": "2026-10-19T00:11:42.358330Z"}
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "5894035d-0c13-44f5-b890-9590742f12d9", "level": "info", "timestamp": "2026-10-19T00:11:42.358496Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "c2ecb500-21d1-403a-a4d1-72077ec1e86b", "level": "info", "timestamp": "2026-10-19T00:11:42.358693Z"}
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "483772ad-1e32-4641-bb11-2eaf03e12272", "level": "info", "timestamp": "2026-10-19T00:11:42.358822Z"}
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "36b57133-4997-4dce-9ee7-167403ecffb0", "level": "info", "timestamp": "2026-10-19T00:11:42.358958Z"}
+{"status_code": 200, "duration_ms": 98.85, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "6249d004-0a08-4acf-a937-5e7ca3e8880e", "level": "info", "timestamp": "2026-10-19T00:11:42.362930Z"}
+{"status_code": 200, "duration_ms": 99.43, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "77ffe285-b511-4484-a599-f4129412b85d", "level": "info", "timestamp": "2026-10-19T00:11:42.363704Z"}
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "29af1f67-ce93-4bc5-945e-14e5a968f26e", "level": "info", "timestamp": "2026-10-19T00:11:42.363839Z"}
+{"status_code": 200, "duration_ms": 8.65, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "1c65f7a6-6599-4ba2-bc7b-24e35b52974c", "level": "info", "timestamp": "2026-10-19T00:11:42.366392Z"}
+{"status_code": 200, "duration_ms": 99.37, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "c47d265b-e1a2-4c17-b26b-f72c11d14ad1", "level": "info", "timestamp": "2026-10-19T00:11:42.457808Z"}
+{"status_code": 200, "duration_ms": 99.68, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "5894035d-0c13-44f5-b890-9590742f12d9", "level": "info", "timestamp": "2026-10-19T00:11:42.458217Z"}
+{"status_code": 200, "duration_ms": 100.34, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "a7a7ebe0-0a38-4dee-9aaa-bbe407c2e4e9", "level": "info", "timestamp": "2026-10-19T00:11:42.458464Z"}
+{"status_code": 200, "duration_ms": 100.02, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "c2ecb500-21d1-403a-a4d1-72077ec1e86b", "level": "info", "timestamp": "2026-10-19T00:11:42.458739Z"}
+{"status_code": 200, "duration_ms": 100.09, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "483772ad-1e32-4641-bb11-2eaf03e12272", "level": "info", "timestamp": "2026-10-19T00:11:42.459118Z"}
+{"status_code": 200, "duration_ms": 100.33, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "36b57133-4997-4dce-9ee7-167403ecffb0", "level": "info", "timestamp": "2026-10-19T00:11:42.459314Z"}
+INFO:     198.18.1.6:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.1:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 99.19, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "29af1f67-ce93-4bc5-945e-14e5a968f26e", "level": "info", "timestamp": "2026-10-19T00:11:42.463072Z"}
+INFO:     198.18.1.10:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.7:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.9:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.2:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.8:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.3:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.4:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "7bb78809-26ce-44ca-a03c-93253f106bf7", "level": "info", "timestamp": "2026-10-19T00:11:42.558790Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "867090fa-7ec3-4612-b3ca-d6d10e1a028f", "level": "info", "timestamp": "2026-10-19T00:11:42.560209Z"}
+INFO:     198.18.1.5:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "6c6a5816-3387-463f-ab87-50bd09ba32a7", "level": "info", "timestamp": "2026-10-19T00:11:42.565969Z"}
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "1f583079-4483-4414-98d7-30c2753eb372", "level": "info", "timestamp": "2026-10-19T00:11:42.566392Z"}
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "18211f43-01ec-4c3a-aa34-7869e5224554", "level": "info", "timestamp": "2026-10-19T00:11:42.567131Z"}
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "95c2d57e-3d40-4574-8bc9-4361a4a98289", "level": "info", "timestamp": "2026-10-19T00:11:42.567515Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "ef17e7b6-6176-486a-bd7d-dc3fd43068f3", "level": "info", "timestamp": "2026-10-19T00:11:42.567766Z"}
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "4fd12636-e119-4c99-a4dd-be043f479066", "level": "info", "timestamp": "2026-10-19T00:11:42.658302Z"}
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "af88c575-dcd2-4b1f-9dce-8365869a67f1", "level": "info", "timestamp": "2026-10-19T00:11:42.659061Z"}
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "cc58a9c4-6456-4eee-8094-3f870fb77b11", "level": "info", "timestamp": "2026-10-19T00:11:42.665161Z"}
+{"status_code": 200, "duration_ms": 500.94, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "867090fa-7ec3-4612-b3ca-d6d10e1a028f", "level": "info", "timestamp": "2026-10-19T00:11:43.061259Z"}
+{"status_code": 200, "duration_ms": 495.32, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "1f583079-4483-4414-98d7-30c2753eb372", "level": "info", "timestamp": "2026-10-19T00:11:43.061733Z"}
+{"status_code": 200, "duration_ms": 396.91, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "cc58a9c4-6456-4eee-8094-3f870fb77b11", "level": "info", "timestamp": "2026-10-19T00:11:43.062078Z"}
+{"status_code": 200, "duration_ms": 404.43, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "4fd12636-e119-4c99-a4dd-be043f479066", "level": "info", "timestamp": "2026-10-19T00:11:43.258139Z"}
+{"status_code": 200, "duration_ms": 694.91, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "6c6a5816-3387-463f-ab87-50bd09ba32a7", "level": "info", "timestamp": "2026-10-19T00:11:43.260890Z"}
+INFO:     198.18.1.6:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.7:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.5:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 696.34, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "18211f43-01ec-4c3a-aa34-7869e5224554", "level": "info", "timestamp": "2026-10-19T00:11:43.263458Z"}
+{"status_code": 200, "duration_ms": 695.9, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "ef17e7b6-6176-486a-bd7d-dc3fd43068f3", "level": "info", "timestamp": "2026-10-19T00:11:43.263658Z"}
+{"status_code": 200, "duration_ms": 705.31, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "7bb78809-26ce-44ca-a03c-93253f106bf7", "level": "info", "timestamp": "2026-10-19T00:11:43.263788Z"}
+INFO:     198.18.1.3:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.10:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.9:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.8:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 698.95, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "af88c575-dcd2-4b1f-9dce-8365869a67f1", "level": "info", "timestamp": "2026-10-19T00:11:43.358056Z"}
+INFO:     198.18.1.1:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 791.49, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "95c2d57e-3d40-4574-8bc9-4361a4a98289", "level": "info", "timestamp": "2026-10-19T00:11:43.359035Z"}
+INFO:     198.18.1.4:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.2:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "5d03edaa-1674-4218-8c84-185ba17de118", "level": "info", "timestamp": "2026-10-19T00:11:45.331084Z"}
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "cf158e53-b641-41b7-a253-7b5a3bee2943", "level": "info", "timestamp": "2026-10-19T00:11:45.331688Z"}
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "3f6b432a-6216-4c52-843b-3d91694f1002", "level": "info", "timestamp": "2026-10-19T00:11:45.332050Z"}
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "8da3fc6a-c0e6-4c68-b885-5d79df2b851f", "level": "info", "timestamp": "2026-10-19T00:11:45.333161Z"}
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "6a018eae-6062-4efe-b9f5-86f7278d6f0c", "level": "info", "timestamp": "2026-10-19T00:11:45.333742Z"}
+{"status_code": 200, "duration_ms": 5.6, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "3f6b432a-6216-4c52-843b-3d91694f1002", "level": "info", "timestamp": "2026-10-19T00:11:45.337674Z"}
+{"status_code": 200, "duration_ms": 6.83, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "5d03edaa-1674-4218-8c84-185ba17de118", "level": "info", "timestamp": "2026-10-19T00:11:45.337837Z"}
+{"status_code": 200, "duration_ms": 4.78, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "8da3fc6a-c0e6-4c68-b885-5d79df2b851f", "level": "info", "timestamp": "2026-10-19T00:11:45.337911Z"}
+{"status_code": 200, "duration_ms": 4.26, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "6a018eae-6062-4efe-b9f5-86f7278d6f0c", "level": "info", "timestamp": "2026-10-19T00:11:45.337968Z"}
+{"status_code": 200, "duration_ms": 6.42, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "cf158e53-b641-41b7-a253-7b5a3bee2943", "level": "info", "timestamp": "2026-10-19T00:11:45.338067Z"}
+INFO:     198.18.1.10:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.6:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.3:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.7:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.5:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "b1504930-2abf-41d5-b793-bb950e7883a7", "level": "info", "timestamp": "2026-10-19T00:11:45.421485Z"}
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "427dbd43-cee6-4628-a4c5-66706151b33d", "level": "info", "timestamp": "2026-10-19T00:11:45.421755Z"}
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "acbe9e7f-3974-4f95-b8cf-0e667dc03d86", "level": "info", "timestamp": "2026-10-19T00:11:45.421974Z"}
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "e809de73-70a6-47da-841d-aef10339060d", "level": "info", "timestamp": "2026-10-19T00:11:45.422158Z"}
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "e5ee55f7-5c07-4d07-8700-e475c6dbd1f2", "level": "info", "timestamp": "2026-10-19T00:11:45.423276Z"}
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "67e82212-8b96-45b3-9f0f-50970f5b025a", "level": "info", "timestamp": "2026-10-19T00:11:45.423887Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "b8eb368c-928e-4c04-9454-0d861571652d", "level": "info", "timestamp": "2026-10-19T00:11:45.424163Z"}
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "da46ede7-b0f0-41b1-84ee-7d23d12a450e", "level": "info", "timestamp": "2026-10-19T00:11:45.525394Z"}
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "c6a062d8-da20-41af-abb3-95f30390f163", "level": "info", "timestamp": "2026-10-19T00:11:45.525930Z"}
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "965a88bb-5ca0-498f-9307-b91ebe1af602", "level": "info", "timestamp": "2026-10-19T00:11:45.526148Z"}
+{"status_code": 200, "duration_ms": 106.36, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "b1504930-2abf-41d5-b793-bb950e7883a7", "level": "info", "timestamp": "2026-10-19T00:11:45.527818Z"}
+{"status_code": 200, "duration_ms": 106.19, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "427dbd43-cee6-4628-a4c5-66706151b33d", "level": "info", "timestamp": "2026-10-19T00:11:45.527932Z"}
+{"status_code": 200, "duration_ms": 106.03, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "acbe9e7f-3974-4f95-b8cf-0e667dc03d86", "level": "info", "timestamp": "2026-10-19T00:11:45.527985Z"}
+{"status_code": 200, "duration_ms": 105.88, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "e809de73-70a6-47da-841d-aef10339060d", "level": "info", "timestamp": "2026-10-19T00:11:45.528025Z"}
+{"status_code": 200, "duration_ms": 105.89, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "e5ee55f7-5c07-4d07-8700-e475c6dbd1f2", "level": "info", "timestamp": "2026-10-19T00:11:45.529173Z"}
+{"status_code": 200, "duration_ms": 105.85, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "67e82212-8b96-45b3-9f0f-50970f5b025a", "level": "info", "timestamp": "2026-10-19T00:11:45.529735Z"}
+{"status_code": 200, "duration_ms": 105.69, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "b8eb368c-928e-4c04-9454-0d861571652d", "level": "info", "timestamp": "2026-10-19T00:11:45.529841Z"}
+INFO:     198.18.1.6:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.3:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.7:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.5:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.10:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.1:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.8:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 101.69, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "da46ede7-b0f0-41b1-84ee-7d23d12a450e", "level": "info", "timestamp": "2026-10-19T00:11:45.627127Z"}
+{"status_code": 200, "duration_ms": 101.37, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "c6a062d8-da20-41af-abb3-95f30390f163", "level": "info", "timestamp": "2026-10-19T00:11:45.627279Z"}
+{"status_code": 200, "duration_ms": 101.22, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "965a88bb-5ca0-498f-9307-b91ebe1af602", "level": "info", "timestamp": "2026-10-19T00:11:45.627368Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "ba9c8a9e-7c56-41f5-a45a-ce1ac8db1573", "level": "info", "timestamp": "2026-10-19T00:11:45.721503Z"}
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "96ec9940-cd7f-4da3-baf5-840ab11584e0", "level": "info", "timestamp": "2026-10-19T00:11:45.721761Z"}
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "ada7a134-25b4-4a94-9977-7460b868ec85", "level": "info", "timestamp": "2026-10-19T00:11:45.722231Z"}
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "d33fe91b-c26f-47c7-b1ab-cef63c8a52b5", "level": "info", "timestamp": "2026-10-19T00:11:45.722447Z"}
+INFO:     198.18.1.4:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.2:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.9:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "3fef0d0e-4d98-467a-b8bf-47c49192b81c", "level": "info", "timestamp": "2026-10-19T00:11:45.724269Z"}
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "f28dc652-c93e-4730-be4e-83b60272af86", "level": "info", "timestamp": "2026-10-19T00:11:45.725005Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "7b3f2b7c-7cb7-48d3-bff5-f4a7737c96a8", "level": "info", "timestamp": "2026-10-19T00:11:45.725163Z"}
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "68346f7f-6dc7-4ced-a85a-3fd0997f9d3d", "level": "info", "timestamp": "2026-10-19T00:11:45.818726Z"}
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "fedcaf36-d32b-4611-b7ce-ac47bc4e4bce", "level": "info", "timestamp": "2026-10-19T00:11:45.819364Z"}
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "4d04e15b-227e-4c00-8391-6755151194f8", "level": "info", "timestamp": "2026-10-19T00:11:45.819838Z"}
+{"status_code": 200, "duration_ms": 106.96, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "ada7a134-25b4-4a94-9977-7460b868ec85", "level": "info", "timestamp": "2026-10-19T00:11:45.829204Z"}
+{"status_code": 200, "duration_ms": 107.87, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "ba9c8a9e-7c56-41f5-a45a-ce1ac8db1573", "level": "info", "timestamp": "2026-10-19T00:11:45.829335Z"}
+{"status_code": 200, "duration_ms": 107.0, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "d33fe91b-c26f-47c7-b1ab-cef63c8a52b5", "level": "info", "timestamp": "2026-10-19T00:11:45.829431Z"}
+{"status_code": 200, "duration_ms": 104.52, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "f28dc652-c93e-4730-be4e-83b60272af86", "level": "info", "timestamp": "2026-10-19T00:11:45.829512Z"}
+{"status_code": 200, "duration_ms": 196.91, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "96ec9940-cd7f-4da3-baf5-840ab11584e0", "level": "info", "timestamp": "2026-10-19T00:11:45.918804Z"}
+{"status_code": 200, "duration_ms": 194.04, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "7b3f2b7c-7cb7-48d3-bff5-f4a7737c96a8", "level": "info", "timestamp": "2026-10-19T00:11:45.919261Z"}
+{"status_code": 200, "duration_ms": 195.3, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "3fef0d0e-4d98-467a-b8bf-47c49192b81c", "level": "info", "timestamp": "2026-10-19T00:11:45.919612Z"}
+INFO:     198.18.1.5:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.6:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.7:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 204.67, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "68346f7f-6dc7-4ced-a85a-3fd0997f9d3d", "level": "info", "timestamp": "2026-10-19T00:11:46.023361Z"}
+{"status_code": 200, "duration_ms": 204.34, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "fedcaf36-d32b-4611-b7ce-ac47bc4e4bce", "level": "info", "timestamp": "2026-10-19T00:11:46.023686Z"}
+{"status_code": 200, "duration_ms": 204.05, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "4d04e15b-227e-4c00-8391-6755151194f8", "level": "info", "timestamp": "2026-10-19T00:11:46.023880Z"}
+INFO:     198.18.1.1:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.3:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.8:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.10:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.4:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.2:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.9:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "4657b817-b5a0-426e-82b6-7139c61592a9", "level": "info", "timestamp": "2026-10-19T00:11:46.123757Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "89dc8c44-f14a-4ce8-8545-ac4c20c66dae", "level": "info", "timestamp": "2026-10-19T00:11:46.125395Z"}
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "e3db90d3-424c-4f52-84e4-0b091be3e446", "level": "info", "timestamp": "2026-10-19T00:11:46.125830Z"}
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "860f1ec4-ba48-47eb-a30c-72d4dea07fd8", "level": "info", "timestamp": "2026-10-19T00:11:46.126331Z"}
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "b3a59b31-8109-4087-826c-eaee3a22329b", "level": "info", "timestamp": "2026-10-19T00:11:46.126651Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "62bdb4d0-9db3-48d1-a8a9-7dfe08bb4997", "level": "info", "timestamp": "2026-10-19T00:11:46.126928Z"}
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "f436182a-4adb-4d07-b9e8-3b40bc9342ae", "level": "info", "timestamp": "2026-10-19T00:11:46.127218Z"}
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "cb7303a5-1b28-438f-b547-d10e9781cad6", "level": "info", "timestamp": "2026-10-19T00:11:46.223610Z"}
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "0dec0c19-52ef-4cd5-bdfb-cea767d78d9e", "level": "info", "timestamp": "2026-10-19T00:11:46.224358Z"}
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "908cc954-1b66-466f-b6d8-7a231d178c2d", "level": "info", "timestamp": "2026-10-19T00:11:46.226021Z"}
+{"status_code": 200, "duration_ms": 194.41, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "860f1ec4-ba48-47eb-a30c-72d4dea07fd8", "level": "info", "timestamp": "2026-10-19T00:11:46.320856Z"}
+{"status_code": 200, "duration_ms": 194.3, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "62bdb4d0-9db3-48d1-a8a9-7dfe08bb4997", "level": "info", "timestamp": "2026-10-19T00:11:46.321251Z"}
+INFO:     198.18.1.1:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.8:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "9669f62f-20ac-4fb5-b24a-e57a23d3610e", "level": "info", "timestamp": "2026-10-19T00:11:46.325489Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "21f952f5-3817-4848-b993-343c2944d457", "level": "info", "timestamp": "2026-10-19T00:11:46.326148Z"}
+{"status_code": 200, "duration_ms": 105.77, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "cb7303a5-1b28-438f-b547-d10e9781cad6", "level": "info", "timestamp": "2026-10-19T00:11:46.329350Z"}
+{"status_code": 200, "duration_ms": 103.55, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "908cc954-1b66-466f-b6d8-7a231d178c2d", "level": "info", "timestamp": "2026-10-19T00:11:46.329521Z"}
+{"status_code": 200, "duration_ms": 105.7, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "0dec0c19-52ef-4cd5-bdfb-cea767d78d9e", "level": "info", "timestamp": "2026-10-19T00:11:46.330027Z"}
+INFO:     198.18.1.4:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.9:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.2:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "f30b4227-bed9-4551-983b-1a01cfcdbb1d", "level": "info", "timestamp": "2026-10-19T00:11:46.819046Z"}
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "4c1ecb49-83ea-4a53-8377-648cc26cafaa", "level": "info", "timestamp": "2026-10-19T00:11:46.819973Z"}
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "abc87742-0990-4622-8e4a-d80c32325202", "level": "info", "timestamp": "2026-10-19T00:11:46.821362Z"}
+{"status_code": 200, "duration_ms": 897.42, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "b3a59b31-8109-4087-826c-eaee3a22329b", "level": "info", "timestamp": "2026-10-19T00:11:47.024100Z"}
+{"status_code": 200, "duration_ms": 898.49, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "e3db90d3-424c-4f52-84e4-0b091be3e446", "level": "info", "timestamp": "2026-10-19T00:11:47.024292Z"}
+INFO:     198.18.1.3:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.7:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 1093.39, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "f436182a-4adb-4d07-b9e8-3b40bc9342ae", "level": "info", "timestamp": "2026-10-19T00:11:47.220647Z"}
+INFO:     198.18.1.10:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 1195.66, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "4657b817-b5a0-426e-82b6-7139c61592a9", "level": "info", "timestamp": "2026-10-19T00:11:47.319505Z"}
+{"status_code": 200, "duration_ms": 1194.58, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "89dc8c44-f14a-4ce8-8545-ac4c20c66dae", "level": "info", "timestamp": "2026-10-19T00:11:47.319971Z"}
+{"status_code": 200, "duration_ms": 499.66, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "abc87742-0990-4622-8e4a-d80c32325202", "level": "info", "timestamp": "2026-10-19T00:11:47.321063Z"}
+{"status_code": 200, "duration_ms": 501.42, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "4c1ecb49-83ea-4a53-8377-648cc26cafaa", "level": "info", "timestamp": "2026-10-19T00:11:47.321437Z"}
+{"status_code": 200, "duration_ms": 995.59, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "21f952f5-3817-4848-b993-343c2944d457", "level": "info", "timestamp": "2026-10-19T00:11:47.321757Z"}
+INFO:     198.18.1.5:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 998.08, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "9669f62f-20ac-4fb5-b24a-e57a23d3610e", "level": "info", "timestamp": "2026-10-19T00:11:47.323581Z"}
+INFO:     198.18.1.6:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.9:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.2:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.8:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.1:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 603.2, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "f30b4227-bed9-4551-983b-1a01cfcdbb1d", "level": "info", "timestamp": "2026-10-19T00:11:47.422211Z"}
+INFO:     198.18.1.4:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "dd469630-5703-4b91-afea-0c88e1ce5b27", "level": "info", "timestamp": "2026-10-19T00:11:49.224920Z"}
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "1c7f2c54-697a-41ce-bc75-f1123b04a62e", "level": "info", "timestamp": "2026-10-19T00:11:49.225401Z"}
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "ec635b80-8adb-422e-946d-ce4a0eb20726", "level": "info", "timestamp": "2026-10-19T00:11:49.226800Z"}
+{"status_code": 200, "duration_ms": 2.79, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "ec635b80-8adb-422e-946d-ce4a0eb20726", "level": "info", "timestamp": "2026-10-19T00:11:49.229593Z"}
+{"status_code": 200, "duration_ms": 4.67, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "1c7f2c54-697a-41ce-bc75-f1123b04a62e", "level": "info", "timestamp": "2026-10-19T00:11:49.230059Z"}
+{"status_code": 200, "duration_ms": 6.09, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "dd469630-5703-4b91-afea-0c88e1ce5b27", "level": "info", "timestamp": "2026-10-19T00:11:49.230904Z"}
+INFO:     198.18.1.7:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.10:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.3:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "fad32d3f-6b3c-4836-b975-376a18ab28a2", "level": "info", "timestamp": "2026-10-19T00:11:49.233969Z"}
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "005b4481-69c6-461d-93f5-207a8a5b9ed8", "level": "info", "timestamp": "2026-10-19T00:11:49.234342Z"}
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "35c09552-0755-4354-8b0f-cd543024d71d", "level": "info", "timestamp": "2026-10-19T00:11:49.235191Z"}
+{"status_code": 200, "duration_ms": 92.28, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "fad32d3f-6b3c-4836-b975-376a18ab28a2", "level": "info", "timestamp": "2026-10-19T00:11:49.326281Z"}
+{"status_code": 200, "duration_ms": 187.16, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "005b4481-69c6-461d-93f5-207a8a5b9ed8", "level": "info", "timestamp": "2026-10-19T00:11:49.421581Z"}
+{"status_code": 200, "duration_ms": 187.0, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "35c09552-0755-4354-8b0f-cd543024d71d", "level": "info", "timestamp": "2026-10-19T00:11:49.422216Z"}
+INFO:     198.18.1.7:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.10:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "f7801c74-a36a-44c6-aa4f-4f2ac420f08d", "level": "info", "timestamp": "2026-10-19T00:11:49.518684Z"}
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "1dbe16ac-b76c-4f0b-846a-d12ec17a3265", "level": "info", "timestamp": "2026-10-19T00:11:49.519429Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "25cc2fc4-abf4-4833-873f-acaf1417e7f8", "level": "info", "timestamp": "2026-10-19T00:11:49.519991Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "6b1447d8-cd7f-4745-826b-d0445d93a0b9", "level": "info", "timestamp": "2026-10-19T00:11:49.521115Z"}
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "4fdaad87-1f14-4cf9-962a-56d488da4c05", "level": "info", "timestamp": "2026-10-19T00:11:49.521550Z"}
+INFO:     198.18.1.3:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "91d17c7a-ae7d-45ff-9203-b53b64156532", "level": "info", "timestamp": "2026-10-19T00:11:49.524733Z"}
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "b8ca0360-c5d8-4c60-beba-552594896a5e", "level": "info", "timestamp": "2026-10-19T00:11:49.525997Z"}
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "578287c0-e5f5-4091-a5c3-e289f794040f", "level": "info", "timestamp": "2026-10-19T00:11:49.618290Z"}
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "c03c97d4-6fae-4b43-8f8b-d226ccafc3fa", "level": "info", "timestamp": "2026-10-19T00:11:49.620192Z"}
+{"status_code": 200, "duration_ms": 102.37, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "f7801c74-a36a-44c6-aa4f-4f2ac420f08d", "level": "info", "timestamp": "2026-10-19T00:11:49.620950Z"}
+{"status_code": 200, "duration_ms": 101.14, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "25cc2fc4-abf4-4833-873f-acaf1417e7f8", "level": "info", "timestamp": "2026-10-19T00:11:49.621083Z"}
+{"status_code": 200, "duration_ms": 100.15, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "6b1447d8-cd7f-4745-826b-d0445d93a0b9", "level": "info", "timestamp": "2026-10-19T00:11:49.621208Z"}
+{"status_code": 200, "duration_ms": 99.81, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "4fdaad87-1f14-4cf9-962a-56d488da4c05", "level": "info", "timestamp": "2026-10-19T00:11:49.621327Z"}
+{"status_code": 200, "duration_ms": 102.11, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "1dbe16ac-b76c-4f0b-846a-d12ec17a3265", "level": "info", "timestamp": "2026-10-19T00:11:49.621438Z"}
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "06364a1e-638a-4ece-b117-247f0e361a5c", "level": "info", "timestamp": "2026-10-19T00:11:49.622004Z"}
+INFO:     198.18.1.9:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.6:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.8:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.2:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 98.95, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "b8ca0360-c5d8-4c60-beba-552594896a5e", "level": "info", "timestamp": "2026-10-19T00:11:49.624925Z"}
+{"status_code": 200, "duration_ms": 100.36, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "91d17c7a-ae7d-45ff-9203-b53b64156532", "level": "info", "timestamp": "2026-10-19T00:11:49.625054Z"}
+{"status_code": 200, "duration_ms": 6.89, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "578287c0-e5f5-4091-a5c3-e289f794040f", "level": "info", "timestamp": "2026-10-19T00:11:49.625149Z"}
+INFO:     198.18.1.5:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 5.21, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "06364a1e-638a-4ece-b117-247f0e361a5c", "level": "info", "timestamp": "2026-10-19T00:11:49.627200Z"}
+{"status_code": 200, "duration_ms": 7.12, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "c03c97d4-6fae-4b43-8f8b-d226ccafc3fa", "level": "info", "timestamp": "2026-10-19T00:11:49.627300Z"}
+INFO:     198.18.1.4:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.1:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.7:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "6a0cfb61-3ec5-4451-b0e2-745fea0a92be", "level": "info", "timestamp": "2026-10-19T00:11:49.721377Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "69e8b672-3b07-4d83-8614-20bc24b8981e", "level": "info", "timestamp": "2026-10-19T00:11:49.722176Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "ef3cf3d7-bc9d-4a2e-9dac-d81273481a63", "level": "info", "timestamp": "2026-10-19T00:11:49.722494Z"}
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "70539754-2ee3-4928-9d4b-0116e46120ff", "level": "info", "timestamp": "2026-10-19T00:11:49.722842Z"}
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "8ce9a94b-f984-4f59-be57-620d2ed6009a", "level": "info", "timestamp": "2026-10-19T00:11:49.723177Z"}
+INFO:     198.18.1.3:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.10:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "bc071444-77a5-4bbf-8a55-b5284b5ac9f0", "level": "info", "timestamp": "2026-10-19T00:11:49.819888Z"}
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "e53f1235-926d-4144-9eee-3b490d1e3b4a", "level": "info", "timestamp": "2026-10-19T00:11:49.820117Z"}
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "6f7476ef-cb4f-4407-911c-d12903760290", "level": "info", "timestamp": "2026-10-19T00:11:49.820371Z"}
+{"status_code": 200, "duration_ms": 200.91, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "6a0cfb61-3ec5-4451-b0e2-745fea0a92be", "level": "info", "timestamp": "2026-10-19T00:11:49.922297Z"}
+{"status_code": 200, "duration_ms": 199.76, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "8ce9a94b-f984-4f59-be57-620d2ed6009a", "level": "info", "timestamp": "2026-10-19T00:11:49.922955Z"}
+{"status_code": 200, "duration_ms": 200.79, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "ef3cf3d7-bc9d-4a2e-9dac-d81273481a63", "level": "info", "timestamp": "2026-10-19T00:11:49.923308Z"}
+{"status_code": 200, "duration_ms": 200.81, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "70539754-2ee3-4928-9d4b-0116e46120ff", "level": "info", "timestamp": "2026-10-19T00:11:49.923695Z"}
+{"status_code": 200, "duration_ms": 201.93, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "69e8b672-3b07-4d83-8614-20bc24b8981e", "level": "info", "timestamp": "2026-10-19T00:11:49.924031Z"}
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "47d6e64f-bd54-4de7-bba6-2cb80f749680", "level": "info", "timestamp": "2026-10-19T00:11:49.924762Z"}
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "117943ba-0c0a-41ab-89f4-69f5026519de", "level": "info", "timestamp": "2026-10-19T00:11:49.925421Z"}
+INFO:     198.18.1.9:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.5:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.8:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.2:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.6:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "aef57ab8-6fe2-44c3-90bc-b4199f6c2a36", "level": "info", "timestamp": "2026-10-19T00:11:50.120055Z"}
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "4bbf62fd-e774-4e83-b7a4-765ba9c21937", "level": "info", "timestamp": "2026-10-19T00:11:50.120380Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "43098286-58e7-498f-8ff2-31a3992e478f", "level": "info", "timestamp": "2026-10-19T00:11:50.120752Z"}
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "832f94b5-e2aa-4e14-9333-de63b6566976", "level": "info", "timestamp": "2026-10-19T00:11:50.121033Z"}
+{"status_code": 200, "duration_ms": 301.67, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "e53f1235-926d-4144-9eee-3b490d1e3b4a", "level": "info", "timestamp": "2026-10-19T00:11:50.121811Z"}
+{"status_code": 200, "duration_ms": 302.24, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "bc071444-77a5-4bbf-8a55-b5284b5ac9f0", "level": "info", "timestamp": "2026-10-19T00:11:50.122121Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "68bd66b1-53b4-4d25-acab-d1732d7b14bb", "level": "info", "timestamp": "2026-10-19T00:11:50.123187Z"}
+{"status_code": 200, "duration_ms": 304.34, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "6f7476ef-cb4f-4407-911c-d12903760290", "level": "info", "timestamp": "2026-10-19T00:11:50.124701Z"}
+INFO:     198.18.1.1:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.4:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.7:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 100.24, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "43098286-58e7-498f-8ff2-31a3992e478f", "level": "info", "timestamp": "2026-10-19T00:11:50.221016Z"}
+{"status_code": 200, "duration_ms": 100.18, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "832f94b5-e2aa-4e14-9333-de63b6566976", "level": "info", "timestamp": "2026-10-19T00:11:50.221218Z"}
+{"status_code": 200, "duration_ms": 98.15, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "68bd66b1-53b4-4d25-acab-d1732d7b14bb", "level": "info", "timestamp": "2026-10-19T00:11:50.221323Z"}
+{"status_code": 200, "duration_ms": 101.08, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "4bbf62fd-e774-4e83-b7a4-765ba9c21937", "level": "info", "timestamp": "2026-10-19T00:11:50.221416Z"}
+{"status_code": 200, "duration_ms": 101.88, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "aef57ab8-6fe2-44c3-90bc-b4199f6c2a36", "level": "info", "timestamp": "2026-10-19T00:11:50.221938Z"}
+{"status_code": 200, "duration_ms": 296.79, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "117943ba-0c0a-41ab-89f4-69f5026519de", "level": "info", "timestamp": "2026-10-19T00:11:50.222131Z"}
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "41895379-4823-4d3f-b81a-9f2d8bf358cc", "level": "info", "timestamp": "2026-10-19T00:11:50.223691Z"}
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "63ff0589-76c9-4fc4-8eb5-a85fbe7aaf6f", "level": "info", "timestamp": "2026-10-19T00:11:50.224036Z"}
+INFO:     198.18.1.8:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.2:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.6:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.5:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.9:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 300.58, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "47d6e64f-bd54-4de7-bba6-2cb80f749680", "level": "info", "timestamp": "2026-10-19T00:11:50.225263Z"}
+INFO:     198.18.1.10:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.3:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "f417215f-f555-45da-9b67-2ce42ba32f61", "level": "info", "timestamp": "2026-10-19T00:11:50.323165Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "235b77d3-9e28-4353-a541-5cd31791ba1d", "level": "info", "timestamp": "2026-10-19T00:11:50.323700Z"}
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "15c7a027-275d-44e9-a721-6dcf0338109f", "level": "info", "timestamp": "2026-10-19T00:11:50.324067Z"}
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "000fc3c1-167a-4bb2-97ec-7be9384ad2d2", "level": "info", "timestamp": "2026-10-19T00:11:50.324289Z"}
+{"status_code": 200, "duration_ms": 100.9, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "41895379-4823-4d3f-b81a-9f2d8bf358cc", "level": "info", "timestamp": "2026-10-19T00:11:50.324632Z"}
+{"status_code": 200, "duration_ms": 100.85, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "63ff0589-76c9-4fc4-8eb5-a85fbe7aaf6f", "level": "info", "timestamp": "2026-10-19T00:11:50.324893Z"}
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "28d56556-453a-47d4-9c92-c33dd164673f", "level": "info", "timestamp": "2026-10-19T00:11:50.325114Z"}
+INFO:     198.18.1.1:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.4:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "58f02abd-e85d-464f-b182-a0f7aedf6fd2", "level": "info", "timestamp": "2026-10-19T00:11:50.423871Z"}
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "c5005e3d-dc27-4333-a6d2-a1866bd867ef", "level": "info", "timestamp": "2026-10-19T00:11:50.424940Z"}
+{"status_code": 200, "duration_ms": 594.78, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "15c7a027-275d-44e9-a721-6dcf0338109f", "level": "info", "timestamp": "2026-10-19T00:11:50.918913Z"}
+INFO:     198.18.1.5:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 498.81, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "c5005e3d-dc27-4333-a6d2-a1866bd867ef", "level": "info", "timestamp": "2026-10-19T00:11:50.923730Z"}
+INFO:     198.18.1.4:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 696.84, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "000fc3c1-167a-4bb2-97ec-7be9384ad2d2", "level": "info", "timestamp": "2026-10-19T00:11:51.021212Z"}
+{"status_code": 200, "duration_ms": 597.91, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "58f02abd-e85d-464f-b182-a0f7aedf6fd2", "level": "info", "timestamp": "2026-10-19T00:11:51.021793Z"}
+{"status_code": 200, "duration_ms": 698.33, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "235b77d3-9e28-4353-a541-5cd31791ba1d", "level": "info", "timestamp": "2026-10-19T00:11:51.022008Z"}
+{"status_code": 200, "duration_ms": 697.12, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "28d56556-453a-47d4-9c92-c33dd164673f", "level": "info", "timestamp": "2026-10-19T00:11:51.022234Z"}
+{"status_code": 200, "duration_ms": 699.3, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "f417215f-f555-45da-9b67-2ce42ba32f61", "level": "info", "timestamp": "2026-10-19T00:11:51.022426Z"}
+INFO:     198.18.1.9:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.1:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.6:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.2:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.8:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "b8b5a513-d098-47ca-a342-6b6c879c104f", "level": "info", "timestamp": "2026-10-19T00:11:52.224035Z"}
+{"status_code": 200, "duration_ms": 2.41, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "b8b5a513-d098-47ca-a342-6b6c879c104f", "level": "info", "timestamp": "2026-10-19T00:11:52.226374Z"}
+INFO:     198.18.1.7:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "7f193b36-1108-459e-a95e-ac76f6850ec2", "level": "info", "timestamp": "2026-10-19T00:11:52.229390Z"}
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "21766926-b1b5-48a4-8fe0-56af2c5b1db3", "level": "info", "timestamp": "2026-10-19T00:11:52.230051Z"}
+{"status_code": 200, "duration_ms": 5.93, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "7f193b36-1108-459e-a95e-ac76f6850ec2", "level": "info", "timestamp": "2026-10-19T00:11:52.235303Z"}
+{"status_code": 200, "duration_ms": 88.41, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "21766926-b1b5-48a4-8fe0-56af2c5b1db3", "level": "info", "timestamp": "2026-10-19T00:11:52.318523Z"}
+INFO:     198.18.1.7:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.10:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "761cdbbc-03fb-4ce8-8426-143e0edd907d", "level": "info", "timestamp": "2026-10-19T00:11:52.322796Z"}
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "371e6193-8f15-458a-9609-997fd4682fd1", "level": "info", "timestamp": "2026-10-19T00:11:52.323504Z"}
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "c3d80ae2-c380-4f84-bc2e-0ef39edbcd0d", "level": "info", "timestamp": "2026-10-19T00:11:52.324956Z"}
+{"status_code": 200, "duration_ms": 5.32, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "761cdbbc-03fb-4ce8-8426-143e0edd907d", "level": "info", "timestamp": "2026-10-19T00:11:52.328097Z"}
+{"status_code": 200, "duration_ms": 4.76, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "371e6193-8f15-458a-9609-997fd4682fd1", "level": "info", "timestamp": "2026-10-19T00:11:52.328242Z"}
+INFO:     198.18.1.7:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.10:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "80a42948-539d-4c57-82db-2af474deb6fb", "level": "info", "timestamp": "2026-10-19T00:11:52.330309Z"}
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "ff6192a9-9796-4b63-8de3-e36e70a212a9", "level": "info", "timestamp": "2026-10-19T00:11:52.330602Z"}
+{"status_code": 200, "duration_ms": 89.56, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "ff6192a9-9796-4b63-8de3-e36e70a212a9", "level": "info", "timestamp": "2026-10-19T00:11:52.420177Z"}
+INFO:     198.18.1.10:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "89003219-652c-4e74-9c9f-0d31baeb74c9", "level": "info", "timestamp": "2026-10-19T00:11:52.520082Z"}
+{"status_code": 200, "duration_ms": 195.44, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "c3d80ae2-c380-4f84-bc2e-0ef39edbcd0d", "level": "info", "timestamp": "2026-10-19T00:11:52.520383Z"}
+{"status_code": 200, "duration_ms": 190.21, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "80a42948-539d-4c57-82db-2af474deb6fb", "level": "info", "timestamp": "2026-10-19T00:11:52.520516Z"}
+INFO:     198.18.1.3:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.7:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "da2c299e-8c1b-41a3-9328-eac6de74cb63", "level": "info", "timestamp": "2026-10-19T00:11:52.523876Z"}
+{"status_code": 200, "duration_ms": 95.32, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "da2c299e-8c1b-41a3-9328-eac6de74cb63", "level": "info", "timestamp": "2026-10-19T00:11:52.619260Z"}
+{"status_code": 200, "duration_ms": 99.72, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "89003219-652c-4e74-9c9f-0d31baeb74c9", "level": "info", "timestamp": "2026-10-19T00:11:52.619794Z"}
+INFO:     198.18.1.3:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.10:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "e9ea6ff6-b6fc-4e53-9f6c-4754a151c3a8", "level": "info", "timestamp": "2026-10-19T00:11:52.623578Z"}
+{"status_code": 200, "duration_ms": 2.2, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "e9ea6ff6-b6fc-4e53-9f6c-4754a151c3a8", "level": "info", "timestamp": "2026-10-19T00:11:52.625790Z"}
+INFO:     198.18.1.3:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "342c1257-e3ee-4da4-bca3-000d06110442", "level": "info", "timestamp": "2026-10-19T00:11:52.718795Z"}
+{"status_code": 200, "duration_ms": 3.15, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "342c1257-e3ee-4da4-bca3-000d06110442", "level": "info", "timestamp": "2026-10-19T00:11:52.721946Z"}
+INFO:     198.18.1.3:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "53871e0e-7ff3-4122-8007-c1c2121eae4e", "level": "info", "timestamp": "2026-10-19T00:11:52.927556Z"}
+{"status_code": 200, "duration_ms": 2.18, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "53871e0e-7ff3-4122-8007-c1c2121eae4e", "level": "info", "timestamp": "2026-10-19T00:11:52.929688Z"}
+INFO:     198.18.1.5:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "fbbd791a-b3a0-438e-b420-37151126ff2a", "level": "info", "timestamp": "2026-10-19T00:11:52.931888Z"}
+{"status_code": 200, "duration_ms": 2.64, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "fbbd791a-b3a0-438e-b420-37151126ff2a", "level": "info", "timestamp": "2026-10-19T00:11:52.934517Z"}
+INFO:     198.18.1.5:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "d6260bb6-ae28-44f7-ba5f-921c3f51da94", "level": "info", "timestamp": "2026-10-19T00:11:52.935833Z"}
+{"status_code": 200, "duration_ms": 0.75, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "d6260bb6-ae28-44f7-ba5f-921c3f51da94", "level": "info", "timestamp": "2026-10-19T00:11:52.936587Z"}
+INFO:     198.18.1.5:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "775178cc-6376-4264-99f1-8d430a8e9a96", "level": "info", "timestamp": "2026-10-19T00:11:52.937473Z"}
+{"status_code": 200, "duration_ms": 1.08, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "775178cc-6376-4264-99f1-8d430a8e9a96", "level": "info", "timestamp": "2026-10-19T00:11:52.938556Z"}
+INFO:     198.18.1.5:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "5d4b7b28-d7ef-407d-b890-fdc82fc43470", "level": "info", "timestamp": "2026-10-19T00:11:53.025238Z"}
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "4dc9b0a5-3ac8-476a-b945-570f55534532", "level": "info", "timestamp": "2026-10-19T00:11:53.026802Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "b2811658-0812-4296-a4d8-ba5e044350fe", "level": "info", "timestamp": "2026-10-19T00:11:53.028028Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "e973e08e-de1a-468f-afbc-3ae9cf81951b", "level": "info", "timestamp": "2026-10-19T00:11:53.029168Z"}
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "e33785f5-2af5-4237-a2ec-c6df18d278a3", "level": "info", "timestamp": "2026-10-19T00:11:53.030634Z"}
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "20489312-b078-4544-8368-16d0ae9ac8cd", "level": "info", "timestamp": "2026-10-19T00:11:53.031101Z"}
+{"status_code": 200, "duration_ms": 4.47, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "4dc9b0a5-3ac8-476a-b945-570f55534532", "level": "info", "timestamp": "2026-10-19T00:11:53.031255Z"}
+{"status_code": 200, "duration_ms": 6.2, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "5d4b7b28-d7ef-407d-b890-fdc82fc43470", "level": "info", "timestamp": "2026-10-19T00:11:53.031317Z"}
+INFO:     198.18.1.1:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.4:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "a5f5e004-58c5-4f83-a108-93dee116cf16", "level": "info", "timestamp": "2026-10-19T00:11:53.121392Z"}
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "09331b5b-ab44-4f4f-bc5d-5b140cd2b7fc", "level": "info", "timestamp": "2026-10-19T00:11:53.122046Z"}
+{"status_code": 200, "duration_ms": 91.56, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "e33785f5-2af5-4237-a2ec-c6df18d278a3", "level": "info", "timestamp": "2026-10-19T00:11:53.122217Z"}
+{"status_code": 200, "duration_ms": 91.25, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "20489312-b078-4544-8368-16d0ae9ac8cd", "level": "info", "timestamp": "2026-10-19T00:11:53.122358Z"}
+{"status_code": 200, "duration_ms": 93.35, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "e973e08e-de1a-468f-afbc-3ae9cf81951b", "level": "info", "timestamp": "2026-10-19T00:11:53.122535Z"}
+{"status_code": 200, "duration_ms": 94.67, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "b2811658-0812-4296-a4d8-ba5e044350fe", "level": "info", "timestamp": "2026-10-19T00:11:53.122687Z"}
+INFO:     198.18.1.9:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.2:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.8:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.6:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 101.67, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "a5f5e004-58c5-4f83-a108-93dee116cf16", "level": "info", "timestamp": "2026-10-19T00:11:53.223074Z"}
+{"status_code": 200, "duration_ms": 101.33, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "09331b5b-ab44-4f4f-bc5d-5b140cd2b7fc", "level": "info", "timestamp": "2026-10-19T00:11:53.223481Z"}
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "f038687f-a97d-4185-9e3a-7e9e8b98c6b3", "level": "info", "timestamp": "2026-10-19T00:11:53.225628Z"}
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "263fc8c0-022b-4c29-939c-a4414cf18116", "level": "info", "timestamp": "2026-10-19T00:11:53.226012Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "6c450026-359a-4b30-adc6-6f60702e3384", "level": "info", "timestamp": "2026-10-19T00:11:53.226293Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "5bc54d1f-2a63-466d-b648-edb67b8c812f", "level": "info", "timestamp": "2026-10-19T00:11:53.226568Z"}
+INFO:     198.18.1.4:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.1:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 196.17, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "6c450026-359a-4b30-adc6-6f60702e3384", "level": "info", "timestamp": "2026-10-19T00:11:53.422480Z"}
+{"status_code": 200, "duration_ms": 196.11, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "5bc54d1f-2a63-466d-b648-edb67b8c812f", "level": "info", "timestamp": "2026-10-19T00:11:53.422739Z"}
+{"status_code": 200, "duration_ms": 197.27, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "f038687f-a97d-4185-9e3a-7e9e8b98c6b3", "level": "info", "timestamp": "2026-10-19T00:11:53.422863Z"}
+{"status_code": 200, "duration_ms": 196.98, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "263fc8c0-022b-4c29-939c-a4414cf18116", "level": "info", "timestamp": "2026-10-19T00:11:53.422965Z"}
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "269063b5-ec51-4616-8b18-1a9feec2b883", "level": "info", "timestamp": "2026-10-19T00:11:53.423140Z"}
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "6f350014-901b-4eca-b578-aefe2ac869ee", "level": "info", "timestamp": "2026-10-19T00:11:53.423344Z"}
+INFO:     198.18.1.6:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.8:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.9:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.2:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 97.58, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "6f350014-901b-4eca-b578-aefe2ac869ee", "level": "info", "timestamp": "2026-10-19T00:11:53.521031Z"}
+{"status_code": 200, "duration_ms": 98.28, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "269063b5-ec51-4616-8b18-1a9feec2b883", "level": "info", "timestamp": "2026-10-19T00:11:53.521448Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "eb7a79e2-e8d4-40ff-9270-983efa7ff3e9", "level": "info", "timestamp": "2026-10-19T00:11:53.523726Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "60842afd-a46b-4a2b-911d-135ccf1c58ea", "level": "info", "timestamp": "2026-10-19T00:11:53.524147Z"}
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "0e153e02-c0b9-444c-8127-fbde58a6407c", "level": "info", "timestamp": "2026-10-19T00:11:53.524502Z"}
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "f80e3bdc-e91b-4db8-95e6-fd8bb4e31bf1", "level": "info", "timestamp": "2026-10-19T00:11:53.525100Z"}
+INFO:     198.18.1.1:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.4:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "f75d8b12-88ff-4c7e-a08d-ef533542e80c", "level": "info", "timestamp": "2026-10-19T00:11:53.622494Z"}
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "38ac63ef-4379-41dd-8520-34d5aaae5240", "level": "info", "timestamp": "2026-10-19T00:11:53.625176Z"}
+{"status_code": 200, "duration_ms": 100.47, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "f80e3bdc-e91b-4db8-95e6-fd8bb4e31bf1", "level": "info", "timestamp": "2026-10-19T00:11:53.625577Z"}
+{"status_code": 200, "duration_ms": 101.63, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "60842afd-a46b-4a2b-911d-135ccf1c58ea", "level": "info", "timestamp": "2026-10-19T00:11:53.625751Z"}
+{"status_code": 200, "duration_ms": 102.23, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "eb7a79e2-e8d4-40ff-9270-983efa7ff3e9", "level": "info", "timestamp": "2026-10-19T00:11:53.625824Z"}
+{"status_code": 200, "duration_ms": 194.26, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "0e153e02-c0b9-444c-8127-fbde58a6407c", "level": "info", "timestamp": "2026-10-19T00:11:53.718851Z"}
+INFO:     198.18.1.2:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.8:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.6:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.9:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "5a820e7c-b20f-4d02-9ec3-bbc751ff2d95", "level": "info", "timestamp": "2026-10-19T00:11:53.725165Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "aeb8e5dc-3996-4b0b-8ffd-f33906ad8253", "level": "info", "timestamp": "2026-10-19T00:11:53.725582Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "54a13e8f-c0c0-4766-8d62-007017d90328", "level": "info", "timestamp": "2026-10-19T00:11:53.726580Z"}
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "9d7d5ac3-eba2-4810-9ad7-4ce346ee2f06", "level": "info", "timestamp": "2026-10-19T00:11:53.820506Z"}
+{"status_code": 200, "duration_ms": 201.78, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "5a820e7c-b20f-4d02-9ec3-bbc751ff2d95", "level": "info", "timestamp": "2026-10-19T00:11:53.926966Z"}
+INFO:     198.18.1.2:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 400.39, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "38ac63ef-4379-41dd-8520-34d5aaae5240", "level": "info", "timestamp": "2026-10-19T00:11:54.025599Z"}
+{"status_code": 200, "duration_ms": 205.34, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "9d7d5ac3-eba2-4810-9ad7-4ce346ee2f06", "level": "info", "timestamp": "2026-10-19T00:11:54.025806Z"}
+INFO:     198.18.1.4:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.9:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 396.58, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "54a13e8f-c0c0-4766-8d62-007017d90328", "level": "info", "timestamp": "2026-10-19T00:11:54.123252Z"}
+{"status_code": 200, "duration_ms": 596.64, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "f75d8b12-88ff-4c7e-a08d-ef533542e80c", "level": "info", "timestamp": "2026-10-19T00:11:54.219167Z"}
+{"status_code": 200, "duration_ms": 493.92, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "aeb8e5dc-3996-4b0b-8ffd-f33906ad8253", "level": "info", "timestamp": "2026-10-19T00:11:54.219537Z"}
+INFO:     198.18.1.6:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.1:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.8:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "d1dfa59a-523c-4e1e-8d11-efd264b5e6c0", "level": "info", "timestamp": "2026-10-19T00:11:54.525002Z"}
+{"status_code": 200, "duration_ms": 1.48, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "d1dfa59a-523c-4e1e-8d11-efd264b5e6c0", "level": "info", "timestamp": "2026-10-19T00:11:54.526475Z"}
+INFO:     198.18.1.7:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "a1dc2db9-d005-4774-9e8b-997441fd4683", "level": "info", "timestamp": "2026-10-19T00:11:54.528254Z"}
+{"status_code": 200, "duration_ms": 3.08, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "a1dc2db9-d005-4774-9e8b-997441fd4683", "level": "info", "timestamp": "2026-10-19T00:11:54.531328Z"}
+INFO:     198.18.1.7:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "7fce3daa-6ad2-49aa-b074-e3139774ae8c", "level": "info", "timestamp": "2026-10-19T00:11:54.532820Z"}
+{"status_code": 200, "duration_ms": 0.92, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "7fce3daa-6ad2-49aa-b074-e3139774ae8c", "level": "info", "timestamp": "2026-10-19T00:11:54.533738Z"}
+INFO:     198.18.1.7:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "3bc4e936-8e85-4b9f-82e3-94828d5160d1", "level": "info", "timestamp": "2026-10-19T00:11:54.534737Z"}
+{"status_code": 200, "duration_ms": 86.84, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "3bc4e936-8e85-4b9f-82e3-94828d5160d1", "level": "info", "timestamp": "2026-10-19T00:11:54.621651Z"}
+INFO:     198.18.1.7:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "c5d73e0a-3711-4dbd-a4a8-9ea7541fbe83", "level": "info", "timestamp": "2026-10-19T00:11:54.623938Z"}
+{"status_code": 200, "duration_ms": 1.38, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "c5d73e0a-3711-4dbd-a4a8-9ea7541fbe83", "level": "info", "timestamp": "2026-10-19T00:11:54.625315Z"}
+INFO:     198.18.1.10:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "618333d2-5aba-461f-a862-6de1ce29cf2c", "level": "info", "timestamp": "2026-10-19T00:11:54.626840Z"}
+{"status_code": 200, "duration_ms": 2.91, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "618333d2-5aba-461f-a862-6de1ce29cf2c", "level": "info", "timestamp": "2026-10-19T00:11:54.629747Z"}
+INFO:     198.18.1.10:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "c0713a87-abff-4806-8175-8d02f740999e", "level": "info", "timestamp": "2026-10-19T00:11:54.719286Z"}
+{"status_code": 200, "duration_ms": 2.62, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "c0713a87-abff-4806-8175-8d02f740999e", "level": "info", "timestamp": "2026-10-19T00:11:54.721867Z"}
+INFO:     198.18.1.10:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "db2e115e-9151-479d-903c-e8585d8200f6", "level": "info", "timestamp": "2026-10-19T00:11:54.724363Z"}
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "438baeee-efbf-48cc-80af-e8bf0c25b7b0", "level": "info", "timestamp": "2026-10-19T00:11:54.725646Z"}
+{"status_code": 200, "duration_ms": 93.52, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "438baeee-efbf-48cc-80af-e8bf0c25b7b0", "level": "info", "timestamp": "2026-10-19T00:11:54.819218Z"}
+INFO:     198.18.1.3:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "88a1bfcf-19c8-40a1-be91-3c939c3576c5", "level": "info", "timestamp": "2026-10-19T00:11:54.822323Z"}
+{"status_code": 200, "duration_ms": 2.13, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "88a1bfcf-19c8-40a1-be91-3c939c3576c5", "level": "info", "timestamp": "2026-10-19T00:11:54.824450Z"}
+{"status_code": 200, "duration_ms": 100.25, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "db2e115e-9151-479d-903c-e8585d8200f6", "level": "info", "timestamp": "2026-10-19T00:11:54.824569Z"}
+INFO:     198.18.1.3:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.10:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "979d73f2-1e8c-4784-9a13-0b3f1c02ddd0", "level": "info", "timestamp": "2026-10-19T00:11:54.825615Z"}
+{"status_code": 200, "duration_ms": 0.76, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "979d73f2-1e8c-4784-9a13-0b3f1c02ddd0", "level": "info", "timestamp": "2026-10-19T00:11:54.826382Z"}
+INFO:     198.18.1.3:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "855c493a-57a6-4dba-bb59-6aa4f2495296", "level": "info", "timestamp": "2026-10-19T00:11:54.918798Z"}
+{"status_code": 200, "duration_ms": 3.69, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "855c493a-57a6-4dba-bb59-6aa4f2495296", "level": "info", "timestamp": "2026-10-19T00:11:54.922475Z"}
+INFO:     198.18.1.3:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "11366dab-e0a9-4b18-830d-0d0566aff653", "level": "info", "timestamp": "2026-10-19T00:11:54.940309Z"}
+{"status_code": 200, "duration_ms": 1.08, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "11366dab-e0a9-4b18-830d-0d0566aff653", "level": "info", "timestamp": "2026-10-19T00:11:54.941393Z"}
+INFO:     198.18.1.5:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "1dc291ca-78c4-4339-ab8d-7af51605cbc1", "level": "info", "timestamp": "2026-10-19T00:11:54.942486Z"}
+{"status_code": 200, "duration_ms": 1.98, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "1dc291ca-78c4-4339-ab8d-7af51605cbc1", "level": "info", "timestamp": "2026-10-19T00:11:54.944467Z"}
+INFO:     198.18.1.5:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "62609f39-80e6-4832-8840-4a564328bc94", "level": "info", "timestamp": "2026-10-19T00:11:55.019224Z"}
+{"status_code": 200, "duration_ms": 2.19, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "62609f39-80e6-4832-8840-4a564328bc94", "level": "info", "timestamp": "2026-10-19T00:11:55.021378Z"}
+INFO:     198.18.1.5:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "b19b3cd2-0c52-449c-ad37-3519fe2abe94", "level": "info", "timestamp": "2026-10-19T00:11:55.024155Z"}
+{"status_code": 200, "duration_ms": 1.63, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "b19b3cd2-0c52-449c-ad37-3519fe2abe94", "level": "info", "timestamp": "2026-10-19T00:11:55.025778Z"}
+INFO:     198.18.1.5:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "c1f1826f-2886-4218-bae9-f2bd0192056c", "level": "info", "timestamp": "2026-10-19T00:11:56.021538Z"}
+{"status_code": 200, "duration_ms": 0.98, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "c1f1826f-2886-4218-bae9-f2bd0192056c", "level": "info", "timestamp": "2026-10-19T00:11:56.022512Z"}
+INFO:     198.18.1.2:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "29afc132-2ee0-46d8-b61b-518a4c2155e3", "level": "info", "timestamp": "2026-10-19T00:11:56.023658Z"}
+{"status_code": 200, "duration_ms": 2.3, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "29afc132-2ee0-46d8-b61b-518a4c2155e3", "level": "info", "timestamp": "2026-10-19T00:11:56.025971Z"}
+INFO:     198.18.1.2:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "3f8918cf-2006-43f1-ac6e-ad9ab478b2d1", "level": "info", "timestamp": "2026-10-19T00:11:56.027335Z"}
+{"status_code": 200, "duration_ms": 1.7, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "3f8918cf-2006-43f1-ac6e-ad9ab478b2d1", "level": "info", "timestamp": "2026-10-19T00:11:56.029112Z"}
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "8a29d2cd-3830-4b4d-8d01-f665a4f3204c", "level": "info", "timestamp": "2026-10-19T00:11:56.029545Z"}
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "74c465ef-1b79-4199-abaa-7fa52f58f318", "level": "info", "timestamp": "2026-10-19T00:11:56.029747Z"}
+INFO:     198.18.1.2:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 2.6, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "8a29d2cd-3830-4b4d-8d01-f665a4f3204c", "level": "info", "timestamp": "2026-10-19T00:11:56.032140Z"}
+{"status_code": 200, "duration_ms": 2.53, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "74c465ef-1b79-4199-abaa-7fa52f58f318", "level": "info", "timestamp": "2026-10-19T00:11:56.032274Z"}
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "307a2b76-3f8d-418a-90f1-5f0a0cd4282f", "level": "info", "timestamp": "2026-10-19T00:11:56.032413Z"}
+INFO:     198.18.1.4:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.9:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "d370cce8-3308-49dc-a5e7-b0e8c8f68ba9", "level": "info", "timestamp": "2026-10-19T00:11:56.120341Z"}
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "f3b08a41-22b9-445d-8fbe-12729472d148", "level": "info", "timestamp": "2026-10-19T00:11:56.121770Z"}
+{"status_code": 200, "duration_ms": 104.92, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "d370cce8-3308-49dc-a5e7-b0e8c8f68ba9", "level": "info", "timestamp": "2026-10-19T00:11:56.225254Z"}
+{"status_code": 200, "duration_ms": 104.78, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "f3b08a41-22b9-445d-8fbe-12729472d148", "level": "info", "timestamp": "2026-10-19T00:11:56.226546Z"}
+{"status_code": 200, "duration_ms": 194.33, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "307a2b76-3f8d-418a-90f1-5f0a0cd4282f", "level": "info", "timestamp": "2026-10-19T00:11:56.226752Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "4ccf48c8-e596-4c1f-b5fe-2e627e02ef41", "level": "info", "timestamp": "2026-10-19T00:11:56.318034Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "41dd89b0-3992-4bda-869c-328fcdca4474", "level": "info", "timestamp": "2026-10-19T00:11:56.318359Z"}
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "95f1bf00-be11-4dfc-b2c1-b1699f8f7e49", "level": "info", "timestamp": "2026-10-19T00:11:56.318537Z"}
+INFO:     198.18.1.4:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.9:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.2:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 4.45, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "41dd89b0-3992-4bda-869c-328fcdca4474", "level": "info", "timestamp": "2026-10-19T00:11:56.322813Z"}
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "4321152b-a8d9-402f-b54c-6a8e3017e63c", "level": "info", "timestamp": "2026-10-19T00:11:56.323268Z"}
+{"status_code": 200, "duration_ms": 5.16, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "95f1bf00-be11-4dfc-b2c1-b1699f8f7e49", "level": "info", "timestamp": "2026-10-19T00:11:56.323748Z"}
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "313a2f19-f85d-41e8-9d2b-6cf7f22ad1fb", "level": "info", "timestamp": "2026-10-19T00:11:56.324282Z"}
+INFO:     198.18.1.8:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 7.55, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "4ccf48c8-e596-4c1f-b5fe-2e627e02ef41", "level": "info", "timestamp": "2026-10-19T00:11:56.325528Z"}
+INFO:     198.18.1.1:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 3.34, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "4321152b-a8d9-402f-b54c-6a8e3017e63c", "level": "info", "timestamp": "2026-10-19T00:11:56.326571Z"}
+INFO:     198.18.1.6:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.4:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "0344792a-0e22-4c94-85d3-05717616e8d6", "level": "info", "timestamp": "2026-10-19T00:12:00.918250Z"}
+{"status_code": 200, "duration_ms": 4594.17, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "313a2f19-f85d-41e8-9d2b-6cf7f22ad1fb", "level": "info", "timestamp": "2026-10-19T00:12:00.918469Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "866a473b-17a9-4c06-9191-818495ebfd13", "level": "info", "timestamp": "2026-10-19T00:12:00.918627Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "e7781a7f-c71a-4f93-8751-31af7f9b904b", "level": "info", "timestamp": "2026-10-19T00:12:00.919733Z"}
+INFO:     198.18.1.9:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "c1764cdc-58f2-479e-977c-44a70f569a9d", "level": "info", "timestamp": "2026-10-19T00:12:00.923876Z"}
+{"status_code": 200, "duration_ms": 5.9, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "0344792a-0e22-4c94-85d3-05717616e8d6", "level": "info", "timestamp": "2026-10-19T00:12:00.924122Z"}
+{"status_code": 200, "duration_ms": 5.62, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "866a473b-17a9-4c06-9191-818495ebfd13", "level": "info", "timestamp": "2026-10-19T00:12:00.924224Z"}
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "97dba001-08c7-40ff-b650-10d54f6b5c79", "level": "info", "timestamp": "2026-10-19T00:12:00.925335Z"}
+INFO:     198.18.1.1:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.8:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 100.74, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "e7781a7f-c71a-4f93-8751-31af7f9b904b", "level": "info", "timestamp": "2026-10-19T00:12:01.020515Z"}
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "33ad3e39-e806-440d-a32a-7b9b5daf519d", "level": "info", "timestamp": "2026-10-19T00:12:01.022204Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "aa22efee-e29c-49c3-8e06-34df4b1ed2ab", "level": "info", "timestamp": "2026-10-19T00:12:01.022466Z"}
+INFO:     198.18.1.6:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 101.3, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "c1764cdc-58f2-479e-977c-44a70f569a9d", "level": "info", "timestamp": "2026-10-19T00:12:01.025192Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "f0e59758-4640-465a-9344-fc51e4170546", "level": "info", "timestamp": "2026-10-19T00:11:56.620541Z"}
+INFO:     198.18.1.4:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": -4400.73, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "33ad3e39-e806-440d-a32a-7b9b5daf519d", "level": "info", "timestamp": "2026-10-19T00:11:56.621480Z"}
+{"status_code": 200, "duration_ms": -4400.86, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "aa22efee-e29c-49c3-8e06-34df4b1ed2ab", "level": "info", "timestamp": "2026-10-19T00:11:56.621597Z"}
+INFO:     198.18.1.1:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.8:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "c7d71f85-5a6f-41eb-b2e0-fd69417eae50", "level": "info", "timestamp": "2026-10-19T00:11:56.626577Z"}
+{"status_code": 200, "duration_ms": 6.37, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "f0e59758-4640-465a-9344-fc51e4170546", "level": "info", "timestamp": "2026-10-19T00:11:56.626905Z"}
+{"status_code": 200, "duration_ms": -4298.29, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "97dba001-08c7-40ff-b650-10d54f6b5c79", "level": "info", "timestamp": "2026-10-19T00:11:56.627059Z"}
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "3b5154c4-0ef7-4c63-84de-7866cc4d9796", "level": "info", "timestamp": "2026-10-19T00:11:56.718813Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "c43f2d5f-a6df-48ce-ba6c-1f1bfdb9ac86", "level": "info", "timestamp": "2026-10-19T00:11:56.719533Z"}
+INFO:     198.18.1.6:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.9:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 94.99, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "c7d71f85-5a6f-41eb-b2e0-fd69417eae50", "level": "info", "timestamp": "2026-10-19T00:11:56.721531Z"}
+INFO:     198.18.1.7:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "a7e9f548-f47a-478a-af32-f3d8f178802e", "level": "info", "timestamp": "2026-10-19T00:11:56.722900Z"}
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "e5e6d8f2-4097-4514-97cc-be90980ab665", "level": "info", "timestamp": "2026-10-19T00:11:56.724092Z"}
+{"status_code": 200, "duration_ms": 97.5, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "e5e6d8f2-4097-4514-97cc-be90980ab665", "level": "info", "timestamp": "2026-10-19T00:11:56.821602Z"}
+INFO:     198.18.1.7:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 201.01, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "3b5154c4-0ef7-4c63-84de-7866cc4d9796", "level": "info", "timestamp": "2026-10-19T00:11:56.919859Z"}
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "c051ffc6-f5c6-4a81-be27-b8773bfe80ca", "level": "info", "timestamp": "2026-10-19T00:11:56.920524Z"}
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "87652cdb-b4cf-4b85-8efc-3c5e6a84a35d", "level": "info", "timestamp": "2026-10-19T00:11:56.920723Z"}
+{"status_code": 200, "duration_ms": 198.56, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "a7e9f548-f47a-478a-af32-f3d8f178802e", "level": "info", "timestamp": "2026-10-19T00:11:56.921488Z"}
+INFO:     198.18.1.1:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 203.47, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "c43f2d5f-a6df-48ce-ba6c-1f1bfdb9ac86", "level": "info", "timestamp": "2026-10-19T00:11:56.923018Z"}
+INFO:     198.18.1.6:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 4.3, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "c051ffc6-f5c6-4a81-be27-b8773bfe80ca", "level": "info", "timestamp": "2026-10-19T00:11:56.924817Z"}
+{"status_code": 200, "duration_ms": 4.27, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "87652cdb-b4cf-4b85-8efc-3c5e6a84a35d", "level": "info", "timestamp": "2026-10-19T00:11:56.925001Z"}
+INFO:     198.18.1.8:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "97eea986-4d1b-4a16-9bb7-029de5adabf2", "level": "info", "timestamp": "2026-10-19T00:11:56.926224Z"}
+INFO:     198.18.1.7:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.10:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "1c4a08c3-ebf7-40d0-a090-9e797cf90e74", "level": "info", "timestamp": "2026-10-19T00:11:57.019632Z"}
+{"status_code": 200, "duration_ms": 93.65, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "97eea986-4d1b-4a16-9bb7-029de5adabf2", "level": "info", "timestamp": "2026-10-19T00:11:57.019879Z"}
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "686900dd-9d41-4a20-9ba8-850a4be6ef0f", "level": "info", "timestamp": "2026-10-19T00:11:57.020103Z"}
+INFO:     198.18.1.3:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 3.77, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "686900dd-9d41-4a20-9ba8-850a4be6ef0f", "level": "info", "timestamp": "2026-10-19T00:11:57.023866Z"}
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "5b47412a-959b-4261-8516-2a9f9248d344", "level": "info", "timestamp": "2026-10-19T00:11:57.024808Z"}
+INFO:     198.18.1.10:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 95.63, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "5b47412a-959b-4261-8516-2a9f9248d344", "level": "info", "timestamp": "2026-10-19T00:11:57.120459Z"}
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "e4cc3cd9-cc59-4ccd-a752-edf53777b6f9", "level": "info", "timestamp": "2026-10-19T00:11:57.121314Z"}
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "043fa75e-4e1d-4129-9a96-d274f20f8c35", "level": "info", "timestamp": "2026-10-19T00:11:57.122284Z"}
+INFO:     198.18.1.3:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 104.33, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "1c4a08c3-ebf7-40d0-a090-9e797cf90e74", "level": "info", "timestamp": "2026-10-19T00:11:57.123983Z"}
+{"status_code": 200, "duration_ms": 2.97, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "043fa75e-4e1d-4129-9a96-d274f20f8c35", "level": "info", "timestamp": "2026-10-19T00:11:57.125247Z"}
+{"status_code": 200, "duration_ms": 4.1, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "e4cc3cd9-cc59-4ccd-a752-edf53777b6f9", "level": "info", "timestamp": "2026-10-19T00:11:57.125417Z"}
+INFO:     198.18.1.7:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "aafb5fd6-2633-4e84-b9f5-a4bff8bc7267", "level": "info", "timestamp": "2026-10-19T00:11:57.126776Z"}
+INFO:     198.18.1.5:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.10:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "ec007182-0e7d-4fe1-8c3d-2213deb0f4b3", "level": "info", "timestamp": "2026-10-19T00:11:57.220439Z"}
+{"status_code": 200, "duration_ms": 93.82, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "aafb5fd6-2633-4e84-b9f5-a4bff8bc7267", "level": "info", "timestamp": "2026-10-19T00:11:57.220598Z"}
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "0779ae74-cfbc-44cb-aca6-27721965c265", "level": "info", "timestamp": "2026-10-19T00:11:57.220728Z"}
+INFO:     198.18.1.3:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 2.83, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "0779ae74-cfbc-44cb-aca6-27721965c265", "level": "info", "timestamp": "2026-10-19T00:11:57.223567Z"}
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "34ffefae-0213-4b49-a3b1-fd87d44e61be", "level": "info", "timestamp": "2026-10-19T00:11:57.224137Z"}
+INFO:     198.18.1.5:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "b2df7741-09fc-4886-a79c-dcd7754c7ba7", "level": "info", "timestamp": "2026-10-19T00:11:57.226170Z"}
+{"status_code": 200, "duration_ms": 0.86, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "b2df7741-09fc-4886-a79c-dcd7754c7ba7", "level": "info", "timestamp": "2026-10-19T00:11:57.227036Z"}
+{"status_code": 200, "duration_ms": 95.26, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "34ffefae-0213-4b49-a3b1-fd87d44e61be", "level": "info", "timestamp": "2026-10-19T00:11:57.319492Z"}
+INFO:     198.18.1.5:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.3:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "0c513d73-1253-4133-ab49-a92d13ad0e7b", "level": "info", "timestamp": "2026-10-19T00:11:57.323010Z"}
+{"status_code": 200, "duration_ms": 105.11, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "ec007182-0e7d-4fe1-8c3d-2213deb0f4b3", "level": "info", "timestamp": "2026-10-19T00:11:57.325570Z"}
+INFO:     198.18.1.10:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 95.88, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "0c513d73-1253-4133-ab49-a92d13ad0e7b", "level": "info", "timestamp": "2026-10-19T00:11:57.418956Z"}
+INFO:     198.18.1.5:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "8ed06fe0-447c-4647-b1af-b6b7ada41822", "level": "info", "timestamp": "2026-10-19T00:11:58.324419Z"}
+{"status_code": 200, "duration_ms": 2.19, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "8ed06fe0-447c-4647-b1af-b6b7ada41822", "level": "info", "timestamp": "2026-10-19T00:11:58.326593Z"}
+INFO:     198.18.1.2:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "abc7aa7b-5035-4c1e-913d-537e0e624bfa", "level": "info", "timestamp": "2026-10-19T00:11:58.328908Z"}
+{"status_code": 200, "duration_ms": 3.36, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "abc7aa7b-5035-4c1e-913d-537e0e624bfa", "level": "info", "timestamp": "2026-10-19T00:11:58.332265Z"}
+INFO:     198.18.1.2:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "608787c0-44c5-4c2f-ade6-2f9a68e1c91a", "level": "info", "timestamp": "2026-10-19T00:11:58.333775Z"}
+{"status_code": 200, "duration_ms": 0.89, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "608787c0-44c5-4c2f-ade6-2f9a68e1c91a", "level": "info", "timestamp": "2026-10-19T00:11:58.334665Z"}
+INFO:     198.18.1.2:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "e5175681-aa54-465f-a485-c5c5683d4b95", "level": "info", "timestamp": "2026-10-19T00:11:58.419056Z"}
+{"status_code": 200, "duration_ms": 2.65, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "e5175681-aa54-465f-a485-c5c5683d4b95", "level": "info", "timestamp": "2026-10-19T00:11:58.421695Z"}
+INFO:     198.18.1.2:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "80e630b9-30fe-4ad5-b624-6e0f27314286", "level": "info", "timestamp": "2026-10-19T00:11:58.625212Z"}
+{"status_code": 200, "duration_ms": 1.75, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "80e630b9-30fe-4ad5-b624-6e0f27314286", "level": "info", "timestamp": "2026-10-19T00:11:58.626946Z"}
+INFO:     198.18.1.4:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "ae8e5ae5-d6fd-4d9a-a528-0a6e2102898c", "level": "info", "timestamp": "2026-10-19T00:11:58.629225Z"}
+{"status_code": 200, "duration_ms": 3.35, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "ae8e5ae5-d6fd-4d9a-a528-0a6e2102898c", "level": "info", "timestamp": "2026-10-19T00:11:58.632564Z"}
+INFO:     198.18.1.4:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "fe3939c5-5bb6-4387-b0b4-0d6b1d30a01d", "level": "info", "timestamp": "2026-10-19T00:11:58.634248Z"}
+{"status_code": 200, "duration_ms": 0.87, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "fe3939c5-5bb6-4387-b0b4-0d6b1d30a01d", "level": "info", "timestamp": "2026-10-19T00:11:58.635120Z"}
+INFO:     198.18.1.4:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "d28f783a-1e18-4b30-876e-cd16e9175bef", "level": "info", "timestamp": "2026-10-19T00:11:58.636090Z"}
+{"status_code": 200, "duration_ms": 83.3, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "d28f783a-1e18-4b30-876e-cd16e9175bef", "level": "info", "timestamp": "2026-10-19T00:11:58.719418Z"}
+INFO:     198.18.1.4:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "1988aa9c-5607-49ea-a6ad-654ed048f3e7", "level": "info", "timestamp": "2026-10-19T00:11:58.722963Z"}
+{"status_code": 200, "duration_ms": 0.88, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "1988aa9c-5607-49ea-a6ad-654ed048f3e7", "level": "info", "timestamp": "2026-10-19T00:11:58.723834Z"}
+INFO:     198.18.1.9:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "1da38c5f-ed88-42f4-a54d-40e09c049e5c", "level": "info", "timestamp": "2026-10-19T00:11:58.724713Z"}
+{"status_code": 200, "duration_ms": 3.25, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "1da38c5f-ed88-42f4-a54d-40e09c049e5c", "level": "info", "timestamp": "2026-10-19T00:11:58.727959Z"}
+INFO:     198.18.1.9:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "1e42d96e-11e3-4877-986c-27690ff30215", "level": "info", "timestamp": "2026-10-19T00:11:58.728940Z"}
+{"status_code": 200, "duration_ms": 0.83, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "1e42d96e-11e3-4877-986c-27690ff30215", "level": "info", "timestamp": "2026-10-19T00:11:58.729778Z"}
+INFO:     198.18.1.9:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "9ae9d4ac-de11-4e70-92d5-31eecb4b98c9", "level": "info", "timestamp": "2026-10-19T00:11:58.730601Z"}
+{"status_code": 200, "duration_ms": 89.68, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "9ae9d4ac-de11-4e70-92d5-31eecb4b98c9", "level": "info", "timestamp": "2026-10-19T00:11:58.820321Z"}
+INFO:     198.18.1.9:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "1f2f6f4c-6f08-4d2b-9d12-4bd3966925c5", "level": "info", "timestamp": "2026-10-19T00:11:58.927186Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "8d99354d-d881-4068-956b-35e693d7c85c", "level": "info", "timestamp": "2026-10-19T00:11:58.928211Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "4fb51a50-3e1e-451c-a73e-adf40398daac", "level": "info", "timestamp": "2026-10-19T00:11:58.928429Z"}
+{"status_code": 200, "duration_ms": 2.36, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "8d99354d-d881-4068-956b-35e693d7c85c", "level": "info", "timestamp": "2026-10-19T00:11:58.930573Z"}
+{"status_code": 200, "duration_ms": 2.3, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "4fb51a50-3e1e-451c-a73e-adf40398daac", "level": "info", "timestamp": "2026-10-19T00:11:58.930726Z"}
+INFO:     198.18.1.8:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.6:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 5.1, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "1f2f6f4c-6f08-4d2b-9d12-4bd3966925c5", "level": "info", "timestamp": "2026-10-19T00:11:58.932263Z"}
+INFO:     198.18.1.1:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "591f44b6-a57f-4424-8f21-468835fbce25", "level": "info", "timestamp": "2026-10-19T00:11:58.933930Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "d7162775-75ee-42c4-bb84-3398f85391bc", "level": "info", "timestamp": "2026-10-19T00:11:58.934108Z"}
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "8fc25a00-b9e7-400c-8073-cf2cfbc2cda9", "level": "info", "timestamp": "2026-10-19T00:11:58.934944Z"}
+{"status_code": 200, "duration_ms": 85.77, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "8fc25a00-b9e7-400c-8073-cf2cfbc2cda9", "level": "info", "timestamp": "2026-10-19T00:11:59.020766Z"}
+{"status_code": 200, "duration_ms": 87.17, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "591f44b6-a57f-4424-8f21-468835fbce25", "level": "info", "timestamp": "2026-10-19T00:11:59.021114Z"}
+{"status_code": 200, "duration_ms": 87.14, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "d7162775-75ee-42c4-bb84-3398f85391bc", "level": "info", "timestamp": "2026-10-19T00:11:59.021250Z"}
+INFO:     198.18.1.1:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.8:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.6:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "260fc0ac-1314-4cd9-a046-2c0fcba48843", "level": "info", "timestamp": "2026-10-19T00:11:59.023850Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "0cb7a49c-2b03-4329-9b2d-daa185175067", "level": "info", "timestamp": "2026-10-19T00:11:59.024438Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "8e3ab174-7674-46ae-8ebc-a6117747d889", "level": "info", "timestamp": "2026-10-19T00:11:59.024620Z"}
+{"status_code": 200, "duration_ms": 2.4, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "260fc0ac-1314-4cd9-a046-2c0fcba48843", "level": "info", "timestamp": "2026-10-19T00:11:59.026232Z"}
+{"status_code": 200, "duration_ms": 1.91, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "0cb7a49c-2b03-4329-9b2d-daa185175067", "level": "info", "timestamp": "2026-10-19T00:11:59.026334Z"}
+INFO:     198.18.1.1:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.8:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 94.81, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "8e3ab174-7674-46ae-8ebc-a6117747d889", "level": "info", "timestamp": "2026-10-19T00:11:59.119502Z"}
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "1e4d6cc0-a4ab-4642-ac85-8994916656b3", "level": "info", "timestamp": "2026-10-19T00:11:59.120314Z"}
+INFO:     198.18.1.6:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "d9d53881-5cb0-4bde-a7ab-e4006d41f080", "level": "info", "timestamp": "2026-10-19T00:11:59.120864Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "8eb74b65-1c08-4548-b976-28909273d833", "level": "info", "timestamp": "2026-10-19T00:11:59.121617Z"}
+{"status_code": 200, "duration_ms": 5.39, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "1e4d6cc0-a4ab-4642-ac85-8994916656b3", "level": "info", "timestamp": "2026-10-19T00:11:59.125686Z"}
+{"status_code": 200, "duration_ms": 4.69, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "8eb74b65-1c08-4548-b976-28909273d833", "level": "info", "timestamp": "2026-10-19T00:11:59.126335Z"}
+INFO:     198.18.1.8:0 - "GET /health HTTP/1.1" 200 OK
+INFO:     198.18.1.6:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "baf72e8d-6357-4fd2-bf76-e6a8ec43c299", "level": "info", "timestamp": "2026-10-19T00:11:59.219361Z"}
+{"status_code": 200, "duration_ms": 98.69, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "d9d53881-5cb0-4bde-a7ab-e4006d41f080", "level": "info", "timestamp": "2026-10-19T00:11:59.219576Z"}
+INFO:     198.18.1.1:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 2.02, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "baf72e8d-6357-4fd2-bf76-e6a8ec43c299", "level": "info", "timestamp": "2026-10-19T00:11:59.221366Z"}
+INFO:     198.18.1.7:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "344e01ba-73a2-416b-a7db-711d0eb77542", "level": "info", "timestamp": "2026-10-19T00:11:59.222447Z"}
+{"status_code": 200, "duration_ms": 2.15, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "344e01ba-73a2-416b-a7db-711d0eb77542", "level": "info", "timestamp": "2026-10-19T00:11:59.224597Z"}
+INFO:     198.18.1.7:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "75150e28-5426-4440-b6c8-cb1950f23913", "level": "info", "timestamp": "2026-10-19T00:11:59.225548Z"}
+{"status_code": 200, "duration_ms": 0.76, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "75150e28-5426-4440-b6c8-cb1950f23913", "level": "info", "timestamp": "2026-10-19T00:11:59.226309Z"}
+INFO:     198.18.1.7:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.7", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "98f59388-0afd-414f-b27c-f193e7766882", "level": "info", "timestamp": "2026-10-19T00:11:59.227308Z"}
+{"status_code": 200, "duration_ms": 91.24, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "98f59388-0afd-414f-b27c-f193e7766882", "level": "info", "timestamp": "2026-10-19T00:11:59.318588Z"}
+INFO:     198.18.1.7:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "a5d3165d-8b32-42bf-91bd-29af3aa05944", "level": "info", "timestamp": "2026-10-19T00:11:59.324852Z"}
+{"status_code": 200, "duration_ms": 0.81, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "a5d3165d-8b32-42bf-91bd-29af3aa05944", "level": "info", "timestamp": "2026-10-19T00:11:59.325659Z"}
+INFO:     198.18.1.3:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "dd58a821-a4ab-4539-af10-44d7c379c5a0", "level": "info", "timestamp": "2026-10-19T00:11:59.326616Z"}
+{"status_code": 200, "duration_ms": 1.98, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "dd58a821-a4ab-4539-af10-44d7c379c5a0", "level": "info", "timestamp": "2026-10-19T00:11:59.328597Z"}
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "39fb72cc-dc07-433c-a054-87467042fbda", "level": "info", "timestamp": "2026-10-19T00:11:59.328794Z"}
+INFO:     198.18.1.3:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "57712804-6241-43a7-a6ad-b5131bd9ee07", "level": "info", "timestamp": "2026-10-19T00:11:59.330075Z"}
+{"status_code": 200, "duration_ms": 2.23, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "39fb72cc-dc07-433c-a054-87467042fbda", "level": "info", "timestamp": "2026-10-19T00:11:59.331022Z"}
+{"status_code": 200, "duration_ms": 1.07, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "57712804-6241-43a7-a6ad-b5131bd9ee07", "level": "info", "timestamp": "2026-10-19T00:11:59.331136Z"}
+INFO:     198.18.1.10:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.3:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "d16ef4b8-f337-4929-a5c5-50b4e6f0584f", "level": "info", "timestamp": "2026-10-19T00:11:59.332092Z"}
+{"query": null, "client_ip": "198.18.1.3", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "04233084-a373-4484-be0d-f1775f3ac63d", "level": "info", "timestamp": "2026-10-19T00:11:59.332373Z"}
+{"status_code": 200, "duration_ms": 2.01, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "d16ef4b8-f337-4929-a5c5-50b4e6f0584f", "level": "info", "timestamp": "2026-10-19T00:11:59.334110Z"}
+INFO:     198.18.1.10:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "9b9c92a0-0c49-4424-aa99-a772bbc0d5a0", "level": "info", "timestamp": "2026-10-19T00:11:59.418908Z"}
+{"status_code": 200, "duration_ms": 86.79, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "04233084-a373-4484-be0d-f1775f3ac63d", "level": "info", "timestamp": "2026-10-19T00:11:59.419183Z"}
+INFO:     198.18.1.3:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 1.49, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "9b9c92a0-0c49-4424-aa99-a772bbc0d5a0", "level": "info", "timestamp": "2026-10-19T00:11:59.420390Z"}
+INFO:     198.18.1.10:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.10", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "edb3c4e3-69f8-41c0-bb28-0b97ea72e417", "level": "info", "timestamp": "2026-10-19T00:11:59.421422Z"}
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "0008398c-ce05-41e6-a822-3504d1c42601", "level": "info", "timestamp": "2026-10-19T00:11:59.421691Z"}
+{"status_code": 200, "duration_ms": 0.78, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "0008398c-ce05-41e6-a822-3504d1c42601", "level": "info", "timestamp": "2026-10-19T00:11:59.422475Z"}
+INFO:     198.18.1.5:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "0689766e-30b3-4a30-96f0-42fde0603389", "level": "info", "timestamp": "2026-10-19T00:11:59.423462Z"}
+{"status_code": 200, "duration_ms": 2.71, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "0689766e-30b3-4a30-96f0-42fde0603389", "level": "info", "timestamp": "2026-10-19T00:11:59.426170Z"}
+{"status_code": 200, "duration_ms": 4.87, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "edb3c4e3-69f8-41c0-bb28-0b97ea72e417", "level": "info", "timestamp": "2026-10-19T00:11:59.426285Z"}
+INFO:     198.18.1.5:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+INFO:     198.18.1.10:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "6f946c49-1cd1-4f3d-9d20-a486cceda867", "level": "info", "timestamp": "2026-10-19T00:11:59.427173Z"}
+{"status_code": 200, "duration_ms": 92.82, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "6f946c49-1cd1-4f3d-9d20-a486cceda867", "level": "info", "timestamp": "2026-10-19T00:11:59.520047Z"}
+INFO:     198.18.1.5:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.5", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "e9e9027a-6695-421d-a132-cbac6a7f1940", "level": "info", "timestamp": "2026-10-19T00:11:59.522273Z"}
+{"status_code": 200, "duration_ms": 2.07, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "e9e9027a-6695-421d-a132-cbac6a7f1940", "level": "info", "timestamp": "2026-10-19T00:11:59.524330Z"}
+INFO:     198.18.1.5:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "e8bfbe48-24ec-4bcc-955e-47335a43321a", "level": "info", "timestamp": "2026-10-19T00:12:00.424389Z"}
+{"status_code": 200, "duration_ms": 0.96, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "e8bfbe48-24ec-4bcc-955e-47335a43321a", "level": "info", "timestamp": "2026-10-19T00:12:00.425342Z"}
+INFO:     198.18.1.2:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "05663c16-e006-4b82-a4dc-572d82a55cdb", "level": "info", "timestamp": "2026-10-19T00:12:00.426455Z"}
+{"status_code": 200, "duration_ms": 1.83, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "05663c16-e006-4b82-a4dc-572d82a55cdb", "level": "info", "timestamp": "2026-10-19T00:12:00.428286Z"}
+INFO:     198.18.1.2:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "66a477d5-56b5-45b7-9c3c-1bb47fe8d50c", "level": "info", "timestamp": "2026-10-19T00:12:00.429370Z"}
+{"status_code": 200, "duration_ms": 0.95, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "66a477d5-56b5-45b7-9c3c-1bb47fe8d50c", "level": "info", "timestamp": "2026-10-19T00:12:00.430293Z"}
+INFO:     198.18.1.2:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.2", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "7f86aa82-2668-41e0-8773-b618a5671454", "level": "info", "timestamp": "2026-10-19T00:12:00.431335Z"}
+{"status_code": 200, "duration_ms": 3.15, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "7f86aa82-2668-41e0-8773-b618a5671454", "level": "info", "timestamp": "2026-10-19T00:12:00.434501Z"}
+INFO:     198.18.1.2:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "0b768742-4438-41ce-8af5-10fbf6947833", "level": "info", "timestamp": "2026-10-19T00:12:00.723192Z"}
+{"status_code": 200, "duration_ms": 3.12, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "0b768742-4438-41ce-8af5-10fbf6947833", "level": "info", "timestamp": "2026-10-19T00:12:00.726296Z"}
+INFO:     198.18.1.4:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "86eff1cd-35dc-4f61-9e7c-e824b39d8df2", "level": "info", "timestamp": "2026-10-19T00:12:00.729172Z"}
+{"status_code": 200, "duration_ms": 3.28, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "86eff1cd-35dc-4f61-9e7c-e824b39d8df2", "level": "info", "timestamp": "2026-10-19T00:12:00.732429Z"}
+INFO:     198.18.1.4:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "62f91cc4-8cc4-4cf1-8f19-fe6da011579e", "level": "info", "timestamp": "2026-10-19T00:12:00.819163Z"}
+{"status_code": 200, "duration_ms": 2.04, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "62f91cc4-8cc4-4cf1-8f19-fe6da011579e", "level": "info", "timestamp": "2026-10-19T00:12:00.821230Z"}
+INFO:     198.18.1.4:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "dfac8d43-6c16-461a-acb2-6ba721424058", "level": "info", "timestamp": "2026-10-19T00:12:00.822611Z"}
+{"query": null, "client_ip": "198.18.1.4", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "9401fe05-04f0-457a-be38-9b08a570a6d3", "level": "info", "timestamp": "2026-10-19T00:12:00.824122Z"}
+{"status_code": 200, "duration_ms": 2.52, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "dfac8d43-6c16-461a-acb2-6ba721424058", "level": "info", "timestamp": "2026-10-19T00:12:00.825115Z"}
+INFO:     198.18.1.9:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "b1a37ebb-7d84-409e-87de-1d8b3593b5ee", "level": "info", "timestamp": "2026-10-19T00:12:00.827625Z"}
+{"status_code": 200, "duration_ms": 3.73, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "9401fe05-04f0-457a-be38-9b08a570a6d3", "level": "info", "timestamp": "2026-10-19T00:12:00.827863Z"}
+INFO:     198.18.1.4:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 92.51, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "b1a37ebb-7d84-409e-87de-1d8b3593b5ee", "level": "info", "timestamp": "2026-10-19T00:12:00.920148Z"}
+INFO:     198.18.1.9:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "72cad794-0751-47ce-924a-61e57e9131fc", "level": "info", "timestamp": "2026-10-19T00:12:00.921561Z"}
+{"status_code": 200, "duration_ms": 1.06, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "72cad794-0751-47ce-924a-61e57e9131fc", "level": "info", "timestamp": "2026-10-19T00:12:00.922626Z"}
+INFO:     198.18.1.9:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.9", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "91cf322c-708c-4e1c-8b2b-23cd26969272", "level": "info", "timestamp": "2026-10-19T00:12:00.924009Z"}
+{"status_code": 200, "duration_ms": 1.36, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "91cf322c-708c-4e1c-8b2b-23cd26969272", "level": "info", "timestamp": "2026-10-19T00:12:00.925368Z"}
+INFO:     198.18.1.9:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "ec69e941-e253-4eaf-898e-0ded1aeba81e", "level": "info", "timestamp": "2026-10-19T00:12:01.128547Z"}
+{"status_code": 200, "duration_ms": 1.07, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "ec69e941-e253-4eaf-898e-0ded1aeba81e", "level": "info", "timestamp": "2026-10-19T00:12:01.129614Z"}
+INFO:     198.18.1.8:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "f3138acb-c73f-4dda-a115-55a7763c8aba", "level": "info", "timestamp": "2026-10-19T00:12:01.130865Z"}
+{"status_code": 200, "duration_ms": 1.94, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "f3138acb-c73f-4dda-a115-55a7763c8aba", "level": "info", "timestamp": "2026-10-19T00:12:01.132802Z"}
+INFO:     198.18.1.8:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "aa17d4c1-e13f-4ade-8afe-12946d3e5afa", "level": "info", "timestamp": "2026-10-19T00:12:01.134271Z"}
+{"status_code": 200, "duration_ms": 0.68, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "aa17d4c1-e13f-4ade-8afe-12946d3e5afa", "level": "info", "timestamp": "2026-10-19T00:12:01.134936Z"}
+INFO:     198.18.1.8:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.8", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "378e6c38-e3dd-4335-9c6a-3fcf7d6bbad4", "level": "info", "timestamp": "2026-10-19T00:12:01.135805Z"}
+{"status_code": 200, "duration_ms": 1.39, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "378e6c38-e3dd-4335-9c6a-3fcf7d6bbad4", "level": "info", "timestamp": "2026-10-19T00:12:01.137199Z"}
+INFO:     198.18.1.8:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "6912db26-ac59-498a-afbe-22a43474e095", "level": "info", "timestamp": "2026-10-19T00:12:01.220363Z"}
+{"status_code": 200, "duration_ms": 0.99, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "6912db26-ac59-498a-afbe-22a43474e095", "level": "info", "timestamp": "2026-10-19T00:12:01.221351Z"}
+INFO:     198.18.1.6:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/about", "request_id": "e05cb0a8-3a6b-4454-8b64-f33271a418c6", "level": "info", "timestamp": "2026-10-19T00:12:01.222212Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "f82ff1c1-73e7-4635-9b3c-1146feefc35b", "level": "info", "timestamp": "2026-10-19T00:12:01.222680Z"}
+{"status_code": 200, "duration_ms": 1.57, "event": "response_sent", "method": "GET", "path": "/api/v1/about", "request_id": "e05cb0a8-3a6b-4454-8b64-f33271a418c6", "level": "info", "timestamp": "2026-10-19T00:12:01.223782Z"}
+{"status_code": 200, "duration_ms": 2.83, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "f82ff1c1-73e7-4635-9b3c-1146feefc35b", "level": "info", "timestamp": "2026-10-19T00:12:01.225495Z"}
+INFO:     198.18.1.1:0 - "GET /api/v1/about HTTP/1.1" 200 OK
+INFO:     198.18.1.6:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/projects", "request_id": "a759bcea-615e-43ce-91c6-5289b1d48833", "level": "info", "timestamp": "2026-10-19T00:12:01.226632Z"}
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "7804eed6-aa27-48f7-b529-06910f512689", "level": "info", "timestamp": "2026-10-19T00:12:01.227196Z"}
+{"status_code": 200, "duration_ms": 2.77, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "7804eed6-aa27-48f7-b529-06910f512689", "level": "info", "timestamp": "2026-10-19T00:12:01.229998Z"}
+{"status_code": 200, "duration_ms": 3.48, "event": "response_sent", "method": "GET", "path": "/api/v1/projects", "request_id": "a759bcea-615e-43ce-91c6-5289b1d48833", "level": "info", "timestamp": "2026-10-19T00:12:01.230101Z"}
+INFO:     198.18.1.6:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+INFO:     198.18.1.1:0 - "GET /api/v1/projects HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.6", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "5c50eeb8-8868-4597-94cc-b67c30d90142", "level": "info", "timestamp": "2026-10-19T00:12:01.232009Z"}
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/api/v1/stack", "request_id": "05548ada-4975-4567-85d0-68b6362e967d", "level": "info", "timestamp": "2026-10-19T00:12:01.232145Z"}
+{"status_code": 200, "duration_ms": 87.77, "event": "response_sent", "method": "GET", "path": "/api/v1/stack", "request_id": "05548ada-4975-4567-85d0-68b6362e967d", "level": "info", "timestamp": "2026-10-19T00:12:01.320008Z"}
+INFO:     198.18.1.1:0 - "GET /api/v1/stack HTTP/1.1" 200 OK
+{"query": null, "client_ip": "198.18.1.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "f37890a0-d389-4230-967a-40f127007004", "level": "info", "timestamp": "2026-10-19T00:12:01.322783Z"}
+{"status_code": 200, "duration_ms": 186.44, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "5c50eeb8-8868-4597-94cc-b67c30d90142", "level": "info", "timestamp": "2026-10-19T00:12:01.418486Z"}
+INFO:     198.18.1.6:0 - "GET /health HTTP/1.1" 200 OK
+{"status_code": 200, "duration_ms": 97.33, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "f37890a0-d389-4230-967a-40f127007004", "level": "info", "timestamp": "2026-10-19T00:12:01.420076Z"}
+INFO:     198.18.1.1:0 - "GET /health HTTP/1.1" 200 OK
+{"query": null, "client_ip": "127.0.0.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/metrics", "request_id": "573648dc-d568-490a-90c6-ad392233dab7", "level": "info", "timestamp": "2026-10-19T00:12:03.442350Z"}
+{"status_code": 200, "duration_ms": 5.51, "event": "response_sent", "method": "GET", "path": "/metrics", "request_id": "573648dc-d568-490a-90c6-ad392233dab7", "level": "info", "timestamp": "2026-10-19T00:12:03.447824Z"}
+INFO:     127.0.0.1:59592 - "GET /metrics HTTP/1.1" 200 OK
+{"query": null, "client_ip": "127.0.0.1", "identity": "ip", "event": "request_received", "method": "GET", "path": "/health", "request_id": "395c72e1-2cd8-47cf-93aa-f709f169f681", "level": "info", "timestamp": "2026-10-19T00:12:09.620223Z"}
+{"status_code": 200, "duration_ms": 5.24, "event": "response_sent", "method": "GET", "path": "/health", "request_id": "395c72e1-2cd8-47cf-93aa-f709f169f681", "level": "info", "timestamp": "2026-10-19T00:12:09.625423Z"}
+INFO:     127.0.0.1:58458 - "GET /health HTTP/1.1" 200 OK

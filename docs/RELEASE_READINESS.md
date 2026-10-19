@@ -50,7 +50,10 @@ Keep future content changes tied to deliberate snapshot review.
 
 1. Docker image build from repository-root context: complete in local validation.
 2. Deployment-sized single-process API/consumer load: executed twice; latency
-   acceptance failed. Profile/resolve capacity and obtain a passing rerun.
+   acceptance failed. A [CPU comparison](../benchmarks/results/f7975d8-cpu-comparison/README.md)
+   reproduces failures at 0.1 CPU and passes at 1 CPU, twice each with the same
+   image. The deployment-sized budget remains unaccepted; resolve capacity or
+   establish an application hotspot before changing code, then obtain a passing rerun.
 3. Confirm `AMBIENTE` contains exactly `production` and Koyeb receives
    `ENVIRONMENT=production`; preserve secret/resource identities.
 4. Verify external monitors using `/saude` or `/salud` before removing aliases.

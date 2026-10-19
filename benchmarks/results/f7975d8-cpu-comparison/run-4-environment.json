@@ -1,0 +1,120 @@
+{
+  "source_commit": "f7975d84ba0bdbca4a2e91964b91415230bd6d26",
+  "image_id": "sha256:298141ec2088e76c96b5a76320392c7448c7356f797ba53627ccaecdf2bc9122",
+  "run": 4,
+  "cpu": "0.1",
+  "started_utc": "2026-10-19T00:14:06.5188092+00:00",
+  "ended_utc": "2026-10-19T00:14:31.7970354+00:00",
+  "k6_exit": 99,
+  "cpu_before": {
+    "throttled_usec": 82687913,
+    "nr_bursts": 0,
+    "user_usec": 4212716,
+    "burst_usec": 0,
+    "system_usec": 537244,
+    "nr_throttled": 473,
+    "usage_usec": 4749960,
+    "nr_periods": 495
+  },
+  "cpu_after": {
+    "throttled_usec": 106829634,
+    "nr_bursts": 0,
+    "user_usec": 5768084,
+    "burst_usec": 0,
+    "system_usec": 840121,
+    "nr_throttled": 647,
+    "usage_usec": 6608206,
+    "nr_periods": 730
+  },
+  "cpu_delta": {
+    "throttled_usec": 24141721,
+    "nr_bursts": 0,
+    "user_usec": 1555368,
+    "burst_usec": 0,
+    "system_usec": 302877,
+    "nr_throttled": 174,
+    "usage_usec": 1858246,
+    "nr_periods": 235
+  },
+  "cpu_max": "10000 100000",
+  "memory_peak": "74670080",
+  "memory_events": [
+    "low 0",
+    "high 0",
+    "max 0",
+    "oom 0",
+    "oom_kill 0",
+    "oom_group_kill 0"
+  ],
+  "limits": {
+    "memory": 536870912,
+    "swap": 536870912,
+    "cpu": 100000000
+  },
+  "restarts": 0,
+  "oom_killed": false,
+  "ports": {
+    "8000/tcp": null
+  },
+  "initial_health": {
+    "status": "ok",
+    "message": "API functioning normally",
+    "api_version": "1.9.2",
+    "environment": "production",
+    "uptime_seconds": 9,
+    "details": {
+      "data": "ok",
+      "email": "pending",
+      "data_details": {
+        "about.json": "ok",
+        "projects.json": "ok",
+        "stack.json": "ok",
+        "experiences.json": "ok",
+        "formation.json": "ok",
+        "philosophy.json": "ok",
+        "project_case_studies.json": "ok"
+      }
+    }
+  },
+  "final_health": {
+    "status": "ok",
+    "message": "API functioning normally",
+    "api_version": "1.9.2",
+    "environment": "production",
+    "uptime_seconds": 47,
+    "details": {
+      "data": "ok",
+      "email": "pending",
+      "data_details": {
+        "about.json": "ok",
+        "projects.json": "ok",
+        "stack.json": "ok",
+        "experiences.json": "ok",
+        "formation.json": "ok",
+        "philosophy.json": "ok",
+        "project_case_studies.json": "ok"
+      }
+    }
+  },
+  "pending": [
+    "0",
+    "",
+    "",
+    ""
+  ],
+  "group": [
+    "name",
+    "email_workers",
+    "consumers",
+    "1",
+    "pending",
+    "0",
+    "last-delivered-id",
+    "1792368846053-0",
+    "entries-read",
+    "10",
+    "lag",
+    "0"
+  ],
+  "dlq": "0"
+}
