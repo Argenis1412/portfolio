@@ -5,11 +5,6 @@ The [first attempt](results/8a73bb4/validation-status.md) was blocked by Docker
 Desktop startup. No image or performance result was produced by that attempt.
 The [resumed validation](results/f9eaa7f-local-20261017/README.md) built the image
 and completed two real load runs; both failed latency thresholds.
-The subsequent [CPU comparison](results/f7975d8-cpu-comparison/README.md) isolates
-quota effects with the same image: two failures at 0.1 CPU and two passes at
-1 CPU. Run `./benchmarks/scripts/cpu_comparison.ps1` from the repository root
-to reproduce that diagnostic with fresh containers and unchanged thresholds.
-It does not approve a production capacity change or close 0.1-CPU acceptance.
 
 The current infrastructure selects Koyeb's `free` instance. Its
 [published budget](https://www.koyeb.com/docs/reference/instances) is 0.1 vCPU and

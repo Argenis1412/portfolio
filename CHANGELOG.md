@@ -96,11 +96,6 @@ incidents and versioned releases below retain their original historical context.
   console jobs, but all five latency thresholds failed. Recorded image/resource
   evidence and raw summaries; performance acceptance remains open. Corrected the
   procedure to run k6 in the API network namespace without host port publishing.
-- Isolated CPU quota effects with four fresh API/Redis load runs using the same
-  image: both 0.1-CPU runs failed all five latency thresholds and both 1-CPU runs
-  passed. Retained P99, load-window cgroup deltas, console job checks, and a
-  comparison runner. No application optimization, threshold, production capacity,
-  or deployment change; 0.1-CPU acceptance remains failed.
 
 ### Frontend deployment dependency
 
