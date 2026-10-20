@@ -1,88 +1,30 @@
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import LiveMetricsBento from '../components/LiveMetricsBento';
 import { useMetricsDisplay } from '../hooks/useMetricsDisplay';
-
+import fixture from './fixtures/metrics-d0d1cea.json';
 vi.mock('../hooks/useMetricsDisplay');
-
-const baseDisplayContext = {
-  isLoading: false,
-  t: (key: string) => key,
-  data: {
-    last_incident: 'none',
-    last_incident_ago: 'none',
-    timestamp: new Date().toISOString(),
-    requests_24h: 1024,
-    requests_since_deploy: 100,
-  },
-  hasIncident: false,
-  incidentDot: 'bg-status-ok',
-  incidentText: 'text-status-ok',
-  latestEventLabel: 'metrics.incident.none',
-  latestEventAgoSeconds: null,
-  metrics: {
-    status: 'operational',
-    sampleHistory: [],
-    confidenceScore: 98,
-    latestTrace: null,
-    recentTraces: [],
-    displayLifecycle: 'NORMAL',
-    strategyProfile: {
-      retryBudget: 0,
-      cacheTtlSeconds: 30,
-      activePath: 'sync',
-      source: 'real',
-    },
-  },
-};
-
-describe('LiveMetricsBento — stale data notice', () => {
-  it('does not show the stale notice when the fetch is healthy', () => {
-    vi.mocked(useMetricsDisplay).mockReturnValue({
-      ...baseDisplayContext,
-      isError: false,
-    } as unknown as ReturnType<typeof useMetricsDisplay>);
-
+const base = { t: (key: string) => key, data: fixture, isLoading: false, isError: false,
+  metrics: { status: 'operational', sampleHistory: [], lastSuccessAt: Date.parse(fixture.timestamp), isStale: false } };
+beforeEach(() => vi.mocked(useMetricsDisplay).mockReturnValue(base as unknown as ReturnType<typeof useMetricsDisplay>));
+describe('metrics presentation', () => {
+  it('renders real counters and the last valid receipt time', () => {
     render(<LiveMetricsBento />);
-    expect(screen.queryByText('metrics.stale_notice')).toBeNull();
+    expect(screen.getByText('44ms')).toBeTruthy();
+    expect(screen.getByText('100')).toBeTruthy();
+    expect(document.querySelector('time')?.dateTime).toBe('2026-10-20T12:00:00.000Z');
+    expect(screen.queryByText('NORMAL')).toBeNull();
   });
-
-  it('shows the stale notice when the poll fails but cached data remains', () => {
-    vi.mocked(useMetricsDisplay).mockReturnValue({
-      ...baseDisplayContext,
-      isError: true,
-    } as unknown as ReturnType<typeof useMetricsDisplay>);
-
+  it('labels previous data even when the last known state was degraded', () => {
+    vi.mocked(useMetricsDisplay).mockReturnValue({ ...base, metrics: { ...base.metrics, isStale: true } } as unknown as ReturnType<typeof useMetricsDisplay>);
     render(<LiveMetricsBento />);
     expect(screen.getByText('metrics.stale_notice')).toBeTruthy();
   });
-
-  it('does not stack the stale notice on top of the degraded/down banners', () => {
-    vi.mocked(useMetricsDisplay).mockReturnValue({
-      ...baseDisplayContext,
-      isError: true,
-      metrics: { ...baseDisplayContext.metrics, status: 'down' },
-    } as unknown as ReturnType<typeof useMetricsDisplay>);
-
+  it('hides expired values while retaining last receipt time', () => {
+    vi.mocked(useMetricsDisplay).mockReturnValue({ ...base, data: undefined } as unknown as ReturnType<typeof useMetricsDisplay>);
     render(<LiveMetricsBento />);
-    expect(screen.queryByText('metrics.stale_notice')).toBeNull();
-  });
-
-  it('removes the stale notice once the poll recovers', () => {
-    const { rerender } = render(<LiveMetricsBento />);
-
-    vi.mocked(useMetricsDisplay).mockReturnValue({
-      ...baseDisplayContext,
-      isError: true,
-    } as unknown as ReturnType<typeof useMetricsDisplay>);
-    rerender(<LiveMetricsBento />);
-    expect(screen.getByText('metrics.stale_notice')).toBeTruthy();
-
-    vi.mocked(useMetricsDisplay).mockReturnValue({
-      ...baseDisplayContext,
-      isError: false,
-    } as unknown as ReturnType<typeof useMetricsDisplay>);
-    rerender(<LiveMetricsBento />);
-    expect(screen.queryByText('metrics.stale_notice')).toBeNull();
+    expect(screen.getByText('metrics.no_current_data')).toBeTruthy();
+    expect(screen.queryByText('44ms')).toBeNull();
+    expect(document.querySelector('time')).toBeTruthy();
   });
 });

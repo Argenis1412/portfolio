@@ -20,10 +20,9 @@ import type { About, Project, ProjectDetailed, Skill, Experience, Formation, Phi
 export type { About, Project, ProjectDetailed, Skill, Experience, Formation, PhilosophyItem, MetricsSummary };
 
 export function fetchMetricsSummary(
-  chaosPreset?: string,
   signal?: AbortSignal,
 ): Promise<MetricsSummary> {
-  return apiGet('/metrics/summary', MetricsSummarySchema, chaosPreset, signal);
+  return apiGet('/metrics/summary', MetricsSummarySchema, signal);
 }
 
 export const fetchAbout = (): Promise<About> =>

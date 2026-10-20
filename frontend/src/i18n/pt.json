@@ -119,7 +119,7 @@
   "experience.signal.failure": "Falha",
   "experience.signal.learning": "Aprendizado",
   "experience.signal.impact": "Impacto",
-  "metrics.section_subtitle": "As métricas combinam telemetria do backend com projeções sintéticas claramente sinalizadas durante eventos de chaos ativos.",
+  "metrics.section_subtitle": "Medicoes do backend desde o inicio do processo.",
   "metrics.latency": "Latência P95",
    "metrics.error_rate": "Taxa de Erro",
     "metrics.error_rate_slo_context": "SLO < 0.5% (5xx / 15min)",
@@ -131,7 +131,7 @@
   "metrics.status.warning": "AVISO",
   "metrics.status.down": "FORA DO AR",
   "metrics.status.loading": "Conectando...",
-  "metrics.stale_notice": "Mostrando últimos dados conhecidos — reconectando...",
+  "metrics.stale_notice": "Dados anteriores - atualizando",
   "metrics.db_connected": "DB Conectado",
   "metrics.requests_24h": "Requisições (24h)",
   "metrics.updated_ago": "Atualizado há {s}s",
@@ -431,5 +431,10 @@
   "evidence.navigation.incidents": "Incidentes",
   "not_found.title": "Página não encontrada",
   "not_found.description": "A página solicitada não existe ou foi movida.",
-  "not_found.home": "Voltar ao início"
+  "not_found.home": "Voltar ao início",
+  "metrics.no_current_data": "Sem dados atuais",
+  "metrics.last_received": "Ultima leitura valida recebida",
+  "metrics.no_reading": "Ainda nao ha leitura valida",
+  "metrics.history_label": "Medicoes historicas de P95",
+  "metrics.no_samples": "Ainda não há medições de P95"
 }

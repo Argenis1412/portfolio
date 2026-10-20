@@ -64,7 +64,7 @@ describe('apiGet signal support', () => {
 
     const schema = z.object({});
     await expect(
-      apiGet('/test', schema, undefined, controller.signal),
+      apiGet('/test', schema, controller.signal),
     ).rejects.toMatchObject({ name: 'AbortError' });
 
     expect(fetchSpy).toHaveBeenCalledWith(

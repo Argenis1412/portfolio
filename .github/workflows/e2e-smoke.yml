@@ -10,9 +10,9 @@ on:
   workflow_dispatch:
     inputs:
       base_url:
-        description: 'Target URL (default: production)'
+        description: 'Hosted UI URL (empty: isolated local frontend)'
         required: false
-        default: 'https://argenisbackend.com'
+        default: ''
 
 jobs:
   e2e:
@@ -44,7 +44,7 @@ jobs:
       - name: 🚀 Run E2E smoke tests
         run: |
           cd frontend
-          npm run e2e
+          npm run e2e -- --retries=0
         env:
           BASE_URL: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.base_url || '' }}
 

@@ -4,11 +4,11 @@
  *
  * Preferred usage going forward:
  *   import { fetchAbout } from '../api/portfolioService';
- *   import { postChaosDrain } from '../api/chaosService';
+ *   import { postChaosDrain } from '../api/contactService';
  *   import { ApiError } from '../api/client';
  */
 export * from './types';
 export * from './schemas';
 export * from './client';
 export * from './portfolioService';
-export * from './chaosService';
+export * from './contactService';

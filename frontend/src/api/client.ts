@@ -90,15 +90,9 @@ export class ApiError extends Error {
 export async function apiGet<T>(
   path: string,
   schema: z.ZodSchema<T>,
-  chaosPreset?: string,
   signal?: AbortSignal,
 ): Promise<T> {
-  const headers: Record<string, string> = {};
-  if (chaosPreset) {
-    headers['X-Chaos-Preset'] = chaosPreset;
-  }
-
-  const res = await fetch(buildApiUrl(path), { headers, signal });
+  const res = await fetch(buildApiUrl(path), { signal });
 
   // Parse body first so we can extract trace_id from error responses
   const rawData = await res.json().catch(() => null);
