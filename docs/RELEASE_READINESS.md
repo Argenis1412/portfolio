@@ -1,46 +1,60 @@
 # Release Readiness
 
-**Cleanup status: merge and deployment blocked by frontend retirement.** Passing
-backend tests does not make the existing UI compatible with retired Chaos routes
-and metrics fields. The [consumer list](../CHANGELOG.md#frontend-deployment-dependency)
-and [operations runbook](architecture/production-operations.md) define remaining work.
+**Cleanup status: frontend retirement implemented; deployment and capacity remain unverified.**
+Backend tests and isolated frontend tests do not establish that the compatible
+frontend is deployed or that the deployed backend serves an exact commit.
 
 ## Validation boundaries
 
-Before every commit, run backend pytest and frontend ESLint, `tsc -b`, and Vitest
-as documented in the [root guide](../README.md#required-checks-before-a-commit).
-Backend lint/format and gradual mypy configuration are documented in the
-[backend guide](../backend/README.md#code-and-checks). Documentation-only changes
-need link/history checks, not new behavioral tests.
+Before every commit run frontend ESLint, `tsc -b`, Vitest, and backend pytest.
+Also build the frontend and run the isolated Playwright smoke. The existing
+translation-parity test checks EN/PT/ES and runs explicitly in the E2E workflow.
+A local pass is not a GitHub Actions result; verify the event, SHA, jobs and artifacts.
 
-CI jobs are separate, filtered workflows, not one universal release gate.
-Backend/frontend pushes on `chore/backend-cleanup` do not match their configured
-push branch filters, and root/docs-only changes do not match their code path
-filters. A local pass or old badge does not prove this commit ran in GitHub Actions.
-Check the event, commit, jobs, and artifacts before claiming CI success.
+Playwright starts a local frontend with a fictitious API origin unless `BASE_URL`
+is supplied. With `BASE_URL`, it loads the hosted UI and intercepts its compiled
+API target through `/api/v1/` paths on any origin. Content and metrics use fixtures;
+contact uses fake acceptance or error responses. Unexpected API calls and mutations
+fail validation; other origins, including Sentry, are aborted, service workers are
+blocked, and external WebSockets are closed; same-origin WebSockets remain available
+for the local development server. Requests must not include `X-Chaos-Preset`.
+No test sends a real email. This suite checks
+UI behavior, not production API reachability or delivery.
 
-Playwright is a separate frontend smoke suite:
+The workflow runs for matching frontend/workflow pushes to `main`, pull requests
+**targeting `main`**, and manual dispatch. Empty manual `base_url` means local execution;
+a supplied URL selects a hosted UI under the same interception policy. Its only
+permission is `contents: read`; no secrets are required. A stacked PR targeting
+the retirement branch does not match the `pull_request` base filter until retargeted.
+Manual dispatch can validate each PR branch before integration. Both branches use
+local execution by default, and the smoke command disables retries so a passing
+run cannot conceal a flaky first attempt.
 
-- Without `BASE_URL`, its configuration starts a local frontend and injects the
-  production API base URL for reads. Local UI execution is not an isolated local
-  backend test.
-- With `BASE_URL`, no local server starts and `VITE_API_URL` is not injected by
-  Playwright. The hosted frontend must already target the intended backend.
-- Existing Chaos smoke tests intercept specific action requests and return
-  fixtures. They test that UI contract, not availability or recovery of retired
-  backend routes. Their interception is not a blanket guarantee that arbitrary
-  future mutating requests cannot reach the configured API.
-- Replace the remaining Chaos scenarios and validate the compatible frontend/API
-  pair before release. Do not send real contact email as part of a documentation
-  check; a live delivery smoke test requires explicit authorization.
+Metrics retain previous validated values during failed refreshes for less than
+60 seconds; at 60 seconds they show no current data, preserve the last receipt
+time, and retain only explicitly historical charts. Invalid responses do not
+renew freshness. Both backend contracts are accepted without strict unknown-key
+rejection; invalid shared states are rejected instead of becoming healthy defaults.
+Latency and request counters must be nonnegative integers; error rates must be
+between zero and one. A failed refresh immediately withdraws the current operational
+status and suppresses new threshold alerts, even while previous values remain
+visible below 60 seconds. Expired cached readings are hidden from the first render.
+Returning to a visible tab refreshes stale queries without waiting for the next poll.
 
-The E2E workflow runs on matching frontend pushes to `main` or manual dispatch;
-manual dispatch defaults to the production frontend URL. This cleanup does not
-run that suite against production or claim a new Playwright result.
+Local validation passed ESLint, TypeScript, Vitest and the frontend build; backend
+pytest passed 341 tests with 3 real Redis integrations skipped (90.57% coverage).
+The isolated Chromium suite covers both API contracts, freshness, fake contact,
+network blocking, and keyboard focus. Desktop (1440x1000) and mobile (390x844)
+metrics screenshots were reviewed in light/dark themes with reduced motion; no
+horizontal overflow was observed. These checks do not establish a complete WCAG
+audit, cross-browser support, live delivery, or production behavior.
+Validation evidence and remaining visual-review limits are recorded in the draft PRs.
 
-Manual UI review remains required for desktop/mobile layouts (including 390x844),
-keyboard navigation, focus restoration, labels, contrast, and reduced motion.
-These are validation criteria, not a record that this review has been completed.
+Safe HTTP observations on 2026-10-20: `/health` returned 200 with version `1.9.2`
+and `details.data`; GET `/api/v1/chaos/spike` returned 404. These are compatible
+with the new backend, not proof that `d0d1cea` is deployed. New frontend deployment
+remains unconfirmed. Keep the backend `X-Chaos-Preset` CORS permission until that
+frontend is confirmed deployed and old tabs/bundles have been considered.
 
 ## Backend and operational prerequisites
 

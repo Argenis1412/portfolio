@@ -6,6 +6,11 @@ on:
     paths:
       - 'frontend/**'
       - '.github/workflows/e2e-smoke.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/e2e-smoke.yml'
   # Run manually from the GitHub Actions UI
   workflow_dispatch:
     inputs:
@@ -14,9 +19,12 @@ on:
         required: false
         default: ''
 
+permissions:
+  contents: read
+
 jobs:
   e2e:
-    name: 🎭 Chaos Playwright Smoke
+    name: Portfolio Playwright Smoke
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -40,6 +48,11 @@ jobs:
         run: |
           cd frontend
           npx playwright install --with-deps chromium
+
+      - name: Check translation parity
+        run: |
+          cd frontend
+          npm run test -- --run src/tests/i18n-parity.test.ts
 
       - name: 🚀 Run E2E smoke tests
         run: |

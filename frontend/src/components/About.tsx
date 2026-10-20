@@ -1,124 +1,33 @@
-import { useState } from 'react';
-import { m, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
 import { useSkills } from '../hooks/useApi';
-import { ChevronRight } from 'lucide-react';
-
-const CATEGORY_ORDER = ['backend', 'banco_dados', 'database', 'devops', 'frontend', 'testing', 'tools', 'automation'];
+import Experience from './Experience';
 
 export default function About() {
   const { t } = useLanguage();
-  const { data: skills = [], isLoading: isLoadingSkills } = useSkills();
-
-  const [expandedCat, setExpandedCat] = useState<string | null>(null);
-
-  // Sort and filter categories based on data
-  const allCats = Array.from(new Set(skills.map((s) => s.category)));
-  const categories = [
-    ...CATEGORY_ORDER.filter((c) => allCats.includes(c)),
-    ...allCats.filter((c) => !CATEGORY_ORDER.includes(c)),
-  ];
+  const { data: skills = [] } = useSkills();
 
   return (
-    <section id="about" className="py-12 px-4 max-w-6xl mx-auto">
-      <m.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.15 }}
-        transition={{ duration: 0.5 }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center"
-      >
-        {/* Text column */}
-        <div>
-          <h2 className="text-xs font-mono uppercase tracking-[0.2em] text-app-primary mb-3">
-            {t('about.title')}
-          </h2>
-          <p className="text-sm text-app-muted leading-relaxed mb-6">
-            {t('about.bio')}
-          </p>
-
-          {!isLoadingSkills && categories.length > 0 && (
-            <div className="mb-8">
-              <h3 className="text-sm font-bold text-app-text mb-4">
-                {t('stack.section_title')}
-              </h3>
-              <div className="space-y-2">
-                {categories.map((category) => {
-                  const isExpanded = expandedCat === category;
-                  const catSkills = skills.filter((s) => s.category === category);
-
-                  return (
-                    <div key={category} className="border border-app-border rounded-lg bg-app-surface overflow-hidden">
-                      <button
-                        onClick={() => setExpandedCat(isExpanded ? null : category)}
-                        aria-expanded={isExpanded}
-                        aria-controls={`skills-${category}`}
-                        className="w-full flex items-start justify-between gap-3 p-3 text-left hover:bg-app-surface-hover transition-colors focus-visible:outline-none"
-                      >
-                        <div className="flex flex-col items-start flex-1 min-w-0">
-                          <span className="text-xs font-mono uppercase tracking-widest text-app-text">
-                            {t(`stack.category.${category}`)}
-                          </span>
-                          {catSkills.length > 0 && (
-                            <span className="block mt-1 text-[10px] font-mono text-app-muted/70 truncate max-w-full">
-                              {catSkills.slice(0, 3).map(s => s.name).join(' · ')}
-                              {catSkills.length > 3 && ` · +${catSkills.length - 3}`}
-                            </span>
-                          )}
-                        </div>
-                        <ChevronRight
-                          className={`w-4 h-4 text-app-primary transition-transform duration-300 flex-shrink-0 mt-0.5 ${isExpanded ? 'rotate-90' : ''}`}
-                        />
-                      </button>
-                      <AnimatePresence initial={false}>
-                        {isExpanded && (
-                          <m.div
-                            id={`skills-${category}`}
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: 'auto', opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.2 }}
-                          >
-                            <div className="p-3 pt-0 flex flex-wrap gap-1.5 border-t border-app-border/50">
-                              {catSkills.map((skill) => (
-                                <span
-                                  key={skill.name}
-                                  className="inline-flex items-center px-2 py-1 rounded text-xs font-mono text-app-muted hover:text-app-primary hover:bg-app-primary/5 transition-colors border border-transparent hover:border-app-primary/10"
-                                >
-                                  ▹ {skill.name}
-                                </span>
-                              ))}
-                            </div>
-                          </m.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+    <section id="about" aria-labelledby="about-title" className="home-container border-t border-app-border py-10 sm:py-12">
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+        <div className="max-w-2xl">
+          <h2 id="about-title" className="text-2xl tracking-tight sm:text-3xl">{t('nav.about')}</h2>
+          <p className="mt-4 leading-relaxed text-app-muted">{t('about.bio')}</p>
+          {skills.length > 0 && <details className="mt-4">
+            <summary className="w-fit cursor-pointer py-2 text-sm font-semibold text-app-primary">{t('stack.section_title')}</summary>
+            <ul className="mt-2 flex flex-wrap gap-2 text-sm text-app-muted">
+              {skills.map((skill) => <li key={`${skill.category}-${skill.name}`} className="rounded-md border border-app-border px-2 py-1">{skill.name}</li>)}
+            </ul>
+          </details>}
         </div>
-
-        {/* Photo column */}
-        <div className="flex justify-center md:justify-end">
-          <div className="relative w-[220px] h-[220px] md:w-[280px] md:h-[280px] rounded-full p-1.5 bg-gradient-to-tr from-app-primary to-transparent shadow-[0_0_30px_rgba(212,163,115,0.2)]">
-            <div className="w-full h-full rounded-full overflow-hidden bg-app-surface-hover">
-              <picture>
-                <source srcSet="/profile.webp" type="image/webp" />
-                <img
-                  src="/profile.jpg"
-                  alt="Argenis"
-                  width="280"
-                  height="280"
-                  loading="lazy"
-                  className="w-full h-full object-cover rounded-full filter brightness-105"
-                />
-              </picture>
-            </div>
-          </div>
-        </div>
-      </m.div>
+        <picture className="shrink-0">
+          <source srcSet="/profile.webp" type="image/webp" />
+          <img src="/profile.jpg" alt="Argenis Lopez" width="112" height="112" loading="lazy" className="h-28 w-28 rounded-xl border border-app-border object-cover" />
+        </picture>
+      </div>
+      <details className="mt-4">
+        <summary className="w-fit cursor-pointer py-2 text-sm font-semibold text-app-primary">{t('about.experience')}</summary>
+        <Experience />
+      </details>
     </section>
   );
 }

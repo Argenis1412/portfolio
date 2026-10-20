@@ -3,8 +3,13 @@ import { readFileSync } from 'node:fs';
 const current = JSON.parse(readFileSync(new URL('../src/tests/fixtures/metrics-d0d1cea.json', import.meta.url), 'utf8'));
 
 const load = (name: string) => JSON.parse(readFileSync(new URL(`../../backend/data/${name}.json`, import.meta.url), 'utf8'));
-const projects = load('projects');
 const cases = load('project_case_studies');
+// Match the public response, rather than serving repository storage records.
+const projects = load('projects').map((project: { id: string; highlight: boolean }) => ({
+  ...project,
+  highlighted: project.highlight,
+  case_study: cases[project.id] ?? null,
+}));
 export const test = base.extend<{ network: { contact: Record<string, unknown>[]; blocked: string[]; unexpected: string[] } }>({
   network: [async ({ context, baseURL }, use) => {
     const network = { contact: [] as Record<string, unknown>[], blocked: [] as string[], unexpected: [] as string[] };

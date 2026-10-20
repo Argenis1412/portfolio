@@ -10,10 +10,10 @@ export default function FeaturedIncident() {
     <section id="incident-history" className="px-4 max-w-6xl mx-auto py-12">
       <div className="mb-10">
         <h2 className="text-xs font-mono uppercase tracking-[0.2em] text-app-primary mb-1">
-          {t('chaos.incidents.history')}
+          {t('incidents.history')}
         </h2>
         <p className="text-sm text-app-muted max-w-lg">
-          {t('chaos.incidents.history_subtitle')}
+          {t('incidents.history_subtitle')}
         </p>
       </div>
 

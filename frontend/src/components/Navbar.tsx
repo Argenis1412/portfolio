@@ -91,10 +91,6 @@ export default function Navbar() {
 
   const handleNavClick = (section: string) => {
     setIsOpen(false);
-    if (section === 'production-evidence') {
-      navigate('/production-evidence');
-      return;
-    }
     if (location.pathname === '/') {
       scrollToSection(section);
       return;
@@ -113,14 +109,13 @@ export default function Navbar() {
 
   const navItems = [
     { id: 'projects', label: t('nav.projects'), prefetchFn: () => prefetch(queryKeys.about, fetchAbout) },
-    { id: 'production-evidence', label: t('nav.production_evidence') },
     { id: 'about', label: t('nav.about'), prefetchFn: () => { prefetch(queryKeys.about, fetchAbout); prefetch(queryKeys.skills, fetchSkills); } },
     { id: 'contact', label: t('nav.contact'), testId: 'nav-contact' },
   ];
 
   return (
-    <nav ref={navigationRef} className="fixed top-0 w-full z-50 overflow-visible glass border-b border-app-border/70">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav ref={navigationRef} className="fixed top-0 w-full z-50 border-b border-app-border bg-app-bg">
+      <div className="home-container">
         <div className="flex items-center justify-between h-16">
 
           {/* Mobile Menu Button */}
@@ -137,12 +132,8 @@ export default function Navbar() {
             </button>
           </div>
 
-          <div className="flex-shrink-0 hidden md:block">
-            {/* Optional logo or leave empty. Kept div for flex spacing. */}
-          </div>
-
           <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-1">
+            <div className="flex items-baseline gap-1">
               {navItems.map((item, index) => (
                 <button
                   key={item.id}
@@ -150,7 +141,7 @@ export default function Navbar() {
                   data-testid={index === 0 ? 'nav-projects' : item.testId}
                   onClick={() => handleNavClick(item.id)}
                   onMouseEnter={item.prefetchFn}
-                  className="hover:text-app-primary px-3 py-3 rounded-md text-xs font-mono uppercase tracking-widest transition-colors text-app-text"
+                  className="hover:text-app-primary px-3 py-3 rounded-md text-sm font-medium transition-colors text-app-text"
                 >
                   {item.label}
                 </button>

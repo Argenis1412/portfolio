@@ -1,7 +1,8 @@
 # Architecture and Decision Index
 
-This document describes the backend cleanup branch. **Deployment remains blocked
-by frontend retirement**; see [remaining consumers](CHANGELOG.md#frontend-deployment-dependency).
+This document describes the JSON/Redis backend and the compatible frontend after
+Chaos retirement. Deployment of the new frontend remains unconfirmed; see
+[release boundaries](CHANGELOG.md#frontend-deployment-dependency).
 The [backend guide](backend/README.md) defines configuration and API behavior;
 the [operations runbook](docs/architecture/production-operations.md) defines triage
 and release prerequisites. Neither this document nor historical benchmarks
@@ -78,6 +79,22 @@ internal identities and moved blocks are preserved. Application SQL removal does
 not authorize external database deletion or secret renaming. `/saude` and `/salud`
 remain deprecated static liveness-style routes pending monitor verification.
 
+## Frontend evidence boundary
+
+`useApi` owns API queries and contact mutations; `useLiveMetrics` maintains real
+P95 history and freshness. The metrics schema accepts shared fields from both
+backend versions and strips unknown fields without inventing healthy defaults.
+Failed refreshes show previous data until 60 seconds after the last validated
+receipt; then current values and operational status are hidden. The receipt time
+remains visible. Telemetry unavailability does not establish backend downtime.
+
+Browser events are local threshold alerts over fresh received measurements, not
+server logs, traces, worker state, or automatic recovery. Historical incident
+content retains its original evidence context. Playwright intercepts API routes
+on any origin, blocks third-party traffic and external WebSockets, and fakes contact delivery.
+The backend CORS permission for `X-Chaos-Preset` remains until the new frontend is
+confirmed deployed and cached clients have been considered. Health aliases remain.
+
 ## Numbered decision index
 
 Numbers retain the original root-document references. Dedicated ADR filenames
@@ -93,19 +110,19 @@ older citations. Frontend entries record context, not a new frontend audit.
 | 5 | JSON-first reads | Current: avoid database round-trips for static content; earlier latency numbers are historical measurements. |
 | 6 | Browser origin policy | Current: configured allowlist plus optional regex, with separate frontend CSP. |
 | 7 | English identifiers | Current: English settings/code; deprecated health routes remain until monitor migration is verified. |
-| 8 | TanStack Query/server state | Frontend context: cache remote data separately from local UI state. Frontend cleanup remains pending. |
+| 8 | TanStack Query/server state | Frontend context: cache remote data separately from local UI state. The metrics query validates the shared old/new backend contract. |
 | 9 | Sentry | Current optional backend integration; frontend configuration is separate. Cross-service correlation requires actual configuration/evidence. |
 | 10 | Headers/compression | Current middleware: conditional HSTS, browser security headers, gzip. No universal response-path guarantee. |
 | 11 | Redis shared state | Current: rate limits, idempotency, deduplication, and stream queue; local fallback is process-bound. |
 | 12 | Possible Go expansion | Deferred proposal, not an approved service or roadmap commitment. Measure a real bottleneck before adding another deployment. |
-| 13 | Frontend telemetry overlays | Historical/current UI context: real and synthetic samples must be distinguishable; removed backend fields require UI retirement. |
-| 14 | Modular frontend API | Frontend context: client, schemas, services, business hooks, and presentational components. Chaos-specific pieces remain pending cleanup. |
+| 13 | Frontend telemetry overlays | Current: display received measurements only; expired data is unavailable after 60 seconds. Historical simulation overlays are retired. |
+| 14 | Modular frontend API | Frontend context: client, schemas, services, business hooks, and presentational components. Chaos actions and contracts are retired; contact remains a separate service. |
 | 15.1 | Fail-silent Chaos SQL writes | Retired: simulation endpoints and incident writes were removed. See INC-003 for the original failure. |
 | 15.2 | Root Docker build context | Current: build `backend/Dockerfile` from the repository root to keep COPY paths consistent. Current image verification is pending. |
 | 15.3 | CSP/CORS coordination | Current: review API origins and frontend connect-src together; see INC-004. |
 | 16 | English contracts/localized content | Current: English API identifiers with localized content. JSON claims/snapshots require deliberate review. |
 | 17 | Separate error/latency alerts | Design rule: distinguish symptoms and align buckets/SLOs. Verify actual deployed alert rules and labels rather than assuming they match older prose. |
-| 18 | Local Chaos E2E | Retired backend strategy: its workflow/endpoints were removed. Remaining frontend smoke scenarios are a release blocker. |
+| 18 | Local Chaos E2E | Retired backend strategy: its workflow/endpoints were removed. Frontend smoke now uses intercepted content, metrics, and contact fixtures. |
 | 19 | Minimum IaC | Current: Terraform-managed Koyeb and externally provisioned stateful services; preserve ownership and identities. |
 | 20 | Redis Streams delivery | Current, with explicit limits: at-least-once processing, bounded retries/DLQ, PEL recovery, and non-durable fallback. |
 | 21 | Simulated 503 UI traces | Historical UI convention, not proof of an HTTP failure or current backend behavior. |

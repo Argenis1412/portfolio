@@ -96,6 +96,7 @@
 }
 
 .dark {
+  --theme-primary:        #D4A373;
   --theme-surface-hover:  #2C2723;
   --theme-muted:          #A89F91;
   --theme-primary-hover:  #E2B68A;
@@ -147,6 +148,14 @@ body {
   @apply bg-app-bg text-app-text antialiased transition-colors duration-300 selection:bg-app-primary/30;
   font-family: 'Inter', sans-serif;
   line-height: 1.55;
+}
+
+/* Shared alignment for the home page and its navigation. */
+.home-container {
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 4vw, 2.5rem);
 }
 
 :focus-visible {
