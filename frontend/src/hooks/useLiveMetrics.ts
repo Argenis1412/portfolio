@@ -23,8 +23,8 @@ export function useLiveMetrics() {
       updatedAt: query.dataUpdatedAt,
       requests: snapshot.requests_since_deploy,
       samples: snapshot.p95_status === 'warming_up' ? samples : [...samples, {
-        value: snapshot.p95_ms, timestamp: query.dataUpdatedAt, source: 'real', confidence: 100,
-      } as MetricSample].slice(-12),
+        value: snapshot.p95_ms, timestamp: query.dataUpdatedAt,
+      }].slice(-12),
     });
   }
 

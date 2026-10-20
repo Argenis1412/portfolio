@@ -5,22 +5,25 @@ const current = JSON.parse(readFileSync(new URL('../src/tests/fixtures/metrics-d
 const load = (name: string) => JSON.parse(readFileSync(new URL(`../../backend/data/${name}.json`, import.meta.url), 'utf8'));
 const projects = load('projects');
 const cases = load('project_case_studies');
-export const test = base.extend<{ network: { contact: Record<string, unknown>[]; blocked: string[] } }>({
+export const test = base.extend<{ network: { contact: Record<string, unknown>[]; blocked: string[]; unexpected: string[] } }>({
   network: [async ({ context, baseURL }, use) => {
-    const network = { contact: [] as Record<string, unknown>[], blocked: [] as string[] };
+    const network = { contact: [] as Record<string, unknown>[], blocked: [] as string[], unexpected: [] as string[] };
     const origin = new URL(baseURL!).origin;
     await context.route('**/*', async route => {
       const req = route.request();
-      expect(req.headers()).not.toHaveProperty('x-chaos-preset');
+      if ('x-chaos-preset' in req.headers()) {
+        network.unexpected.push(`X-Chaos-Preset ${req.method()} ${req.url()}`);
+        return route.abort();
+      }
       const url = new URL(req.url());
       if (url.pathname.startsWith('/api/v1/')) {
         const path = url.pathname.slice('/api/v1'.length);
-        if (path.includes('/chaos/')) { network.blocked.push(req.url()); return route.abort(); }
+        if (path.includes('/chaos/')) { network.unexpected.push(`${req.method()} ${req.url()}`); return route.abort(); }
         if (req.method() === 'POST' && path === '/contact') {
           network.contact.push({ ...req.postDataJSON(), idempotencyKey: req.headers()['idempotency-key'] });
           return route.fulfill({ status: 202, json: { message: 'Accepted by isolated test', queue_status: 'queued', delivery_mode: 'stream', downstream: 'fake' } });
         }
-        if (req.method() !== 'GET') { network.blocked.push(req.url()); return route.abort(); }
+        if (req.method() !== 'GET') { network.unexpected.push(`${req.method()} ${req.url()}`); return route.abort(); }
         const data: Record<string, unknown> = {
           '/about': load('about'), '/projects': { projects }, '/stack': { stack: load('stack'), by_category: {} },
           '/experiences': { experiences: load('experiences') }, '/formation': { formations: load('formation') },
@@ -31,9 +34,10 @@ export const test = base.extend<{ network: { contact: Record<string, unknown>[];
           const project = projects.find((item: { id: string }) => item.id === id);
           return route.fulfill({ status: project ? 200 : 404, json: project ? { ...project, case_study: cases[id!] ?? null } : { error: { message: 'Not found' } } });
         }
-        if (!(path in data)) { network.blocked.push(req.url()); return route.abort(); }
+        if (!(path in data)) { network.unexpected.push(`${req.method()} ${req.url()}`); return route.abort(); }
         return route.fulfill({ json: data[path] });
       }
+      if (!['GET', 'HEAD'].includes(req.method()) && url.origin === origin) network.unexpected.push(`${req.method()} ${req.url()}`);
       if (url.origin !== origin || !['GET', 'HEAD'].includes(req.method())) {
         network.blocked.push(req.url());
         return route.abort();
@@ -47,7 +51,7 @@ export const test = base.extend<{ network: { contact: Record<string, unknown>[];
       else socket.close();
     });
     await use(network);
-    expect(network.blocked.filter(url => new URL(url).pathname.includes('/chaos/'))).toEqual([]);
+    expect(network.unexpected).toEqual([]);
   }, { auto: true }],
 });
 export { expect };

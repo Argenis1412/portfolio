@@ -39,6 +39,7 @@ describe('real metrics freshness', () => {
   it('keeps previous data below 60 seconds and hides it exactly at expiry', () => {
     const { result, rerender } = renderHook(() => useLiveMetrics());
     const received = result.current.lastSuccessAt;
+    expect(result.current.sampleHistory).toEqual([{ value: 44, timestamp: received }]);
     snapshot = { ...snapshot, isError: true };
     act(() => vi.advanceTimersByTime(59_999));
     act(() => window.dispatchEvent(new Event('focus')));

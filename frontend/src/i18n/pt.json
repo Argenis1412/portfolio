@@ -435,5 +435,6 @@
   "metrics.no_current_data": "Sem dados atuais",
   "metrics.last_received": "Ultima leitura valida recebida",
   "metrics.no_reading": "Ainda nao ha leitura valida",
-  "metrics.history_label": "Medicoes historicas de P95"
+  "metrics.history_label": "Medicoes historicas de P95",
+  "metrics.no_samples": "Ainda não há medições de P95"
 }

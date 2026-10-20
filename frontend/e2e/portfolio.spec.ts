@@ -1,5 +1,16 @@
 import { test, expect } from './fixtures';
 
+test('aborts requests with retired Chaos headers and records the violation', async ({ page, network }) => {
+  await page.goto('/');
+  const blocked = await page.evaluate(() => fetch('/api/v1/about', {
+    headers: { 'X-Chaos-Preset': 'retired' },
+  }).then(() => false, () => true));
+  expect(blocked).toBe(true);
+  expect(network.unexpected.splice(0)).toEqual([
+    `X-Chaos-Preset GET ${new URL('/api/v1/about', page.url()).href}`,
+  ]);
+});
+
 test('shows measured metrics without retired controls', async ({ page }) => {
   await page.goto('/production-evidence');
   await expect(page.locator('#metrics').getByText('44ms', { exact: true })).toBeVisible();

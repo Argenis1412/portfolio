@@ -28,7 +28,7 @@ export default function LiveMetricsBento() {
       </div>
       <div className="mt-6">
         <p className="text-xs text-app-muted">{t('metrics.history_label')}</p>
-        <MetricsSparkline samples={metrics.sampleHistory} />
+        <MetricsSparkline samples={metrics.sampleHistory} label={t('metrics.history_label')} emptyLabel={t('metrics.no_samples')} />
       </div>
     </section>
   );

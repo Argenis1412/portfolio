@@ -15,6 +15,7 @@ This changelog separates three categories intentionally:
 ### Frontend Chaos retirement
 
 - Removed frontend failure injection and retired metrics contracts; contact remains available. Metrics expire after 60 seconds without a validated reading. Frontend deployment is not confirmed.
+- Historical P95 charts draw only received observations, including a single point for a single reading; no fabricated predecessor or confidence percentage is attached to samples.
 
 ### Fixed
 
