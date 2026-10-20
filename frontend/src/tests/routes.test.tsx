@@ -55,7 +55,7 @@ describe('public routes', () => {
 
     const heading = await screen.findByRole(
       'heading',
-      { name: 'I build backend systems that survive production' },
+      { name: 'I build APIs and backend applications.' },
       { timeout: 3000 },
     );
     await waitFor(() => expect(document.activeElement).toBe(heading));

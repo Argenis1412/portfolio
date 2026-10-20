@@ -2,13 +2,9 @@ import { lazy, Suspense, useEffect } from 'react';
 import Hero from '../components/hero/Hero';
 import { scrollToSection } from '../utils/scrollToSection';
 
-const ArchitectureTradeoffs = lazy(() => import('../components/ArchitectureTradeoffs'));
 const About = lazy(() => import('../components/About'));
-const Experience = lazy(() => import('../components/Experience'));
 const Contact = lazy(() => import('../components/Contact'));
-const SocialRail = lazy(() => import('../components/SocialRail'));
 const FeaturedProjects = lazy(() => import('../components/FeaturedProjects'));
-const HiringSections = lazy(() => import('../components/HiringSections'));
 
 const SectionFallback = () => (
   <div className="flex h-24 w-full items-center justify-center text-xs font-mono tracking-widest text-app-muted opacity-40 animate-pulse">
@@ -43,18 +39,11 @@ export default function HomePage() {
 
   return (
     <>
-      <Suspense fallback={null}>
-        <SocialRail />
-      </Suspense>
       <Hero />
       <Suspense fallback={<SectionFallback />}>
         <FeaturedProjects />
-        <HiringSections section="proof" />
-        <ArchitectureTradeoffs />
-        <HiringSections section="principles" />
-        <Experience />
-        <Contact />
         <About />
+        <Contact />
       </Suspense>
     </>
   );

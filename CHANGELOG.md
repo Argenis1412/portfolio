@@ -12,6 +12,14 @@ This changelog separates three categories intentionally:
 
 ## [Unreleased]
 
+### Home page simplification
+
+- Centered and shortened the home page around projects, a concise introduction,
+  About and Contact. Preserved EN/PT/ES, themes, project links and contact behavior.
+- Moved portfolio engineering links and architecture details into its case study;
+  retained evidence routes and made skills, experience and request details expandable.
+- Restored the dark theme bronze contrast and added isolated responsive home checks.
+
 ### Frontend Chaos retirement
 
 - Removed frontend failure injection and retired metrics contracts; contact remains available. Metrics expire after 60 seconds without a validated reading. Frontend deployment is not confirmed.

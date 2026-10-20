@@ -16,12 +16,28 @@ Frontend application built with **React 19** and **Vite**. Engineered as a **str
 
 ## 🏗️ Component Architecture
 
+### Home page
+
+The home page follows Hero → Projects → About → Contact in one centered container.
+`FeaturedProjects` displays every API project, including repository/demo links and
+case studies, with explicit loading, retry and empty states. Skills and the
+existing experience timeline remain available under native disclosure controls.
+The portfolio case study links to engineering decisions and `/production-evidence`;
+metrics, browser events and incident evidence retain their existing routes.
+The contact form uses the unchanged `useContactForm` hook, with response details
+collapsed and submission feedback announced to assistive technology. Theme,
+EN/PT/ES, keyboard navigation and reduced-motion support are preserved.
+
+Run `npm run e2e -- --retries=0 --workers=1` for isolated fixtures, desktop/mobile
+home checks, contact and evidence regressions. Reports and screenshots go to the
+system temporary directory by default; no real contact messages are sent.
+
 The UI is built using atomic, highly specialized components to ensure modularity:
 
 - **`MobileNav`**: Responsive drawer menu featuring scroll-lock, isolated focus trapping, and graceful mounting animations.
-- **`Banner` / `Hero`**: Themed hero sections utilizing Framer Motion for entrance staggers.
-- **`Footer`**: Contains the decoupled social rails and hardcoded contact fallbacks (with explicit mailto links).
-- **`ContactForm`**: Self-contained mutation component hooked to the global rate-limiter, providing dynamic error handling and loading states.
+- **`Hero`**: Static introduction with project and GitHub actions.
+- **`Footer`**: Compact source/social links and email/phone copy controls.
+- **`Contact`**: Uses `useContactForm` for validation, idempotent submission, errors and loading feedback.
 
 ## 🧠 Data Fetching Pattern (`useApi.ts`)
 
