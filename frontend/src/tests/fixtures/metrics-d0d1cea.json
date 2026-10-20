@@ -1,0 +1,12 @@
+{
+  "p95_ms": 44,
+  "p95_status": "healthy",
+  "requests_since_deploy": 100,
+  "error_rate": 0.01,
+  "error_rate_pct": "1.00%",
+  "error_rate_status": "stable",
+  "system_status": "operational",
+  "uptime": "2h 14m",
+  "window": "since_deploy",
+  "timestamp": "2026-10-20T12:00:00Z"
+}

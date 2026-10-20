@@ -8,6 +8,7 @@ const BADGE_CONFIG: Record<
   SystemStatus,
   { dot: string; text: string; i18nKey: string }
 > = {
+  unavailable: { dot: 'bg-app-muted', text: 'text-app-muted', i18nKey: 'metrics.no_current_data' },
   loading:     { dot: 'bg-app-muted animate-pulse',   text: 'text-app-muted',   i18nKey: 'metrics.status.loading' },
   operational: { dot: 'bg-status-ok animate-pulse', text: 'text-status-ok', i18nKey: 'metrics.api_live' },
   warning:     { dot: 'bg-status-warn animate-pulse',   text: 'text-status-warn',   i18nKey: 'metrics.status.warning' },

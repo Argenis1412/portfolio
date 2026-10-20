@@ -26,11 +26,11 @@ function makeTrace(overrides: Partial<TraceEntry> = {}): TraceEntry {
 }
 
 describe('MetricsSparkline', () => {
-  it('renders with minimal samples (placeholder path)', () => {
+  it('does not invent a placeholder measurement', () => {
     const { container } = render(<MetricsSparkline samples={[]} />);
     const svg = container.querySelector('svg');
-    expect(svg).toBeTruthy();
-    expect(container.querySelector('polyline')).toBeTruthy();
+    expect(svg).toBeNull();
+    expect(container.querySelector('polyline')).toBeNull();
   });
 
   it('renders animated polylines when given real samples', () => {

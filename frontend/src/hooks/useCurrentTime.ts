@@ -7,7 +7,13 @@ export function useCurrentTime(intervalMs: number = 1000): number {
     const update = () => setCurrentTime(Date.now());
     update();
     const timer = setInterval(update, intervalMs);
-    return () => clearInterval(timer);
+    window.addEventListener('focus', update);
+    document.addEventListener('visibilitychange', update);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('focus', update);
+      document.removeEventListener('visibilitychange', update);
+    };
   }, [intervalMs]);
 
   return currentTime;

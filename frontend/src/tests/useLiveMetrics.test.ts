@@ -1,627 +1,72 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createElement, type ReactNode } from 'react';
-import { ChaosContext, type ChaosPreset } from '../context/ChaosContextCore';
+import { renderHook, act } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useLiveMetrics } from '../hooks/useLiveMetrics';
-import { getRecentTraces, subscribeToTraces, type TraceEntry } from '../services/TraceEmitter';
+import { useMetricsSummary } from '../hooks/useApi';
+import fixture from './fixtures/metrics-d0d1cea.json';
+import type { MetricsSummary } from '../api/types';
 
-vi.mock('../services/TraceEmitter', () => ({
-  subscribeToTraces: vi.fn(() => () => {}),
-  getRecentTraces: vi.fn(() => []),
-}));
+vi.mock('../hooks/useApi', () => ({ useMetricsSummary: vi.fn() }));
+let snapshot: { data: MetricsSummary | undefined; dataUpdatedAt: number; isError: boolean; isLoading: boolean };
+beforeEach(() => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date('2026-10-20T12:00:00Z'));
+  snapshot = { data: fixture as MetricsSummary, dataUpdatedAt: Date.now(), isError: false, isLoading: false };
+  vi.mocked(useMetricsSummary).mockImplementation(() => snapshot as ReturnType<typeof useMetricsSummary>);
+});
+afterEach(() => vi.useRealTimers());
 
-const healthyMetrics = {
-  p95_ms: 44,
-  p95_status: 'healthy',
-  requests_24h: 1024,
-  requests_since_deploy: 100,
-  error_rate: 0.013,
-  error_rate_pct: '1.30%',
-  error_rate_status: 'stable',
-  system_status: 'operational',
-  system_lifecycle: 'NORMAL',
-  uptime: '2h 14m',
-  window: 'last_24h',
-  timestamp: new Date().toISOString(),
-  retries_1h: 0,
-  last_incident: 'none',
-  last_incident_ago: 'none',
-  active_path: 'sync',
-  cache_ttl_s: 30,
-};
-
-vi.mock('../api/portfolioService', () => ({
-  fetchMetricsSummary: vi.fn(async () => ({ ...healthyMetrics })),
-}));
-
-function createWrapper(preset: ChaosPreset, queryClient: QueryClient) {
-  return function Wrapper({ children }: { children: ReactNode }) {
-    return createElement(
-      QueryClientProvider,
-      { client: queryClient },
-      createElement(
-        ChaosContext.Provider,
-        { value: { preset, setPreset: () => {} } },
-        children,
-      ),
-    );
-  };
-}
-
-function makeQueryClient() {
-  return new QueryClient({
-    defaultOptions: { queries: { retry: false } },
+describe('real metrics freshness', () => {
+  it('distinguishes loading and initial failure without calling the backend down', () => {
+    snapshot = { data: undefined, dataUpdatedAt: 0, isError: false, isLoading: true };
+    const { result, rerender } = renderHook(() => useLiveMetrics());
+    expect(result.current.status).toBe('loading');
+    snapshot = { ...snapshot, isError: true, isLoading: false };
+    rerender();
+    expect(result.current.status).toBe('unavailable');
+    expect(result.current.lastSuccessAt).toBeNull();
   });
-}
-
-describe('useLiveMetrics', () => {
-  beforeEach(() => {
-    vi.restoreAllMocks();
+  it('keeps previous data below 60 seconds and hides it exactly at expiry', () => {
+    const { result, rerender } = renderHook(() => useLiveMetrics());
+    const received = result.current.lastSuccessAt;
+    snapshot = { ...snapshot, isError: true };
+    act(() => vi.advanceTimersByTime(59_999));
+    act(() => window.dispatchEvent(new Event('focus')));
+    rerender();
+    expect(result.current.data?.p95_ms).toBe(44);
+    expect(result.current.isStale).toBe(true);
+    expect(result.current.status).toBe('unavailable');
+    act(() => vi.advanceTimersByTime(1));
+    expect(result.current.data).toBeUndefined();
+    expect(result.current.lastSuccessAt).toBe(received);
+    expect(result.current.sampleHistory).toHaveLength(1);
+    snapshot = { ...snapshot, dataUpdatedAt: Date.now(), isError: false };
+    rerender();
+    expect(result.current.status).toBe('operational');
+    expect(result.current.expired).toBe(false);
   });
-
-  describe('preset invalidation', () => {
-    it('does not invalidate on first visit to a preset', async () => {
-      const qc = makeQueryClient();
-      const spy = vi.spyOn(qc, 'invalidateQueries');
-
-      const { result } = renderHook(() => useLiveMetrics(), {
-        wrapper: createWrapper('mild', qc),
-      });
-
-      await waitFor(() => expect(result.current.data).toBeDefined());
-      expect(spy).not.toHaveBeenCalled();
-    });
-
-    it('invalidates when returning to a previously-seen preset', async () => {
-      const qc = makeQueryClient();
-      const spy = vi.spyOn(qc, 'invalidateQueries');
-
-      let preset: ChaosPreset = 'off';
-      const setPreset = (p: ChaosPreset) => { preset = p; };
-
-      const { result, rerender } = renderHook(() => useLiveMetrics(), {
-        wrapper: ({ children }: { children: ReactNode }) =>
-          createElement(
-            QueryClientProvider,
-            { client: qc },
-            createElement(
-              ChaosContext.Provider,
-              { value: { preset, setPreset } },
-              children,
-            ),
-          ),
-      });
-
-      await waitFor(() => expect(result.current.data).toBeDefined());
-      spy.mockClear();
-
-      // Switch to mild — first visit, no invalidation
-      act(() => { preset = 'mild'; });
-      rerender();
-      expect(spy).not.toHaveBeenCalled();
-
-      // Switch back to off — already seen, should invalidate
-      act(() => { preset = 'off'; });
-      rerender();
-      expect(spy).toHaveBeenCalledWith({ queryKey: ['metrics-summary'] });
-    });
+  it('expires after a suspended interval even before another poll completes', () => {
+    const { result, rerender } = renderHook(() => useLiveMetrics());
+    vi.setSystemTime(Date.now() + 120_000);
+    act(() => document.dispatchEvent(new Event('visibilitychange')));
+    rerender();
+    expect(result.current.data).toBeUndefined();
   });
-
-  describe('status derivation ignores synthetic P95', () => {
-    it('stays operational when backend is healthy regardless of effectiveP95', async () => {
-      const chaosTrace = {
-        id: 'trace-synth-1',
-        traceId: 'trace-synth-1',
-        requestId: 'req-synth-1',
-        type: 'latency_injection' as const,
-        timestamp: new Date(),
-        origin: 'synthetic' as const,
-        endpoint: '/api/test',
-        status: 'ok' as const,
-        totalMs: 3999,
-        apiMs: 3999,
-        dbMs: 0,
-        cacheMs: 0,
-      };
-
-      let traceListener: ((trace: TraceEntry) => void) | null = null;
-      vi.mocked(subscribeToTraces).mockImplementation((cb) => {
-        traceListener = cb;
-        return () => { traceListener = null; };
-      });
-      vi.mocked(getRecentTraces).mockReturnValue([chaosTrace]);
-
-      const qc = makeQueryClient();
-      const { result } = renderHook(() => useLiveMetrics(), {
-        wrapper: createWrapper('mild', qc),
-      });
-
-      await waitFor(() => expect(result.current.data).toBeDefined());
-
-      await act(async () => {
-        traceListener!({ ...chaosTrace, timestamp: new Date() });
-      });
-
-      expect(result.current.effectiveP95).toBeGreaterThan(44);
-      expect(result.current.status).toBe('operational');
-      expect(result.current.timeoutState).toBe('within_budget');
-    });
-
-    it('falls back to backend P95 when backend is warming_up and latest sample is synthetic', async () => {
-      const { fetchMetricsSummary } = await import('../api/portfolioService');
-      vi.mocked(fetchMetricsSummary).mockResolvedValue({
-        ...healthyMetrics,
-        active_path: 'sync' as const,
-        system_lifecycle: 'NORMAL' as const,
-        system_status: 'operational' as const,
-        p95_ms: 12,
-        p95_status: 'warming_up' as const,
-        error_rate_status: 'warming_up' as const,
-        worker_status: 'ok',
-        queue_backlog: 0,
-        cache_status: 'direct',
-      });
-
-      const chaosTrace = {
-        id: 'trace-synth-2',
-        traceId: 'trace-synth-2',
-        requestId: 'req-synth-2',
-        type: 'latency_injection' as const,
-        timestamp: new Date(),
-        origin: 'synthetic' as const,
-        endpoint: '/api/test',
-        status: 'ok' as const,
-        totalMs: 3999,
-        apiMs: 3999,
-        dbMs: 0,
-        cacheMs: 0,
-      };
-
-      let traceListener: ((trace: TraceEntry) => void) | null = null;
-      vi.mocked(subscribeToTraces).mockImplementation((cb) => {
-        traceListener = cb;
-        return () => { traceListener = null; };
-      });
-      vi.mocked(getRecentTraces).mockReturnValue([chaosTrace]);
-
-      const qc = makeQueryClient();
-      const { result } = renderHook(() => useLiveMetrics(), {
-        wrapper: createWrapper('mild', qc),
-      });
-
-      await waitFor(() => expect(result.current.data).toBeDefined());
-
-      await act(async () => {
-        traceListener!({ ...chaosTrace, timestamp: new Date() });
-      });
-
-      expect(result.current.effectiveP95).toBe(12);
-    });
+  it('does not put warming-up sentinels into the real history', () => {
+    snapshot.data = { ...fixture, p95_ms: 0, p95_status: 'warming_up' } as MetricsSummary;
+    const { result } = renderHook(() => useLiveMetrics());
+    expect(result.current.sampleHistory).toEqual([]);
+    expect(result.current.data?.p95_status).toBe('warming_up');
   });
-
-  describe('chaos recovery softening', () => {
-    it('shows warning not degraded when backend is degraded from recent chaos', async () => {
-      const { fetchMetricsSummary } = await import('../api/portfolioService');
-      vi.mocked(fetchMetricsSummary).mockResolvedValue({
-        ...healthyMetrics,
-        active_path: 'sync' as const,
-        system_lifecycle: 'NORMAL' as const,
-        system_status: 'degraded',
-        p95_ms: 3999,
-        p95_status: 'degraded',
-        error_rate: 0,
-        error_rate_pct: '0.00%',
-        error_rate_status: 'stable',
-        worker_status: 'ok',
-        queue_backlog: 0,
-        cache_status: 'direct',
-      });
-      vi.mocked(getRecentTraces).mockReturnValue([
-        {
-          id: 'trace-chaos-1',
-          traceId: 'trace-chaos-1',
-          requestId: 'req-1',
-          type: 'latency_injection',
-          timestamp: new Date(),
-          origin: 'synthetic' as const,
-          endpoint: '/api/test',
-          status: 'ok' as const,
-          totalMs: 3999,
-          apiMs: 3999,
-          dbMs: 0,
-          cacheMs: 0,
-        },
-      ]);
-
-      const qc = makeQueryClient();
-      const { result } = renderHook(() => useLiveMetrics(), {
-        wrapper: createWrapper('off', qc),
-      });
-
-      await waitFor(() => expect(result.current.data).toBeDefined());
-      expect(result.current.status).toBe('warning');
-    });
-
-    it('shows degraded when backend is degraded with no recent chaos trace', async () => {
-      const { fetchMetricsSummary } = await import('../api/portfolioService');
-      vi.mocked(fetchMetricsSummary).mockResolvedValue({
-        ...healthyMetrics,
-        active_path: 'sync' as const,
-        system_lifecycle: 'NORMAL' as const,
-        system_status: 'degraded',
-        p95_ms: 3999,
-        p95_status: 'degraded',
-        error_rate: 0,
-        error_rate_pct: '0.00%',
-        error_rate_status: 'stable',
-        worker_status: 'ok',
-        queue_backlog: 0,
-        cache_status: 'direct',
-      });
-      vi.mocked(getRecentTraces).mockReturnValue([]);
-
-      const qc = makeQueryClient();
-      const { result } = renderHook(() => useLiveMetrics(), {
-        wrapper: createWrapper('off', qc),
-      });
-
-      await waitFor(() => expect(result.current.data).toBeDefined());
-      expect(result.current.status).toBe('degraded');
-    });
+  it('preserves measured degradation without a synthetic recovery window', () => {
+    snapshot.data = { ...fixture, p95_ms: 180, system_status: 'degraded' } as MetricsSummary;
+    const { result } = renderHook(() => useLiveMetrics());
+    expect(result.current.status).toBe('degraded');
+    expect(result.current.sampleHistory[0].value).toBe(180);
   });
-
-  describe('resilience: transient fetch failures', () => {
-    it('returns status=down when first fetch fails with no cached data', async () => {
-      vi.useFakeTimers();
-      try {
-        const { fetchMetricsSummary } = await import('../api/portfolioService');
-        vi.mocked(fetchMetricsSummary).mockRejectedValue(new Error('network error'));
-
-        const qc = makeQueryClient();
-        const { result } = renderHook(() => useLiveMetrics(), {
-          wrapper: createWrapper('off', qc),
-        });
-
-        // Fast-forward through retry delays: 1s + 2s + 4s = 7s
-        await act(async () => { await vi.advanceTimersByTimeAsync(10_000); });
-
-        expect(result.current.status).toBe('down');
-      } finally {
-        vi.useRealTimers();
-      }
-    });
-
-    it('preserves last known status when fetch fails after successful data load', { timeout: 15_000 }, async () => {
-      const { fetchMetricsSummary } = await import('../api/portfolioService');
-      const successData = {
-        ...healthyMetrics,
-        active_path: 'sync' as const,
-        system_lifecycle: 'NORMAL' as const,
-        system_status: 'operational' as const,
-        p95_ms: 44,
-        p95_status: 'healthy' as const,
-        error_rate_status: 'stable' as const,
-        worker_status: 'ok' as const,
-        queue_backlog: 0,
-        cache_status: 'direct' as const,
-      };
-      vi.mocked(fetchMetricsSummary)
-        .mockResolvedValueOnce(successData)
-        .mockRejectedValue(new Error('transient'));
-
-      const qc = makeQueryClient();
-      const { result } = renderHook(() => useLiveMetrics(), {
-        wrapper: createWrapper('off', qc),
-      });
-
-      // Initial fetch succeeds
-      await waitFor(() => expect(result.current.data).toBeDefined());
-      expect(result.current.status).toBe('operational');
-
-      // Trigger a refetch that exhausts 3 retries (1s + 2s + 4s = ~7s)
-      await act(async () => {
-        await qc.invalidateQueries({ queryKey: ['metrics-summary'] });
-      });
-
-      // Wait for retries to exhaust with generous timeout
-      await waitFor(() => expect(result.current.isError).toBe(true), { timeout: 12_000 });
-
-      // Cached data keeps status alive — must not flip to 'down'
-      expect(result.current.status).not.toBe('down');
-      expect(result.current.data).toBeDefined();
-    });
-  });
-
-  describe('warming_up zero-value guard', () => {
-    const fullDefaults = {
-      active_path: 'sync' as const,
-      system_lifecycle: 'NORMAL' as const,
-      worker_status: 'ok' as const,
-      queue_backlog: 0,
-      cache_status: 'direct' as const,
-      system_status: 'operational' as const,
-      error_rate_status: 'stable' as const,
-    };
-
-    function recentChaosTrace(ageMs = 0) {
-      return {
-        id: 'trace-baseline-reset',
-        traceId: 'trace-baseline-reset',
-        requestId: 'req-baseline-reset',
-        type: 'latency_injection' as const,
-        timestamp: new Date(Date.now() - ageMs),
-        origin: 'synthetic' as const,
-        endpoint: '/api/test',
-        status: 'ok' as const,
-        totalMs: 150,
-        apiMs: 150,
-        dbMs: 0,
-        cacheMs: 0,
-      };
-    }
-
-    it('does not wipe history when requests_since_deploy drops during chaos recovery', async () => {
-      const { fetchMetricsSummary } = await import('../api/portfolioService');
-      vi.mocked(getRecentTraces).mockReturnValue([recentChaosTrace()]);
-      vi.mocked(fetchMetricsSummary)
-        .mockResolvedValueOnce({
-          ...healthyMetrics, ...fullDefaults,
-          p95_ms: 45, p95_status: 'healthy', requests_since_deploy: 100,
-        })
-        .mockResolvedValueOnce({
-          ...healthyMetrics, ...fullDefaults,
-          p95_ms: 0, p95_status: 'warming_up', error_rate_status: 'warming_up',
-          requests_since_deploy: 2,
-        });
-
-      const qc = makeQueryClient();
-      const { result } = renderHook(() => useLiveMetrics(), {
-        wrapper: createWrapper('off', qc),
-      });
-
-      await waitFor(() => expect(result.current.data?.p95_ms).toBe(45));
-      expect(result.current.sampleHistory.length).toBe(1);
-      expect(result.current.history.length).toBe(1);
-
-      await act(async () => {
-        await qc.invalidateQueries({ queryKey: ['metrics-summary'] });
-      });
-
-      await waitFor(() => expect(result.current.data?.p95_status).toBe('warming_up'));
-
-      // requests_since_deploy dropped (100 -> 2) but a recent chaos trace is
-      // present, so the deploy-reset heuristic must not treat this as a real
-      // process restart and wipe the sample history.
-      expect(result.current.sampleHistory.length).toBe(1);
-      expect(result.current.history.length).toBe(1);
-      expect(result.current.effectiveP95).toBe(45);
-    });
-
-    it('still wipes history on a real deploy reset with no recent chaos trace', async () => {
-      const { fetchMetricsSummary } = await import('../api/portfolioService');
-      vi.mocked(getRecentTraces).mockReturnValue([]);
-      vi.mocked(fetchMetricsSummary)
-        .mockResolvedValueOnce({
-          ...healthyMetrics, ...fullDefaults,
-          p95_ms: 45, p95_status: 'healthy', requests_since_deploy: 100,
-        })
-        .mockResolvedValueOnce({
-          ...healthyMetrics, ...fullDefaults,
-          p95_ms: 0, p95_status: 'warming_up', error_rate_status: 'warming_up',
-          requests_since_deploy: 2,
-        });
-
-      const qc = makeQueryClient();
-      const { result } = renderHook(() => useLiveMetrics(), {
-        wrapper: createWrapper('off', qc),
-      });
-
-      await waitFor(() => expect(result.current.data?.p95_ms).toBe(45));
-      expect(result.current.sampleHistory.length).toBe(1);
-      expect(result.current.history.length).toBe(1);
-
-      await act(async () => {
-        await qc.invalidateQueries({ queryKey: ['metrics-summary'] });
-      });
-
-      await waitFor(() => expect(result.current.data?.p95_status).toBe('warming_up'));
-
-      // No chaos trace correlates with this reset — the drop in
-      // requests_since_deploy is a genuine deploy signal, so history must
-      // still be cleared as before this fix.
-      expect(result.current.sampleHistory.length).toBe(0);
-      expect(result.current.history.length).toBe(0);
-    });
-
-    it('preserves the last known P95 and does not poison "previous" across a chaos baseline reset', async () => {
-      const { fetchMetricsSummary } = await import('../api/portfolioService');
-      vi.mocked(getRecentTraces).mockReturnValue([recentChaosTrace()]);
-      vi.mocked(fetchMetricsSummary)
-        .mockResolvedValueOnce({
-          ...healthyMetrics, ...fullDefaults,
-          p95_ms: 40, p95_status: 'healthy', requests_since_deploy: 99,
-        })
-        .mockResolvedValueOnce({
-          ...healthyMetrics, ...fullDefaults,
-          p95_ms: 45, p95_status: 'healthy', requests_since_deploy: 100,
-        })
-        .mockResolvedValueOnce({
-          ...healthyMetrics, ...fullDefaults,
-          p95_ms: 0, p95_status: 'warming_up', error_rate_status: 'warming_up',
-          requests_since_deploy: 2,
-        })
-        .mockResolvedValueOnce({
-          ...healthyMetrics, ...fullDefaults,
-          p95_ms: 50, p95_status: 'healthy', requests_since_deploy: 105,
-        });
-
-      const qc = makeQueryClient();
-      const { result } = renderHook(() => useLiveMetrics(), {
-        wrapper: createWrapper('off', qc),
-      });
-
-      await waitFor(() => expect(result.current.data?.p95_ms).toBe(40));
-
-      await act(async () => {
-        await qc.invalidateQueries({ queryKey: ['metrics-summary'] });
-      });
-      // Second real snapshot (45) — previousRef.current must advance to this,
-      // not stay pinned to the first-ever value (40), before the sentinel hits.
-      await waitFor(() => expect(result.current.data?.p95_ms).toBe(45));
-
-      await act(async () => {
-        await qc.invalidateQueries({ queryKey: ['metrics-summary'] });
-      });
-      await waitFor(() => expect(result.current.data?.p95_status).toBe('warming_up'));
-
-      // "0ms" must never reach the KPI display during warming_up
-      expect(result.current.effectiveP95).toBe(45);
-
-      await act(async () => {
-        await qc.invalidateQueries({ queryKey: ['metrics-summary'] });
-      });
-      await waitFor(() => expect(result.current.data?.p95_ms).toBe(50));
-
-      expect(result.current.sampleHistory.length).toBe(3);
-      expect(result.current.history.length).toBe(3);
-      // "previous" must reflect the latest real snapshot (45), not the older
-      // (40) one or the zero-value warmup sentinel skipped in between.
-      expect(result.current.previous?.p95_ms).toBe(45);
-    });
-
-    it('does not discard a warming_up sample that carries a real non-zero P95', async () => {
-      const { fetchMetricsSummary } = await import('../api/portfolioService');
-      vi.mocked(getRecentTraces).mockReturnValue([]);
-      vi.mocked(fetchMetricsSummary)
-        .mockResolvedValueOnce({
-          ...healthyMetrics, ...fullDefaults,
-          p95_ms: 45, p95_status: 'healthy', requests_since_deploy: 100,
-        })
-        .mockResolvedValueOnce({
-          ...healthyMetrics, ...fullDefaults,
-          p95_ms: 30, p95_status: 'warming_up', error_rate_status: 'warming_up',
-          requests_since_deploy: 105,
-        });
-
-      const qc = makeQueryClient();
-      const { result } = renderHook(() => useLiveMetrics(), {
-        wrapper: createWrapper('off', qc),
-      });
-
-      await waitFor(() => expect(result.current.data?.p95_ms).toBe(45));
-
-      await act(async () => {
-        await qc.invalidateQueries({ queryKey: ['metrics-summary'] });
-      });
-      await waitFor(() => expect(result.current.data?.p95_ms).toBe(30));
-
-      expect(result.current.sampleHistory.length).toBe(2);
-      expect(result.current.history.length).toBe(2);
-      expect(result.current.effectiveP95).toBe(30);
-    });
-
-    it('shows 0ms only transiently on true cold boot, correcting on the next real sample', async () => {
-      const { fetchMetricsSummary } = await import('../api/portfolioService');
-      vi.mocked(getRecentTraces).mockReturnValue([]);
-      vi.mocked(fetchMetricsSummary)
-        .mockResolvedValueOnce({
-          ...healthyMetrics, ...fullDefaults,
-          p95_ms: 0, p95_status: 'warming_up', error_rate_status: 'warming_up',
-          requests_since_deploy: 2,
-        })
-        .mockResolvedValueOnce({
-          ...healthyMetrics, ...fullDefaults,
-          p95_ms: 42, p95_status: 'warming_up', error_rate_status: 'warming_up',
-          requests_since_deploy: 3,
-        });
-
-      const qc = makeQueryClient();
-      const { result } = renderHook(() => useLiveMetrics(), {
-        wrapper: createWrapper('off', qc),
-      });
-
-      await waitFor(() => expect(result.current.data?.p95_ms).toBe(0));
-      // No prior snapshot exists on a true cold boot — this is the one
-      // accepted edge case where 0ms is transiently visible.
-      expect(result.current.effectiveP95).toBe(0);
-
-      await act(async () => {
-        await qc.invalidateQueries({ queryKey: ['metrics-summary'] });
-      });
-      await waitFor(() => expect(result.current.data?.p95_ms).toBe(42));
-
-      // Corrects immediately on the next real sample — never stuck at 0.
-      expect(result.current.effectiveP95).toBe(42);
-    });
-
-    it('extends the chaos-recovery guard through a late-arriving reset poll', async () => {
-      // refetchInterval widens from 5s to 15s the moment RECOVERING_WINDOW_MS
-      // (30s) elapses, so the poll carrying the backend's baseline reset can
-      // realistically land up to one slow interval (15s) past that boundary.
-      // A 35s-old trace is past the 30s window but must still be covered by
-      // the extended CHAOS_BASELINE_RESET_GUARD_MS (30s + 15s = 45s).
-      const { fetchMetricsSummary } = await import('../api/portfolioService');
-      vi.mocked(getRecentTraces).mockReturnValue([recentChaosTrace(35_000)]);
-      vi.mocked(fetchMetricsSummary)
-        .mockResolvedValueOnce({
-          ...healthyMetrics, ...fullDefaults,
-          p95_ms: 45, p95_status: 'healthy', requests_since_deploy: 100,
-        })
-        .mockResolvedValueOnce({
-          ...healthyMetrics, ...fullDefaults,
-          p95_ms: 0, p95_status: 'warming_up', error_rate_status: 'warming_up',
-          requests_since_deploy: 2,
-        });
-
-      const qc = makeQueryClient();
-      const { result } = renderHook(() => useLiveMetrics(), {
-        wrapper: createWrapper('off', qc),
-      });
-
-      await waitFor(() => expect(result.current.data?.p95_ms).toBe(45));
-
-      await act(async () => {
-        await qc.invalidateQueries({ queryKey: ['metrics-summary'] });
-      });
-      await waitFor(() => expect(result.current.data?.p95_status).toBe('warming_up'));
-
-      expect(result.current.sampleHistory.length).toBe(1);
-      expect(result.current.history.length).toBe(1);
-      expect(result.current.effectiveP95).toBe(45);
-    });
-
-    it('stops treating a stale chaos trace as protecting history once the extended guard window elapses', async () => {
-      // Past CHAOS_BASELINE_RESET_GUARD_MS (45s) a drop in requests_since_deploy
-      // is indistinguishable from a real deploy — the wipe must still fire so
-      // the original deploy-reset detection isn't silently disabled.
-      const { fetchMetricsSummary } = await import('../api/portfolioService');
-      vi.mocked(getRecentTraces).mockReturnValue([recentChaosTrace(50_000)]);
-      vi.mocked(fetchMetricsSummary)
-        .mockResolvedValueOnce({
-          ...healthyMetrics, ...fullDefaults,
-          p95_ms: 45, p95_status: 'healthy', requests_since_deploy: 100,
-        })
-        .mockResolvedValueOnce({
-          ...healthyMetrics, ...fullDefaults,
-          p95_ms: 0, p95_status: 'warming_up', error_rate_status: 'warming_up',
-          requests_since_deploy: 2,
-        });
-
-      const qc = makeQueryClient();
-      const { result } = renderHook(() => useLiveMetrics(), {
-        wrapper: createWrapper('off', qc),
-      });
-
-      await waitFor(() => expect(result.current.data?.p95_ms).toBe(45));
-
-      await act(async () => {
-        await qc.invalidateQueries({ queryKey: ['metrics-summary'] });
-      });
-      await waitFor(() => expect(result.current.data?.p95_status).toBe('warming_up'));
-
-      expect(result.current.sampleHistory.length).toBe(0);
-      expect(result.current.history.length).toBe(0);
-    });
+  it('resets history when lifetime request counters drop', () => {
+    const { result, rerender } = renderHook(() => useLiveMetrics());
+    snapshot = { ...snapshot, data: { ...snapshot.data!, requests_since_deploy: 1, p95_status: 'warming_up' }, dataUpdatedAt: snapshot.dataUpdatedAt + 1 };
+    rerender();
+    expect(result.current.sampleHistory).toEqual([]);
   });
 });

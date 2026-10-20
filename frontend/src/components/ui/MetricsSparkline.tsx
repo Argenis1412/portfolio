@@ -48,17 +48,7 @@ export default function MetricsSparkline({
   const prefersReducedMotion = useReducedMotion();
 
   const model = useMemo(() => {
-    const PLACEHOLDER_VALUE = 30;
-    const REFERENCE_TIME = 1713620000000;
-    const effectiveSamples: MetricSample[] =
-      samples.length >= 2
-        ? samples
-        : Array.from({ length: 10 }, (_, i) => ({
-            value: PLACEHOLDER_VALUE,
-            timestamp: REFERENCE_TIME - (9 - i) * 15_000,
-            source: 'real',
-            confidence: 98,
-          }));
+    const effectiveSamples = samples.length ? samples : [{ value: 0, timestamp: 0, source: 'real' as const, confidence: 0 }];
 
     const _samples =
       effectiveSamples.length === 1
@@ -159,7 +149,7 @@ export default function MetricsSparkline({
     return positions;
   }, [model.annotations, width, height]);
 
-  if (!model) return null;
+  if (samples.length === 0) return <p role="status">No P95 measurements yet</p>;
 
   const areaPathD = (() => {
     const pts = animatedMainPolyline.trim().split(/\s+/).filter(Boolean);

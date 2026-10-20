@@ -119,7 +119,7 @@
    "experience.signal.failure": "Failure",
    "experience.signal.learning": "Learning",
    "experience.signal.impact": "Impact",
-   "metrics.section_subtitle": "Metrics combine backend telemetry with clearly-labeled synthetic projections during active chaos events.",
+   "metrics.section_subtitle": "Backend measurements since process start.",
    "metrics.latency": "P95 Latency",
    "metrics.error_rate": "Error Rate",
     "metrics.error_rate_slo_context": "SLO < 0.5% (5xx / 15min)",
@@ -131,7 +131,7 @@
   "metrics.status.warning": "WARNING",
   "metrics.status.down": "DOWN",
   "metrics.status.loading": "Connecting...",
-  "metrics.stale_notice": "Showing last known data — reconnecting...",
+  "metrics.stale_notice": "Previous data - updating",
   "metrics.db_connected": "DB Connected",
   "metrics.requests_24h": "Requests (24h)",
   "metrics.updated_ago": "Updated {s}s ago",
@@ -431,5 +431,9 @@
   "evidence.navigation.incidents": "Incidents",
   "not_found.title": "Page not found",
   "not_found.description": "The page you requested does not exist or has moved.",
-  "not_found.home": "Back to home"
+  "not_found.home": "Back to home",
+  "metrics.no_current_data": "No current data",
+  "metrics.last_received": "Last valid reading received",
+  "metrics.no_reading": "No valid reading yet",
+  "metrics.history_label": "Historical P95 measurements"
 }

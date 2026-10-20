@@ -4,7 +4,6 @@ import { LazyMotion, domAnimation, MotionConfig } from 'framer-motion';
 import Navbar from './components/Navbar';
 import { ThemeProvider } from './context/ThemeContext';
 import { LogProvider } from './context/LogContext';
-import { ChaosModeProvider } from './context/ChaosContext';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const ProjectCasePage = lazy(() => import('./pages/ProjectCasePage'));
@@ -39,7 +38,6 @@ function App() {
   return (
     <ThemeProvider>
       <LogProvider>
-        <ChaosModeProvider>
           <MotionConfig reducedMotion="user">
             <LazyMotion features={domAnimation}>
               <BrowserRouter>
@@ -55,7 +53,6 @@ function App() {
               </BrowserRouter>
             </LazyMotion>
           </MotionConfig>
-        </ChaosModeProvider>
       </LogProvider>
     </ThemeProvider>
   );

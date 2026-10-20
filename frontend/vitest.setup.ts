@@ -56,37 +56,13 @@ vi.stubGlobal(
       return mockJsonResponse({
         p95_ms: 44,
         p95_status: 'healthy',
-        requests_24h: 1024,
+        requests_since_deploy: 1024,
         error_rate: 0.013,
         error_rate_pct: '1.30%',
         error_rate_status: 'stable',
         system_status: 'operational',
         uptime: '2h 14m',
-        window: 'last_24h',
-        timestamp: new Date().toISOString(),
-        retries_1h: 0,
-        last_incident: 'none',
-        last_incident_ago: 'none',
-      });
-    }
-
-    if (url.includes('/api/v1/chaos/spike')) {
-      return mockJsonResponse({
-        status: 'completed',
-        requests_sent: 30,
-        requests_dropped: 0,
-        elapsed_ms: 1200,
-        incident_type: 'traffic_spike',
-        timestamp: new Date().toISOString(),
-      });
-    }
-
-    if (url.includes('/api/v1/chaos/failure')) {
-      return mockJsonResponse({
-        status: 'recovered',
-        recovery_ms: 340,
-        incident_type: 'forced_failure',
-        error_triggered: true,
+        window: 'since_deploy',
         timestamp: new Date().toISOString(),
       });
     }
