@@ -25,20 +25,6 @@ export type PhilosophyItem = z.infer<typeof PhilosophyItemSchema>;
 export type MetricsSummary = z.infer<typeof MetricsSummarySchema>;
 export type About = z.infer<typeof AboutSchema>;
 
-// Chaos domain types (not Zod-derived — defined inline in chaosService)
-export interface ChaosResponse {
-  status: string;
-  incident_type: string;
-  elapsed_ms?: number;
-  recovery_ms?: number;
-  requests_sent?: number;
-  requests_dropped?: number;
-  error_triggered?: boolean;
-  timestamp: string;
-  latency_ms?: number;
-  tasks_purged?: number;
-}
-
 export interface ContactResponse {
   traceId?: string;
   durationMs: number;

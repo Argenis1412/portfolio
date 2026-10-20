@@ -9,19 +9,12 @@ vi.mock('../hooks/useLiveMetrics');
 
 const baseMetrics = {
   data: {
-    last_incident: 'none',
-    last_incident_ago: 'none',
     timestamp: new Date().toISOString(),
     error_rate: 0.01,
     error_rate_status: 'stable',
   },
   status: 'operational' as const,
   isLoading: false,
-  previous: null,
-  effectiveP95: 44,
-  confidenceLabel: 'verified' as const,
-  baselineP95: 44,
-  latestTrace: null,
 };
 
 function wrapper({ children }: { children: ReactNode }) {

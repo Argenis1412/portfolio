@@ -1,10 +1,4 @@
-/**
- * LogStream — Terminal-style system log viewer.
- *
- * Reads from shared LogContext (written to by ChaosPlayground,
- * useLiveMetrics errors, and any component that calls useLog()).
- * Auto-scrolls to latest. Filterable by level.
- */
+/** Browser-local alerts derived from received metrics; not server logs. */
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { m, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useLanguage } from '../context/LanguageContext';
@@ -58,10 +52,10 @@ export default function LogStream() {
   useEffect(() => {
     if (entries.length === 0 || !bodyRef.current) return;
     const raf = requestAnimationFrame(() => {
-      bodyRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+      bodyRef.current?.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'instant' : 'smooth' });
     });
     return () => cancelAnimationFrame(raf);
-  }, [entries.length]);
+  }, [entries.length, prefersReducedMotion]);
 
   const handleFilter = useCallback((level: FilterLevel) => {
     setFilter(level);
@@ -90,9 +84,9 @@ export default function LogStream() {
   }, []);
 
   return (
-    <section id="logs" aria-label="System Logs" className="px-4 max-w-6xl mx-auto py-12">
+    <section id="logs" aria-label={t('logs.title')} className="px-4 max-w-6xl mx-auto py-12">
       <m.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={prefersReducedMotion ? false : { opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.15 }}
         transition={{ duration: 0.5 }}
@@ -139,7 +133,7 @@ export default function LogStream() {
              <span className="w-2.5 h-2.5 rounded-full bg-status-warn/60" />
              <span className="w-2.5 h-2.5 rounded-full bg-status-ok/60" />
              <span className="text-[10px] font-mono text-app-muted/40 ml-2 uppercase tracking-widest">
-               system-log
+               browser-events
              </span>
              <span className="ml-auto text-[10px] font-mono text-app-muted/30">
                {filtered.length} entries

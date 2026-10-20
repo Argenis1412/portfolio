@@ -1,10 +1,10 @@
 /**
  * Public API barrel — re-exports everything from the layered api/ directory.
- * Import from this file to get full backwards compatibility.
+ * Import shared types, validated reads, and contact submission from here.
  *
  * Preferred usage going forward:
  *   import { fetchAbout } from '../api/portfolioService';
- *   import { postChaosDrain } from '../api/contactService';
+ *   import { postContact } from '../api/contactService';
  *   import { ApiError } from '../api/client';
  */
 export * from './types';

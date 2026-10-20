@@ -48,7 +48,6 @@ Global Edge UI deployment.
     | Variable | Required | Value | Description |
     |---|---|---|---|
     | `VITE_API_URL` | ✅ Yes | `https://api.argenisbackend.com/api/v1` | Base URL for all API calls |
-    | `VITE_ENABLE_CHAOS_PLAYGROUND` | Optional | `true` | Enables the Chaos Playground and Trace Viewer UI |
 
     **`VITE_API_URL` — Formal Contract**
 
@@ -59,7 +58,7 @@ Global Edge UI deployment.
     > - ❌ Wrong: `https://api.argenisbackend.com` (missing suffix)
     > - ❌ Wrong: `https://api.argenisbackend.com/api/v1/` (trailing slash)
     >
-    > **Why this matters:** All endpoint builders (e.g. `buildApiUrl('/chaos/drain')`) concatenate paths
+    > **Why this matters:** All endpoint builders (e.g. `buildApiUrl('/about')`) concatenate paths
     > directly onto this base. Without `/api/v1`, requests land on non-existent routes and fail silently.
     >
     > **Enforcement:** In production builds (`import.meta.env.PROD === true`), the frontend will
