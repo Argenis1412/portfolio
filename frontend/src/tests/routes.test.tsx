@@ -94,7 +94,7 @@ describe('public routes', () => {
     expect(screen.getByRole('link', { name: 'Métricas' }).getAttribute('href')).toBe('#metrics');
     expect(screen.queryByRole('link', { name: 'Caos' })).toBeNull();
     expect(screen.queryByRole('link', { name: 'Traces' })).toBeNull();
-    expect(screen.getByRole('link', { name: 'Logs' }).getAttribute('href')).toBe('#logs');
+    expect(screen.getByRole('link', { name: 'Eventos do navegador' }).getAttribute('href')).toBe('#logs');
     expect(screen.getByRole('link', { name: 'Incidentes' }).getAttribute('href')).toBe('#incident-history');
   });
 });

@@ -2,11 +2,10 @@
 
 ## Purpose
 
-This is the retained content/design contract, not proof that every current UI
-consumer matches the cleanup backend. Chaos retirement still blocks release; see
-the [release prerequisites](../RELEASE_READINESS.md). Portfolio copy and its
-list/detail snapshots now reflect backend cleanup. Future content changes still
-require deliberate snapshot review; this does not retire existing UI consumers.
+This is the retained content/design contract. Frontend Chaos controls and retired
+metrics consumers have been removed; deployment remains unconfirmed. See the
+[release prerequisites](../RELEASE_READINESS.md). JSON claims and list/detail
+snapshots remain deliberate evidence boundaries.
 
 The portfolio is a hiring artifact first and a system demonstration second.
 Its home page must answer, in order: who the engineer is, what they build,
@@ -27,8 +26,9 @@ The home page owns only this sequence:
 7. Experience, contact, and short biography.
 
 The home page does not own detailed traces, logs, or full incident narratives.
-Those belong to `/production-evidence`. The earlier placement of interactive
-Chaos controls there is historical; retiring those controls remains required.
+The production evidence route owns received metrics, browser-local alerts, and
+documented historical incidents. Interactive Chaos controls and synthetic traces
+have been retired. Browser events are not server logs or automated recovery.
 
 ## Evidence Rules
 
@@ -51,7 +51,7 @@ The following claims must be presented with these boundaries:
 | JSON-first reads have no SQL application dependency. | [JSON decision](JSON_FIRST_READ_PATH.md), historical INC-002. | Implementation evidence; historical latency figures retain their release context. |
 | Contact uses Redis Streams, classified retries, DLQ, and pending recovery when queued. | [Architecture](../../ARCHITECTURE.md), backend tests. | `REAL` implementation evidence; background fallback is not durable, and acceptance is not inbox delivery. |
 | Backend test configuration requires 80% coverage. | `backend/pytest.ini`, backend workflow. | Repository configuration; CI execution requires a matching trigger and a successful run artifact. |
-| Old Chaos scenarios and frontend fixture responses exist in history/current consumers. | [Retired decision](ADR-17-chaos-e2e-strategy.md), frontend E2E files. | Historical design/isolated UI evidence, not current backend failure testing or production behavior. |
+| Old Chaos scenarios remain in history; current frontend fixtures exercise content, metrics, and contact. | [Retired decision](ADR-17-chaos-e2e-strategy.md), frontend E2E files. | Historical design/isolated UI evidence, not current backend failure testing or production behavior. |
 
 Unsupported contribution counts, project impact claims, and live-demo claims are
 not published until a verifiable source is available.
@@ -79,7 +79,7 @@ they are not repeated in the hero, About section, footer, and project summary.
 | Project records and case studies | `/api/v1/projects` | Featured Projects and project routes. |
 | Operational status | `/api/v1/metrics/summary` | Production Snapshot and Production Evidence. |
 | Architecture decisions | ADRs and decision configuration | Decision routes. |
-| Telemetry presentation | Backend-confirmed observations through existing hooks, after frontend retirement. | Production Evidence only; no retired simulation claims. |
+| Telemetry presentation | Validated backend measurements through existing hooks; local alerts explicitly identified. | Production Evidence only; no retired simulation claims. |
 
 ## Public Navigation
 

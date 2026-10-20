@@ -16,6 +16,7 @@ This changelog separates three categories intentionally:
 
 - Removed frontend failure injection and retired metrics contracts; contact remains available. Metrics expire after 60 seconds without a validated reading. Frontend deployment is not confirmed.
 - Historical P95 charts draw only received observations, including a single point for a single reading; no fabricated predecessor or confidence percentage is attached to samples.
+- Completed isolated E2E coverage, browser-local alert labeling, dead trace cleanup, and smoke workflow targeting with read-only permissions. Backend CORS allowance remains for cached clients.
 
 ### Fixed
 
@@ -119,15 +120,18 @@ incidents and versioned releases below retain their original historical context.
 
 ### Frontend deployment dependency
 
-**Do not merge or deploy this cleanup until frontend retirement is complete.**
-Zod defaults avoid parsing failures but do not remove misleading UI behavior.
+Frontend retirement is implemented in the urgent correction and its dependent
+validation follow-up. This records repository behavior, not deployed compatibility.
 
-| Pending consumer | Required change |
+| Consumer | Implemented change / remaining boundary |
 |---|---|
-| `frontend/src/api/chaosService.ts`, `useChaosActions`, playground controls | Retire simulation actions; retain contact submission. |
-| `frontend/src/api/schemas.ts`, `useLiveMetrics`, status/metrics banners | Remove synthetic fields and simulation-derived status, counters, and recovery logic. |
-| `frontend/src/api/client.ts` | Remove `X-Chaos-Preset`, then its temporary backend CORS allowance. `X-Debug-Mode` is already ignored and disallowed. |
-| `frontend/e2e/chaos.spec.ts`, `.github/workflows/e2e-smoke.yml` | Replace simulation smoke scenarios before targeting the updated API. |
+| Actions, presets, playground and trace projections | Retired; contact remains available through its own service. |
+| Metrics schema, polling and banners | Shared old/new fields only; invalid states fail validation and data expires after 60 seconds. |
+| Client headers / backend CORS | Client no longer sends `X-Chaos-Preset`. Keep backend permission until frontend deployment and cached clients are verified. |
+| Playwright / smoke workflow | Isolated fixtures, fake delivery, external-network blocking; main push/PR and local-default manual execution. |
+
+The frontend deployment, exact backend deployment SHA, external health monitors,
+and capacity acceptance remain operational follow-ups. `/saude` and `/salud` remain.
 
 Before any future release, migrate existing local keys using the
 [backend guide](backend/README.md#configuration), confirm the GitHub secret
