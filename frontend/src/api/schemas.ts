@@ -90,10 +90,10 @@ export const PhilosophyItemSchema = z.object({
 });
 
 export const MetricsSummarySchema = z.object({
-  p95_ms: z.number().int(),
+  p95_ms: z.number().int().nonnegative(),
   p95_status: z.enum(['healthy', 'degraded', 'warming_up']),
-  requests_since_deploy: z.number().int(),
-  error_rate: z.number(),
+  requests_since_deploy: z.number().int().nonnegative(),
+  error_rate: z.number().min(0).max(1),
   error_rate_pct: z.string(),
   error_rate_status: z.enum(['stable', 'warning', 'investigating', 'warming_up']),
   system_status: z.enum(['operational', 'degraded', 'down']),

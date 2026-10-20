@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 export function useCurrentTime(intervalMs: number = 1000): number {
-  const [currentTime, setCurrentTime] = useState(0);
+  const [currentTime, setCurrentTime] = useState(() => Date.now());
 
   useEffect(() => {
     const update = () => setCurrentTime(Date.now());

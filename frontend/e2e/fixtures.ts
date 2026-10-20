@@ -11,6 +11,7 @@ export const test = base.extend<{ network: { contact: Record<string, unknown>[];
     const origin = new URL(baseURL!).origin;
     await context.route('**/*', async route => {
       const req = route.request();
+      expect(req.headers()).not.toHaveProperty('x-chaos-preset');
       const url = new URL(req.url());
       if (url.pathname.startsWith('/api/v1/')) {
         const path = url.pathname.slice('/api/v1'.length);
@@ -39,7 +40,12 @@ export const test = base.extend<{ network: { contact: Record<string, unknown>[];
       }
       return route.continue();
     });
-    await context.routeWebSocket('**/*', socket => socket.close());
+    await context.routeWebSocket('**/*', socket => {
+      const url = new URL(socket.url());
+      url.protocol = url.protocol === 'wss:' ? 'https:' : 'http:';
+      if (url.origin === origin) socket.connectToServer();
+      else socket.close();
+    });
     await use(network);
     expect(network.blocked.filter(url => new URL(url).pathname.includes('/chaos/'))).toEqual([]);
   }, { auto: true }],

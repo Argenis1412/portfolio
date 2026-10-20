@@ -99,7 +99,7 @@ export function useMetricsSummary() {
     staleTime: 10_000,
     refetchInterval: 15_000,
     refetchIntervalInBackground: false,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
     gcTime: 60_000,
     retry: 3,
     retryDelay: count => Math.min(1_000 * 2 ** count, 4_000),

@@ -16,6 +16,17 @@ beforeEach(() => {
 afterEach(() => vi.useRealTimers());
 
 describe('real metrics freshness', () => {
+  it('never exposes expired cached data during the first render', () => {
+    snapshot.dataUpdatedAt = Date.now() - 60_000;
+    const renders: boolean[] = [];
+    renderHook(() => {
+      const metrics = useLiveMetrics();
+      renders.push(metrics.data !== undefined);
+      return metrics;
+    });
+    expect(renders.length).toBeGreaterThan(0);
+    expect(renders.every(visible => !visible)).toBe(true);
+  });
   it('distinguishes loading and initial failure without calling the backend down', () => {
     snapshot = { data: undefined, dataUpdatedAt: 0, isError: false, isLoading: true };
     const { result, rerender } = renderHook(() => useLiveMetrics());

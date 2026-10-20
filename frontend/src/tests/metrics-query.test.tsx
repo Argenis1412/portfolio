@@ -1,5 +1,5 @@
 import { createElement, type ReactNode } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, focusManager } from '@tanstack/react-query';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { useLiveMetrics } from '../hooks/useLiveMetrics';
@@ -9,9 +9,23 @@ let client: QueryClient;
 function wrapper({ children }: { children: ReactNode }) {
   return createElement(QueryClientProvider, { client }, children);
 }
-afterEach(() => { client.clear(); vi.useRealTimers(); vi.restoreAllMocks(); });
+afterEach(() => { client.clear(); focusManager.setFocused(undefined); vi.useRealTimers(); vi.restoreAllMocks(); });
 
 describe('validated metrics query', () => {
+  it('refreshes stale metrics when visibility returns without waiting for the poll', async () => {
+    client = new QueryClient();
+    const fetch = vi.spyOn(globalThis, 'fetch').mockImplementation(async () => new Response(JSON.stringify(fixture)));
+    const { result } = renderHook(() => useLiveMetrics(), { wrapper });
+    await waitFor(() => expect(result.current.data?.p95_ms).toBe(44));
+    const received = result.current.lastSuccessAt!;
+    focusManager.setFocused(false);
+    vi.spyOn(Date, 'now').mockReturnValue(received + 60_000);
+    fetch.mockImplementation(async () => new Response(JSON.stringify({ ...fixture, p95_ms: 45 })));
+    act(() => focusManager.setFocused(true));
+    await waitFor(() => expect(result.current.data?.p95_ms).toBe(45));
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(result.current.lastSuccessAt).toBe(received + 60_000);
+  });
   it('does not renew the last good receipt time after a schema violation', async () => {
     client = new QueryClient();
     const fetch = vi.spyOn(globalThis, 'fetch').mockImplementation(async () => new Response(JSON.stringify(fixture)));
