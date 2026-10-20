@@ -26,3 +26,4 @@ dist-ssr
 # Test output artifacts
 test_output.txt
 *.test_output.txt
+playwright-report/
