@@ -49,39 +49,39 @@
       "es": "Un portfolio backend necesita evidencia operativa verificable en lugar de promesas estaticas de calidad."
     },
     "constraints": {
-      "en": "The SPA must remain useful during backend cold starts and clearly distinguish live from simulated signals.",
-      "pt": "A SPA precisa permanecer util durante cold starts e distinguir claramente sinais reais de simulados.",
-      "es": "La SPA debe seguir siendo util durante cold starts y distinguir claramente las senales reales de las simuladas."
+      "en": "Serve content and accept contact without SQL; distinguish implementation evidence from production measurements.",
+      "pt": "Servir conteúdo e aceitar contatos sem SQL; distinguir evidências de implementação de medições em produção.",
+      "es": "Servir contenido y aceptar contactos sin SQL; distinguir evidencias de implementación de mediciones en producción."
     },
     "solution": {
-      "en": "FastAPI Clean Architecture is paired with a React client, explicit telemetry labels, and documented failure behavior.",
-      "pt": "Clean Architecture com FastAPI e combinada com cliente React, etiquetas explicitas de telemetria e falhas documentadas.",
-      "es": "Clean Architecture con FastAPI se combina con un cliente React, etiquetas explicitas de telemetria y fallos documentados."
+      "en": "FastAPI use cases and adapters provide JSON content reads, HTTP telemetry, and asynchronous contact delivery.",
+      "pt": "Casos de uso e adaptadores FastAPI oferecem leituras JSON, telemetria HTTP e entrega assíncrona de contatos.",
+      "es": "Casos de uso y adaptadores FastAPI ofrecen lecturas JSON, telemetría HTTP y entrega asíncrona de contactos."
     },
     "architecture": {
-      "en": "Controllers call use cases and entities through repository ports; static reads use a JSON repository and mutations use transactional storage.",
-      "pt": "Controllers chamam casos de uso e entidades por portas de repositorio; leituras estaticas usam JSON e mutacoes usam armazenamento transacional.",
-      "es": "Los controllers llaman casos de uso y entidades mediante puertos de repositorio; las lecturas estaticas usan JSON y las mutaciones almacenamiento transaccional."
+      "en": "Controllers call use cases wired to adapters. Reads use cached JSON; contact uses Redis protection and stream delivery with a background fallback.",
+      "pt": "Controllers chamam casos de uso conectados a adaptadores. Leituras usam JSON em cache; contatos usam proteção Redis e entrega por stream com alternativa em segundo plano.",
+      "es": "Los controllers llaman casos de uso conectados a adaptadores. Las lecturas usan JSON en caché; los contactos usan protección Redis y entrega por stream con alternativa en segundo plano."
     },
     "testing": {
-      "en": "Backend, frontend, and chaos behavior are covered by unit, integration, and local CI end-to-end checks.",
-      "pt": "Backend, frontend e comportamento de chaos sao cobertos por testes unitarios, integracao e E2E local em CI.",
-      "es": "Backend, frontend y comportamiento de chaos estan cubiertos por pruebas unitarias, de integracion y E2E local en CI."
+      "en": "Backend tests cover content contracts, contact protection, delivery retries, and retired Chaos routes returning 404. Frontend compatibility and deployment-sized load testing remain pending.",
+      "pt": "Testes backend cobrem contratos de conteúdo, proteção de contatos, novas tentativas de entrega e rotas Chaos retiradas retornando 404. A compatibilidade frontend e os testes de carga na escala do deploy continuam pendentes.",
+      "es": "Las pruebas backend cubren contratos de contenido, protección de contactos, reintentos de entrega y rutas Chaos retiradas con respuesta 404. La compatibilidad frontend y las pruebas de carga a escala de despliegue siguen pendientes."
     },
     "reliability": {
-      "en": "Contact delivery uses idempotency, abuse controls, PII masking, Redis Streams retries, DLQ handling, and PEL recovery.",
-      "pt": "Entrega de contato usa idempotencia, controles de abuso, mascaramento de PII, retries Redis Streams, DLQ e recuperacao PEL.",
-      "es": "La entrega de contacto usa idempotencia, controles de abuso, enmascaramiento de PII, reintentos Redis Streams, DLQ y recuperacion PEL."
+      "en": "Stream delivery supports classified retries, DLQ handling, and pending recovery. Local protection resets on restart; background fallback has no automatic retries. Acceptance is not inbox delivery.",
+      "pt": "A entrega por stream oferece novas tentativas conforme o tipo de falha, DLQ e recuperação de pendências. A proteção local reinicia com o processo; a alternativa em segundo plano não tem novas tentativas automáticas. Aceitação não comprova entrega na caixa de entrada.",
+      "es": "La entrega por stream ofrece reintentos clasificados, DLQ y recuperación de pendientes. La protección local se reinicia con el proceso; la alternativa en segundo plano no tiene reintentos automáticos. La aceptación no demuestra entrega en la bandeja de entrada."
     },
     "impact": {
-      "en": "The JSON-first path removes the PostgreSQL round trip from static reads while preserving transactional storage for mutations.",
-      "pt": "O caminho JSON-first remove o round trip PostgreSQL de leituras estaticas e preserva armazenamento transacional para mutacoes.",
-      "es": "La ruta JSON-first elimina el round trip de PostgreSQL de las lecturas estaticas y conserva almacenamiento transaccional para mutaciones."
+      "en": "The cleanup removes SQL application paths and backend simulations while retaining content reads, contact delivery, and observed HTTP/worker metrics. Current latency and capacity still need measurement.",
+      "pt": "A limpeza remove caminhos SQL e simulações backend, mantendo leituras de conteúdo, entrega de contatos e métricas HTTP/worker observadas. Latência e capacidade atuais ainda precisam ser medidas.",
+      "es": "La limpieza retira las rutas SQL y simulaciones backend, conservando lecturas de contenido, entrega de contactos y métricas HTTP/worker observadas. La latencia y capacidad actuales aún necesitan medición."
     },
     "evidence": [
-      {"label": {"en": "CI coverage", "pt": "Cobertura de CI", "es": "Cobertura de CI"}, "value": "Backend, frontend, and local chaos checks", "classification": "REPRODUCED", "source": "docs/architecture/ADR-17-chaos-e2e-strategy.md"},
-      {"label": {"en": "Contact reliability", "pt": "Confiabilidade de contato", "es": "Fiabilidad de contacto"}, "value": "Redis Streams retries, DLQ handling, and PEL recovery", "classification": "REAL", "source": "ARCHITECTURE.md#20-resilient-background-processing-redis-streams"},
-      {"label": {"en": "Cold-start incident", "pt": "Incidente de cold start", "es": "Incidente de cold start"}, "value": "JSON-first read path removes the PostgreSQL round trip", "classification": "REPRODUCED", "source": "docs/architecture/JSON_FIRST_READ_PATH.md"}
+      {"label": {"en": "Backend regression tests", "pt": "Testes de regressão backend", "es": "Pruebas de regresión backend"}, "value": "Repository tests cover public JSON snapshots and retired Chaos routes; this is not live production evidence", "classification": "REAL", "source": "backend/tests/test_content_snapshots.py; backend/tests/test_chaos_retirement.py"},
+      {"label": {"en": "Contact reliability", "pt": "Confiabilidade de contato", "es": "Fiabilidad de contacto"}, "value": "Stream retries, DLQ, and pending recovery; background fallback has no automatic retries", "classification": "REAL", "source": "docs/architecture/production-operations.md#runtime-and-health-signals"},
+      {"label": {"en": "JSON content reads", "pt": "Leituras de conteúdo JSON", "es": "Lecturas de contenido JSON"}, "value": "On-demand JSON reads remove the SQL dependency; historical timings do not establish current performance", "classification": "REAL", "source": "docs/architecture/JSON_FIRST_READ_PATH.md"}
     ]
   },
   "patchforge": {

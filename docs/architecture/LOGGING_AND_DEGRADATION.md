@@ -1,59 +1,64 @@
-# Structured Logging & Degraded Mode
+# Structured Logging and Degradation Evidence
 
-## 1. Useful vs Pretty Logs: Automated Action Triggers
+This guide describes the cleanup branch. For accepted failure behavior, use the
+[failure model](FAILURE_MODEL.md); for recovery, use the
+[operations runbook](production-operations.md).
 
-Instead of outputting raw text dumps, the system outputs structured JSON logs. This enables automated tracing and immediate action rules.
+## Format and request context
 
-### Identified Pattern & Action Rule
-**Pattern Identified:** A repetitive chain of `psycopg2.OperationalError` triggers within 5 seconds under high load.
-**Rule:** `IF (Database_Timeout_Count > 5 in 10s) AND (CPU_Utilization > 85%)`
+`configure_structlog()` in `app/adapters/logger_adapter.py` configures logging
+once. It merges context variables, masks selected PII fields, adds level and ISO
+timestamp, formats exceptions, and renders human-readable output when stderr is
+a terminal or JSON otherwise. The configured filtering threshold is INFO;
+calling `debug()` does not imply a debug event is emitted.
 
-**Action (Automated):**
-1. **Trip Circuit Breaker** immediately (bypass halfway open state).
-2. **Activate Drain Mode** — purge the lowest priority 20% of the async queue.
-3. **Emit `System_Degraded` event** to telemetry tools.
+Request middleware generates a UUID request ID, binds method/path context, and
+logs `request_received`, `response_sent`, or `request_processing_error`. Normal
+response processing adds `X-Request-ID` and `X-Response-Time`; a valid active
+OpenTelemetry span can also supply `X-Trace-ID`. Correlation is conditional on
+middleware/span execution, not guaranteed for every error or asynchronous job.
+Use job IDs and consumer identity when following stream processing.
 
-#### Structured Log Example
-```json
-{
-  "timestamp": "2026-04-20T19:05:00Z",
-  "level": "CRITICAL",
-  "event": "circuit_breaker_tripped",
-  "actor": "chaos_latency_injector",
-  "metrics": {
-    "error_rate": 0.08,
-    "p95_latency_ms": 3500,
-    "active_connections": 100
-  },
-  "automated_action_taken": "queue_drained",
-  "suggested_human_action": "Verify database instance capacity or expand pool size."
-}
-```
+## Data handling limits
 
----
+- The processor masks top-level string `email` and `phone` fields. Shared email
+  masking retains at most one local-part character and a lowercase domain;
+  phone masking retains the first/last two digits when more than four exist.
+- Request query logging redacts recognized names such as `token`, `api_key`,
+  `email`, and `password`, case-insensitively. Other parameter names remain.
+  Email-prefixed request identities use the shared mask.
+- These transformations do not recursively sanitize nested objects, arbitrary
+  strings, exception text, paths, IP addresses, or every possible query key.
+  Select fields deliberately; do not log contact bodies, credentials, or provider
+  response bodies. `send_default_pii=False` in Sentry is a separate SDK setting.
 
-## 2. Degraded Mode: The Survival Payload
+## Events that explain degradation
 
-When the system triggers "Survival Mode" due to the aforementioned rule, it alters the standard API response wrapper. This dictates frontend behavior to save client resources and mask failure elegantly.
+| Evidence | Meaning | Interpretation limit |
+|---|---|---|
+| `rate_limiter_degraded_mode` | Contact protection attempted local rate limiting after primary storage failure. | Local state is not shared or durable; even this fallback can fail open. |
+| `rate_limiter_backend_unavailable` | Read-only rate limiting failed open. | It does not mean the content read itself failed. |
+| `rate_limit_backend_unavailable_total{path,mode}` | Counts primary storage failures during rate-limit evaluation. | Modes distinguish `degraded` and `fail_open`; this is not a total count of all Redis operations. |
+| `queue_unavailable_fallback_background` | Stream enqueue failed and delivery switched to a background task. | A disabled/missing queue also uses fallback without this enqueue-failure event. |
+| `contact_queued` with `delivery_mode` | Records stream or background acceptance after contact checks. | It does not establish provider acceptance or inbox delivery. |
+| `job_retry_scheduled`, `job_moved_to_dlq` | The consumer scheduled a retry or transferred failed work. | Reconcile job IDs with acknowledgment and provider evidence; at-least-once processing can duplicate delivery. |
 
-### JSON Structure Strategy (Backend -> React)
+Worker metrics complement these events; see the
+[observability guide](observability.md#http-and-worker-metrics). `/health` reports
+JSON file status and email configuration, not Redis or Resend connectivity.
+Check degraded bodies even when HTTP status is 200.
 
-```json
-{
-  "status": "success",
-  "data": {
-    // Normal or cached data payload
-  },
-  "system_telemetry": {
-    "status": "degraded",
-    "active_circuit_breakers": 1,
-    "ui_directives": {
-      "disable_animations": true,
-      "hide_secondary_metrics": true,
-      "throttle_polling": 30000
-    },
-    "message": "System is operating under heavy load. Non-essential features are disabled."
-  }
-}
-```
-*Frontend Reaction:* Upon receiving `disable_animations: true`, React strips Framer Motion wrappers and uses static renders to save the client's CPU while the slow response is processed.
+## Previous design examples
+
+The previous document proposed database-timeout/CPU rules, automatic circuit
+breaker transitions, purging 20% of a queue, a survival payload, and UI animation
+or polling directives. Those examples are not implemented by the current API
+and do not establish that the proposed automation ever ran. SQL and Chaos API
+paths are retired. The consumer's Redis quota circuit breaker is a separate
+mechanism, not evidence of those CPU/database rules or queue purging.
+
+Original examples remain available with
+`git show f3ceea8:docs/architecture/LOGGING_AND_DEGRADATION.md`.
+There is no current `system_telemetry` wrapper or server-issued `ui_directives`
+contract. Any future automated action needs its own scoped implementation and
+verification; this cleanup does not add alert routing or destructive queue actions.

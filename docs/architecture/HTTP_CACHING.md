@@ -1,24 +1,51 @@
 # Architecture Decision Record: HTTP Caching
 
-## Context and Problem Statement
-The frontend makes frequent requests to the backend for portfolio data, live metrics, and health status. Re-fetching identical data on every page navigation consumes unnecessary bandwidth and increases load on the server. We needed a strategy to efficiently cache API responses while ensuring the frontend always displays up-to-date data when relevant.
+## Current backend decision
 
-## Decision
-We adopted a multi-layered **HTTP Caching Strategy**:
-1. **React 19 + TanStack Query:** Client-side caching is optimized with a 15-minute stale time. Data is cached locally in the browser memory, enabling zero-refetch on mount and immediate transitions between pages.
-2. **HTTP ETags:** The backend generates an ETag hash for responses. When TanStack Query eventually revalidates data, the request includes the `If-None-Match` header. If the data hasn't changed, the server responds with `304 Not Modified`.
+Portfolio content routes use `cacheable_response()` in `app/core/cache_http.py`.
+This covers about, project lists/details, stack, experiences, formation, and
+philosophy under the API routers. It is separate from the repository's
+[on-demand JSON cache](JSON_FIRST_READ_PATH.md).
 
-## Consequences
+| Response | Backend behavior |
+|---|---|
+| Content with no matching validator | Returns the payload with `ETag` and `Cache-Control: public, max-age=300, stale-while-revalidate=60`. |
+| Exact matching `If-None-Match` string | Returns HTTP 304 with no body, retaining `ETag` and `Cache-Control`. |
+| `/api/v1/metrics/summary` | Sets `Cache-Control: public, max-age=15`; it does not use the ETag helper. |
 
-### Positive
-- **Zero-Bandwidth Revalidation:** The `304 Not Modified` responses drastically reduce payload sizes and bandwidth consumption.
-- **Instant Client Navigation:** TanStack Query serves from cache immediately, making navigation feel instantaneous.
-- **Reduced Server Load:** The backend skips JSON serialization and full response generation when the ETag matches.
+The ETag is a quoted value containing the first 16 hexadecimal characters of a
+SHA-256 digest. Input is `json.dumps(payload, ensure_ascii=False, sort_keys=True,
+default=str)`, not necessarily the exact wire bytes after response-model
+serialization and compression. The helper compares the whole incoming header
+string for equality; it does not parse validator lists, weak tags, or `*`.
 
-### Negative
-- **Implementation Complexity:** Requires careful handling of ETags and `Cache-Control` headers on the backend.
-- **Stale Data Risks:** If caching headers are misconfigured, users might see outdated system states.
+## Work saved and freshness limits
 
-## Implementation Notes
-- Cache duration for `/api/v1/metrics` is fine-tuned to avoid obscuring real-time chaos simulation changes.
-- ETags are generated using a fast hashing algorithm over the response JSON bytes.
+Routes execute their use cases and construct payloads before calling the helper.
+The helper serializes input to calculate the ETag even for a 304. A matching tag
+saves body transfer and subsequent normal response-body rendering; it does not
+skip route execution, rate-limit checks where present, or all serialization.
+A 304 still transfers response headers.
+
+Cache directives permit reuse but do not prove that a browser or intermediary
+stored the response, honored stale-while-revalidate, or revalidated it. Repository
+values remain cached for the repository instance; HTTP expiry does not reload
+changed files. Deploy corrected content and restart the process to replace
+cached values. Existing copies may remain fresh for the advertised cache period.
+
+Do not generalize these public cache directives to contact responses or assume
+that every endpoint uses the helper. Error responses are not successful cached
+content; failed stack reads propagate errors without a successful ETag response.
+
+## Frontend and historical context
+
+The former guide claimed automatic TanStack Query revalidation, a universal
+15-minute client stale time, and current Chaos metrics caching. Those claims are
+not this backend's contract. Frontend request/cache behavior requires a separate
+review during frontend retirement. In particular, CORS currently does not expose
+`ETag` or explicitly allow `If-None-Match` for manual JavaScript revalidation; see
+the [CORS policy](cors-policy.md#browser-and-cache-boundaries).
+
+Original wording is available with
+`git show 989c04c:docs/architecture/HTTP_CACHING.md`.
+No cache performance measurements or deployed CDN behavior were verified here.

@@ -37,17 +37,13 @@ class ContactGuard:
 
     Applies, in order:
       1. Honeypot check  — silent drop for bots
-      2. Spam scoring    — classify and optionally silent-drop high-score messages
+      2. Spam scoring    — label suspicious messages without discarding them
       3. Content dedup   — prevent identical messages within the TTL window
       4. Rate limiting   — per-email (10/day), per-IP (30/hour), per-fingerprint
 
     All checks delegate to the existing core modules; this class only
     orchestrates them and manages structured logging.
     """
-
-    # Spam score thresholds (must match spam_check.py semantics)
-    SCORE_SILENT_DROP = 70  # >= this: drop silently, return fake 200
-    SCORE_SUSPICIOUS = 30  # >= this: deliver with [POSSIBLE SPAM] flag
 
     # Dedup window in seconds (same message within 30 minutes = duplicate)
     DEDUP_TTL_SECONDS = 1800
@@ -75,17 +71,15 @@ class ContactGuard:
         return hashlib.sha256(content_str.encode()).hexdigest()
 
     @staticmethod
-    def get_spam_score(
-        message: str, email: str, name: str = "", subject: str = ""
-    ) -> int:
+    def get_spam_score(message: str, email: str) -> int:
         """
         Returns a spam score in [0, 100].
 
-        0–30   Normal  — deliver
-        31–69  Suspect — deliver with [POSSIBLE SPAM] flag
-        >=70   Silent spam — silently drop
+        0–29   Normal — deliver
+        30–69  Possible spam — deliver with a warning
+        >=70   Likely spam — deliver with a stronger warning
         """
-        return calculate_spam_score(message, email, name=name, subject=subject)
+        return calculate_spam_score(message, email)
 
     @staticmethod
     async def reserve_dedup(content_hash: str) -> bool:

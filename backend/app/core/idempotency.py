@@ -5,9 +5,9 @@ from typing import Any, Dict, Optional
 import structlog
 from fastapi import Header, HTTPException, Request, status
 from pydantic import BaseModel
-from redis import asyncio as redis
 
 from app.settings import settings
+from app.core.infrastructure import create_redis_client
 
 logger = structlog.get_logger(__name__)
 _REDIS_WARNING_INTERVAL = 60.0
@@ -51,12 +51,8 @@ class IdempotencyStore:
         self._last_redis_warning: float = float("-inf")
 
         if settings.redis_url and not settings.redis_url.startswith("memory://"):
-            self._redis = redis.from_url(
-                settings.redis_url,
-                decode_responses=True,
-                health_check_interval=30,
-                socket_timeout=settings.redis_socket_timeout_seconds,
-                socket_connect_timeout=settings.redis_connect_timeout_seconds,
+            self._redis = create_redis_client(
+                settings.redis_url, health_check_interval=30
             )
 
     def _redis_key(self, key: str) -> str:
@@ -131,8 +127,7 @@ class IdempotencyStore:
                     ex=self.lock_ttl_seconds,  # Short TTL: crash won't block retries for 1h
                     nx=True,
                 )
-                if acquired:
-                    return True
+                return bool(acquired)
             except Exception as exc:
                 self._log_redis_fallback("set_in_progress", exc)
 

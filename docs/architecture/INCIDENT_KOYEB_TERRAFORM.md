@@ -1,37 +1,36 @@
 # Incident Post-Mortem: INC-007
-## 🛑 Koyeb Terraform Provider Schema Incompatibility
 
-**Date:** 2026-05-07
-**Severity:** P1 (Infrastructure Blocked)
-**Status:** Resolved (via Architectural Pivot)
+## Koyeb Terraform Provider Schema Incompatibility
 
----
+**Recorded date:** 2026-05-07. **Severity:** P1, provisioning blocked.
+**Historical resolution:** Secret-first orchestration, v1.8.1.
+This is a historical report, not verification of today's provider capabilities.
 
-### 📝 Executive Summary
-During the migration from manual deployment to Infrastructure as Code (IaC) using Terraform, the deployment pipeline was blocked by a critical schema mismatch between the `koyeb/koyeb` Terraform provider (v0.1.11) and the modern Koyeb API. The provider lacked support for the newly mandatory `type` field in environment variable definitions, resulting in a permanent `400 Bad Request`.
+## Recorded failure and response
 
-### 🔍 Symptoms
-- **Terraform Error:** `{"field":"definition.env.***.type", "description":"env type is required"}`.
-- **Context:** The error persisted even after removing all unsupported arguments from the HCL code, indicating that the provider was sending an incomplete JSON payload to the API.
-- **Impact:** Automated infrastructure provisioning was impossible, stalling the v1.7.0 release.
+During the IaC migration, provider v0.1.11 could not represent metadata required
+by the Koyeb API for literal environment entries. Apply failed with HTTP 400 and
+`env type is required`, blocking the release's provisioning path.
 
-### 🕵️ Root Cause Analysis
-1.  **Abstractions Leak:** The Terraform provider (v0.1.11) was last updated in early 2024.
-2.  **API Evolution:** The Koyeb API evolved to require an explicit `type` (`PLAINTEXT` or `SECRET`) for all environment variables within a service definition.
-3.  **Schema Rigidity:** Because the provider's HCL schema did not include a `type` field for the `env` block, there was no way to pass the required metadata through standard configuration.
+The recorded workaround moved settings into Koyeb secrets and injected secret
+references into the service. Filtering omitted empty/null optional values, and
+resource keys were separated from sensitive inputs to make `for_each` usable.
+These describe the recorded response, not evidence that all later applies passed.
 
-### 🛡️ Mitigation & Architectural Pivot
-Instead of waiting for a provider update (which was outside our control), we implemented a **Secret-First Orchestration** strategy:
+## Lessons and current boundary
 
-1.  **Koyeb Secrets Vault:** Every environment variable (sensitive or not) was moved into a `koyeb_secret` resource.
-2.  **Reference-Only Injection:** The `koyeb_service` was refactored to use only `secret` references instead of literal `value` keys.
-3.  **Why it worked:** The Koyeb API handles secret references differently; since the secret itself already has an immutable type in the vault, the service definition API does not require the `type` field for that specific environment entry.
+Provider/API schema mismatches need version-specific evidence. Do not assume a
+historical limitation still exists or upgrade providers without a scoped review.
+Using secret resources does not by itself guarantee secure Terraform state;
+key sensitivity annotations and secret storage are distinct concerns.
 
-### 📈 Reliability Enhancements
-As a side effect of this incident, we introduced **Resilient Provisioning Logic**:
-- **Filtering Logic:** Added a Terraform `locals` filter to automatically omit empty/null variables from the provisioning loop. This prevents the "cannot use <nil>" API error when optional GitHub Secrets are missing.
-- **Nonsensitive Key Mapping:** Solved the `Invalid for_each argument` error by decoupling sensitive values from non-sensitive resource keys, ensuring a clean and secure Terraform state.
+The cleanup retains secret-first wiring and stable identities. `AMBIENTE` maps
+to application key `ENVIRONMENT`; confirmation of its production value remains
+pending. The application no longer uses SQL even though retained infrastructure
+still includes database configuration. No secret values or live state were
+inspected or changed here.
 
-### 💡 Lessons Learned
-- **Don't fight the tooling, bypass it:** When a managed provider is broken, look for alternative resource paths (Secrets vs. Env) that the API might handle more gracefully.
-- **Infrastructure is Code:** Just like application code, infrastructure needs defensive programming (filtering, error handling, and type safety).
+See the [IaC decision](ADR-18-iac-strategy.md),
+[operations runbook](production-operations.md), and [changelog](../../CHANGELOG.md).
+Original wording remains available with
+`git show bb3ff44:docs/architecture/INCIDENT_KOYEB_TERRAFORM.md`.

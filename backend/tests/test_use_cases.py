@@ -79,6 +79,23 @@ async def test_get_stack_groups_by_category(repository_mock):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("error_type", [FileNotFoundError, ValueError])
+async def test_get_stack_propagates_repository_failure(repository_mock, error_type):
+    repository_mock.get_stack.side_effect = error_type("Stack data unavailable")
+    uc = GetStackUseCase(repository_mock)
+
+    with pytest.raises(error_type, match="Stack data unavailable"):
+        await uc.execute()
+
+
+@pytest.mark.asyncio
+async def test_get_stack_accepts_empty_content(repository_mock):
+    repository_mock.get_stack.return_value = []
+
+    assert await GetStackUseCase(repository_mock).execute() == {}
+
+
+@pytest.mark.asyncio
 async def test_get_experiences_orders_chronologically(repository_mock):
     """Tests that experiences are ordered (current first)."""
     uc = GetExperiencesUseCase(repository_mock)
@@ -122,8 +139,17 @@ async def test_send_contact_success(email_adapter_mock, logger_mock):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("score", "label"),
+    [
+        (30, "POSSIBLE SPAM"),
+        (69, "POSSIBLE SPAM"),
+        (70, "LIKELY SPAM"),
+        (100, "LIKELY SPAM"),
+    ],
+)
 async def test_send_contact_suspicious_receives_visible_warning(
-    email_adapter_mock, logger_mock
+    email_adapter_mock, logger_mock, score, label
 ):
     """Tests that suspicious emails receive a strong warning in subject and body."""
     uc = SendContactUseCase(email_adapter_mock, logger_mock)
@@ -135,13 +161,13 @@ async def test_send_contact_suspicious_receives_visible_warning(
         subject="Security review",
         message="Please click this urgent link.",
         is_suspicious=True,
-        spam_score=45,
+        spam_score=score,
     )
 
     message_enviada = email_adapter_mock.send_message.call_args.args[0]
-    assert message_enviada.subject.startswith("[⚠ POSSIBLE SPAM]")
+    assert message_enviada.subject.startswith(f"[⚠ {label}]")
     assert "--- 🛡️ SECURITY WARNING (ANTI-SPAM FILTER) ---" in message_enviada.message
-    assert "Risk Level: 45/100" in message_enviada.message
+    assert f"Risk Level: {score}/100" in message_enviada.message
 
 
 @pytest.mark.asyncio

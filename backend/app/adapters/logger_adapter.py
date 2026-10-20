@@ -10,15 +10,9 @@ from typing import Any, Mapping, MutableMapping
 
 import structlog
 
+from app.utils.email import mask_email
+
 _structlog_configured = False
-
-
-def _mask_email(value: str) -> str:
-    if "@" not in value:
-        return "***"
-    local, domain = value.split("@", 1)
-    prefix = local[0] if local else "*"
-    return f"{prefix}***@{domain}"
 
 
 def _mask_phone(value: str) -> str:
@@ -34,28 +28,18 @@ def _mask_pii(
     email = event_dict.get("email")
     phone = event_dict.get("phone")
     if isinstance(email, str):
-        event_dict["email"] = _mask_email(email)
+        event_dict["email"] = mask_email(email)
     if isinstance(phone, str):
         event_dict["phone"] = _mask_phone(phone)
     return event_dict
 
 
 def configure_structlog() -> None:
+    """Configure context, PII masking, and terminal or JSON output once."""
     global _structlog_configured
     if _structlog_configured:
         return
     _structlog_configured = True
-    """
-    Configures structlog with suitable processors for production.
-
-    Processors:
-        - add_log_level: Adds log level
-        - add_logger_name: Adds logger name
-        - TimeStamper: Adds ISO 8601 timestamp
-        - StackInfoRenderer: Renders stack traces
-        - format_exc_info: Formats exceptions
-        - JSONRenderer (production) or ConsoleRenderer (dev)
-    """
     structlog.configure(
         processors=[
             structlog.contextvars.merge_contextvars,
@@ -65,7 +49,7 @@ def configure_structlog() -> None:
             structlog.processors.StackInfoRenderer(),
             structlog.processors.format_exc_info,
             structlog.processors.UnicodeDecoder(),
-            # JSON for production, Console for development
+            # Human-readable output in a terminal, JSON otherwise.
             structlog.dev.ConsoleRenderer()
             if sys.stderr.isatty()
             else structlog.processors.JSONRenderer(),

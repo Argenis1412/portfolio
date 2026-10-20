@@ -1,144 +1,76 @@
 # Service Level Objectives (SLOs)
 
-> Single source of truth for system performance targets.
-> Values extracted from ENGINEERING_PLAYBOOK.md section 11.
+These are retained engineering targets, not verified compliance claims for the
+cleanup branch. No live production measurements or new load test were collected
+for this documentation update. The [operations runbook](production-operations.md)
+records pending release checks and the frontend deployment blocker.
 
----
+## Targets and alert proposals
 
-## Overview
+| Scope | Retained objective | Proposed alert trigger |
+|---|---|---|
+| Static portfolio reads (`/api/v1/about`, `/api/v1/projects`, `/api/v1/stack`, `/api/v1/experiences`) | P95 < 100 ms | P95 > 100 ms for 5 minutes, or errors > 0.5% for 15 minutes. |
+| `POST /api/v1/contact` acceptance | P95 < 200 ms | P95 > 200 ms for 5 minutes, 5xx > 0.5% for 15 minutes, or Redis connection failures > 1% for 5 minutes. |
+| `GET /health` | P99 < 100 ms | P99 > 100 ms for 3 minutes, non-200 on two consecutive checks, or probe failure. Also inspect degraded response bodies. |
+| Global HTTP errors | At most 0.5% 5xx over a rolling 15-minute window | Above 0.5% for 15 minutes (warning); above 2% for 5 minutes (critical). |
+| Critical reads and health | 99.9% availability over a rolling 30 days | Below 99.9% over 1 hour is an early warning, not the 30-day objective calculation. |
 
-This document defines the Service Level Objectives (SLOs) for the backend API. Each SLO includes the target value, measurement method, current status based on production incidents, and alert triggers.
+A 30-day availability budget at 99.9% is 43.2 minutes. These thresholds require
+verified monitor configuration, scope, minimum sample counts, and routing before
+being described as deployed alerts. Define the Redis failure ratio denominator
+explicitly when implementing that alert; it is not supplied by a log event alone.
 
----
+## Measurement contract
 
-## 1. Static Portfolio Data Endpoints
+Use the protected Prometheus endpoint for HTTP counters and duration histograms.
+Inspect exported metric names and labels before writing queries; do not assume a
+`path` label where the instrumentator exports `handler`. Calculate rolling error
+ratios from counter rates over the same route set and window, not lifetime totals.
 
-### Endpoints
-- `GET /api/v1/about`
-- `GET /api/v1/projects`
-- `GET /api/v1/stack`
-- `GET /api/v1/experiences`
+Measure each target's route population separately. Histogram quantiles are bucket
+estimates and become unstable under sparse traffic. Record sample count, window,
+release, cold/warm conditions, and concurrency alongside results. Client timings
+include network and browser costs and must be identified separately from server
+latency. Synthetic UI values are not backend SLI evidence.
 
-### Latency Target
-- **SLO:** P95 < 100ms
+`/api/v1/metrics/summary` is a process-local aggregate. Its P95 excludes probe and
+metrics routes and uses a duration baseline reset after warmup; request/error
+counters retain process-lifetime totals. It cannot establish an endpoint's rolling
+SLO or aggregate replicas. Use external collection for windowed, multi-instance
+measurements and probes for availability.
 
-### Measurement Method
-- **Primary:** Prometheus histograms exposed at `/metrics` endpoint (ADR-04)
-- **Secondary:** Synthetic telemetry from frontend `useLiveMetrics` hook (ADR-13)
-- **Backend Source:** FastAPI middleware records `latency_ms` per request with path label
+Contact latency measures acceptance, including protection and queue submission,
+not asynchronous Resend delivery or a PostgreSQL write. Background fallback has
+no automatic retry guarantee. Track worker/provider failures and DLQ evidence
+separately; an inbox-delivery SLO requires its own definition and instrumentation.
+Redis rate-limit failures use local contact protection and fail-open reads; see
+the [failure model](FAILURE_MODEL.md) for events and limits.
 
-### Current Status
-- **Status:** ✅ BEING MET
-- **Evidence:** INC-002 resolution (v1.4.1) migrated reads from PostgreSQL to `JSONRepository`, dropping P95 from ~320ms to <50ms at the time. Production P95 has since settled at ~79ms due to Koyeb free-tier hypervisor overhead and histogram bucket interpolation between the 50ms/100ms boundaries; SLO recalibrated to <100ms to reflect sustainable infrastructure-adjusted reality. Under low request volume (observed: ~33-146 total requests over ~176h uptime), the same hypervisor jitter can push P95 transiently to 150-500ms, amplified by bucket interpolation when the P95 sample index falls near the tail of a very small n. Real per-request timing on `/health` (145-157ms floor, 500-1250ms spikes) is used here only as an infrastructure-jitter proxy — `/health` is the only route with per-request DB round-trip visibility, so its absolute numbers are not a direct measurement of the DB-free static endpoints, though both share the same underlying hypervisor. Histogram buckets were narrowed in the 75-500ms range (interior boundaries added, individual bucket widths reduced) to reduce this interpolation error; the target SLO and alert trigger are unchanged, as this describes measurement precision under low traffic, not a regression in endpoint performance. This P95 model assumes a single long-lived process (`scalings.max=1` in `infrastructure/main.tf`); it silently diverges under horizontal scaling, since the underlying Prometheus histogram and baseline-reset state are process-local, not shared.
-- **Baseline:** Files loaded into memory at startup; no database round-trip
+The HTTP instrumentator excludes `/health`, `/live`, `/saude`, `/salud`, and
+`/metrics`; the health latency objective therefore needs external probe timings
+or separately added instrumentation. Its built-in counters also ignore
+untemplated routes, so a global ratio must state which requests are eligible.
 
-### Alert Trigger
-- P95 > 100ms for 5 consecutive minutes
-- OR error rate > 0.5% for 15 minutes
+`/health` checks JSON without network requests and can return HTTP 200 while
+`status="degraded"`. Monitor its body as well as transport success. `/live` only
+checks process response. External monitor configuration and legacy alias targets
+remain unverified. Backend Chaos endpoints are retired; historical synthetic
+failure exclusions do not justify discarding current unexpected failures.
 
----
+## Historical evidence
 
-## 2. Contact Submission Endpoint
+INC-002 recorded 280-400 ms database-related read latency before JSON-first reads.
+Older reports described sub-50 ms improvements and later low-volume histogram
+estimates around 79 ms. Those results do not establish current performance, and
+the earlier description of `/health` as a database probe is obsolete.
 
-### Endpoint
-- `POST /api/v1/contact`
+The previous SLO document recorded cold-start P95 around 3.5 seconds, warm P95
+around 1.3 seconds at five virtual users, and roughly 9.7% errors during a
+20-user ramp. These remain historical observations, not measurements of this
+branch or proof of a specific infrastructure root cause. The previous wording is
+available with `git show 9211c24:docs/architecture/SLO_DEFINITIONS.md`; see also the
+[recorded benchmark](../../benchmarks/results/02c08d3/summary.md).
 
-### Latency Target
-- **SLO:** P95 < 200ms (includes Redis round-trip for rate limiting)
-
-### Measurement Method
-- **Primary:** Prometheus histograms with `path="/api/v1/contact"` label
-- **Secondary:** Frontend `TraceConsole` records end-to-end latency including network
-- **Components Measured:** Redis rate limit check + PostgreSQL write + Resend API call
-
-### Current Status
-- **Status:** ✅ BEING MET
-- **Evidence:** INC-001 resolution (v1.3.0) migrated rate limiting to Redis (Upstash). Counters survive container restarts.
-- **Note:** Redis is now in the critical path; rate limiter fails open if unavailable (accepted in INC-001)
-
-### Alert Trigger
-- P95 > 200ms for 5 minutes
-- OR 5xx error rate > 0.5% for 15 minutes
-- OR Redis connection failures > 1% for 5 minutes
-- **Structured log event:** `rate_limiter_redis_fallback_open` → configure as a
-  critical alert in Sentry/Grafana. When this fires, anti-spam and rate limiting
-  on `/contact` are non-functional (fail-open). See INC-001 / FAILURE_MODEL.md §1.
-
----
-
-## 3. Health Check Endpoint
-
-### Endpoint
-- `GET /health`
-
-### Latency Target
-- **SLO:** P99 < 100ms *(Recalibrated from 20ms to match free tier hypervisor realities)*
-
-### Measurement Method
-- **Primary:** Prometheus histograms (no database dependency)
-- **Secondary:** Keep-alive cron job pings every 14 minutes, logs response time
-- **Chaos Testing:** Chaos Playground includes health check latency in telemetry
-
-### Current Status
-- **Status:** ⚠️ DEGRADATION OBSERVED
-- **Evidence:** Benchmarks against production (commit 3775843) show a clear distinction between infrastructure states:
-    - **P95 Cold Start:** ~3.5s (Initial container spin-up on Koyeb Free Tier).
-    - **P95 Warm State:** ~1.3s (Steady state traffic, 5 concurrent VUs).
-    - **Ramp-up Failure:** Timeouts observed at 20 concurrent VUs (Error rate ~9.7%), indicating infrastructure capacity limits.
-- **Root Cause:** Primarily Koyeb Free Tier cold-starts and "noisy neighbor" latency on shared hypervisors. ADR-05 removal of DB dependency fixed the logic, but infra remains non-deterministic under load.
-- **Historical Issue:** INC-002 showed keep-alive hitting `/health` was not enough when data endpoints still required DB.
-
-### Alert Trigger
-- P99 > 100ms for 3 minutes
-- OR non-200 HTTP response for 2 consecutive checks
-- OR keep-alive cron reports failure
-
----
-
-## 4. Error Rate Objectives (Global)
-
-### Target
-- **SLO:** Maximum 0.5% 5xx error rate over any 15-minute rolling window
-
-### Measurement Method
-- **Source:** Prometheus counter `http_requests_total{status=~"5.."}` divided by total requests
-- **Recording Rule:** `rate(http_requests_total[15m])` filtered by status code
-
-### Current Status
-- **Status:** ✅ BEING MET
-- **Historical Peak:** INC-001 period had elevated errors due to rate limiter failures; resolved in v1.3.0
-
-### Alert Trigger
-- Error rate > 0.5% for 15 minutes (warning)
-- Error rate > 2% for 5 minutes (critical)
-
----
-
-## 5. Availability Objectives
-
-### Target
-- **SLO:** 99.9% availability for critical endpoints (data reads, health check)
-- **Excluded:** Chaos Playground synthetic failures (labeled as expected behavior per ADR-13)
-
-### Measurement Method
-- **Source:** Synthetic probe success rate from keep-alive cron + frontend telemetry
-- **Window:** 30-day rolling
-
-### Current Status
-- **Status:** ✅ BEING MET
-- **Downtime Budget:** ~43 minutes/month allowed
-
-### Alert Trigger
-- Availability < 99.9% over 1-hour window
-
----
-
-## References
-
-- **Source of Truth:** ENGINEERING_PLAYBOOK.md section 11 (Performance)
-- **Incident History:** CHANGELOG.md (INC-001 through INC-006)
-- **Architecture Decisions:**
-  - ADR-04: Protected Prometheus metrics
-  - ADR-05: JSON-First Read Path
-  - ADR-11: External Storage (Redis)
-  - ADR-13: Synthetic vs. Real telemetry labeling
+Re-establish baselines for the single-process API/consumer deployment before
+claiming compliance or changing targets. Keep historical results tied to their
+recorded release and test conditions.

@@ -1,0 +1,1086 @@
+{
+  "about": {
+    "name": "Argenis Lopez",
+    "title": "Backend Developer | Python | FastAPI | Clean Architecture",
+    "location": "Curitiba, PR",
+    "email": "argenisbackend@gmail.com",
+    "phone": "(41) 9 9510-3364",
+    "github": "https://github.com/Argenis1412",
+    "linkedin": "https://www.linkedin.com/in/argenis1412/",
+    "description": {
+      "pt": "Focado em sistemas determinísticos, observabilidade estruturada e resiliência (graceful failure).",
+      "en": "Focused on deterministic systems, structured observability, and graceful failure.",
+      "es": "Enfocado en sistemas deterministas, observabilidad estructurada y resiliencia ante fallos (graceful failure)."
+    },
+    "availability": {
+      "pt": "Remoto, híbrido ou presencial",
+      "en": "Remote, hybrid, or on-site",
+      "es": "Remoto, híbrido o presencial"
+    }
+  },
+  "projects": {
+    "projects": [
+      {
+        "id": "portfolio-api",
+        "name": "Full-Stack Portfolio",
+        "short_description": {
+          "pt": "Project de Portfolio Full-Stack com FastAPI e React 19, focado em Clean Architecture e UX premium",
+          "en": "Full-Stack Portfolio project with FastAPI and React 19, focused on Clean Architecture and premium UX",
+          "es": "Proyecto de Portafolio Full-Stack con FastAPI y React 19, enfocado en Clean Architecture y UX premium"
+        },
+        "full_description": {
+          "pt": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problema</div><p>Um portfolio backend precisa de evidências verificáveis da implementação e limites claros para afirmações operacionais.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Restrição</div><p>A API deve servir o conteúdo do portfolio e aceitar mensagens de contato sem depender de SQL.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decisão</div><p>Usar casos de uso e adaptadores FastAPI, leituras JSON em cache, métricas HTTP e entrega de contato por Redis Streams com novas tentativas conforme o tipo de falha e fila de falhas.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>Falhas no Redis reduzem a proteção compartilhada a estado local; a entrega alternativa em segundo plano não é durável e não tem novas tentativas automáticas.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Resultado</div><p>A limpeza remove simulações Chaos e caminhos SQL do backend. Aceitar um contato não comprova entrega na caixa de entrada; latência e capacidade atuais ainda precisam ser medidas.</p></div>",
+          "en": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problem</div><p>A backend portfolio needs verifiable implementation evidence and clear limits on operational claims.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Constraint</div><p>The API must serve portfolio content and accept contact messages without a SQL dependency.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decision</div><p>Use FastAPI use cases and adapters, cached JSON reads, HTTP metrics, and Redis Streams contact delivery with classified retries and a dead-letter queue.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>Redis failures reduce shared protection to local state; background delivery fallback is not durable and has no automatic retries.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Outcome</div><p>The cleanup removes backend Chaos simulations and SQL paths. Contact acceptance does not prove inbox delivery; current latency and capacity still require measurement.</p></div>",
+          "es": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problema</div><p>Un portfolio backend necesita evidencias verificables de implementación y límites claros para las afirmaciones operativas.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Restricción</div><p>La API debe servir el contenido del portfolio y aceptar mensajes de contacto sin depender de SQL.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decisión</div><p>Usar casos de uso y adaptadores FastAPI, lecturas JSON en caché, métricas HTTP y entrega de contactos por Redis Streams con reintentos clasificados y cola de fallos.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>Los fallos de Redis reducen la protección compartida a estado local; la entrega alternativa en segundo plano no es duradera ni tiene reintentos automáticos.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Resultado</div><p>La limpieza retira las simulaciones Chaos y las rutas SQL del backend. Aceptar un contacto no demuestra entrega en la bandeja de entrada; la latencia y capacidad actuales aún necesitan medición.</p></div>"
+        },
+        "technologies": [
+          "Python",
+          "FastAPI",
+          "Pydantic V2",
+          "React 19",
+          "TypeScript",
+          "Tailwind CSS v4",
+          "TanStack Query",
+          "Framer Motion",
+          "Pytest",
+          "i18n (PT, EN, ES)",
+          "GitHub Actions",
+          "Docker"
+        ],
+        "features": [
+          "Multilingual support (PT, EN, ES) with dynamic switching",
+          "Contact validation, honeypots, rate limits, and optional idempotency",
+          "Cached JSON content reads with ETag revalidation",
+          "Clean Architecture implementation (Backend & Frontend approach)",
+          "OpenAPI/Swagger documentation outside production",
+          "Interactive Project and Experience showcases",
+          "Responsive and Animated UI with Dark/Light modes",
+          "Configured CI quality checks with branch and path filters"
+        ],
+        "learnings": [
+          "Full-Stack architecture and integration patterns",
+          "Scalable internationalization strategies",
+          "Advanced state management with TanStack Query",
+          "Multi-layered security for public forms",
+          "Modern CSS with Tailwind CSS v4 engine",
+          "Automated testing for complex business flows",
+          "CI/CD workflow orchestration"
+        ],
+        "highlighted": true,
+        "repository": "https://github.com/Argenis1412/portfolio",
+        "demo": null,
+        "image": null,
+        "case_study": {
+          "problem": {
+            "en": "A backend portfolio needs verifiable operational evidence instead of static quality claims.",
+            "pt": "Um portfolio backend precisa de evidencia operacional verificavel em vez de promessas estaticas de qualidade.",
+            "es": "Un portfolio backend necesita evidencia operativa verificable en lugar de promesas estaticas de calidad."
+          },
+          "constraints": {
+            "en": "Serve content and accept contact without SQL; distinguish implementation evidence from production measurements.",
+            "pt": "Servir conteúdo e aceitar contatos sem SQL; distinguir evidências de implementação de medições em produção.",
+            "es": "Servir contenido y aceptar contactos sin SQL; distinguir evidencias de implementación de mediciones en producción."
+          },
+          "solution": {
+            "en": "FastAPI use cases and adapters provide JSON content reads, HTTP telemetry, and asynchronous contact delivery.",
+            "pt": "Casos de uso e adaptadores FastAPI oferecem leituras JSON, telemetria HTTP e entrega assíncrona de contatos.",
+            "es": "Casos de uso y adaptadores FastAPI ofrecen lecturas JSON, telemetría HTTP y entrega asíncrona de contactos."
+          },
+          "architecture": {
+            "en": "Controllers call use cases wired to adapters. Reads use cached JSON; contact uses Redis protection and stream delivery with a background fallback.",
+            "pt": "Controllers chamam casos de uso conectados a adaptadores. Leituras usam JSON em cache; contatos usam proteção Redis e entrega por stream com alternativa em segundo plano.",
+            "es": "Los controllers llaman casos de uso conectados a adaptadores. Las lecturas usan JSON en caché; los contactos usan protección Redis y entrega por stream con alternativa en segundo plano."
+          },
+          "testing": {
+            "en": "Backend tests cover content contracts, contact protection, delivery retries, and retired Chaos routes returning 404. Frontend compatibility and deployment-sized load testing remain pending.",
+            "pt": "Testes backend cobrem contratos de conteúdo, proteção de contatos, novas tentativas de entrega e rotas Chaos retiradas retornando 404. A compatibilidade frontend e os testes de carga na escala do deploy continuam pendentes.",
+            "es": "Las pruebas backend cubren contratos de contenido, protección de contactos, reintentos de entrega y rutas Chaos retiradas con respuesta 404. La compatibilidad frontend y las pruebas de carga a escala de despliegue siguen pendientes."
+          },
+          "reliability": {
+            "en": "Stream delivery supports classified retries, DLQ handling, and pending recovery. Local protection resets on restart; background fallback has no automatic retries. Acceptance is not inbox delivery.",
+            "pt": "A entrega por stream oferece novas tentativas conforme o tipo de falha, DLQ e recuperação de pendências. A proteção local reinicia com o processo; a alternativa em segundo plano não tem novas tentativas automáticas. Aceitação não comprova entrega na caixa de entrada.",
+            "es": "La entrega por stream ofrece reintentos clasificados, DLQ y recuperación de pendientes. La protección local se reinicia con el proceso; la alternativa en segundo plano no tiene reintentos automáticos. La aceptación no demuestra entrega en la bandeja de entrada."
+          },
+          "impact": {
+            "en": "The cleanup removes SQL application paths and backend simulations while retaining content reads, contact delivery, and observed HTTP/worker metrics. Current latency and capacity still need measurement.",
+            "pt": "A limpeza remove caminhos SQL e simulações backend, mantendo leituras de conteúdo, entrega de contatos e métricas HTTP/worker observadas. Latência e capacidade atuais ainda precisam ser medidas.",
+            "es": "La limpieza retira las rutas SQL y simulaciones backend, conservando lecturas de contenido, entrega de contactos y métricas HTTP/worker observadas. La latencia y capacidad actuales aún necesitan medición."
+          },
+          "evidence": [
+            {
+              "label": {
+                "en": "Backend regression tests",
+                "pt": "Testes de regressão backend",
+                "es": "Pruebas de regresión backend"
+              },
+              "value": "Repository tests cover public JSON snapshots and retired Chaos routes; this is not live production evidence",
+              "classification": "REAL",
+              "source": "backend/tests/test_content_snapshots.py; backend/tests/test_chaos_retirement.py"
+            },
+            {
+              "label": {
+                "en": "Contact reliability",
+                "pt": "Confiabilidade de contato",
+                "es": "Fiabilidad de contacto"
+              },
+              "value": "Stream retries, DLQ, and pending recovery; background fallback has no automatic retries",
+              "classification": "REAL",
+              "source": "docs/architecture/production-operations.md#runtime-and-health-signals"
+            },
+            {
+              "label": {
+                "en": "JSON content reads",
+                "pt": "Leituras de conteúdo JSON",
+                "es": "Lecturas de contenido JSON"
+              },
+              "value": "On-demand JSON reads remove the SQL dependency; historical timings do not establish current performance",
+              "classification": "REAL",
+              "source": "docs/architecture/JSON_FIRST_READ_PATH.md"
+            }
+          ]
+        }
+      },
+      {
+        "id": "patchforge",
+        "name": "PatchForge",
+        "short_description": {
+          "pt": "Ferramenta de modificação de código orientada por IA que prioriza segurança, validação determinística e aprovação humana antes de aplicar mudanças.",
+          "en": "AI-powered code modification tool that prioritizes safety, deterministic validation, and human approval before applying changes.",
+          "es": "Herramienta de modificación de código con IA que prioriza seguridad, validación determinista y aprobación humana antes de aplicar cambios."
+        },
+        "full_description": {
+          "pt": "<div class=\"project-story\"><p>Ferramentas de código com IA podem modificar repositórios sem oferecer evidências suficientes de segurança, validação ou intenção.</p><p>As mudanças precisavam permanecer revisáveis, compatíveis com o estado do repositório e impossíveis de aplicar sem uma ação explícita do usuário.</p><p>O produto foi estruturado em um pipeline determinístico Plan → Preview → Validate → Apply, com contratos Pydantic tipados, artefatos persistidos e revisão nativa com Git.</p><p>O fluxo adiciona etapas e disciplina antes da alteração do repositório, mas torna cada mudança inspecionável e reduz automações opacas.</p><p>PatchForge entrega patches validados e auditáveis, permitindo que a IA proponha mudanças enquanto a decisão final permanece humana.</p></div>",
+          "en": "<div class=\"project-story\"><p>AI coding tools can modify repositories without providing enough evidence of safety, validation, or intent.</p><p>Changes had to remain reviewable, compatible with repository state, and impossible to apply without an explicit user action.</p><p>The product uses a deterministic Plan → Preview → Validate → Apply pipeline with typed Pydantic contracts, persisted artifacts, and Git-native review.</p><p>The workflow adds stages and discipline before repository modification, but makes every change inspectable and reduces opaque automation.</p><p>PatchForge delivers validated, auditable patches so AI can propose changes while the final decision remains human.</p></div>",
+          "es": "<div class=\"project-story\"><p>Las herramientas de código con IA pueden modificar repositorios sin aportar suficiente evidencia de seguridad, validación o intención.</p><p>Los cambios debían seguir siendo revisables, compatibles con el estado del repositorio e imposibles de aplicar sin una acción explícita del usuario.</p><p>El producto se organizó en un pipeline determinista Plan → Preview → Validate → Apply, con contratos Pydantic tipados, artefactos persistentes y revisión nativa con Git.</p><p>El flujo añade etapas y disciplina antes de modificar el repositorio, pero vuelve cada cambio inspeccionable y reduce la automatización opaca.</p><p>PatchForge entrega parches validados y auditables para que la IA proponga cambios mientras la decisión final sigue siendo humana.</p></div>"
+        },
+        "technologies": [
+          "Python 3.12+",
+          "Pydantic",
+          "CLI",
+          "Git",
+          "Docker",
+          "Pytest",
+          "Ruff",
+          "GitHub Actions"
+        ],
+        "features": [
+          "Deterministic Plan, Preview, Validate, and Apply workflow",
+          "Typed Pydantic contracts between specialized agents",
+          "Persisted plans, patches, and validation reports",
+          "Repository safety checks before patch application",
+          "Git-native review and explicit human approval",
+          "Configurable subprocess timeout policy",
+          "CI quality gates with pytest and Ruff"
+        ],
+        "learnings": [
+          "Safety-first AI-assisted code modification",
+          "Deterministic workflows for autonomous systems",
+          "Typed contracts for multi-agent orchestration",
+          "Artifact-based validation and auditability",
+          "Git compatibility checks and controlled patch application",
+          "CLI and Docker delivery for developer tools"
+        ],
+        "highlighted": true,
+        "repository": "https://github.com/Argenis1412/PatchForge",
+        "demo": null,
+        "image": null,
+        "case_study": {
+          "problem": {
+            "pt": "Ferramentas de codigo com IA podem alterar repositorios sem fornecer prova suficiente de seguranca, validacao ou intencao.",
+            "en": "AI coding tools can change repositories without giving developers enough proof of safety, validation, or intent.",
+            "es": "Las herramientas de codigo con IA pueden cambiar repositorios sin ofrecer prueba suficiente de seguridad, validacion o intencion."
+          },
+          "constraints": {
+            "pt": "Mudancas devem permanecer revisaveis, compativeis com o estado do repositorio e impossiveis de aplicar sem acao humana explicita.",
+            "en": "Changes must remain reviewable, compatible with repository state, and impossible to apply without explicit human action.",
+            "es": "Los cambios deben seguir siendo revisables, compatibles con el estado del repositorio e imposibles de aplicar sin una accion humana explicita."
+          },
+          "solution": {
+            "pt": "Um pipeline deterministico Plan, Preview, Validate, Apply persiste artefatos e exige aprovacao humana antes da modificacao.",
+            "en": "A deterministic Plan, Preview, Validate, Apply pipeline persists artifacts and requires human approval before modification.",
+            "es": "Un pipeline determinista Plan, Preview, Validate, Apply persiste artefactos y exige aprobacion humana antes de la modificacion."
+          },
+          "architecture": {
+            "pt": "Contratos Pydantic tipados e revisao nativa Git mantem explicitas as fronteiras de planejamento, validacao e aplicacao.",
+            "en": "Typed Pydantic contracts and Git-native review keep planning, validation, and application boundaries explicit.",
+            "es": "Contratos Pydantic tipados y revision nativa de Git mantienen explicitos los limites de planificacion, validacion y aplicacion."
+          },
+          "testing": {
+            "pt": "O projeto mantem mais de 1.000 testes automatizados, incluindo regressao para concorrencia e fallback de provedores.",
+            "en": "The project maintains more than 1,000 automated tests, including regression coverage for concurrency and provider fallback behavior.",
+            "es": "El proyecto mantiene mas de 1.000 pruebas automatizadas, incluida regresion para concurrencia y fallback de proveedores."
+          },
+          "reliability": {
+            "pt": "A inicializacao do circuit breaker usa locks ordenados e testes de contencao para preservar uma unica instancia por provedor sob concorrencia.",
+            "en": "Circuit breaker initialization uses ordered locks and contention tests to preserve a single provider instance under concurrent access.",
+            "es": "La inicializacion del circuit breaker usa locks ordenados y pruebas de contencion para preservar una unica instancia por proveedor bajo concurrencia."
+          },
+          "impact": {
+            "pt": "A IA pode propor uma mudanca, mas a evidencia de validacao e a decisao final sobre o repositorio permanecem com o revisor humano.",
+            "en": "AI can propose a change, but validation evidence and the final repository decision remain with the human reviewer.",
+            "es": "La IA puede proponer un cambio, pero la evidencia de validacion y la decision final sobre el repositorio permanecen con el revisor humano."
+          },
+          "evidence": [
+            {
+              "label": {
+                "pt": "Suite de testes",
+                "en": "Test suite",
+                "es": "Suite de pruebas"
+              },
+              "value": "1,000+ automated tests",
+              "classification": "REAL",
+              "source": "PatchForge/docs/context/discoveries.md"
+            },
+            {
+              "label": {
+                "pt": "Seguranca de concorrencia",
+                "en": "Concurrency safety",
+                "es": "Seguridad de concurrencia"
+              },
+              "value": "Ordered locks and a registry contention regression test",
+              "classification": "REAL",
+              "source": "PatchForge/docs/context/discoveries.md"
+            },
+            {
+              "label": {
+                "pt": "Aprovacao humana",
+                "en": "Human approval",
+                "es": "Aprobacion humana"
+              },
+              "value": "Validation evidence and the final apply decision remain human-controlled",
+              "classification": "REAL",
+              "source": "PatchForge/docs/product-thesis-v2.md"
+            }
+          ]
+        }
+      },
+      {
+        "id": "loja-app",
+        "name": "Loja App",
+        "short_description": {
+          "pt": "Laboratório de lógica de pagamentos focado em cálculos financeiros determinísticos e fronteiras limpas de arquitetura.",
+          "en": "Payment logic laboratory focused on deterministic financial calculations and clean architectural boundaries.",
+          "es": "Laboratorio de lógica de pagos enfocado en cálculos financieros deterministas y fronteras limpias de arquitectura."
+        },
+        "full_description": {
+          "pt": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problema</div><p>Construir um motor de pagamentos capaz de executar cálculos financeiros exatos sem espalhar regras críticas entre frontend, framework e persistência.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Restrição</div><p>Parcelamentos exigiam consistência matemática, tratamento explícito de arredondamento e isolamento total da lógica de negócio em Python puro.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decisão</div><p>O backend foi definido como única fonte de verdade, com domínio independente de FastAPI e SQLAlchemy e regras explícitas para dinheiro, débito, crédito 2-6x sem juros e crédito 12-24x com 10%.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>A implementação exige mais disciplina arquitetural e mais testes, mas evita duplicação de regra e reduz inconsistências entre interface e cálculo financeiro.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Impacto</div><p>A última parcela absorve qualquer deriva de arredondamento, garantindo totais matematicamente exatos e um laboratório confiável para lógica de pagamentos.</p></div>",
+          "en": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problem</div><p>Build a payment engine capable of exact financial calculations without spreading critical rules across frontend, framework code, and persistence.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Constraint</div><p>Installment flows required mathematical consistency, explicit rounding handling, and full isolation of business logic in pure Python.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decision</div><p>The backend became the single source of truth, with a framework-independent domain and explicit rules for cash, debit, credit in 2-6 installments at 0% interest, and credit in 12-24 installments at 10% interest.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>The implementation demands stricter architecture and more testing, but avoids duplicated rules and reduces inconsistencies between UI and financial calculation.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Impact</div><p>The final installment absorbs any rounding drift, guaranteeing mathematically exact totals and a reliable laboratory for payment logic.</p></div>",
+          "es": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problema</div><p>Construir un motor de pagos capaz de ejecutar cálculos financieros exactos sin dispersar reglas críticas entre frontend, framework y persistencia.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Restricción</div><p>Los flujos de cuotas exigían consistencia matemática, manejo explícito del redondeo y aislamiento total de la lógica de negocio en Python puro.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decisión</div><p>El backend se definió como única fuente de verdad, con dominio independiente de FastAPI y SQLAlchemy y reglas explícitas para dinero, débito, crédito en 2-6 cuotas sin interés y crédito en 12-24 cuotas con 10%.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>La implementación exige más disciplina arquitectónica y más pruebas, pero evita duplicación de reglas y reduce inconsistencias entre UI y cálculo financiero.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Impacto</div><p>La última cuota absorbe cualquier deriva de redondeo, garantizando totales matemáticamente exactos y un laboratorio confiable de lógica de pagos.</p></div>"
+        },
+        "technologies": [
+          "Python",
+          "FastAPI",
+          "Pydantic",
+          "PostgreSQL",
+          "SQLAlchemy ORM",
+          "Alembic",
+          "Pytest",
+          "React",
+          "TypeScript",
+          "Tailwind CSS",
+          "GitHub Actions"
+        ],
+        "features": [
+          "REST API for payment system",
+          "Interest, discount, and installment calculation",
+          "Hexagonal Architecture: domain, use cases, adapters",
+          "Data validation with Pydantic",
+          "Automatic documentation with Swagger UI/OpenAPI",
+          "Unit and integration tests with pytest",
+          "CI with GitHub Actions",
+          "Persistence with PostgreSQL + SQLAlchemy ORM",
+          "Schema migrations with Alembic",
+          "React + TypeScript + Tailwind CSS frontend"
+        ],
+        "learnings": [
+          "Hexagonal Architecture implementation in Python",
+          "Deterministic financial business rules",
+          "Precise monetary calculations",
+          "ORM with SQLAlchemy",
+          "Schema migrations with Alembic",
+          "Integration testing with pytest",
+          "CI with GitHub Actions",
+          "Typed frontend with React + TypeScript"
+        ],
+        "highlighted": false,
+        "repository": "https://github.com/Argenis1412/Loja_app",
+        "demo": null,
+        "image": null,
+        "case_study": {
+          "problem": {
+            "pt": "Regras de pagamento precisam produzir totais exatos sem duplicar a logica de negocio entre UI, framework e persistencia.",
+            "en": "Payment rules must produce exact totals without duplicating business logic across the UI, framework, and persistence layers.",
+            "es": "Las reglas de pago deben producir totales exactos sin duplicar la logica de negocio entre la UI, el framework y la persistencia."
+          },
+          "constraints": {
+            "pt": "Parcelamentos exigem arredondamento explicito e regras monetarias deterministicas.",
+            "en": "Installments require explicit rounding and deterministic monetary rules.",
+            "es": "Las cuotas requieren redondeo explicito y reglas monetarias deterministas."
+          },
+          "solution": {
+            "pt": "O backend e a unica fonte de verdade para calculo e validacao de pagamentos.",
+            "en": "The backend is the single source of truth for payment calculation and validation.",
+            "es": "El backend es la unica fuente de verdad para el calculo y la validacion de pagos."
+          },
+          "architecture": {
+            "pt": "Clean Architecture mantem o dominio de pagamentos independente de FastAPI e SQLAlchemy.",
+            "en": "Clean Architecture keeps the payment domain independent from FastAPI and SQLAlchemy.",
+            "es": "Clean Architecture mantiene el dominio de pagos independiente de FastAPI y SQLAlchemy."
+          },
+          "testing": {
+            "pt": "O dominio de calculo de pagamentos possui testes unitarios completos; o projeto documenta 94% de cobertura total.",
+            "en": "The payment calculation domain is fully unit-tested; the project documents 94% total coverage.",
+            "es": "El dominio de calculo de pagos esta completamente probado por unidad; el proyecto documenta 94% de cobertura total."
+          },
+          "reliability": {
+            "pt": "Chaves de idempotencia, paginacao limitada, soft deletes e migracoes Alembic protegem o comportamento transacional.",
+            "en": "Idempotency keys, bounded pagination, soft deletes, and Alembic migrations protect transactional behavior.",
+            "es": "Claves de idempotencia, paginacion limitada, soft deletes y migraciones Alembic protegen el comportamiento transaccional."
+          },
+          "impact": {
+            "pt": "A ultima parcela absorve a diferenca de arredondamento para manter o total matematicamente exato.",
+            "en": "The final installment absorbs rounding drift so the payment total remains mathematically exact.",
+            "es": "La ultima cuota absorbe la diferencia de redondeo para mantener el total matematicamente exacto."
+          },
+          "evidence": [
+            {
+              "label": {
+                "pt": "Testes de dominio",
+                "en": "Domain tests",
+                "es": "Pruebas de dominio"
+              },
+              "value": "Payment calculation domain is 100% unit-tested",
+              "classification": "REAL",
+              "source": "Loja_app/README.md"
+            },
+            {
+              "label": {
+                "pt": "Cobertura",
+                "en": "Coverage",
+                "es": "Cobertura"
+              },
+              "value": "94% total coverage",
+              "classification": "REAL",
+              "source": "Loja_app/CHANGELOG.md"
+            },
+            {
+              "label": {
+                "pt": "Controles transacionais",
+                "en": "Transactional controls",
+                "es": "Controles transaccionales"
+              },
+              "value": "Idempotency, pagination, soft deletes, and Alembic migrations",
+              "classification": "REAL",
+              "source": "Loja_app/docs/adr/0001-standardization-and-observability.md; Loja_app/docs/adr/0002-idempotency-and-pagination.md"
+            },
+            {
+              "label": {
+                "pt": "Politica de arredondamento",
+                "en": "Rounding policy",
+                "es": "Politica de redondeo"
+              },
+              "value": "Final installment absorbs rounding drift",
+              "classification": "REAL",
+              "source": "Loja_app/README.md"
+            }
+          ]
+        }
+      }
+    ],
+    "total": 3
+  },
+  "projects/portfolio-api": {
+    "id": "portfolio-api",
+    "name": "Full-Stack Portfolio",
+    "short_description": {
+      "pt": "Project de Portfolio Full-Stack com FastAPI e React 19, focado em Clean Architecture e UX premium",
+      "en": "Full-Stack Portfolio project with FastAPI and React 19, focused on Clean Architecture and premium UX",
+      "es": "Proyecto de Portafolio Full-Stack con FastAPI y React 19, enfocado en Clean Architecture y UX premium"
+    },
+    "full_description": {
+      "pt": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problema</div><p>Um portfolio backend precisa de evidências verificáveis da implementação e limites claros para afirmações operacionais.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Restrição</div><p>A API deve servir o conteúdo do portfolio e aceitar mensagens de contato sem depender de SQL.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decisão</div><p>Usar casos de uso e adaptadores FastAPI, leituras JSON em cache, métricas HTTP e entrega de contato por Redis Streams com novas tentativas conforme o tipo de falha e fila de falhas.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>Falhas no Redis reduzem a proteção compartilhada a estado local; a entrega alternativa em segundo plano não é durável e não tem novas tentativas automáticas.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Resultado</div><p>A limpeza remove simulações Chaos e caminhos SQL do backend. Aceitar um contato não comprova entrega na caixa de entrada; latência e capacidade atuais ainda precisam ser medidas.</p></div>",
+      "en": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problem</div><p>A backend portfolio needs verifiable implementation evidence and clear limits on operational claims.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Constraint</div><p>The API must serve portfolio content and accept contact messages without a SQL dependency.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decision</div><p>Use FastAPI use cases and adapters, cached JSON reads, HTTP metrics, and Redis Streams contact delivery with classified retries and a dead-letter queue.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>Redis failures reduce shared protection to local state; background delivery fallback is not durable and has no automatic retries.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Outcome</div><p>The cleanup removes backend Chaos simulations and SQL paths. Contact acceptance does not prove inbox delivery; current latency and capacity still require measurement.</p></div>",
+      "es": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problema</div><p>Un portfolio backend necesita evidencias verificables de implementación y límites claros para las afirmaciones operativas.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Restricción</div><p>La API debe servir el contenido del portfolio y aceptar mensajes de contacto sin depender de SQL.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decisión</div><p>Usar casos de uso y adaptadores FastAPI, lecturas JSON en caché, métricas HTTP y entrega de contactos por Redis Streams con reintentos clasificados y cola de fallos.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>Los fallos de Redis reducen la protección compartida a estado local; la entrega alternativa en segundo plano no es duradera ni tiene reintentos automáticos.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Resultado</div><p>La limpieza retira las simulaciones Chaos y las rutas SQL del backend. Aceptar un contacto no demuestra entrega en la bandeja de entrada; la latencia y capacidad actuales aún necesitan medición.</p></div>"
+    },
+    "technologies": [
+      "Python",
+      "FastAPI",
+      "Pydantic V2",
+      "React 19",
+      "TypeScript",
+      "Tailwind CSS v4",
+      "TanStack Query",
+      "Framer Motion",
+      "Pytest",
+      "i18n (PT, EN, ES)",
+      "GitHub Actions",
+      "Docker"
+    ],
+    "features": [
+      "Multilingual support (PT, EN, ES) with dynamic switching",
+      "Contact validation, honeypots, rate limits, and optional idempotency",
+      "Cached JSON content reads with ETag revalidation",
+      "Clean Architecture implementation (Backend & Frontend approach)",
+      "OpenAPI/Swagger documentation outside production",
+      "Interactive Project and Experience showcases",
+      "Responsive and Animated UI with Dark/Light modes",
+      "Configured CI quality checks with branch and path filters"
+    ],
+    "learnings": [
+      "Full-Stack architecture and integration patterns",
+      "Scalable internationalization strategies",
+      "Advanced state management with TanStack Query",
+      "Multi-layered security for public forms",
+      "Modern CSS with Tailwind CSS v4 engine",
+      "Automated testing for complex business flows",
+      "CI/CD workflow orchestration"
+    ],
+    "repository": "https://github.com/Argenis1412/portfolio",
+    "demo": null,
+    "highlighted": true,
+    "image": null,
+    "case_study": {
+      "problem": {
+        "en": "A backend portfolio needs verifiable operational evidence instead of static quality claims.",
+        "pt": "Um portfolio backend precisa de evidencia operacional verificavel em vez de promessas estaticas de qualidade.",
+        "es": "Un portfolio backend necesita evidencia operativa verificable en lugar de promesas estaticas de calidad."
+      },
+      "constraints": {
+        "en": "Serve content and accept contact without SQL; distinguish implementation evidence from production measurements.",
+        "pt": "Servir conteúdo e aceitar contatos sem SQL; distinguir evidências de implementação de medições em produção.",
+        "es": "Servir contenido y aceptar contactos sin SQL; distinguir evidencias de implementación de mediciones en producción."
+      },
+      "solution": {
+        "en": "FastAPI use cases and adapters provide JSON content reads, HTTP telemetry, and asynchronous contact delivery.",
+        "pt": "Casos de uso e adaptadores FastAPI oferecem leituras JSON, telemetria HTTP e entrega assíncrona de contatos.",
+        "es": "Casos de uso y adaptadores FastAPI ofrecen lecturas JSON, telemetría HTTP y entrega asíncrona de contactos."
+      },
+      "architecture": {
+        "en": "Controllers call use cases wired to adapters. Reads use cached JSON; contact uses Redis protection and stream delivery with a background fallback.",
+        "pt": "Controllers chamam casos de uso conectados a adaptadores. Leituras usam JSON em cache; contatos usam proteção Redis e entrega por stream com alternativa em segundo plano.",
+        "es": "Los controllers llaman casos de uso conectados a adaptadores. Las lecturas usan JSON en caché; los contactos usan protección Redis y entrega por stream con alternativa en segundo plano."
+      },
+      "testing": {
+        "en": "Backend tests cover content contracts, contact protection, delivery retries, and retired Chaos routes returning 404. Frontend compatibility and deployment-sized load testing remain pending.",
+        "pt": "Testes backend cobrem contratos de conteúdo, proteção de contatos, novas tentativas de entrega e rotas Chaos retiradas retornando 404. A compatibilidade frontend e os testes de carga na escala do deploy continuam pendentes.",
+        "es": "Las pruebas backend cubren contratos de contenido, protección de contactos, reintentos de entrega y rutas Chaos retiradas con respuesta 404. La compatibilidad frontend y las pruebas de carga a escala de despliegue siguen pendientes."
+      },
+      "reliability": {
+        "en": "Stream delivery supports classified retries, DLQ handling, and pending recovery. Local protection resets on restart; background fallback has no automatic retries. Acceptance is not inbox delivery.",
+        "pt": "A entrega por stream oferece novas tentativas conforme o tipo de falha, DLQ e recuperação de pendências. A proteção local reinicia com o processo; a alternativa em segundo plano não tem novas tentativas automáticas. Aceitação não comprova entrega na caixa de entrada.",
+        "es": "La entrega por stream ofrece reintentos clasificados, DLQ y recuperación de pendientes. La protección local se reinicia con el proceso; la alternativa en segundo plano no tiene reintentos automáticos. La aceptación no demuestra entrega en la bandeja de entrada."
+      },
+      "impact": {
+        "en": "The cleanup removes SQL application paths and backend simulations while retaining content reads, contact delivery, and observed HTTP/worker metrics. Current latency and capacity still need measurement.",
+        "pt": "A limpeza remove caminhos SQL e simulações backend, mantendo leituras de conteúdo, entrega de contatos e métricas HTTP/worker observadas. Latência e capacidade atuais ainda precisam ser medidas.",
+        "es": "La limpieza retira las rutas SQL y simulaciones backend, conservando lecturas de contenido, entrega de contactos y métricas HTTP/worker observadas. La latencia y capacidad actuales aún necesitan medición."
+      },
+      "evidence": [
+        {
+          "label": {
+            "en": "Backend regression tests",
+            "pt": "Testes de regressão backend",
+            "es": "Pruebas de regresión backend"
+          },
+          "value": "Repository tests cover public JSON snapshots and retired Chaos routes; this is not live production evidence",
+          "classification": "REAL",
+          "source": "backend/tests/test_content_snapshots.py; backend/tests/test_chaos_retirement.py"
+        },
+        {
+          "label": {
+            "en": "Contact reliability",
+            "pt": "Confiabilidade de contato",
+            "es": "Fiabilidad de contacto"
+          },
+          "value": "Stream retries, DLQ, and pending recovery; background fallback has no automatic retries",
+          "classification": "REAL",
+          "source": "docs/architecture/production-operations.md#runtime-and-health-signals"
+        },
+        {
+          "label": {
+            "en": "JSON content reads",
+            "pt": "Leituras de conteúdo JSON",
+            "es": "Lecturas de contenido JSON"
+          },
+          "value": "On-demand JSON reads remove the SQL dependency; historical timings do not establish current performance",
+          "classification": "REAL",
+          "source": "docs/architecture/JSON_FIRST_READ_PATH.md"
+        }
+      ]
+    }
+  },
+  "projects/patchforge": {
+    "id": "patchforge",
+    "name": "PatchForge",
+    "short_description": {
+      "pt": "Ferramenta de modificação de código orientada por IA que prioriza segurança, validação determinística e aprovação humana antes de aplicar mudanças.",
+      "en": "AI-powered code modification tool that prioritizes safety, deterministic validation, and human approval before applying changes.",
+      "es": "Herramienta de modificación de código con IA que prioriza seguridad, validación determinista y aprobación humana antes de aplicar cambios."
+    },
+    "full_description": {
+      "pt": "<div class=\"project-story\"><p>Ferramentas de código com IA podem modificar repositórios sem oferecer evidências suficientes de segurança, validação ou intenção.</p><p>As mudanças precisavam permanecer revisáveis, compatíveis com o estado do repositório e impossíveis de aplicar sem uma ação explícita do usuário.</p><p>O produto foi estruturado em um pipeline determinístico Plan → Preview → Validate → Apply, com contratos Pydantic tipados, artefatos persistidos e revisão nativa com Git.</p><p>O fluxo adiciona etapas e disciplina antes da alteração do repositório, mas torna cada mudança inspecionável e reduz automações opacas.</p><p>PatchForge entrega patches validados e auditáveis, permitindo que a IA proponha mudanças enquanto a decisão final permanece humana.</p></div>",
+      "en": "<div class=\"project-story\"><p>AI coding tools can modify repositories without providing enough evidence of safety, validation, or intent.</p><p>Changes had to remain reviewable, compatible with repository state, and impossible to apply without an explicit user action.</p><p>The product uses a deterministic Plan → Preview → Validate → Apply pipeline with typed Pydantic contracts, persisted artifacts, and Git-native review.</p><p>The workflow adds stages and discipline before repository modification, but makes every change inspectable and reduces opaque automation.</p><p>PatchForge delivers validated, auditable patches so AI can propose changes while the final decision remains human.</p></div>",
+      "es": "<div class=\"project-story\"><p>Las herramientas de código con IA pueden modificar repositorios sin aportar suficiente evidencia de seguridad, validación o intención.</p><p>Los cambios debían seguir siendo revisables, compatibles con el estado del repositorio e imposibles de aplicar sin una acción explícita del usuario.</p><p>El producto se organizó en un pipeline determinista Plan → Preview → Validate → Apply, con contratos Pydantic tipados, artefactos persistentes y revisión nativa con Git.</p><p>El flujo añade etapas y disciplina antes de modificar el repositorio, pero vuelve cada cambio inspeccionable y reduce la automatización opaca.</p><p>PatchForge entrega parches validados y auditables para que la IA proponga cambios mientras la decisión final sigue siendo humana.</p></div>"
+    },
+    "technologies": [
+      "Python 3.12+",
+      "Pydantic",
+      "CLI",
+      "Git",
+      "Docker",
+      "Pytest",
+      "Ruff",
+      "GitHub Actions"
+    ],
+    "features": [
+      "Deterministic Plan, Preview, Validate, and Apply workflow",
+      "Typed Pydantic contracts between specialized agents",
+      "Persisted plans, patches, and validation reports",
+      "Repository safety checks before patch application",
+      "Git-native review and explicit human approval",
+      "Configurable subprocess timeout policy",
+      "CI quality gates with pytest and Ruff"
+    ],
+    "learnings": [
+      "Safety-first AI-assisted code modification",
+      "Deterministic workflows for autonomous systems",
+      "Typed contracts for multi-agent orchestration",
+      "Artifact-based validation and auditability",
+      "Git compatibility checks and controlled patch application",
+      "CLI and Docker delivery for developer tools"
+    ],
+    "repository": "https://github.com/Argenis1412/PatchForge",
+    "demo": null,
+    "highlighted": true,
+    "image": null,
+    "case_study": {
+      "problem": {
+        "pt": "Ferramentas de codigo com IA podem alterar repositorios sem fornecer prova suficiente de seguranca, validacao ou intencao.",
+        "en": "AI coding tools can change repositories without giving developers enough proof of safety, validation, or intent.",
+        "es": "Las herramientas de codigo con IA pueden cambiar repositorios sin ofrecer prueba suficiente de seguridad, validacion o intencion."
+      },
+      "constraints": {
+        "pt": "Mudancas devem permanecer revisaveis, compativeis com o estado do repositorio e impossiveis de aplicar sem acao humana explicita.",
+        "en": "Changes must remain reviewable, compatible with repository state, and impossible to apply without explicit human action.",
+        "es": "Los cambios deben seguir siendo revisables, compatibles con el estado del repositorio e imposibles de aplicar sin una accion humana explicita."
+      },
+      "solution": {
+        "pt": "Um pipeline deterministico Plan, Preview, Validate, Apply persiste artefatos e exige aprovacao humana antes da modificacao.",
+        "en": "A deterministic Plan, Preview, Validate, Apply pipeline persists artifacts and requires human approval before modification.",
+        "es": "Un pipeline determinista Plan, Preview, Validate, Apply persiste artefactos y exige aprobacion humana antes de la modificacion."
+      },
+      "architecture": {
+        "pt": "Contratos Pydantic tipados e revisao nativa Git mantem explicitas as fronteiras de planejamento, validacao e aplicacao.",
+        "en": "Typed Pydantic contracts and Git-native review keep planning, validation, and application boundaries explicit.",
+        "es": "Contratos Pydantic tipados y revision nativa de Git mantienen explicitos los limites de planificacion, validacion y aplicacion."
+      },
+      "testing": {
+        "pt": "O projeto mantem mais de 1.000 testes automatizados, incluindo regressao para concorrencia e fallback de provedores.",
+        "en": "The project maintains more than 1,000 automated tests, including regression coverage for concurrency and provider fallback behavior.",
+        "es": "El proyecto mantiene mas de 1.000 pruebas automatizadas, incluida regresion para concurrencia y fallback de proveedores."
+      },
+      "reliability": {
+        "pt": "A inicializacao do circuit breaker usa locks ordenados e testes de contencao para preservar uma unica instancia por provedor sob concorrencia.",
+        "en": "Circuit breaker initialization uses ordered locks and contention tests to preserve a single provider instance under concurrent access.",
+        "es": "La inicializacion del circuit breaker usa locks ordenados y pruebas de contencion para preservar una unica instancia por proveedor bajo concurrencia."
+      },
+      "impact": {
+        "pt": "A IA pode propor uma mudanca, mas a evidencia de validacao e a decisao final sobre o repositorio permanecem com o revisor humano.",
+        "en": "AI can propose a change, but validation evidence and the final repository decision remain with the human reviewer.",
+        "es": "La IA puede proponer un cambio, pero la evidencia de validacion y la decision final sobre el repositorio permanecen con el revisor humano."
+      },
+      "evidence": [
+        {
+          "label": {
+            "pt": "Suite de testes",
+            "en": "Test suite",
+            "es": "Suite de pruebas"
+          },
+          "value": "1,000+ automated tests",
+          "classification": "REAL",
+          "source": "PatchForge/docs/context/discoveries.md"
+        },
+        {
+          "label": {
+            "pt": "Seguranca de concorrencia",
+            "en": "Concurrency safety",
+            "es": "Seguridad de concurrencia"
+          },
+          "value": "Ordered locks and a registry contention regression test",
+          "classification": "REAL",
+          "source": "PatchForge/docs/context/discoveries.md"
+        },
+        {
+          "label": {
+            "pt": "Aprovacao humana",
+            "en": "Human approval",
+            "es": "Aprobacion humana"
+          },
+          "value": "Validation evidence and the final apply decision remain human-controlled",
+          "classification": "REAL",
+          "source": "PatchForge/docs/product-thesis-v2.md"
+        }
+      ]
+    }
+  },
+  "projects/loja-app": {
+    "id": "loja-app",
+    "name": "Loja App",
+    "short_description": {
+      "pt": "Laboratório de lógica de pagamentos focado em cálculos financeiros determinísticos e fronteiras limpas de arquitetura.",
+      "en": "Payment logic laboratory focused on deterministic financial calculations and clean architectural boundaries.",
+      "es": "Laboratorio de lógica de pagos enfocado en cálculos financieros deterministas y fronteras limpias de arquitectura."
+    },
+    "full_description": {
+      "pt": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problema</div><p>Construir um motor de pagamentos capaz de executar cálculos financeiros exatos sem espalhar regras críticas entre frontend, framework e persistência.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Restrição</div><p>Parcelamentos exigiam consistência matemática, tratamento explícito de arredondamento e isolamento total da lógica de negócio em Python puro.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decisão</div><p>O backend foi definido como única fonte de verdade, com domínio independente de FastAPI e SQLAlchemy e regras explícitas para dinheiro, débito, crédito 2-6x sem juros e crédito 12-24x com 10%.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>A implementação exige mais disciplina arquitetural e mais testes, mas evita duplicação de regra e reduz inconsistências entre interface e cálculo financeiro.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Impacto</div><p>A última parcela absorve qualquer deriva de arredondamento, garantindo totais matematicamente exatos e um laboratório confiável para lógica de pagamentos.</p></div>",
+      "en": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problem</div><p>Build a payment engine capable of exact financial calculations without spreading critical rules across frontend, framework code, and persistence.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Constraint</div><p>Installment flows required mathematical consistency, explicit rounding handling, and full isolation of business logic in pure Python.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decision</div><p>The backend became the single source of truth, with a framework-independent domain and explicit rules for cash, debit, credit in 2-6 installments at 0% interest, and credit in 12-24 installments at 10% interest.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>The implementation demands stricter architecture and more testing, but avoids duplicated rules and reduces inconsistencies between UI and financial calculation.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Impact</div><p>The final installment absorbs any rounding drift, guaranteeing mathematically exact totals and a reliable laboratory for payment logic.</p></div>",
+      "es": "<div class=\"project-story\"><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Problema</div><p>Construir un motor de pagos capaz de ejecutar cálculos financieros exactos sin dispersar reglas críticas entre frontend, framework y persistencia.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Restricción</div><p>Los flujos de cuotas exigían consistencia matemática, manejo explícito del redondeo y aislamiento total de la lógica de negocio en Python puro.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Decisión</div><p>El backend se definió como única fuente de verdad, con dominio independiente de FastAPI y SQLAlchemy y reglas explícitas para dinero, débito, crédito en 2-6 cuotas sin interés y crédito en 12-24 cuotas con 10%.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Trade-off</div><p>La implementación exige más disciplina arquitectónica y más pruebas, pero evita duplicación de reglas y reduce inconsistencias entre UI y cálculo financiero.</p><div class=\"font-bold text-app-primary uppercase text-xs tracking-widest mt-4 mb-1\">Impacto</div><p>La última cuota absorbe cualquier deriva de redondeo, garantizando totales matemáticamente exactos y un laboratorio confiable de lógica de pagos.</p></div>"
+    },
+    "technologies": [
+      "Python",
+      "FastAPI",
+      "Pydantic",
+      "PostgreSQL",
+      "SQLAlchemy ORM",
+      "Alembic",
+      "Pytest",
+      "React",
+      "TypeScript",
+      "Tailwind CSS",
+      "GitHub Actions"
+    ],
+    "features": [
+      "REST API for payment system",
+      "Interest, discount, and installment calculation",
+      "Hexagonal Architecture: domain, use cases, adapters",
+      "Data validation with Pydantic",
+      "Automatic documentation with Swagger UI/OpenAPI",
+      "Unit and integration tests with pytest",
+      "CI with GitHub Actions",
+      "Persistence with PostgreSQL + SQLAlchemy ORM",
+      "Schema migrations with Alembic",
+      "React + TypeScript + Tailwind CSS frontend"
+    ],
+    "learnings": [
+      "Hexagonal Architecture implementation in Python",
+      "Deterministic financial business rules",
+      "Precise monetary calculations",
+      "ORM with SQLAlchemy",
+      "Schema migrations with Alembic",
+      "Integration testing with pytest",
+      "CI with GitHub Actions",
+      "Typed frontend with React + TypeScript"
+    ],
+    "repository": "https://github.com/Argenis1412/Loja_app",
+    "demo": null,
+    "highlighted": false,
+    "image": null,
+    "case_study": {
+      "problem": {
+        "pt": "Regras de pagamento precisam produzir totais exatos sem duplicar a logica de negocio entre UI, framework e persistencia.",
+        "en": "Payment rules must produce exact totals without duplicating business logic across the UI, framework, and persistence layers.",
+        "es": "Las reglas de pago deben producir totales exactos sin duplicar la logica de negocio entre la UI, el framework y la persistencia."
+      },
+      "constraints": {
+        "pt": "Parcelamentos exigem arredondamento explicito e regras monetarias deterministicas.",
+        "en": "Installments require explicit rounding and deterministic monetary rules.",
+        "es": "Las cuotas requieren redondeo explicito y reglas monetarias deterministas."
+      },
+      "solution": {
+        "pt": "O backend e a unica fonte de verdade para calculo e validacao de pagamentos.",
+        "en": "The backend is the single source of truth for payment calculation and validation.",
+        "es": "El backend es la unica fuente de verdad para el calculo y la validacion de pagos."
+      },
+      "architecture": {
+        "pt": "Clean Architecture mantem o dominio de pagamentos independente de FastAPI e SQLAlchemy.",
+        "en": "Clean Architecture keeps the payment domain independent from FastAPI and SQLAlchemy.",
+        "es": "Clean Architecture mantiene el dominio de pagos independiente de FastAPI y SQLAlchemy."
+      },
+      "testing": {
+        "pt": "O dominio de calculo de pagamentos possui testes unitarios completos; o projeto documenta 94% de cobertura total.",
+        "en": "The payment calculation domain is fully unit-tested; the project documents 94% total coverage.",
+        "es": "El dominio de calculo de pagos esta completamente probado por unidad; el proyecto documenta 94% de cobertura total."
+      },
+      "reliability": {
+        "pt": "Chaves de idempotencia, paginacao limitada, soft deletes e migracoes Alembic protegem o comportamento transacional.",
+        "en": "Idempotency keys, bounded pagination, soft deletes, and Alembic migrations protect transactional behavior.",
+        "es": "Claves de idempotencia, paginacion limitada, soft deletes y migraciones Alembic protegen el comportamiento transaccional."
+      },
+      "impact": {
+        "pt": "A ultima parcela absorve a diferenca de arredondamento para manter o total matematicamente exato.",
+        "en": "The final installment absorbs rounding drift so the payment total remains mathematically exact.",
+        "es": "La ultima cuota absorbe la diferencia de redondeo para mantener el total matematicamente exacto."
+      },
+      "evidence": [
+        {
+          "label": {
+            "pt": "Testes de dominio",
+            "en": "Domain tests",
+            "es": "Pruebas de dominio"
+          },
+          "value": "Payment calculation domain is 100% unit-tested",
+          "classification": "REAL",
+          "source": "Loja_app/README.md"
+        },
+        {
+          "label": {
+            "pt": "Cobertura",
+            "en": "Coverage",
+            "es": "Cobertura"
+          },
+          "value": "94% total coverage",
+          "classification": "REAL",
+          "source": "Loja_app/CHANGELOG.md"
+        },
+        {
+          "label": {
+            "pt": "Controles transacionais",
+            "en": "Transactional controls",
+            "es": "Controles transaccionales"
+          },
+          "value": "Idempotency, pagination, soft deletes, and Alembic migrations",
+          "classification": "REAL",
+          "source": "Loja_app/docs/adr/0001-standardization-and-observability.md; Loja_app/docs/adr/0002-idempotency-and-pagination.md"
+        },
+        {
+          "label": {
+            "pt": "Politica de arredondamento",
+            "en": "Rounding policy",
+            "es": "Politica de redondeo"
+          },
+          "value": "Final installment absorbs rounding drift",
+          "classification": "REAL",
+          "source": "Loja_app/README.md"
+        }
+      ]
+    }
+  },
+  "stack": {
+    "stack": [
+      {
+        "name": "Python 3",
+        "category": "backend",
+        "level": 3,
+        "icon": "python"
+      },
+      {
+        "name": "FastAPI",
+        "category": "backend",
+        "level": 3,
+        "icon": "fastapi"
+      },
+      {
+        "name": "Pydantic",
+        "category": "backend",
+        "level": 3,
+        "icon": null
+      },
+      {
+        "name": "Pytest",
+        "category": "backend",
+        "level": 3,
+        "icon": "pytest"
+      },
+      {
+        "name": "PostgreSQL",
+        "category": "database",
+        "level": 3,
+        "icon": "postgresql"
+      },
+      {
+        "name": "SQLAlchemy ORM",
+        "category": "database",
+        "level": 3,
+        "icon": null
+      },
+      {
+        "name": "Alembic",
+        "category": "database",
+        "level": 2,
+        "icon": null
+      },
+      {
+        "name": "React",
+        "category": "frontend",
+        "level": 2,
+        "icon": "react"
+      },
+      {
+        "name": "TypeScript",
+        "category": "frontend",
+        "level": 2,
+        "icon": "typescript"
+      },
+      {
+        "name": "Fetch API",
+        "category": "frontend",
+        "level": 2,
+        "icon": null
+      },
+      {
+        "name": "Tailwind CSS",
+        "category": "frontend",
+        "level": 2,
+        "icon": "tailwindcss"
+      },
+      {
+        "name": "Git/GitHub",
+        "category": "devops",
+        "level": 3,
+        "icon": "git"
+      },
+      {
+        "name": "GitHub Actions",
+        "category": "devops",
+        "level": 2,
+        "icon": "github"
+      }
+    ],
+    "by_category": {
+      "backend": [
+        {
+          "name": "Python 3",
+          "category": "backend",
+          "level": 3,
+          "icon": "python"
+        },
+        {
+          "name": "FastAPI",
+          "category": "backend",
+          "level": 3,
+          "icon": "fastapi"
+        },
+        {
+          "name": "Pydantic",
+          "category": "backend",
+          "level": 3,
+          "icon": null
+        },
+        {
+          "name": "Pytest",
+          "category": "backend",
+          "level": 3,
+          "icon": "pytest"
+        }
+      ],
+      "database": [
+        {
+          "name": "PostgreSQL",
+          "category": "database",
+          "level": 3,
+          "icon": "postgresql"
+        },
+        {
+          "name": "SQLAlchemy ORM",
+          "category": "database",
+          "level": 3,
+          "icon": null
+        },
+        {
+          "name": "Alembic",
+          "category": "database",
+          "level": 2,
+          "icon": null
+        }
+      ],
+      "frontend": [
+        {
+          "name": "React",
+          "category": "frontend",
+          "level": 2,
+          "icon": "react"
+        },
+        {
+          "name": "TypeScript",
+          "category": "frontend",
+          "level": 2,
+          "icon": "typescript"
+        },
+        {
+          "name": "Fetch API",
+          "category": "frontend",
+          "level": 2,
+          "icon": null
+        },
+        {
+          "name": "Tailwind CSS",
+          "category": "frontend",
+          "level": 2,
+          "icon": "tailwindcss"
+        }
+      ],
+      "devops": [
+        {
+          "name": "Git/GitHub",
+          "category": "devops",
+          "level": 3,
+          "icon": "git"
+        },
+        {
+          "name": "GitHub Actions",
+          "category": "devops",
+          "level": 2,
+          "icon": "github"
+        }
+      ]
+    }
+  },
+  "experiences": {
+    "experiences": [
+      {
+        "id": "exp-001",
+        "role": {
+          "pt": "Desenvolvedor Backend",
+          "en": "Backend Developer",
+          "es": "Desarrollador Backend"
+        },
+        "company": "Loja App (Personal Project)",
+        "location": "Remote",
+        "start_date": "2025-12-20",
+        "end_date": "2026-03-06",
+        "description": {
+          "pt": "[Decision] Estruturei o project como um laboratório de lógica de pagamentos, com foco em cálculos financeiros determinísticos e fronteiras limpas entre domínio, API e persistência.\n[Learning] Consolidei regras explícitas para dinheiro, débito, crédito em 2-6x sem juros e crédito em 12-24x com juros de 10%, mantendo o backend como única fonte de verdade.\n[Impact] A última parcela absorve qualquer deriva de arredondamento, garantindo totais matematicamente exatos e regras desacopladas de FastAPI e SQLAlchemy.\n[Impact] Stack aplicada: FastAPI, PostgreSQL, SQLAlchemy, Pytest, React e TypeScript.",
+          "en": "[Decision] I structured the project as a payment logic laboratory focused on deterministic financial calculations and clean boundaries between domain, API, and persistence.\n[Learning] I consolidated explicit rules for cash, debit, credit in 2-6 installments with 0% interest, and credit in 12-24 installments with 10% interest while keeping the backend as the single source of truth.\n[Impact] The final installment absorbs any rounding drift, guaranteeing mathematically exact totals and rules fully decoupled from FastAPI and SQLAlchemy.\n[Impact] Applied stack: FastAPI, PostgreSQL, SQLAlchemy, Pytest, React, and TypeScript.",
+          "es": "[Decision] Estructuré el proyecto como un laboratorio de lógica de pagos enfocado en cálculos financieros deterministas y fronteras limpias entre dominio, API y persistencia.\n[Learning] Consolidé reglas explícitas para dinero, débito, crédito en 2-6 cuotas sin interés y crédito en 12-24 cuotas con 10% de interés, manteniendo el backend como única fuente de verdad.\n[Impact] La última cuota absorbe cualquier deriva de redondeo, garantizando totales matemáticamente exactos y reglas desacopladas de FastAPI y SQLAlchemy.\n[Impact] Stack aplicada: FastAPI, PostgreSQL, SQLAlchemy, Pytest, React y TypeScript."
+        },
+        "technologies": [
+          "Python",
+          "FastAPI",
+          "Pydantic",
+          "PostgreSQL",
+          "SQLAlchemy ORM",
+          "Alembic",
+          "Pytest",
+          "React",
+          "TypeScript",
+          "Tailwind CSS",
+          "GitHub Actions"
+        ],
+        "current": false
+      },
+      {
+        "id": "exp-002",
+        "role": {
+          "pt": "Consultor de Negócios",
+          "en": "Business Consultant",
+          "es": "Consultor de Negocios"
+        },
+        "company": "Ademicon",
+        "location": "Curitiba, PR",
+        "start_date": "2025-06-01",
+        "end_date": "2025-10-31",
+        "description": {
+          "pt": "[Decision] Atuei como consultor de negócios em consórcio, crédito imobiliário e crédito veicular, combinando prospecção ativa, reuniões comerciais e entendimento das necessidades do cliente.\n[Learning] Desenvolvi comunicação consultiva, qualificação de oportunidades e condução de negociações orientadas a relacionamento e confiança.\n[Impact] A experiência ampliou minha visão de produto, contexto financeiro e leitura prática das dores do usuário antes da solução técnica.",
+          "en": "[Decision] I worked as a business consultant in consortium sales, real estate credit, and vehicle credit, combining active prospecting, commercial meetings, and customer needs assessment.\n[Learning] I developed consultative communication, opportunity qualification, and negotiation skills guided by relationship-building and trust.\n[Impact] The experience expanded my product awareness, financial context, and practical understanding of user pain points before the technical solution.",
+          "es": "[Decision] Trabajé como consultor de negocios en consorcio, crédito inmobiliario y crédito vehicular, combinando prospección activa, reuniones comerciales y comprensión de las necesidades del cliente.\n[Learning] Desarrollé comunicación consultiva, calificación de oportunidades y habilidades de negociación guiadas por relación y confianza.\n[Impact] La experience amplió mi visión de producto, contexto financiero y comprensión práctica de los dolores del usuario antes de la solución técnica."
+        },
+        "technologies": [],
+        "current": false
+      }
+    ],
+    "total": 2
+  },
+  "formation": {
+    "formations": [
+      {
+        "id": "edu-001",
+        "course": {
+          "pt": "Tecnologia em Análise e Desenvolvimento de Sistemas",
+          "en": "Associate's Degree in Systems Analysis and Development",
+          "es": "Tecnólogo en Análisis y Desarrollo de Sistemas"
+        },
+        "institution": "UFPR – Universidade Federal do Paraná",
+        "location": "Curitiba, PR",
+        "start_date": "2026-02-01",
+        "end_date": "2029-03-06",
+        "description": {
+          "pt": "[Decision] Formação superior em andamento com foco acadêmico em fundamentos de computação, engenharia de software e desenvolvimento de sistemas.\n[Learning] A universidade amplia a base teórica em algoritmos, modelagem, arquitetura de software, redes e estruturas de dados.\n[Impact] O percurso acadêmico complementa a prática profissional com rigor metodológico e visão de longo prazo para sistemas backend.",
+          "en": "[Decision] Ongoing university degree focused on computer science fundamentals, software engineering, and systems development.\n[Learning] The program expands the theoretical base in algorithms, modeling, software architecture, networking, and data structures.\n[Impact] The academic path complements professional practice with methodological rigor and long-term systems thinking for backend engineering.",
+          "es": "[Decision] Formación universitaria en curso con enfoque académico en fundamentos de computación, ingeniería de software y desarrollo de sistemas.\n[Learning] La universidad amplía la base teórica en algoritmos, modelado, arquitectura de software, redes y estructuras de datos.\n[Impact] El recorrido académico complementa la práctica profesional con rigor metodológico y visión de largo plazo para sistemas backend."
+        },
+        "current": true
+      }
+    ],
+    "total": 1
+  },
+  "philosophy": {
+    "inspirations": [
+      {
+        "id": "alejandro-taboada",
+        "name": "Alejandro Taboada Sánchez",
+        "role": {
+          "es": "Educador e Ingeniero (Programación ATS)",
+          "pt": "Educador e Engenheiro (Programação ATS)",
+          "en": "Educator and Engineer (Programación ATS)"
+        },
+        "image_url": "/philosophy/alejandro.jpg",
+        "description": {
+          "es": "\"Si puedes imaginarlo, puedes programarlo\". Alejandro fue el punto de partida de mi viaje tecnológico. Gracias a su capacidad estratégica para simplificar fundamentos complejos, logré dominar conceptos desde la sintaxis básica hasta la jerarquía de clases en C++. Su metodología despertó en mí la convicción de que no existen límites para lo que podemos construir con código. Su legado como educador sigue siendo mi base fundamental.",
+          "pt": "\"Se você pode imaginar, você pode programar\". Alejandro foi o ponto de partida da minha jornada tecnológica. Graças à sua capacidade estratégica de simplificar fundamentos complexos, consegui dominar conceitos desde a sintaxe básica até a hierarquia de classes em C++. Sua metodologia despertou em mim a convicção de que não existem limites para o que podemos construir com código. Seu legado como educador continua sendo minha base fundamental.",
+          "en": "\"If you can imagine it, you can program it\". Alejandro was the starting point of my technological journey. Thanks to his strategic ability to simplify complex fundamentals, I mastered concepts from basic syntax to class hierarchy in C++. His methodology awoke in me the conviction that there are no limits to what we can build with code. His legacy as an educator remains my foundational base."
+        }
+      },
+      {
+        "id": "margaret-hamilton",
+        "name": "Margaret Hamilton",
+        "role": {
+          "es": "Pionera de la Ingeniería de Software",
+          "pt": "Pioneira da Engenharia de Software",
+          "en": "Software Engineering Pioneer"
+        },
+        "image_url": "/philosophy/margaret.jpg",
+        "description": {
+          "es": "Directora de ingeniería en el Laboratorio de Instrumentación del MIT, Hamilton lideró el desarrollo del software de vuelo para el programa Apolo. Su enfoque en la \"programación defensiva\" salvó el alunizaje del Apolo 11. Le debo a ella no solo el término \"Ingeniería de Software\", sino la comprensión absoluta de que la robustez y la gestión de errores son el verdadero corazón de un sistema backend confiable.",
+          "pt": "Diretora de engenharia do Laboratório de Instrumentação do MIT, Hamilton liderou o desenvolvimento do software de voo para o programa Apollo. Seu foco na \"programação defensiva\" salvou o pouso lunar da Apollo 11. Devo a ela não apenas o termo \"Engenharia de Software\", mas a compreensão absoluta de que a robustez e o tratamento de erros são o verdadeiro coração de um sistema backend confiável.",
+          "en": "Director of Engineering at the MIT Instrumentation Laboratory, Hamilton led the development of the flight software for the Apollo program. Her focus on \"defensive programming\" saved the Apollo 11 moon landing. I owe her not just the term \"Software Engineering\", but the absolute understanding that robustness and error handling are the true heart of a reliable backend system."
+        }
+      },
+      {
+        "id": "muhammad-ali",
+        "name": "Muhammad Ali",
+        "role": {
+          "es": "Integridad, Resistencia y Propósito",
+          "pt": "Integridade, Resistência e Propósito",
+          "en": "Integrity, Resilience, and Purpose"
+        },
+        "image_url": "/philosophy/ali.jpg",
+        "description": {
+          "es": "Más allá de su grandeza en el ring, Ali me inspira profundamente por su inquebrantable valentía para defender sus principios. Se negó a ir a la guerra para defender a un país que no le otorgaba derechos básicos. Arriesgar su libertad y su prometedora carrera por mantenerse fiel a sus convicciones es mi recordatorio definitivo del poder de tener un propósito innegociable en la vida.",
+          "pt": "Além de sua grandeza no ringue, Ali me inspira profundamente por sua coragem inabalável em defender seus princípios. Ele se recusou a ir à guerra para defender um país que não lhe concedia direitos básicos. Arriscar sua liberdade e sua carreira promissora para se manter fiel às suas convicções é meu lembrete definitivo do poder de ter um propósito inegociável na vida.",
+          "en": "Beyond his greatness in the ring, Ali deeply inspires me with his unwavering courage to defend his principles. He refused to go to war to defend a country that didn't grant him basic rights. Risking his freedom and promising career to stay true to his convictions is my ultimate reminder of the power of having a non-negotiable purpose in life."
+        }
+      },
+      {
+        "id": "satoshi-nakamoto",
+        "name": "Satoshi Nakamoto",
+        "role": {
+          "es": "Arquitectura de la Descentralización Absoluta",
+          "pt": "Arquitetura da Descentralização Absoluta",
+          "en": "Architecture of Absolute Decentralization"
+        },
+        "image_url": "/philosophy/satoshi.jpg",
+        "description": {
+          "es": "Satoshi creó Bitcoin como respuesta a la crisis financiera de 2008, buscando un sistema descentralizado, seguro y sin confianza (trustless). Me fascina su genialidad técnica al resolver el problema del \"doble gasto\" mediante tecnología blockchain, creando un ecosistema inmutable donde la confianza no reside en los gobiernos ni en los bancos, sino estrictamente en el consenso matemático y las pruebas criptográficas.",
+          "pt": "Satoshi criou o Bitcoin em resposta à crise financeira de 2008, buscando um sistema descentralizado, seguro e sem necessidade de confiança em terceiros (trustless). Sou fascinado por sua genialidade técnica em resolver o problema do \"gasto duplo\" por meio da tecnologia blockchain, criando um ecossistema imutável onde a confiança não reside em governos ou bancos, mas estritamente no consenso matemático e em provas criptográficas.",
+          "en": "Satoshi created Bitcoin in response to the 2008 financial crisis, seeking a decentralized, secure, and trustless system. I am fascinated by his technical genius in solving the \"double-spending\" problem through blockchain technology, creating an immutable ecosystem where trust resides not in governments or banks, but strictly in mathematical consensus and cryptographic proofs."
+        }
+      },
+      {
+        "id": "linus-torvalds",
+        "name": "Linus Torvalds",
+        "role": {
+          "es": "El Arquitecto del Mundo Moderno",
+          "pt": "O Arquiteto do Mundo Moderno",
+          "en": "The Architect of the Modern World"
+        },
+        "image_url": "/philosophy/linus.jpg",
+        "description": {
+          "es": "Creador del núcleo Linux y de Git, Torvalds redefinió literalmente la colaboración global. Su impacto en la ingeniería de software es incalculable: desde los servidores que sostienen la web hasta las herramientas de control de versiones que utilizamos rigurosamente a diario. Su modelo pragmático es la prueba definitiva de que el código abierto es el motor humano más potente para la innovación tecnológica.",
+          "pt": "Criador do kernel do Linux e do Git, Torvalds redefiniu literalmente a colaboração global. Seu impacto na engenharia de software é incalculável: desde os servidores que sustentam a web até as ferramentas de controle de versão que usamos rigorosamente todos os dias. Seu modelo pragmático é a prova definitiva de que o código aberto é o motor humano mais poderoso para a inovação tecnológica.",
+          "en": "Creator of the Linux kernel and Git, Torvalds literally redefined global collaboration. His impact on software engineering is incalculable: from the servers holding up the web to the version control tools we rigorously use daily. His pragmatic model is the definitive proof that open source is the most powerful human engine for technological innovation."
+        }
+      }
+    ],
+    "total": 5
+  }
+}

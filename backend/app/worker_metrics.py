@@ -7,7 +7,6 @@ _processed = Counter(
 )
 _duration = Histogram("worker_job_duration_seconds", "Worker job duration in seconds")
 _dlq = Counter("worker_dlq_total", "Jobs moved to DLQ", ["reason"])
-_lag = Gauge("worker_consumer_lag", "Estimated consumer lag")
 _retries = Counter("worker_retries_total", "Worker retries", ["reason"])
 _pel = Gauge(
     "worker_pel_size", "Worker pending entries list size", ["group", "consumer"]
@@ -19,6 +18,18 @@ _reclaimed = Counter("worker_messages_reclaimed_total", "Messages reclaimed from
 _quota_blocks = Counter(
     "worker_quota_blocks_total", "Times circuit breaker blocked Redis usage"
 )
+_worker_up = Gauge("contact_worker_up", "Contact worker is consuming jobs")
+_worker_restarts = Counter(
+    "contact_worker_restarts_total", "Contact worker crash restarts"
+)
+
+
+def set_worker_up(up: bool) -> None:
+    _worker_up.set(int(up))
+
+
+def inc_worker_restart() -> None:
+    _worker_restarts.inc()
 
 
 def observe_job_duration(value: float) -> None:
@@ -47,10 +58,6 @@ def inc_reclaimed(count: int = 1) -> None:
 
 def inc_quota_block() -> None:
     _quota_blocks.inc()
-
-
-def set_lag(value: int) -> None:
-    _lag.set(value)
 
 
 def set_pel_size(group: str, consumer: str, value: int) -> None:

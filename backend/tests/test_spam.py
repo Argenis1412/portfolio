@@ -5,13 +5,12 @@ Tests for Honeypot and Spam Scoring defense layers.
 from unittest.mock import AsyncMock
 
 import pytest
-from fastapi.testclient import TestClient
 
 from app.controllers.dependencies import get_send_contact_use_case
+from app.controllers.dependencies import get_job_queue
 from app.core.honeypot import is_honeypot_triggered
+from app.core.spam_check import calculate_spam_score
 from app.main import app
-
-client = TestClient(app)
 
 
 @pytest.fixture
@@ -34,7 +33,7 @@ def mock_use_case():
         ("middle_name", "Danger"),
     ],
 )
-def test_honeypot_triggered(mock_use_case, honeypot_field, value):
+def test_honeypot_triggered(client, mock_use_case, honeypot_field, value):
     """Verifies if the honeypot blocks the send but returns fake success."""
     payload = {
         "name": "Bot",
@@ -52,8 +51,8 @@ def test_honeypot_triggered(mock_use_case, honeypot_field, value):
     mock_use_case.execute.assert_not_called()
 
 
-def test_spam_score_high_silent_drop(mock_use_case):
-    """Verifies if a very high score (>70) causes a silent drop."""
+def test_spam_score_high_is_delivered_with_flag(client, mock_use_case):
+    """High heuristic scores are delivered instead of silently discarded."""
     payload = {
         "name": "Spammer",
         "email": "spammer@temp-mail.org",  # +40 pts
@@ -65,15 +64,16 @@ def test_spam_score_high_silent_drop(mock_use_case):
 
     assert response.status_code == 200
     assert response.json()["success"] is True
-    # The Use Case MUST NOT have been called
-    mock_use_case.execute.assert_not_called()
+    mock_use_case.execute.assert_called_once()
+    assert mock_use_case.execute.call_args.kwargs["is_suspicious"] is True
+    assert mock_use_case.execute.call_args.kwargs["spam_score"] >= 70
 
 
-def test_spam_score_medium_suspect(mock_use_case):
+def test_spam_score_medium_suspect(client, mock_use_case):
     """Verifies if a medium score (>30) marks it as [SUSPECT]."""
     payload = {
         "name": "Suspicious User",
-        "email": "user@gmail.com",
+        "email": "user@temp-mail.org",
         "subject": "Inquiry",
         "message": "Official marketing offer for your project: http://mysite.com",
     }
@@ -88,7 +88,7 @@ def test_spam_score_medium_suspect(mock_use_case):
     assert kwargs["spam_score"] > 30
 
 
-def test_normal_message_not_suspect(mock_use_case):
+def test_normal_message_not_suspect(client, mock_use_case):
     """Verifies if a normal message passes without marking."""
     payload = {
         "name": "Argenis",
@@ -103,6 +103,145 @@ def test_normal_message_not_suspect(mock_use_case):
     mock_use_case.execute.assert_called_once()
     args, kwargs = mock_use_case.execute.call_args
     assert kwargs["is_suspicious"] is False
+
+
+@pytest.mark.parametrize(
+    ("name", "subject"),
+    [
+        ("李", "面试邀请 🚀"),
+        ("María D’Ávila", "Backend — propuesta técnica"),
+        ("Иван Петров", "Вакансия разработчика"),
+        ("علي", "Software Engineer Role"),
+        ("John 四", "Team Ⅻ – interview"),
+    ],
+)
+def test_international_contact_is_delivered_without_format_penalty(
+    client, mock_use_case, name, subject
+):
+    response = client.post(
+        "/api/v1/contact",
+        json={
+            "name": name,
+            "subject": subject,
+            "email": "recruiter@example.com",
+            "message": "Hello, I would like to schedule an interview with you.",
+        },
+    )
+    assert response.status_code == 200
+    mock_use_case.execute.assert_awaited_once()
+    kwargs = mock_use_case.execute.call_args.kwargs
+    assert kwargs["name"] == name
+    assert kwargs["subject"] == subject
+    assert kwargs["is_suspicious"] is False
+
+
+@pytest.mark.parametrize("score", [29, 30, 69, 70, 100])
+def test_all_score_levels_are_queued_with_correct_flag(
+    client, mock_use_case, monkeypatch, score
+):
+    queue = AsyncMock()
+    app.dependency_overrides[get_job_queue] = lambda: queue
+    monkeypatch.setattr(
+        "app.controllers.contact._guard.get_spam_score", lambda *args: score
+    )
+    response = client.post(
+        "/api/v1/contact",
+        json={
+            "name": "Test",
+            "email": "sender@example.com",
+            "message": "Message for review.",
+        },
+    )
+    assert response.status_code == 200
+    assert response.json()["delivery_mode"] == "stream"
+    queue.enqueue.assert_awaited_once()
+    payload = queue.enqueue.call_args.kwargs["payload"]
+    assert payload["is_suspicious"] is (score >= 30)
+    assert payload["spam_score"] == score
+    mock_use_case.execute.assert_not_awaited()
+
+
+@pytest.mark.parametrize("queue_state", ["disabled", "available", "unavailable"])
+def test_contact_delivery_runs_once(client, mock_use_case, queue_state):
+    queue = None if queue_state == "disabled" else AsyncMock()
+    if queue_state == "unavailable":
+        queue.enqueue.side_effect = ConnectionError("Redis unavailable")
+    app.dependency_overrides[get_job_queue] = lambda: queue
+    payload = {
+        "name": "Test User",
+        "email": "sender@example.com",
+        "subject": "Delivery test",
+        "message": "This message should be delivered exactly once.",
+    }
+
+    response = client.post("/api/v1/contact", json=payload)
+
+    assert response.status_code == 200
+    assert response.json()["success"] is True
+    assert response.json()["queue_status"] == "queued"
+    if queue is not None:
+        queue.enqueue.assert_awaited_once()
+    if queue_state == "available":
+        assert response.json()["delivery_mode"] == "stream"
+        mock_use_case.execute.assert_not_awaited()
+    else:
+        assert response.json()["delivery_mode"] == "background_fallback"
+        mock_use_case.execute.assert_awaited_once_with(
+            **payload, is_suspicious=False, spam_score=0
+        )
+
+
+@pytest.mark.parametrize("queued", [False, True])
+def test_honeypot_acceptance_matches_normal_submission_without_delivery(
+    client, mock_use_case, queued
+):
+    queue = AsyncMock() if queued else None
+    app.dependency_overrides[get_job_queue] = lambda: queue
+    payload = {
+        "name": "Test",
+        "email": "sender@example.com",
+        "message": "A normal message.",
+    }
+    normal = client.post("/api/v1/contact", json=payload)
+    mock_use_case.execute.reset_mock()
+    if queue is not None:
+        queue.enqueue.reset_mock()
+    trapped = client.post(
+        "/api/v1/contact", json={**payload, "website": "https://bot.example"}
+    )
+    assert normal.status_code == trapped.status_code == 200
+    assert normal.json() == trapped.json()
+    mock_use_case.execute.assert_not_awaited()
+    if queue is not None:
+        queue.enqueue.assert_not_awaited()
+
+
+def test_likely_spam_cannot_bypass_deduplication_or_email_limit(client, mock_use_case):
+    payload = {
+        "name": "Test",
+        "email": "sender@temp-mail.org",
+        "message": "Bitcoin casino prize 0",
+    }
+    assert client.post("/api/v1/contact", json=payload).status_code == 200
+    assert client.post("/api/v1/contact", json=payload).status_code == 400
+    for number in range(1, 10):
+        payload["message"] = f"Bitcoin casino prize {number}"
+        assert client.post("/api/v1/contact", json=payload).status_code == 200
+    payload["message"] = "Bitcoin casino prize final"
+    assert client.post("/api/v1/contact", json=payload).status_code == 429
+    assert mock_use_case.execute.await_count == 10
+
+
+@pytest.mark.parametrize(
+    "message",
+    [
+        "Our agency has a freelance app development proposal and a website design role.",
+        "Oferta de trabajo: hablamos del negocio por WhatsApp o Telegram, gracias.",
+        "Our marketing and SEO team would like to discuss an outsourcing opportunity.",
+    ],
+)
+def test_recruitment_terms_do_not_raise_spam_score(message):
+    assert calculate_spam_score(message, "recruiter@example.com") == 0
 
 
 def test_honeypot_is_triggered_with_empty_data():
@@ -197,141 +336,21 @@ def test_spam_score_adjacent_urls_with_comma_are_separated():
     assert score == 45
 
 
-def test_international_recruiter_unicode_names():
-    """Verifies that international characters (Cyrillic, Arabic, CJK) in names and subjects do not trigger spam scoring."""
-    from app.core.spam_check import calculate_spam_score
-
-    # Cyrillic name and subject
-    score_cyrillic = calculate_spam_score(
-        message="Hello, I would like to schedule an interview with you.",
-        email="recruiter@yandex.ru",
-        name="Иван Петров",
-        subject="Важная вакансия",
-    )
-    assert score_cyrillic <= 30
-
-    # CJK name and subject
-    score_cjk = calculate_spam_score(
-        message="Hello, I saw your portfolio and wanted to reach out regarding a job opportunity.",
-        email="hr@tencent.com",
-        name="张伟",
-        subject="Job Opportunity [Tencent]",
-    )
-    assert score_cjk <= 30
-
-    # Arabic name and subject
-    score_arabic = calculate_spam_score(
-        message="Hello, we are interested in your profile and would like to discuss a position.",
-        email="contact@firm.ae",
-        name="علي",
-        subject="Software Engineer Role",
-    )
-    assert score_arabic <= 30
-
-
-def test_name_rejects_unicode_nl_numeric_character():
-    """Rejects Number, letter (Nl) unicode characters in name."""
-    from app.core.spam_check import calculate_spam_score
-
-    score = calculate_spam_score(
-        message="Hello, I would like to discuss a role.",
-        email="recruiter@example.com",
-        name="John Ⅻ",
-        subject="Opportunity",
-    )
-    assert score == 100
-
-
-def test_name_rejects_unicode_no_numeric_character():
-    """Rejects Number, other (No) unicode characters in name."""
-    from app.core.spam_check import calculate_spam_score
-
-    score_superscript = calculate_spam_score(
-        message="Hello, I would like to discuss a role.",
-        email="recruiter@example.com",
-        name="John ²",
-        subject="Opportunity",
-    )
-    assert score_superscript == 100
-
-
-def test_name_rejects_unicode_fraction_numeric_character():
-    """Rejects unicode fraction in Number, other category."""
-    from app.core.spam_check import calculate_spam_score
-
-    score = calculate_spam_score(
-        message="Hello, I would like to discuss a role.",
-        email="recruiter@example.com",
-        name="John ½",
-        subject="Opportunity",
-    )
-    assert score == 100
-
-
-def test_name_rejects_unicode_lo_numeric_character():
-    """Rejects numeric chars even when unicode category is Lo."""
-    from app.core.spam_check import calculate_spam_score
-
-    score = calculate_spam_score(
-        message="Hello, I would like to discuss a role.",
-        email="recruiter@example.com",
-        name="John 四",
-        subject="Opportunity",
-    )
-    assert score == 100
-
-
-@pytest.mark.parametrize(
-    "name",
-    ["Studio 54", "Jean-Paul 2nd", "Room 101"],
-)
-def test_name_allows_ascii_digits_after_first_char(name):
-    """Names with ASCII digits in non-initial positions are valid."""
-    from app.core.spam_check import calculate_spam_score
-
-    score = calculate_spam_score(
-        message="Hello, I would like to discuss a role with you.",
-        email="recruiter@example.com",
-        name=name,
-        subject="Opportunity",
-    )
-    assert score < 70
-
-
-@pytest.mark.parametrize(
-    "name",
-    ["12345", "9lives"],
-)
-def test_name_rejects_digit_as_first_char(name):
-    """Names starting with a digit are still rejected."""
-    from app.core.spam_check import calculate_spam_score
-
-    score = calculate_spam_score(
-        message="Hello, I would like to discuss a role with you.",
-        email="recruiter@example.com",
-        name=name,
-        subject="Opportunity",
-    )
-    assert score == 100
-
-
 # ── Rule 9: Non-alphanumeric density ───────────────────────────────────────
 
 
-def test_spam_score_symbol_soup_silent_drop():
+def test_spam_score_symbol_soup_is_likely_spam():
     """
     Regression: the exact garbage message reported in production must be
-    silently dropped (score >= SCORE_SILENT_DROP=70).
+    labeled as likely spam (score >= 70).
     """
     from app.core.spam_check import calculate_spam_score
 
     score = calculate_spam_score(
         message='&!@@#@#@!_+@!+({}) " "BUY skajsbka',
         email="real@gmail.com",
-        name="Argenis",
-        subject="Contacto desde Portafolio",
     )
-    assert score >= 70, f"Expected silent-drop score for symbol soup, got {score}"
+    assert score >= 70, f"Expected likely-spam score for symbol soup, got {score}"
 
 
 def test_spam_score_normal_spanish_message_not_flagged_by_density():
@@ -341,7 +360,6 @@ def test_spam_score_normal_spanish_message_not_flagged_by_density():
     score = calculate_spam_score(
         message="Hola, me gustaría hablar sobre una vacante disponible. ¡Gracias!",
         email="user@example.com",
-        name="María",
     )
     assert score <= 30
 
@@ -356,7 +374,6 @@ def test_spam_score_heavy_query_string_url_not_false_positive():
     score = calculate_spam_score(
         message="Mira esto https://example.com/?a=1&b=2&c=3&d=4&e=5 saludos",
         email="client@empresa.com",
-        name="Cliente",
     )
     assert score <= 30
 
@@ -368,6 +385,5 @@ def test_spam_score_uppercase_url_scheme_not_false_positive():
     score = calculate_spam_score(
         message="Visit HTTP://example.com/?x=1&y=2&z=3 thanks",
         email="dev@co.com",
-        name="John",
     )
     assert score <= 30

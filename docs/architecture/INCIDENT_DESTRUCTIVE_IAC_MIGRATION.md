@@ -1,37 +1,39 @@
 # Incident Post-Mortem: INC-008
-## 🛑 Destructive IaC Migration (Free Tier Constraints)
 
-**Date:** 2026-05-07
-**Severity:** P2 (Planned Maintenance / Migration Downtime)
-**Status:** Resolved (Migration Complete)
-**Downtime:** 14 Hours
+## Destructive IaC Migration
 
----
+**Recorded date:** 2026-05-07. **Severity:** P2, planned migration downtime.
+**Recorded downtime:** 14 hours. **Historical status:** Migration completed.
+This report records an earlier operational decision, not a migration procedure
+or authorization to delete resources during the cleanup.
 
-### 📝 Executive Summary
-To finalize the transition of the backend infrastructure to a fully managed Terraform state, the system underwent a "Cold Migration." Due to platform constraints in the Koyeb Free Tier—specifically the inability to maintain parallel resource ownership or multiple active services—a zero-downtime migration was impossible. The existing manual deployment was decommissioned to allow Terraform to claim ownership of the domain and network hooks.
+## Recorded event
 
-### 🔍 Symptoms
-- **Service Status:** API unavailable during the 14-hour migration window.
-- **Errors:** `502 Bad Gateway` (Platform-level) while resources were being reconciled.
-- **Context:** The transition from "ClickOps" to "IaC" required a clean slate to avoid state drift and resource conflicts.
+The manual Koyeb service held the API domain while Terraform attempted to claim
+ownership. The report attributed the conflict to the then-observed service/domain
+constraints. The chosen migration deleted the manual deployment before creating
+the managed replacement; API unavailability and platform-level 502s were recorded
+during reconciliation.
 
-### 🕵️ Root Cause Analysis
-1.  **Platform Quotas:** The Koyeb Free Tier enforces a 1-service-per-app limit and strict domain exclusivity.
-2.  **Resource Ownership Conflict:** The manual deployment held the CNAME and SSL hooks for `api.argenisbackend.com`. Terraform could not provision a new service with the same domain without the previous resource being destroyed first.
-3.  **State Reconciliation:** Ensuring 100% reproducibility required purging all unmanaged resources to guarantee that the Terraform state reflected the absolute truth of the production environment.
+The earlier narrative also recorded a move to the `was` region and re-established
+email credentials. Those are historical actions, not live verification of today's
+region, credentials, or platform quotas. The report does not establish that
+import or another non-destructive approach is impossible in a future migration.
 
-### 🛡️ Mitigation & Execution
-1.  **Manual Decommissioning:** Purged legacy apps and services to release domain hooks.
-2.  **IaC Provisioning:** Executed `terraform apply` to recreate the entire stack (App, Service, Secrets, Domain, Regional configuration) in a single atomic operation.
-3.  **Regional Optimization:** Leveraged the window to migrate the backend to the `was` (Washington D.C.) region for better colocation with downstream dependencies.
-4.  **Credential Rotation:** Re-established Resend API keys and SMTP identities within the new IaC-managed secret vault.
+## Lessons and current boundary
 
-### 📈 Reliability Enhancements
-- **100% Reproducibility:** Verified that the entire backend stack can be recreated from a blank slate using only the Terraform configuration and GitHub Secrets.
-- **Operational Consistency:** Eliminated "shadow configuration" by centralizing all environment variables in the Koyeb Secrets vault managed by code.
+The event demonstrates the availability cost of delete-before-create. It does
+not prove that deleting unmanaged resources is necessary for reproducibility or
+that a Terraform apply recreates all dependencies atomically. A successful rebuild
+at one point is not a guarantee of complete or ongoing environment parity.
 
-### 💡 Lessons Learned
-- **Provider Constraints dictate Strategy:** In restricted environments, maintenance windows must be accepted as a trade-off for infrastructure consistency and reproducibility.
-- **The "Unmanaged" Tax:** Migrating unmanaged infrastructure into IaC may require destructive reconciliation steps when provider ownership and state cannot be safely imported or shared.
-- **Verification through Destruction:** A successful "from-scratch" deployment is the ultimate test of IaC health.
+For future ownership changes, inspect state, supported import/move mechanisms,
+plans, dependencies, and recovery options before choosing a migration. Preserve
+existing resources and secret identities in this cleanup. No apply, deletion,
+credential rotation, or current provider quota check was performed here.
+
+See the [IaC decision](ADR-18-iac-strategy.md),
+[identity collision](INC-009-terraform-resource-collision.md),
+[operations runbook](production-operations.md), and [changelog](../../CHANGELOG.md).
+Original wording remains available with
+`git show bb3ff44:docs/architecture/INCIDENT_DESTRUCTIVE_IAC_MIGRATION.md`.

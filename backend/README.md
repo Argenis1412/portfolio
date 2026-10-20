@@ -1,202 +1,162 @@
-# 🎯 Portfolio Backend API
+# Portfolio Backend
 
-> **Live API Status:** [Healthy (JSON) →](https://api.argenisbackend.com/health)
+Python 3.12 and FastAPI serve portfolio content from memory-cached JSON files in
+`data/`. Contact messages use Redis Streams and Resend, with background delivery
+when the queue is unavailable. SQL, database drivers, migrations, and seeding are
+no longer required.
 
-REST API built with **FastAPI** and **Clean Architecture** — engineered with a **language-agnostic core** so that the system remains portable, testable, and framework-independent.
+## Run locally
 
-## 📝 Description
+From `backend/`:
 
-Professional backend for a developer portfolio, implementing:
-- ✅ **Clean Architecture** (Controllers → Use Cases → Entities → Adapters)
-- ✅ **Versioned API** (/api/v1/*)
-- ✅ **SQL Database** with **SQLModel** (SQLAlchemy + Pydantic)
-- ✅ **Database Migrations** with **Alembic**
-- ✅ **Global Error Handling** with custom exceptions
-- ✅ **Middleware** with request_id, logging, and performance measurement
-- ✅ **Professional Health Check** with database connectivity and uptime
-- ✅ **Clear separation** of responsibilities
-- ✅ **Automatic validation** with Pydantic V2
-- ✅ **Interactive Documentation** with OpenAPI/Swagger
-- ✅ **Automated Tests** with pytest
-- ✅ **Quality Gate**: GitHub Actions enforces a **80% minimum coverage** threshold and verified Docker builds on every push.
-- ✅ **Layered contact protection**: `ContactGuard` service orchestrating honeypot, spam scoring, content dedup (Redis → in-memory fallback, 30-min window), and multi-tier rate limiting (10/day email, 20/min email, 30/hour IP, 30/hour fingerprint).
-- ✅ **Rate Limiting**: Enforced via slowapi with Redis backend (fails open on Redis outage).
-- ✅ **API Observability**: Full integration with OpenTelemetry, Prometheus, and Sentry.
-- ✅ **Live Evidence Support**: Built-in Chaos Monkey simulations and real-time metrics for interactive frontend dashboards.
-
----
-
-## 🏗️ Architecture
-
-### Simplified Clean Architecture
-```mermaid
-graph TD
-    subgraph Interface Layer
-        C[Controllers / HTTP Layer]
-        C -.- note1[Receives requests<br>Validates input<br>Returns HTTP responses]
-    end
-
-    subgraph Use Case Layer
-        UC[Use Cases / Business Logic]
-        UC -.- note2[Orchestrates business logic<br>NO framework dependencies<br>Testable in isolation]
-    end
-
-    subgraph Domain Layer
-        E[Entities / Domain Models]
-        E -.- note3[Immutable domain models<br>Pure business logic<br>Python Dataclasses]
-    end
-
-    subgraph External Layer
-        A[Adapters / External Services]
-        A -.- note4[Email Resend<br>PostgreSQL / Redis<br>Observability Stack]
-    end
-
-    C -->|Calls| UC
-    UC -->|Uses| E
-    UC -->|Interfaces with| A
-```
-
-### Request Flow
-
-1. HTTP Request
-2. **Middleware**: Assigns `X-Request-ID`, logs entry.
-3. **Controller**: Pydantic validation.
-4. **Use Case**: Executes business logic.
-5. **Adapter**: Interacts with **SQL Database** via **SQLModel**.
-6. Returns Response.
-7. **Middleware**: Logs exit, adds `X-Request-ID` and `X-Response-Time` headers.
-
----
-
-## 🚀 How to Run
-
-### 1. Installation
 ```bash
-git clone https://github.com/Argenis1412/portfolio.git
-cd portfolio/backend
-
-# Create virtual environment
-# Windows:
-py -3.12 -m venv .venv
-# Linux/macOS:
 python -m venv .venv
-
-# Activate virtual environment
-# Windows:
-.\.venv\Scripts\activate
-# Linux/macOS:
-source .venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
+# Windows: .venv\Scripts\activate
+# Linux/macOS: source .venv/bin/activate
+pip install -r requirements.txt -r requirements-dev.txt
 ```
 
-### 2. Database Setup (New)
-```bash
-# 1. Apply schema migrations
-python -m alembic upgrade head
+Copy `../.env.example` to `.env` (PowerShell: `Copy-Item ../.env.example .env`),
+configure email if needed, then run:
 
-# 2. Seed data from JSON to SQL
-python ./scripts/migrate_data.py
-```
-
-### 3. Execution
 ```bash
-# Start the server
 python -m uvicorn app.main:app --reload --port 8000
 ```
-- **Production Docs**: `https://api.argenisbackend.com/docs`
-- **Production Status**: `https://api.argenisbackend.com/health`
-- **Production Health**: `https://api.argenisbackend.com/health`
 
----
+Local API documentation is available at `/docs`. Interactive documentation is
+disabled in production. Without Resend credentials, local delivery is logged by
+the console adapter. Without Redis, contact processing uses in-memory protection
+and background tasks; production requires Redis and nonblank `RESEND_API_KEY`
+and `RESEND_TO_EMAIL`. Missing production delivery credentials fail startup.
 
-## 🐒 Living Dashboard (Live Evidence)
+## Configuration
 
-This backend is designed to feed an interactive "Living Dashboard" frontend. It includes specific instrumentation for demonstrating backend health under load:
+| Variables | Purpose |
+|---|---|
+| `APP_NAME`, `ENVIRONMENT` | Service name and environment; use `production` in production. |
+| `ALLOWED_ORIGINS`, `REGEX_ALLOWED_ORIGINS` | Browser CORS origins and optional origin regex. |
+| `REDIS_URL` | Shared rate limiting, idempotency, deduplication, and contact queue. |
+| `REDIS_SOCKET_TIMEOUT_SECONDS`, `REDIS_CONNECT_TIMEOUT_SECONDS` | Timeouts for nonblocking application Redis clients; defaults are 5 seconds. The worker retains 60-second socket and 10-second connection timeouts for its blocking reads. |
+| `WORKER_ENABLED` | Start the contact consumer inside the API; defaults to `true`. Set `false` in tests or when deliberately pausing queue consumption. |
+| `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_TO_EMAIL` | API key and recipient are required in production; sender has a default. Console delivery remains available locally. |
+| `METRICS_BASIC_AUTH_USERNAME`, `METRICS_BASIC_AUTH_PASSWORD` | Required protection for `/metrics` in production. |
+| `SENTRY_DSN`, `SENTRY_TRACES_SAMPLE_RATE`, `OTLP_ENDPOINT` | Optional error tracking and tracing. |
+| `OTEL_ENABLED` | Enable OpenTelemetry; defaults to `true`. Set `false` to disable instrumentation and trace export. Prometheus and Sentry are configured independently. |
+| `TRUSTED_PROXY_DEPTH`, `TRUSTED_PROXY_IPS` | Trusted proxy configuration for client IP extraction. |
 
-- **Chaos Monkey Simulation**: Triggered via `X-Debug-Mode` header.
-  - `simulate-429`: Simulates rate limit threshold hit (returns 429 with `Retry-After`).
-  - `simulate-500`: Simulates unexpected internal server error.
-- **Real-time API Metrics**: Dedicated endpoint providing a "pulse" of the API (latency P95, requests/24h, errors).
-- **Trace Accountability**: Every error response includes a `trace_id` for immediate debugging transparency.
+Only English configuration keys are supported. Valid environments are `local`,
+`development`, `testing`, `staging`, and `production`; unknown values fail validation.
+Legacy `DATABASE_URL` and `DB_*` settings are ignored. See `app/settings.py` for
+defaults and production guards.
 
----
+Before running this branch with an existing `.env`, rename `AMBIENTE` to
+`ENVIRONMENT`, `NOME_APP` to `APP_NAME`, `ORIGENS_PERMITIDAS` to `ALLOWED_ORIGINS`,
+and `REGEX_ORIGENS_PERMITIDAS` to `REGEX_ALLOWED_ORIGINS`. Use `development`
+instead of `desenvolvimento`, `production` instead of `producao`/`producción`, and
+`staging` instead of `homologação`. Preserve credential values when renaming keys.
+The real Koyeb environment value remains to be verified before deployment.
 
-## 📊 Observability & Metrics
+For Compose, copy the same root example to the root `.env` and set
+`GRAFANA_ADMIN_PASSWORD`. Compose passes that file to the API, overrides its
+environment to `development`, and points it to the internal Redis service.
 
-The API exposes a Prometheus-compatible metrics endpoint at `/metrics`.
+## API
 
-> [!IMPORTANT]
-> **Security Note**: `/metrics` is **protected by HTTP Basic Auth in production**
-> (`METRICS_BASIC_AUTH_USERNAME` / `METRICS_BASIC_AUTH_PASSWORD` env vars).
-> It is accessible without authentication only in local / development environments.
+| Endpoint | Behavior |
+|---|---|
+| `GET /live` | Process liveness with no dependency or file checks. |
+| `GET /health` | JSON file checks, email configuration, version, and uptime. |
+| `GET /api/v1/{about,projects,stack,experiences,formation,philosophy}` | Portfolio content with ETag caching. |
+| `GET /api/v1/projects/{id}` | Project details; 404 for an unknown ID. |
+| `POST /api/v1/contact` | Validated, rate-limited contact submission with deduplication and optional idempotency key. |
+| `GET /api/v1/metrics/summary` | Observed P95, request/error counts, uptime, and derived status. |
+| `GET /metrics` | Prometheus HTTP and worker metrics; Basic Auth in production. |
 
-Supported metrics:
-- `http_requests_total`: Counter of all requests by status code.
-- `http_request_duration_seconds`: Response latency (P95/P99).
-- `process_cpu_seconds_total`: Resource utilization.
+`/health` returns HTTP 200 with `status="ok"` or `status="degraded"`. Its details
+contain `data`, per-file `data_details`, and informational `email` configuration.
+It reads required JSON files, checks syntax and top-level types, and checks the
+optional project case-study sidecar when present. It does not validate every
+content field or contact Redis, Resend, or a database.
 
----
+The P95 warmup reset preserves lifetime request/error counters. Metrics are local
+to each API process. Simulation endpoints and failure injection have been removed;
+the pending frontend retirement is listed in the root CHANGELOG. Deploy both
+changes together.
 
-## 📡 Endpoints
+## Code and checks
 
-### 🔍 Health Check & Observability
-`GET /health`
-Returns status for:
-- API connectivity
-- **Database connection**
-- **External service config (Email: Resend)**
-- **Uptime** and versioning.
+Controllers handle HTTP, use cases retrieve/sort content and submit messages,
+entities describe domain data, and adapters implement JSON reads and delivery.
+`app/core/` contains shared request protection and telemetry; `app/worker.py`
+consumes contact jobs inside the API lifespan when Redis is configured and
+`WORKER_ENABLED=true`. Docker runs one Uvicorn process, so each API instance owns
+one consumer and one process-local metrics registry. Consumer names are unique
+across instances. Shutdown stops the consumer, allows up to five seconds to finish,
+then cancels it and closes its Redis connection. Pending jobs remain available for
+Redis Streams recovery. There is no standalone worker command or Compose service.
+Worker startup and consumption failures restart with exponential backoff (1-60
+seconds, with jitter), resetting after 120 seconds of stable operation. Redis quota
+cooldown pauses attempts instead of terminating the task. `contact_worker_up`
+is 1 while consuming and 0 during backoff or shutdown;
+`contact_worker_restarts_total` counts crash restarts. These metrics do not change
+the `/health` response.
+Capacity under this single-process configuration still needs a deployment-sized
+load test before changing the scaling model.
 
-### 📁 Portfolio Data
-- `GET /api/v1/about`: Internationalized "About Me" data.
-- `GET /api/v1/projects`: Projects with tags and links.
-- `GET /api/v1/stack`: Tech stack by categories.
-- `GET /api/v1/experiences`: Professional timeline.
-- `GET /api/v1/formation`: Education history.
+Resend timeouts, network failures, HTTP 429, and HTTP 5xx failures receive up to
+three retries with exponential backoff and jitter. Other rejected HTTP responses
+and missing provider configuration go directly to `contact_jobs_dlq`. Unknown
+failures receive one retry. Jobs older than 15 minutes are not requeued. The worker
+publishes a retry or DLQ entry before acknowledging the original job. These
+automatic retries apply to Redis Streams delivery; the background fallback logs
+failures without retrying. Acceptance does not confirm delivery to the inbox.
 
-### 🧪 Live Refactoring Features
-- `GET /api/v1/metrics/summary`: Consolidated real-time telemetry for frontend evidence dashboard.
-- `ANY /any-endpoint` + `X-Debug-Mode: simulate-429`: Force immediate 429 response.
+Stream delivery is **at least once**: a crash after sending but before `XACK`
+can duplicate an email to the owner. Startup and periodic recovery process claimed
+pending entries through the same handler as new jobs. Reclaim requires 60 seconds
+idle; entries delivered more than five times are published to DLQ before ACK.
+Malformed JSON is retained as raw payload in the DLQ.
+After the immediate startup scan, the first periodic scan runs after 60 seconds;
+subsequent scans run every 300 seconds. These intervals are not delivery deadlines:
+Redis outages, quota cooldown, and active processing can delay recovery.
 
----
+Real-Redis tests use the `redis_integration` marker and skip when `REDIS_TEST_URL`
+is absent. To run locally, set it to a disposable instance such as
+`redis://127.0.0.1:16379/15` before pytest. The fixture rejects remote hosts,
+credentials, and databases other than `/15`; it flushes only that selected database
+before and after each integration test. CI supplies a disposable Redis service.
 
-## 🧪 Tests
+Contact scoring labels messages instead of dropping them: scores 30-69 use
+`POSSIBLE SPAM`, and 70-100 use `LIKELY SPAM` in the email subject. All scored
+submissions still pass deduplication and email/IP/fingerprint limits. Only filled
+honeypots are silently discarded, with the same acceptance response as a normal
+submission. Email format and field lengths are validated by Pydantic; blank names
+or messages return 422. International names and subjects are preserved, message
+paragraphs remain intact, and user fields are escaped in the email HTML.
+
 ```bash
-# Run all tests
+ruff check .
+ruff format --check .
+python -m mypy --config-file pyproject.toml
 pytest
-
-# With coverage report (HTML)
-pytest --cov=app --cov-config=.coveragerc --cov-report=html
-
-# CI/CD Quality Gate (local simulation — must reach 80%)
-pytest --cov=app --cov-config=.coveragerc --cov-fail-under=80
 ```
 
----
+Mypy checks all of `app/` using the gradual configuration in `pyproject.toml`.
+Install both requirements files and activate the backend virtual environment so
+local checks and CI use the same dependencies. The optional pre-commit check
+uses this environment and configuration too; run it from the repository root
+with `python -m pre_commit run mypy --all-files`. The active Git hook is Husky
+and currently runs frontend lint-staged tasks only.
 
-## 🎓 Technical Decisions
+Pytest enforces 80% coverage and mocks email delivery. Content snapshots in
+`tests/snapshots/content.json` protect the public JSON contract; review snapshot
+updates deliberately when changing portfolio content or response mappings.
 
-### Why SQL Database (SQLModel)?
-- **Professionalism**: Real-world apps use SQL for relationships and performance.
-- **Robustness**: Typing consistency between database models and Pydantic schemas.
-- **Evolution**: **Alembic** allows managed schema changes.
-- **Scalability**: Easy migration from SQLite to PostgreSQL by changing the `DATABASE_URL`.
+`python scripts/check_resend.py` reports configuration presence without printing
+credentials or sending email. Add `--send` only to request a real test email.
 
-### Future-Ready & Language Agnostic
-The **Domain Logic (Use Cases)** is strictly isolated from the framework (FastAPI) and external libraries. This means:
-- **Portability**: The business rules could be migrated to another Python framework (like Starlette or Litestar) or even serve as a blueprint for a rewrite in a high-performance language (like Go or Rust) with minimal logic re-engineering.
-- **Stability**: Changes in infrastructure (DB, Email, Cloud Provider) only require new **Adapters**, leaving the core logic untouched.
+## Idempotency lock contention
 
----
-
-## 🗺️ Future Roadmap
-
-This backend is designed to evolve into a full-scale enterprise system:
-- **🚀 Advanced Simulation**: Transactional logic for a mock "Financial Ledger" (ACID compliance testing).
-- **🔐 Identity Research**: Role-Based Access Control (RBAC) implementation.
-
-### Why Manual JSON Serialization (SQLite Compatibility)?
-- SQLite doesn't always have native JSON support in all environments.
-- Implemented an adapter layer in `sql_models.py` and `SqlRepository` to handle internationalization (dicts/lists) as TEXT, ensuring extreme reliability across all platforms.
+When Redis declines `SET NX`, the request does not acquire a local lock. The
+dependency checks for a finalized response to replay; otherwise it returns HTTP
+409. In-memory lock fallback is used only when Redis is unavailable or disabled.

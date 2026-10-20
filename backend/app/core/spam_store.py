@@ -8,20 +8,15 @@ import time
 from redis.asyncio import Redis
 
 from app.settings import settings
+from app.core.infrastructure import create_redis_client
 
 
 class SpamDedupStore:
-    """Stores short-lived contact hashes outside PostgreSQL."""
+    """Stores short-lived contact hashes in Redis with an in-memory fallback."""
 
     def __init__(self, redis_url: str | None):
         self._redis_client: Redis | None = (
-            Redis.from_url(
-                redis_url,
-                decode_responses=True,
-                health_check_interval=30,
-                socket_timeout=settings.redis_socket_timeout_seconds,
-                socket_connect_timeout=settings.redis_connect_timeout_seconds,
-            )
+            create_redis_client(redis_url, health_check_interval=30)
             if redis_url and not redis_url.startswith("memory://")
             else None
         )

@@ -10,6 +10,129 @@ This changelog separates three categories intentionally:
 
 ---
 
+## [Unreleased]
+
+### Fixed
+
+- Process reclaimed contact jobs through the normal delivery/ACK handler, scan
+  all pending-entry pages, and move over-delivered poison jobs to DLQ before ACK.
+  Preserve malformed payloads and document at-least-once delivery and duplicate
+  email risk after interrupted acknowledgements.
+  Scan immediately at startup, again after 60 seconds, then every 300 seconds.
+
+- Supervise the lifespan contact worker with restart backoff, interruptible quota
+  cooldown, client cleanup, and worker availability/restart metrics. Cover startup
+  Redis recovery with isolated real-Redis tests in local runs and backend CI.
+
+- Fail startup in production when the Resend API key or recipient is blank;
+  retain console delivery for local, development, and testing environments.
+
+These changes describe the cleanup branch, not a deployed release. Production
+incidents and versioned releases below retain their original historical context.
+
+### Backend simplification
+
+- Removed Chaos endpoints, failure injection, incident SQL writes, simulated
+  summary fields, and backend Chaos automation. Real HTTP/worker metrics remain.
+  Retired `/api/v1/chaos/*` routes return 404; request/error counters retain
+  process-lifetime totals while P95 warmup resets once.
+- Removed summary fields: `retries_1h`, `last_incident`, `last_incident_ago`,
+  `worker_status`, `queue_backlog`, `cache_status`, `cache_ttl_s`, `active_path`,
+  `system_lifecycle`, and `total_chaos_events_since_deploy`.
+- Removed SQL repositories/models, drivers, Alembic tooling, seed steps, and the
+  Compose database service. Migration history remains in Git. Existing production
+  tables, volumes, database resources, and Terraform secret identities are intact;
+  database decommissioning is a separate operation.
+- `/health` checks JSON files and returns `data`, `data_details`, and informational
+  `email` configuration. Missing/invalid/unreadable files produce HTTP 200 with
+  `status="degraded"`. `/live` is unchanged. Failed stack reads now propagate as
+  HTTP 500 instead of returning a successful empty stack.
+
+### Contact protection and delivery
+
+- Redis lock contention no longer acquires a local idempotency lock. Finalized
+  responses are replayed; an occupied key otherwise produces HTTP 409. Redis
+  exceptions retain the in-memory fallback.
+- Scores 30-69 label email `POSSIBLE SPAM`; scores 70-100 label it `LIKELY SPAM`.
+  Scoring no longer drops messages. Honeypots remain silent drops; deduplication
+  and email/IP/fingerprint limits remain. Removed format scoring, redundant email
+  regex checks, and broad recruitment/business keyword penalties.
+- Pydantic validates email/lengths and rejects blank names/messages. International
+  text and message paragraphs are preserved; user fields in email HTML are escaped.
+- Resend timeouts/network failures, HTTP 429, and HTTP 5xx receive up to three
+  retries; unknown errors receive one; permanent errors receive none before DLQ.
+  Kept backoff, the 15-minute age limit, and publish-before-ack ordering. Provider
+  acceptance no longer depends on response JSON; failure logs omit provider bodies.
+- The API lifespan owns the contact consumer; Docker uses one Uvicorn process.
+  Removed the standalone worker command and Compose worker service. Added explicit
+  `WORKER_ENABLED` configuration, unique consumer identities, and connection cleanup
+  on normal exit, setup failure, or cancellation. Unified background scheduling
+  for missing or failed queues; this fallback has no automatic delivery retries.
+
+### Configuration and checks
+
+- English settings and validated environment names replace legacy application
+  keys; the shared root `.env.example` replaces the backend duplicate. Compose
+  passes it to the API with development mode and its internal Redis address.
+  Public versions use `app.__version__`; obsolete settings and Docker labels were removed.
+- Centralized async Redis client creation, preserving worker-specific timeouts,
+  store health checks, queue timeout retries, and connection ownership.
+- Removed pytest detection from production code. Tests configure Redis, worker,
+  Sentry, and OpenTelemetry explicitly. Added `OTEL_ENABLED`, enabled by default.
+- Centralized email masking: at most one local-part character and a lowercase
+  domain. Removed the duplicate function/logger and corrected logging documentation.
+- Centralized gradual mypy options for all of `app/`; aligned CI, the local script,
+  and optional pre-commit configuration. Dependencies are unchanged. The active
+  Husky hook still runs frontend lint-staged tasks only.
+- Updated the root guide, operations runbook, root architecture index, and
+  engineering playbook to distinguish current backend behavior from historical
+  SQL/Chaos designs. Preserved numbered decision references and historical sources;
+  removed the obsolete completed roadmap from current operating guidance. Updated
+  the failure model, resilience policy, JSON read decision, and SLO measurement
+  limits; retained targets and historical incident evidence without claiming current
+  compliance. Corrected observability ownership, optional tracing/export behavior,
+  log masking limits, and unsupported automation examples. Aligned security
+  headers, proxy trust, CORS, and cache guidance with implemented behavior, including
+  the current limits on cross-origin manual ETag revalidation. Contextualized
+  historical incident reports and Chaos/IaC decisions; clarified the standalone
+  rate-limit audit identifier collision without renaming its links. Updated the
+  content/release guidance, marked the old frontend refinement plan superseded,
+  and corrected the INC-006 summary against the preserved incident entry.
+- Corrected the portfolio project JSON in EN/PT/ES: removed active Chaos/SQL claims,
+  unverified sub-45 ms latency and total spam-blocking guarantees, and stale
+  evidence sources. Described current contact fallback limits and pending capacity
+  validation. Deliberately updated only that project in list/detail snapshots;
+  other projects, endpoint payloads, and schemas are unchanged. Frontend retirement
+  and operational release checks remain pending.
+- Restricted Docker build context to backend runtime inputs. Added a loopback-only
+  single-process validation scenario and isolated Redis/console-delivery procedure.
+  The initial Docker startup failed; after local recovery, the image built and two
+  deployment-sized load runs completed. Each passed 334 functional checks and ten
+  console jobs, but all five latency thresholds failed. Recorded image/resource
+  evidence and raw summaries; performance acceptance remains open. Corrected the
+  procedure to run k6 in the API network namespace without host port publishing.
+
+### Frontend deployment dependency
+
+**Do not merge or deploy this cleanup until frontend retirement is complete.**
+Zod defaults avoid parsing failures but do not remove misleading UI behavior.
+
+| Pending consumer | Required change |
+|---|---|
+| `frontend/src/api/chaosService.ts`, `useChaosActions`, playground controls | Retire simulation actions; retain contact submission. |
+| `frontend/src/api/schemas.ts`, `useLiveMetrics`, status/metrics banners | Remove synthetic fields and simulation-derived status, counters, and recovery logic. |
+| `frontend/src/api/client.ts` | Remove `X-Chaos-Preset`, then its temporary backend CORS allowance. `X-Debug-Mode` is already ignored and disallowed. |
+| `frontend/e2e/chaos.spec.ts`, `.github/workflows/e2e-smoke.yml` | Replace simulation smoke scenarios before targeting the updated API. |
+
+Before any future release, migrate existing local keys using the
+[backend guide](backend/README.md#configuration), confirm the GitHub secret
+`AMBIENTE` is exactly `production`, and verify Koyeb receives
+`ENVIRONMENT=production`. Preserve existing infrastructure/secret identities.
+Monitor checks for `/saude` and `/salud` remain pending. The Docker image built;
+two deployment-sized load runs failed latency acceptance. See the
+[local report](benchmarks/results/f9eaa7f-local-20261017/README.md) before claiming
+capacity or approving a release.
+
 ## 🔥 Production Incidents
 
 ### INC-009 · Terraform Secret Identity Collision

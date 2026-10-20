@@ -18,7 +18,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from contextlib import asynccontextmanager
 import asyncio
-import os
 import structlog
 
 from app import __version__
@@ -29,7 +28,6 @@ from app.core.handlers import register_exception_handlers
 from app.core.infrastructure import dispose_all
 from app.core.rate_limit import limiter
 from app.core.middleware import (
-    ChaosMonkeyMiddleware,
     MetricsAccessMiddleware,
     RequestMiddleware,
     SecurityHeadersMiddleware,
@@ -45,29 +43,41 @@ async def _lifespan(app: FastAPI):
     """FastAPI lifespan context: startup → yield → shutdown.
 
     Starts the background job worker (Redis Streams) if configured.
-    Shutdown: disposes the SQLAlchemy connection pool to avoid dangling
-    connections during container restarts/rolling deploys.
+    Shutdown closes shared Redis connections.
     """
     worker_task = None
-    if settings.redis_url and not os.environ.get("PYTEST_CURRENT_TEST"):
+    if settings.redis_url and settings.worker_enabled:
         worker = StreamWorker(settings.redis_url)
         worker_task = asyncio.create_task(worker.run())
+
+        def report_worker_exit(task: asyncio.Task) -> None:
+            error = None if task.cancelled() else task.exception()
+            if worker.running:
+                logger.error(
+                    "worker_task_exited_unexpectedly",
+                    exc_info=(type(error), error, error.__traceback__)
+                    if error
+                    else None,
+                    cancelled=task.cancelled(),
+                )
+
+        worker_task.add_done_callback(report_worker_exit)
         app.state.worker = worker
 
-    yield  # Application running
-
-    # Shutdown
-    if worker_task:
-        app.state.worker.stop()
-        # Give some time for the loop to finish or cancel it
+    try:
+        yield
+    finally:
         try:
-            await asyncio.wait_for(worker_task, timeout=5.0)
-        except (asyncio.TimeoutError, asyncio.CancelledError):
-            pass
-        except Exception:
-            logger.warning("worker_task_exception_on_shutdown", exc_info=True)
-
-    await dispose_all()
+            if worker_task:
+                app.state.worker.stop()
+                try:
+                    await asyncio.wait_for(worker_task, timeout=5.0)
+                except (asyncio.TimeoutError, asyncio.CancelledError):
+                    pass
+                except Exception:
+                    logger.warning("worker_task_exception_on_shutdown", exc_info=True)
+        finally:
+            await dispose_all()
 
 
 def create_app() -> FastAPI:
@@ -197,14 +207,14 @@ def _configure_cors(application: FastAPI) -> None:
         # Explicit allowlist instead of ["*"] to reduce attack surface.
         # Methods: GET (portfolio reads), POST (/contact), OPTIONS (CORS preflight).
         # Headers: Content-Type (JSON body), Idempotency-Key (contact dedup),
-        #          Authorization (Basic Auth for /metrics), X-Chaos-Preset (telemetry).
+        #          Authorization (Basic Auth for /metrics).
+        # X-Chaos-Preset is temporarily accepted for the frontend and ignored.
         allow_methods=["GET", "POST", "OPTIONS"],
         allow_headers=[
             "Content-Type",
             "Idempotency-Key",
             "Authorization",
             "X-Chaos-Preset",
-            "X-Debug-Mode",
         ],
         expose_headers=["X-Trace-ID", "X-Request-ID", "X-Response-Time"],
     )
@@ -218,7 +228,6 @@ def _configure_middleware(application: FastAPI) -> None:
     application.add_middleware(RequestMiddleware)
 
     # 1.5. Protect the /metrics endpoint in production
-    application.add_middleware(ChaosMonkeyMiddleware)
     application.add_middleware(MetricsAccessMiddleware)
 
     # 2. GZip compression (saves bandwidth, only for responses > 1KB)
@@ -270,14 +279,10 @@ def _register_routes(application: FastAPI) -> None:
     # still pointing to the Portuguese/Spanish endpoints.
     # Canonical endpoint: GET /health
     # Planned removal: v1.9.3
-    import structlog as _structlog
-
-    _dep_logger = _structlog.get_logger(__name__)
-
     @application.get("/saude", include_in_schema=False, deprecated=True)
     @application.get("/salud", include_in_schema=False, deprecated=True)
     async def legacy_health_alias():
-        _dep_logger.warning(
+        logger.warning(
             "deprecated_endpoint_called",
             path="/saude (or /salud)",
             canonical="/health",

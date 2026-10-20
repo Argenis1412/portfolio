@@ -1,481 +1,164 @@
-# 📜 Engineering Playbook
+# Engineering Playbook
 
-> Standards are only useful when you understand why they exist.
-> Each rule here has a reason — usually a failure that made it necessary.
+Development rules for the cleanup branch. Repository instructions in `AGENTS.md`
+and explicit task scope govern the work. **Do not merge or deploy this branch**
+until the [frontend dependencies](CHANGELOG.md#frontend-deployment-dependency)
+are retired and release prerequisites are met.
 
----
+## Scope, branches, and commits
 
-## 1. Commit Protocol
+Implement the smallest correct change with verifiable criteria. Keep unrelated
+refactors and speculative improvements out of the diff. Record out-of-scope debt
+without fixing it. Resolve ambiguity before dependent changes.
 
-**Format**: `type(scope): description` — [Conventional Commits](https://www.conventionalcommits.org/)
+Use `feat/`, `fix/`, `docs/`, `refactor/`, or `chore/` plus a short English slug.
+Commits follow `type(scope): description`, with one logical change per commit.
+The repository owner is the sole author; do not add additional author trailers.
+Code, comments, commits, PRs, and engineering documentation use English; localized
+portfolio content is a separate concern. Preserve unrelated working-tree files.
 
-| Type | When to use |
-|:---|:---|
-| `feat` | New capability visible to users or API consumers |
-| `fix` | Corrects broken behavior |
-| `perf` | Measurable performance improvement — document the before/after |
-| `refactor` | Internal restructuring with no behavior change |
-| `test` | Tests only — no production code |
-| `docs` | Documentation only |
-| `ci` | CI/CD pipeline changes |
-| `chore` | Dependency bumps, tooling, build config |
+Prepare PRs around the problem, resulting behavior, scope, validation, and known
+limits. Review the complete diff for intent before reviewing individual lines.
+Passing checks do not authorize a merge or deployment. Do not assume repository
+merge settings, branch protection, or workflow execution from historical prose.
 
-**Atomic commits**: One logical change per commit. A feature and its refactor are separate commits — reviewers shouldn't have to untangle them.
+## Checks before every commit
 
-**The Golden Rule**: Atomic commits in branches are a **tool**, not a cage. They become optional when the technical cost of separating changes is higher than the benefit of isolating them. However, never mix unrelated domains (e.g., a security fix and a CSS tweak) in the same commit; that is the "Giant Commit Trap" that kills debuggability.
+Activate the Python 3.12 backend environment with both requirements files installed.
+From `backend/`:
 
-*Exception for mass-formatting*: A repository-wide execution of linters or formatting hooks (e.g., `pre-commit`) that touches many files at once IS considered a single logical change. It must be squashed into a single commit to prevent history pollution.
-
-**Example of a valid atomic commit for mass-formatting:**
-```text
-chore(infra): apply terraform fmt and normalize line endings across repo
-
-First-time execution of pre-commit hooks (terraform fmt + end-of-file fixer)
-touched all .tf and config files. Squashed into single commit per atomic commit policy.
+```bash
+python -m ruff check .
+python -m ruff format --check .
+python -m mypy --config-file pyproject.toml
+python -m pytest
 ```
 
-**`ci:` commits are prioritized above all other work.** A broken pipeline blocks everyone. Fix it first.
+From `frontend/`:
 
----
-
-## 2. Branch Naming
-
-Pattern: `type/short-description` — lowercase, hyphens only, max ~4 words after the prefix.
-
-```
-feat/redis-rate-limiting
-fix/cors-csp-domain-sync
-refactor/api-layer-modular
-docs/add-adr-synthetic-telemetry
-chore/upgrade-pydantic-v2
+```bash
+npm run lint
+npx tsc -b
+npm run test -- --run
 ```
 
-No underscores. No uppercase. No ticket numbers unless the team uses an issue tracker actively.
-
----
-
-## 3. CI/CD — Green Pipeline Before Merge
-
-**Zero Tolerance for Broken Pipelines**: A broken `main` branch is an incident. The CI pipeline on GitHub is the final gate, not a debugging tool.
-
-### Pre-Flight Checklist (Mandatory Local Verification)
-Before pushing to `main` or opening a PR, you MUST execute and pass locally:
-1. **Backend**:
-   - `ruff check .` (Linting)
-   - `ruff format --check .` (Formatting - *The cause of the v1.8.2 CI break*)
-   - `pytest` (Logic & Coverage)
-2. **Frontend**:
-   - `npm run lint` (Style & Types)
-   - `npm run test` (Vitest suite)
-
-No merge to `main` without passing:
-
-1. **`lint`** — `ruff` + `mypy`. Style is not negotiable and is not a human reviewer's job.
-2. **`test`** — Full suite, coverage threshold enforced. A threshold that's never failed is too low.
-3. **`build`** — Docker build succeeds. This proves the artifact is deployable, not just that the code compiles.
-
-**Why this matters in this project**: The `/health` → `/health` rename in v1.4.1 required updating the Dockerfile `HEALTHCHECK`, the keep-alive cron, GitHub Actions healthcheck, and three test fixtures. Missing any one of them caused a silent CI pass but a broken production deploy. The build step catches this class of failure.
-
----
-
-## 4. Architecture
-
-**Clean Architecture layers**: `Controllers → Use Cases → Entities → Adapters`
-
-The rule that matters most: **business logic must not import from infrastructure**. FastAPI, SQLAlchemy, Redis — none of these should appear in the domain or use case layers. If they do, the architecture has collapsed.
-
-**The concrete test**: Can you swap `JSONRepository` for `PostgreSQLRepository` without touching a single controller? In this project, yes — that swap happened in v1.4.1 with zero controller changes. That's the proof the boundary works.
-
-**Framework independence in the domain layer**: If you need to mock a framework to test business logic, the dependency is in the wrong place.
-
----
-
-## 5. Definition of Done
-
-A task is **not done** until:
-
-- [ ] Passes `ruff`, `mypy`, and `pytest` locally
-- [ ] New logic has unit tests with a named failure scenario (`test_<unit>_<scenario>_<expected>`)
-- [ ] If system behavior changed: `README.md`, `ARCHITECTURE.md`, or `CHANGELOG.md` updated
-- [ ] No placeholder values, no TODO comments in committed code
-- [ ] Environment variables documented in `.env.example`
-
-**On documentation**: Updating `ARCHITECTURE.md` is not optional when an ADR-worthy decision is made. The document exists precisely because undocumented decisions become mysteries six months later.
-
----
-
-## 6. Observability & Security
-
-**Structured logging**: Use `structlog` (or equivalent). Log entries are machine-readable first. Fields that matter on every request: `request_id`, `trace_id`, `status_code`, `latency_ms`, `path`.
-
-**Public endpoints**: Rate limiting + idempotency key + honeypot validation as defaults. Not optional additions.
-
-**Silent drops for spam/abuse**: Rejected requests return `200 OK` with a neutral response — never `429` or `403` that confirms the filter was triggered. Feedback to attackers is information.
-
-**PII in logs**: Mask before export. Sentry and OpenTelemetry exporters receive log data. Contact form fields, email addresses, and user-identifiable data must be scrubbed before leaving the process. This is not optional if the project handles any contact or personal data.
-
-**Metrics endpoint**: `/metrics` requires Basic Auth in production. A public metrics endpoint exposes internal system behavior to anyone who finds it. Intentionally accessible ≠ publicly indexed.
-
----
-
-## 7. API Design
-
-**Versioning from day one**: All routes at `/api/v1/...`. Breaking changes get a new version prefix — never silently change an existing response shape.
-
-**Consistent error schema**:
-```json
-{
-  "error": {
-    "code": "RATE_LIMIT_EXCEEDED",
-    "message": "Too many requests from this origin.",
-    "trace_id": "req-abc123"
-  }
-}
-```
-Never return raw strings. Never return HTML error pages from an API endpoint. Both have happened in this codebase — both caused confusing frontend behavior.
-
-**Idempotency keys on mutating endpoints**: `POST /contact` accepts `Idempotency-Key`. Resubmitting the same key returns the original response without side effects. Without this, network retries create duplicate submissions.
-
-**No unbounded lists**: Default `limit=20`, max `limit=100`. An endpoint that returns everything is a denial-of-service vector and a performance cliff waiting to be discovered.
-
----
-
-## 8. Dependency & Environment Hygiene
-
-**Exact version pins in production**: `requirements.txt` uses `==`, not `>=`. A range that installs successfully today may fail after an upstream release. Found out the hard way with a transitive Pydantic dependency in early v1.x.
-
-**Secrets never in code**: All credentials in `.env` (local) or the cloud provider's secret manager. `.env.example` documents the variables without values. If a secret is committed accidentally — rotate it immediately, don't just delete it from git history.
-
-**New dependency checklist before adding**:
-1. Can the standard library or an existing dependency solve this?
-2. What's the maintenance status of the package?
-3. Does it add to the Docker image size meaningfully?
-4. Does it require a new environment variable in production?
-
----
-
-## 9. Data Integrity & Migrations
-
-**Migrations are never destructive by default**. The pattern for removing a column:
-1. Add new column, deploy.
-2. Migrate data to new column, deploy.
-3. Remove old column in a later release cycle.
-
-Dropping a column directly in production has no rollback path if the deploy fails halfway.
-
-**Explicit transactions**: Any operation touching multiple tables lives in a transaction. If the ORM handles it implicitly — document it so the next person doesn't assume it's absent.
-
-**Soft deletes for critical entities**: `deleted_at TIMESTAMP NULL`. Never physically delete users, orders, or contact records. Audit trails matter.
-
----
-
-## 10. Testing Strategy
-
-**70/20/10**: Unit / Integration / E2E. Never invert the pyramid — integration tests that take 30 seconds each don't get run.
-
-**Test naming**: `test_<unit>_<scenario>_<expected_result>`
-```python
-test_contact_with_duplicate_idempotency_key_returns_original_response
-test_rate_limiter_after_container_restart_preserves_counter  # ← the test that caught INC-001
-test_chaos_persistence_failure_does_not_crash_simulation     # ← the test that caught INC-003
-```
-
-**No mocks in the domain layer**: If a use case requires a mock to test, the use case has an infrastructure dependency it shouldn't have.
-
-**Deterministic fixtures**: Seeds and factories. Never use production data in tests. Never generate random data without a fixed seed.
-
----
-
-## 11. Performance
-
-**Document the SLO before optimizing**: Write down the target before writing the code. Current targets for this project:
-- Static portfolio data (`/about`, `/projects`, `/stack`): P95 < 100ms *(Measurement artifact, not a target exception: at production traffic volumes observed to date (~33-146 requests since deploy), isolated slow samples can interpolate to 150-500ms due to Koyeb free-tier hypervisor jitter and bucket granularity — the <100ms target and its alert trigger are not waived by this; see SLO_DEFINITIONS.md §1 for the underlying evidence)*
-- Contact endpoint (`/contact`): P95 < 200ms (includes Redis round-trip)
-- Health check (`/health`): P99 < 100ms *(Recalibrated from 20ms to reflect Koyeb Free Tier cold-start network constraints; P95 Cold: ~3.5s, P95 Warm: ~1.3s)*
-
-**N+1 is a bug, not a todo**: A query inside a loop is a defect. Detect with `EXPLAIN ANALYZE` before it reaches production.
-
-**Document cache strategy explicitly**: TTL, invalidation trigger, and behavior on cache miss. The `JSONRepository` has an implicit cache (files loaded at startup, never invalidated until restart). That's a valid strategy — but it's documented so the next person knows it's intentional.
-
----
-
-## 12. Code Review
-
-**Author prepares the PR**: Description includes context, what changed, why, and what to look for. A reviewer who has to ask "what does this do?" is reading an incomplete PR.
-
-**Reviewer approves logic, not style**: `ruff` handles style. Human comments are for correctness, security, and design decisions.
-
-**Two-pass review**:
-1. First pass: read the full diff to understand the intent.
-2. Second pass: review line by line for correctness.
-
-Reviewing line by line without understanding the intent produces comments about variable names and misses architectural problems.
-
----
-
-## 13. Incident Protocol
-
-**Every significant production incident produces a post-mortem.** Format (same as CHANGELOG `🔥 Production Incidents` section):
-
-```
-### INC-XXX · Title
-Period: which versions were affected
-Affected: which endpoints/components
-
-What happened: observable symptoms
-How it was discovered: not how you wish you'd found it — how you actually found it
-What was tried first (if it didn't work): first hypothesis and why it failed
-Root cause: actual cause
-Resolution: what fixed it
-Accepted side effects: what the fix broke or constrained
-```
-
-**Blameless**: The document names systems and decisions, not people.
-
-**Reproducibility before fixing**: Write the test that reproduces the bug. The fix makes the test pass. This applies to all three fixed in this project: INC-001 (rate limiter), INC-003 (chaos crash), INC-004 (CSP block).
-
----
-
-## 14. Documentation
-
-**Language**: All `.md` files, commit messages, PR descriptions, and branch names are in English. Internal identifiers (routes, field names, directory names) are in English. User-facing content supports EN/ES/PT via i18n — this is separate from codebase language. **Incident post-mortems** specifically stay in English across all locales (en/es/pt): they are professional engineering artifacts where translation adds maintenance overhead without meaningful benefit.
-
-**ADRs**: Any non-obvious architectural decision goes in `ARCHITECTURE.md` with context, decision, and consequences. "Non-obvious" means: if you'd have to explain it in a code review, it needs an ADR.
-
-**CHANGELOG**: Documents what changed and why it mattered. Not a git log. Not a feature list. See the `🔥 Production Incidents` section for the standard incident format.
-
-**Docstrings on public interfaces**: Every public function and class has a docstring. Internal helpers can omit if self-explanatory. "Self-explanatory" means a new contributor understands it without asking.
-
----
-
-## 15. AI-Assisted Development
-
-- Review everything before committing. If you can't explain the code, don't commit it.
-- Never include secrets, credentials, or PII in prompts.
-- AI-generated code follows the same standards as hand-written code: same linting, same tests, same review process.
-- AI can draft — humans own.
-
----
-
-## 16. Infrastructure Provisioning
-
-**Minimum Viable IaC**: The infrastructure is deliberately scoped to provision the Koyeb environment using Terraform, prioritizing backend reproducibility over complete infrastructure automation.
-
-**Bootstrap Flow**:
-1. Manual: Create external stateful resources (Supabase, Upstash Redis).
-2. Export secrets to the local environment (`TF_VAR_*`).
-3. Execute `terraform init` -> `terraform apply` in the `infrastructure/` directory.
-
-### Troubleshooting & Lessons Learned: Terraform CI/CD Integration
-
-During the implementation of GitHub Actions for Terraform, several critical architecture boundaries were tested:
-
-1. **Provider Authentication vs. Arguments**: The `koyeb/koyeb` provider strictly relies on the `KOYEB_TOKEN` environment variable and rejects the `token` argument in the `provider` block. Explicitly declaring the token in `main.tf` caused `terraform plan` to fail with "Unsupported argument". The fix required removing the explicit assignment and trusting the environment injection.
-2. **Execution Contexts (Remote vs. Local)**: When using HCP Terraform (Terraform Cloud) as the backend, the default execution mode is "Remote". This means `terraform plan/apply` run on HashiCorp servers, not the GitHub Actions runner. Consequently, environment variables defined in GitHub Actions (`env: KOYEB_TOKEN: ...`) were completely invisible to the execution context, resulting in "Empty KOYEB_TOKEN" errors.
-3. **The Resolution**: Instead of duplicating secrets in both GitHub and HCP Terraform, the workspace execution mode was changed to **"Local"**. This architecture pattern ensures:
-   - **Compute**: Runs on GitHub Actions (where the CI/CD pipeline and secrets already live).
-   - **State**: Is securely stored and locked remotely in HCP Terraform.
-   - **Secrets Management**: Remains unified in GitHub Secrets without duplication.
-
----
-
----
-
- ## 17. Infrastructure as Code (IaC) Standards
-
- **The "Zero to Destroy" Principle**: In a production-ready environment, an unexpected `destroy` in a Terraform plan is a critical incident. Infrastructure should be evolved, not recreated.
-
- **Rename Protocol**: Terraform does not natively track renames of keys in a `for_each` map. Changing a key (e.g., from `ENV` to `ENVIRONMENT`) will trigger a `destroy + create` cycle.
- - **Requirement**: Always use `moved { ... }` blocks when refactoring resource IDs to maintain state continuity and prevent "already exists" errors from the cloud provider.
-
- **Mandatory Local Plan**: Before pushing infrastructure changes to the repository:
- 1. Execute `terraform plan` locally.
- 2. Verify that the resource delta matches your intent.
- 3. Ensure "0 to destroy" unless explicitly intended.
-
- **Line Endings (LF)**: To prevent linter failures and cross-platform "invisible diffs", all `.tf` and `.sh` files must use `LF` line endings. Enforced via `.gitattributes`.
-
- ---
-
- ## 18. GitHub Configuration & Professional Workflow
-
- **Repository Settings & Philosophy**:
- - ✅ **Allow squash merging**: (Enabled) Prioritized for this repository to maintain a clean, linear history.
- - ℹ️ **Merge Strategy Context**: While merge commits are standard and necessary in large-scale corporate environments (monorepos, complex release branches, hotfix flows), for personal portfolios, **squash merging** is preferred. It ensures that reviewers see the final architectural result without the noise of "work-in-progress" commits.
- - ⚠️ **Allow rebase merging**: (Optional)
-
- **The Ideal Workflow (Even when working solo)**:
- 1. **Create Branch**: `git checkout -b feat/nombre-feature`
- 2. **Clear, Atomic Commits**:
-    ```text
-    feat(auth): implement JWT refresh rotation
-    fix(cache): prevent Redis stampede
-    test(e2e): improve teardown reliability
-    ```
- 3. **Open a PR**: Opening Pull Requests even when working alone demonstrates a professional, team-ready workflow.
- 4. **Merge**: Always use **Squash and merge**.
-
- **Stacked PR Strategy (For Complex Overhauls)**:
- When undertaking a large refactor or UI overhaul (e.g., adding a mobile menu, fixing overlapping elements, and updating typography), avoid the "Giant PR" anti-pattern.
- 1. **Decompose**: Split the work into atomic branches (e.g., `fix/layout`, `feat/mobile-menu`, `refactor/typography`).
- 2. **Execute in Sequence**: Create each branch from `main`, apply the specific changes, and test.
- 3. **Squash Merge Independently**: Merge each branch back into `main` sequentially.
- *Benefits*: Easier code reviews, selective rollback capability, and isolated regression testing.
-
- **English-First Git History**:
- All PR descriptions, commit messages, and branch names MUST be written in English. This is a strict standard to ensure the repository is fully accessible to global engineering teams and recruiters, even if the primary frontend content or local documentation contains other languages.
-
- **Expected Result in `main`**:
- A clean, linear commit history:
- ```text
- feat(metrics): add P95 aggregation
- fix(auth): validate token expiration edge cases
- docs(api): add retry flow documentation
- ```
- *And NOT*: `Merge pull request #34 from ...`
-
- **What is Actually Evaluated (Beyond raw contribution counts)**:
- - Architecture
- - Clarity
- - Tests
- - Observability
- - Documentation
- - Ability to finish features
- - Understandable commits
-
- *Baseline*: This repository enforces conventional commits, separation of responsibilities, real backend practices, and includes tests/docs/performance — avoiding the anti-patterns of generic commit messages like "fix2", "final", or "ahora-si".
-
- ---
-
- ## 19. Resilient Background Processing (Redis Streams)
-
-**At-Least-Once Delivery**: We use Redis Streams (`XADD`, `XREADGROUP`) to ensure no job is lost. A message is only `XACK`ed after successful processing.
-
-**Error Classification Strategy**:
-1. **TransientErrors**: (e.g., Network timeout, Rate limited by provider). **Action**: Retry with exponential backoff + jitter.
-2. **PermanentErrors**: (e.g., Invalid payload, PII violation). **Action**: Move to `contact_jobs_dlq` immediately.
-3. **UnknownErrors**: (Unhandled exceptions). **Action**: Single retry for safety, then DLQ.
-
-**The "Zombies" Problem (PEL Recovery)**: If a worker process crashes, its assigned messages stay in the *Pending Entries List* (PEL).
-- **Solution**: The worker loop starts with `XAUTOCLAIM`. It scans for messages that have been pending for >60s and re-claims them before reading new ones.
-
-**Max Age Protection**: Jobs older than 15 minutes are considered "stale" for the contact use case and are moved to the DLQ to prevent processing severely outdated requests.
-
----
-
-*Last updated: v1.9.0*
-
----
-
-## 📈 Implementation Plan: SRE Portfolio Refinement
-
-This document defines the execution strategy to demonstrate engineering judgment under uncertainty. The core focus is technical honesty: real data (including noise), explicit trade-offs, and human friction.
-
-> [!NOTE]
-> **Time Expectation**: 10–12 weeks (part-time). Controlled execution to avoid scope creep.
-
-### PROJECT STATUS
-
-#### Phase 1: Hygiene and Benchmarks (✅ COMPLETED)
-
-- [x] **1. Reproducible Benchmark (B1)**
-  - **Tool**: k6 implemented with scripts in `/benchmarks/scripts/` (health.js, read_path.js, contact.js).
-  - **Execution**: PowerShell runner (`benchmarks/run.ps1`) created to archive results per commit.
-  - **Transparency**: README updated with Real Baseline and honest analysis of failures (SQLite vs Prod).
-
-- [x] **2. Basic Security (A1)**
-  - **Hygiene**: Swagger/ReDoc disabled conditionally in production.
-  - **Validation**: Test suite added in `test_configuration.py` guaranteeing behavior.
-
-- [x] **3. Coherent SRE Alerts (A2 Basic)**
-  - **Objective**: Monitoring aligned with SLOs without over-design.
-  - **Result**: Error alerts (5xx) separated from latency degradations. Metrics enriched with `app_version` for total traceability. Naming conventions standardized in English.
-
----
-
-### UPCOMING PHASES
-
-#### Phase 2: Credibility and Incidents (✅ COMPLETED)
-
-> [!WARNING]
-> **Strict Timebox and Scope**: Maximum 2 Case Studies. Writing and data extraction are slow; expanding scope here guarantees not finishing.
-
-**Weekly Cadence**
-- **Week 4**: Select 2 incidents + gather raw evidence.
-- **Week 5**: Case Study #1 (draft + metrics + tags).
-- **Week 6**: Case Study #2.
-- **Week 7**: Normalize badges, confidence score, final review.
-
-**Execution Risks & Mitigations**
-- **Risk 1**: Data extraction takes longer than expected.
-  - *Mitigation*: Freeze the time window (e.g., last 30 days) from Day 1.
-- **Risk 2**: Writing expands uncontrollably or becomes generic.
-  - *Mitigation*: Hard word limit (< 700 words) per case. Use summarized technical language only; strictly no "LinkedIn-style" phrasing.
-- **Risk 3**: Lack of source traceability.
-  - *Mitigation*: Mandatory evidence checklist before publishing.
-
-- [x] **4. Case Studies (D1 + D2)**
-  - **Max 2 Cases Rule**: Case A (mandatory, highest business impact); Case B (mandatory, best evidence of *human friction*). Everything else goes to the backlog (Phase 3+).
-  - **Definition of "Done"**: A Case Study is ready ONLY if it has:
-    - Narrative in < 700 words (concise technical language, zero generic/LinkedIn phrasing).
-    - 3 "before vs after" metrics.
-    - Real/Reproduced tag visible.
-    - 1 lesson learned + 1 future action.
-  - **Standard Template (Disciplined Copy/Paste)**:
-    1. **Context**: Which service, when, impact.
-    2. **Symptom**: What was observed.
-    3. **Initial Hypotheses**: What was suspected.
-    4. **Partial/Human Cause**: Decision, process, communication, etc.
-    5. **Before vs After**: Table with 3 metrics.
-    6. **Real vs Reproduced**: Data source and limitations.
-    7. **Lessons & Guardrails**: Preventive action.
-
-- [x] **5. Real vs Synthetic Signal (B2)**
-  - **Labeling Rule**: Every chart/table must have a badge (in title or subtitle). No tag = no publish.
-  - **Taxonomy**:
-    - `REAL`: Verifiable production telemetry.
-    - `REPRODUCED`: Controlled experiment replicating a pattern.
-    - `SYNTHETIC`: Simulated data for demo purposes.
-  - **Confidence Score**:
-    - `High`: Real data + consistent evidence from ≥2 sources.
-    - `Medium`: Real but incomplete, or strictly controlled reproduced data.
-    - `Low`: Synthetic or insufficient sample.
-
-#### Phase 3: Visual Consistency (Week 8)
-
-> [!WARNING]
-> **Non-negotiable Timebox**: 3–4 real days maximum. Focus on typography and reducing visual noise.
-
-- [x] Premium aesthetic improvement focused on readability of technical data.
-
-#### Phase 4: Closure and Release (Weeks 9-12)
-
-- [x] Final smoke tests.
-- [x] Technical release notes documenting accepted degradations.
-- [x] Final hygiene check in production.
-
-#### Phase 5: Operational Health (Resilient Worker & DLQ) (✅ COMPLETED)
-
-> [!IMPORTANT]
-> **Technical Maturity**: This phase transitions the "Resilient Monolith" from simple background tasks to a production-grade, self-healing processing engine.
-
-- [x] **Durable Redis Streams**: Replaced volatile background tasks with persisted streams.
-- [x] **Error Classification**: Logic to distinguish transient failures (retry) from permanent ones (DLQ).
-- [x] **Self-Healing Loop**: Implementation of `XAUTOCLAIM` to recover orphaned messages from PEL.
-- [x] **Worker Observability**: Prometheus metrics and structured logging with PII masking.
-- [x] **CI Stability**: Forced `memory://` storage for tests, achieving 82% coverage.
-
----
-
-## 9. Infrastructure Lessons Learned (Koyeb Free Tier)
-
-**Context**: During the Backend Resilience Audit (Phase 2), we implemented a durable Redis Streams queue.
-
-**Operational Gotchas**:
-1. **Single Instance Limit**: Koyeb's Free Tier strictly allows only **one (1) free instance** per organization. Attempting to deploy a standalone `worker` service alongside the `api` will fail with `failed_precondition`.
-2. **Scale-to-Zero Enforcement**: Free instances must scale to zero when idle. This requires at least one HTTP route. Services of type `WORKER` do not support routes, creating a deadlock for free background processes.
-
-**Architectural Decision (Resilient Monolith)**:
-- To maintain durability without infrastructure costs, the worker was **consolidated** into the API process.
-- The worker runs as an asynchronous background task within the FastAPI `lifespan`.
-- **Verdict**: This maintains the use of Redis Streams for persistence while staying within the free tier constraints. If the service is upgraded to a paid plan, the worker can be easily extracted back into a standalone service by reverting the `main.tf` and `main.py` changes.
+Do not commit if a required check fails. Fix the failure or distinguish a proven
+environment limitation and rerun the affected check successfully. Report commands
+actually executed; do not treat a workflow badge as evidence for an unchecked SHA.
+Docker builds and deployment-sized load tests remain separate pending release gates.
+
+Mypy checks all of `app/` with the shared gradual configuration. Unannotated
+function bodies are not generally checked; a clean result is not strict typing.
+Do not hide errors with new ignores or update dependencies/stubs without evaluating
+the scope. The optional pre-commit entry uses the active backend environment;
+the active Husky hook currently runs frontend lint-staged tasks only. See the
+[backend guide](backend/README.md#code-and-checks) for commands and configuration.
+
+## Tests and completion criteria
+
+| Change | Required evidence |
+|---|---|
+| Behavior, feature, or bug fix | Meaningful tests for the changed behavior; reproduce a bug before fixing it when feasible. |
+| Pure refactor | Existing tests pass; preserve observable behavior. |
+| Documentation only | No new tests required; verify claims, local links, and historical boundaries. Commit checks above still apply. |
+| JSON/response mapping | Deliberate content-snapshot review; do not regenerate expected output without checking the change. |
+
+Pytest enforces 80% coverage. Use deterministic fixtures and mocked external
+services where appropriate. Doubles at repository/email boundaries are compatible
+with injected use cases. Tests configure Redis, worker, Sentry, and OpenTelemetry
+before application imports; production code must not detect pytest.
+
+A block is complete when its criteria and required checks pass, its diff is
+reviewed, configuration changes are documented, and remaining limitations are
+explicit. A local test result does not prove a production deployment, inbox
+delivery, or load capacity. Keep public interfaces documented and describe
+non-obvious decisions with their context, consequences, and status.
+
+## Architecture and API review
+
+Follow the [implemented boundaries](ARCHITECTURE.md#current-backend-design).
+Controllers compose dependencies and map HTTP responses; use cases accept injected
+adapters. Domain/framework boundaries have architecture tests. Avoid introducing
+new persistence layers, global state, or services without a scoped plan.
+
+Portfolio routes use `/api/v1/`; `/live`, `/health`, `/metrics`, and deprecated
+health aliases have separate operational purposes. Idempotency is optional for
+contact submission, with standard and legacy headers. Completed responses replay;
+concurrent requests receive 409. Validation, duplicate-content, and rate-limit
+failures remain observable errors; only honeypots silently accept/drop requests.
+
+Review compatibility with consumers before changing responses. Current collection
+routes serve finite checked-in content without pagination. If dynamic/unbounded
+collections are introduced, design limits explicitly rather than documenting
+pagination that does not exist. Production errors use existing handlers; debug
+mode can return diagnostic tracebacks and must remain disabled in production.
+
+## Logging, security, and dependencies
+
+Use the structured logger and request context. Request logs include request IDs,
+path, method, status, and duration; trace IDs are conditional on an active span.
+Email masking is shared and preserves at most one local-part character. Phone
+masking applies to the recognized structured field. These processors do not scrub
+all arbitrary strings, contact bodies, names, or exception messages: choose log
+fields deliberately and keep secrets/PII out of artifacts and exported telemetry.
+
+Production `/metrics` requires Basic Auth. Check CORS, CSP, proxy trust, and header
+behavior against the actual settings and middleware when changing browser access.
+Do not document a security guarantee based only on a middleware class name.
+
+Keep existing production dependency pins. Before adding a package, assess whether
+current dependencies suffice, maintenance, image impact, configuration, and typing.
+Use the shared `.env.example`; store real credentials outside Git. For exposed
+credentials, follow the [rotation runbook](docs/architecture/production-operations.md#recovery-and-secret-rotation).
+
+## Performance and reliability
+
+Use [SLO definitions](docs/architecture/SLO_DEFINITIONS.md) for targets and recorded
+benchmarks for evidence tied to a version, environment, time window, and sample
+size. Describe cold starts and low-volume histogram uncertainty without waiving
+targets. The current single-process API/consumer configuration needs a fresh load
+test; older latency figures are not its baseline.
+
+Document caching, invalidation, and fallback limits. JSON reads cache on demand
+until restart; `/health` bypasses that cache. Redis provides shared protection
+state; in-memory fallback is process-local and resets on restart. Redis lock
+contention is distinct from a Redis exception.
+
+Redis Streams support at-least-once processing, not a promise that delivery can
+never fail or duplicate. Retry/DLQ publication precedes acknowledgment. Background
+fallback has no automatic retries. Use the backend guide for current retry
+classification/limits and the operations runbook for incident triage.
+
+## Infrastructure and release boundaries
+
+GitHub Actions supplies secret values to Terraform, which manages Koyeb. Preserve
+stable resource/secret identities and existing moved blocks; unexpected destruction
+requires investigation before any apply. Do not infer current provider restrictions
+or organization quotas from old incidents. HCP workspace execution settings and
+live provider state must be verified when relevant; they are not established by
+local source review.
+
+Application SQL retirement does not remove external databases, volumes, or their
+credentials. Database migrations, soft-delete policies, and standalone worker
+provisioning from older playbooks are not current application procedures.
+
+Use the [operations runbook](docs/architecture/production-operations.md) for release
+prerequisites and recovery. This cleanup does not authorize resource deletion,
+secret renaming, production email tests, merge, or deployment.
+
+## Incidents and evidence
+
+Preserve significant incidents with affected version, observed impact, detection,
+timeline, initial hypotheses, evidence, root cause when established, mitigation,
+accepted limitations, and follow-up. Keep reports factual and blameless. Do not
+rewrite past observations to match the current implementation.
+
+Label evidence `REAL`, `REPRODUCED`, or `SYNTHETIC`, with source and limitations.
+A synthetic UI trace is not an actual backend HTTP response. Avoid universal claims
+from sparse data or fixed quotas for metrics/case studies when evidence is missing.
+
+The former completed roadmap and original playbook are available with
+`git show 615c9a5:ENGINEERING_PLAYBOOK.md`. Their completion marks apply to earlier
+work and do not close current release gates. Use [CHANGELOG](CHANGELOG.md) for
+release/incident history; detailed architecture documents and portfolio JSON still
+need their separate consistency review.

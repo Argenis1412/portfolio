@@ -15,14 +15,12 @@ from app.adapters.email_adapter import (
 )
 from app.adapters.logger_adapter import LoggerAdapter, StructuredLogger
 from app.adapters.repository import JsonRepository, PortfolioRepository
-from app.adapters.sql_repository import SqlRepository
 
 __all__ = [
     "EmailAdapter",
     "ResendEmailAdapter",
     "PortfolioRepository",
     "JsonRepository",
-    "SqlRepository",
     "LoggerAdapter",
     "StructuredLogger",
 ]

@@ -1,34 +1,40 @@
-# Case Study: INC-005 (Fail-Open Rate Limiting & IP Spoofing)
+# Case Study: Rate-Limit Degradation and Proxy Trust Audit
 
-**Confidence Score**: `High` (Audit findings & architectural review)
-**Tag**: `REPRODUCED`
+**Historical identifier:** `INC-005` in this standalone case-study filename.
+**Recorded classification:** `REPRODUCED`, security/resilience audit of v1.x.
+This identifier conflicts with the changelog's INC-005 (Docker build context).
+The filename is retained for existing links; this is not a newly numbered
+production incident. Redis counter persistence is covered separately by INC-001.
 
-### 1. Context
-- **Service**: Backend API (FastAPI) and Rate Limiting Infrastructure (Redis).
-- **Timeline**: Security & Resilience Audit (v1.x).
-- **Impact**: Potential 100% exposure to spam and abuse during Redis outages or via IP spoofing.
+## Recorded finding and earlier mitigation
 
-### 2. Symptom
-During an infrastructure resilience audit, it was discovered that the rate-limiting mechanism (`slowapi` + Redis) was configured to fail **open**. If Redis went down or timed out, the system would catch the exception, log a warning, and allow the request to proceed. Concurrently, the IP extraction logic implicitly trusted `X-Forwarded-For` without validating the upstream proxy.
+The audit described Redis errors allowing contact requests through and forwarded
+IP headers being trusted without a peer allowlist. It reported a controlled
+storage-failure experiment using mocked limiter errors, not an observed
+production attack or a measured 100% exposure rate.
 
-### 3. Initial Hypotheses
-The original implementation prioritized availability over security. The assumption was that rejecting requests due to an internal cache failure would degrade user experience, so failing open seemed like a reasonable fallback.
+The earlier mitigation used HTTP 503 for contact when Redis failed, while reads
+remained fail-open. That historical fail-closed behavior has been superseded.
+Original wording remains available with
+`git show bb3ff44:docs/case_studies/INC-005_fail_open_rate_limit.md`.
 
-### 4. Partial/Human Cause
-Lack of distinction between read-only and mutating endpoints. The fail-open strategy is valid for fetching portfolio data (`GET /projects`), but applying the same fallback to the `/contact` endpoint created a Single Point of Failure (SPOF) for abuse. The IP spoofing vulnerability was caused by a default configuration that trusted standard proxy headers without a definitive allowlist.
+## Current behavior and evidence
 
-### 5. Before vs After [REPRODUCED]
+| Boundary | Cleanup branch behavior |
+|---|---|
+| Contact rate-limit storage failure | Attempt a local memory limiter; exhausted limits still reject. A failure of the memory limiter also allows through as a last resort. |
+| Read-only rate-limit storage failure | Fail open. |
+| Strict proxy trust | Enabled by a non-empty `TRUSTED_PROXY_IPS`; unlisted peers cannot supply forwarded identity. |
+| Default compatibility mode | Uses `TRUSTED_PROXY_DEPTH` without a peer allowlist. Actual proxy configuration still matters. |
 
-| Metric | Before (v1.x) | After (Security Phase 1) |
-| :--- | :--- | :--- |
-| **Contact API Behavior on Redis Failure** | 200 OK (Fail-Open) | 503 Service Unavailable (Fail-Closed) |
-| **Read-Only API Behavior on Redis Failure** | 200 OK (Fail-Open) | 200 OK (Fail-Open) |
-| **IP Spoofing Vulnerability** | High (Trusted `X-Forwarded-For`) | Mitigated (`strict_proxy_mode` allowlist) |
+`backend/tests/test_robustness.py` checks contact memory fallback, read fail-open,
+and degradation metrics; `test_rate_limit.py` covers depth-based proxy identity.
+Those tests explicitly disable strict mode and do not establish strict peer
+allowlist coverage. Production proxy trust and live Redis availability remain
+separate verification tasks. The legacy test/constant names containing
+`fail_closed` do not establish that Redis failure currently returns HTTP 503.
 
-### 6. Real vs Reproduced
-- **Source**: `REPRODUCED`.
-- **Limitations**: The vulnerability was discovered and patched proactively during an audit. Simulated in tests via `monkeypatch` on the `limiter.hit` function to trigger connection errors.
-
-### 7. Lessons & Guardrails
-- **Lesson**: Availability must be endpoint-specific. Mutating or sensitive endpoints must fail closed to protect the system, while read-only endpoints should degrade gracefully and fail open to maintain user experience.
-- **Guardrail**: Implemented strict routing separation for fail-closed behaviors (`FAIL_CLOSED_PATHS`). Added a Prometheus metric (`rate_limit_backend_unavailable_total`) to alert on Redis degradation before it causes widespread 503s. Introduced `strict_proxy_mode` as an environment feature flag to secure IP extraction.
+`rate_limit_backend_unavailable_total` and structured events expose degradation;
+their presence does not prove alert routing. See the
+[failure model](../architecture/FAILURE_MODEL.md) and
+[security controls](../architecture/security-hardening.md).

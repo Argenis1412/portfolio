@@ -1,5 +1,5 @@
 """
-Resilience tests: Redis failures, Supabase transient errors,
+Resilience tests: Redis failures,
 email adapter timeouts, and concurrent idempotency conflicts.
 """
 
@@ -66,7 +66,7 @@ async def test_spam_store_redis_down_fallback():
     """
     from app.core.spam_store import SpamDedupStore
 
-    with patch("redis.asyncio.Redis.from_url") as mock_factory:
+    with patch("app.core.spam_store.create_redis_client") as mock_factory:
         mock_client = AsyncMock()
         mock_client.set.side_effect = redis.exceptions.ConnectionError("Redis down")
         mock_factory.return_value = mock_client
@@ -83,56 +83,28 @@ async def test_spam_store_redis_down_fallback():
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Supabase / database transient failure
-# ──────────────────────────────────────────────────────────────────────────────
-
-
-async def test_supabase_transient_failure_health_check(client):
-    """
-    When the database layer raises an exception, the /health endpoint must
-    return HTTP 200 with status='erro' in the body — NOT a 500 crash.
-    This validates that SqlRepository.check_health() catches exceptions.
-    """
-    from app.adapters.sql_repository import SqlRepository
-    from app.controllers import dependencies
-
-    mock_repo = AsyncMock(spec=SqlRepository)
-    mock_repo.check_health.return_value = {
-        "status": "erro",
-        "details": "Simulated transient DB failure",
-    }
-
-    app.dependency_overrides[dependencies.get_repository] = lambda: mock_repo
-
-    try:
-        resp = client.get("/health")
-        # When a dependency is degraded, the health endpoint returns 503 Service Unavailable
-        # (HTTP 200 is only returned when all checks pass).
-        assert resp.status_code in (200, 503)
-        body = resp.json()
-        # The service must not crash — a structured body is always returned
-        assert isinstance(body, dict)
-    finally:
-        app.dependency_overrides.pop(dependencies.get_repository, None)
-
-
-# ──────────────────────────────────────────────────────────────────────────────
 # Email adapter timeout
 # ──────────────────────────────────────────────────────────────────────────────
 
 
-async def test_email_adapter_timeout_returns_200_backgrounded(client):
+@pytest.mark.parametrize("classified", [False, True])
+async def test_email_adapter_timeout_returns_200_backgrounded(client, classified):
     """
     A ConnectTimeout from the Email Adapter must produce HTTP 200 because the delivery
     happens in the background. The error is only logged.
     """
     from httpx import ConnectTimeout
+    from app.core.exceptions import EmailDeliveryError
 
     from app.use_cases import SendContactUseCase
     from app.controllers.dependencies import get_send_contact_use_case
 
     mock_uc = AsyncMock(spec=SendContactUseCase)
-    mock_uc.execute.side_effect = ConnectTimeout("Email timed out")
+    mock_uc.execute.side_effect = (
+        EmailDeliveryError("resend_transport_failure", transient=True)
+        if classified
+        else ConnectTimeout("Email timed out")
+    )
 
     app.dependency_overrides[get_send_contact_use_case] = lambda: mock_uc
 

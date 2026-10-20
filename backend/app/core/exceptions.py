@@ -65,6 +65,17 @@ class InfrastructureError(Exception):
         super().__init__(message)
 
 
+class EmailDeliveryError(InfrastructureError):
+    """A provider failure with an explicit retry decision and safe error context."""
+
+    def __init__(
+        self, message: str, *, transient: bool, status_code: int | None = None
+    ) -> None:
+        super().__init__(message, code="EMAIL_DELIVERY_ERROR", origin="resend")
+        self.transient = transient
+        self.status_code = status_code
+
+
 class ResourceNotFoundError(DomainError):
     """
     Exception for resource not found.
@@ -78,17 +89,6 @@ class ResourceNotFoundError(DomainError):
             code="PROJECT_NOT_FOUND"
         )
     """
-
-
-class MissingIdempotencyKeyError(DomainError):
-    """
-    Exception for missing Idempotency-Key in protected routes.
-
-    Maps to HTTP 400 Bad Request.
-    """
-
-    def __init__(self, message: str = "Header 'Idempotency-Key' is required") -> None:
-        super().__init__(message, code="MISSING_IDEMPOTENCY_KEY")
 
 
 class DuplicateContactError(DomainError):

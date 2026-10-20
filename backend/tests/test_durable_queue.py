@@ -12,7 +12,7 @@ from app.worker import StreamWorker
 async def test_enqueue_includes_operational_metadata():
     mock_redis = AsyncMock()
     with patch("app.core.queue.get_redis", return_value=mock_redis):
-        queue = RedisStreamsQueue("redis://localhost", stream_name="test_stream")
+        queue = RedisStreamsQueue(stream_name="test_stream")
         await queue.enqueue("test_job", {"a": 1})
         args, kwargs = mock_redis.xadd.call_args
         data = args[1]
@@ -28,7 +28,7 @@ async def test_enqueue_includes_operational_metadata():
 async def test_enqueue_dlq_publishes_failure_context():
     mock_redis = AsyncMock()
     with patch("app.core.queue.get_redis", return_value=mock_redis):
-        queue = RedisStreamsQueue("redis://localhost")
+        queue = RedisStreamsQueue()
         await queue.enqueue_dlq(
             job_name="send_contact_email",
             payload={"name": "n"},
@@ -295,7 +295,8 @@ async def test_worker_reclaims_pel():
         "meta": {"retry_count": 0},
     }
     mock_redis.xpending.return_value = {"pending": 1}
-    mock_redis.xautoclaim.return_value = [
+    mock_redis.xpending_range.return_value = [{"times_delivered": 2}]
+    claimed = [
         "0",
         [
             (
@@ -307,10 +308,17 @@ async def test_worker_reclaims_pel():
 
     worker = StreamWorker("redis://localhost", recovery_interval=0.01)
 
+    def reclaim(*args, **kwargs):
+        worker.stop()
+        return claimed
+
+    mock_redis.xautoclaim.side_effect = reclaim
+
     uc_mock = AsyncMock()
     uc_mock.execute.return_value = True
 
     with (
+        patch("app.worker._RECLAIM_MIN_IDLE_MS", 0),
         patch("redis.asyncio.from_url", return_value=mock_redis),
         patch("app.worker.get_send_contact_use_case", return_value=uc_mock),
     ):
@@ -322,6 +330,10 @@ async def test_worker_reclaims_pel():
 
         mock_redis.xpending.assert_called()
         mock_redis.xautoclaim.assert_called()
+        uc_mock.execute.assert_awaited_once()
+        mock_redis.xack.assert_awaited_once_with(
+            "contact_jobs", "email_workers", "job-pel-1"
+        )
 
 
 @pytest.mark.asyncio
@@ -334,6 +346,7 @@ async def test_worker_recovery_reports_pending():
     worker = StreamWorker("redis://localhost", recovery_interval=0.01)
 
     with (
+        patch("app.worker._RECLAIM_MIN_IDLE_MS", 0),
         patch("redis.asyncio.from_url", return_value=mock_redis),
         patch("app.worker.inc_recovery_run") as inc_mock,
     ):
@@ -399,62 +412,3 @@ async def test_worker_xadds_before_xack_on_retry():
 
     assert "xack" in calls and "xadd" in calls
     assert calls.index("xadd") < calls.index("xack")
-
-
-@pytest.mark.asyncio
-async def test_worker_signal_handler_unix(monkeypatch):
-    """On non-Windows platforms, worker uses loop.add_signal_handler for graceful shutdown."""
-    from app.worker import main
-
-    monkeypatch.setattr("app.worker.settings.redis_url", "redis://localhost")
-    monkeypatch.setattr("app.worker.sys.platform", "linux")
-
-    registered_signals: list[int] = []
-
-    class FakeLoop:
-        def add_signal_handler(self, sig, cb):
-            registered_signals.append(sig)
-
-    fake_loop = FakeLoop()
-
-    async def fake_run(self):
-        pass
-
-    with (
-        patch("app.worker.asyncio.get_running_loop", return_value=fake_loop),
-        patch.object(StreamWorker, "run", new=fake_run),
-    ):
-        await main()
-
-    import signal as _signal
-
-    assert _signal.SIGINT in registered_signals
-    assert _signal.SIGTERM in registered_signals
-
-
-@pytest.mark.asyncio
-async def test_worker_signal_handler_windows(monkeypatch):
-    """On Windows, worker falls back to signal.signal for graceful shutdown."""
-    from app.worker import main
-
-    monkeypatch.setattr("app.worker.settings.redis_url", "redis://localhost")
-    monkeypatch.setattr("app.worker.sys.platform", "win32")
-
-    registered_signals: list[int] = []
-
-    def fake_signal(sig, handler):
-        registered_signals.append(sig)
-
-    import signal as _signal
-
-    async def fake_run(self):
-        pass
-
-    with (
-        patch("app.worker.signal.signal", side_effect=fake_signal),
-        patch.object(StreamWorker, "run", new=fake_run),
-    ):
-        await main()
-
-    assert _signal.SIGINT in registered_signals
-    assert _signal.SIGTERM in registered_signals

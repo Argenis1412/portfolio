@@ -140,7 +140,6 @@ tmp/
 # DOCKER
 # ===========================
 docker-compose.override.yml
-.dockerignore
 *.dockerfile.dev
 
 # ===========================

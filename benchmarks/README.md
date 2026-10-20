@@ -1,5 +1,13 @@
 # Benchmarks
 
+For the cleanup branch, use the [isolated single-process procedure](LOCAL_VALIDATION.md).
+The [resumed validation](results/f9eaa7f-local-20261017/README.md) built the image
+and completed two load runs. Functional checks passed; latency thresholds failed.
+The earlier [startup failure](results/8a73bb4/validation-status.md) is historical. The scripts,
+claims, and results below predate this validation procedure and must be read in
+their historical context. Do not run the contact benchmark against production
+without explicit authorization to send email.
+
 Load testing scripts using [k6](https://k6.io/) to measure and track API performance over time.
 
 ## Why this exists

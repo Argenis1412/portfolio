@@ -18,7 +18,6 @@ Scalable Python API hosting.
     | Variable | Required | Description |
     |---|---|---|
     | `ENVIRONMENT` | ✅ Yes | Must be exactly `production` to enable prod guards |
-    | `DATABASE_URL` | ✅ Yes (prod) | PostgreSQL URL (`postgresql+asyncpg://...`). SQLite not allowed in production |
     | `REDIS_URL` | ✅ Yes (prod) | Redis URL (e.g. `rediss://...`). Required for rate-limiting and idempotency |
     | `RESEND_API_KEY` | ✅ Yes | Resend API Key for email delivery |
     | `ALLOWED_ORIGINS` | ✅ Yes (prod) | Comma-separated list of allowed CORS origins. **Must include your Vercel URL** (e.g. `https://argenisbackend.com,https://my-app.vercel.app`) |
@@ -72,11 +71,11 @@ Global Edge UI deployment.
 ---
 
 ## 🛠️ Architecture Notes
-*   **Database (PostgreSQL/SQLite)**: The system is designed for **Managed PostgreSQL** in production (recommended: **Supabase Postgres**) to ensure data persistence across container restarts. It gracefully falls back to **SQLite** if no `DATABASE_URL` is provided. We do **not** commit the database file to Git. Run `alembic upgrade head` during deploy/release tasks, not on every container boot.
+*   **Portfolio data**: Served from memory-cached JSON files in `backend/data/`. No SQL database, migration, or seeding step is required. `/health` checks local JSON readability and email configuration; `/live` only checks process liveness.
 *   **Active Security**: Built-in protection includes a 5-minute deduplication window, honeypot traps, and heuristic spam scoring.
 *   **Instant Availability (Fixing the 15s Cold Start)**: Cloud platforms like Koyeb hibernate free web services, which causes a 10-15s cold start. To prevent this, configure an **external cron service** (like [cron-job.org](https://cron-job.org/en/)) to send a `GET` request to `https://api.argenisbackend.com/live` every **3 minutes**.
 
-    Use `/live` (not `/health`) because it has **zero external dependencies** — no DB, no Redis — so the keep-alive ping itself never causes a failure or adds load.
+    Use `/live` (not `/health`) because it has **zero external dependencies** — no file checks, no Redis — so the keep-alive ping itself never causes a failure or adds load.
 
     **cron-job.org setup**:
     - URL: `https://api.argenisbackend.com/live`
@@ -86,12 +85,10 @@ Global Edge UI deployment.
 
     > ⚠️ *Note*: GitHub Actions `cron` was previously used but is highly unreliable (often delayed in the queue up to 15+ minutes), defeating the purpose of a keep-alive ping. Always use a dedicated uptime service.
 
-### Recommended Koyeb Deploy Flow
-1. **Release task / pre-deploy**: `alembic upgrade head`
-2. **One-off seed (only when static SQL data must be refreshed)**: `python backend/scripts/migrate_data.py`
-3. **Runtime start command**: `uvicorn app.main:app --host 0.0.0.0 --port 8000`
+### Koyeb Deploy Flow
+Build `backend/Dockerfile` from the repository root and start the API. The image
+includes `backend/data/`; there is no migration or seed release task.
 
-This avoids running migrations and full reseeds on every cold start.
 
 ---
 

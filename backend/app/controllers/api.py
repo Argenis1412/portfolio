@@ -22,7 +22,6 @@ from app.use_cases.get_formation import GetFormationUseCase
 from app.use_cases.get_philosophy import GetPhilosophyUseCase
 from app.use_cases.get_projects import GetProjectByIdUseCase, GetProjectsUseCase
 from app.use_cases.get_stack import GetStackUseCase
-from app.controllers.chaos import chaos_state
 from app.controllers.dependencies import (
     dep_about,
     dep_experiences,
@@ -38,7 +37,6 @@ from app.core.exceptions import ResourceNotFoundError
 from app.core.prometheus_aggregation import (
     compute_p95,
     compute_request_stats,
-    reset_metrics_baseline,
     reset_p95_baseline,
 )
 from app.core.rate_limit import check_rate_limit
@@ -57,13 +55,7 @@ from app.schemas.stack import StackItem, StackResponse
 
 router = APIRouter(tags=["API"])
 
-# Tracks whether the previous metrics poll was inside a chaos recovery window.
-# When it transitions True→False the Prometheus baseline is reset so that
-# chaos-period slow samples don't permanently inflate the cumulative P95.
-_was_chaos_active: bool = False
-
-# One-shot warmup baseline reset: discards cold-start P95 outliers (Koyeb
-# wake, DB init) once initial traffic has settled, without chaos ever firing.
+# Discard cold-start P95 outliers once initial traffic has settled.
 _baseline_established: bool = False
 WARMUP_GRACE_S = 90
 
@@ -96,101 +88,34 @@ async def get_metrics_summary(response: Response) -> MetricsSummary:
     """
     Returns consolidated metrics for the dashboard sourced from Prometheus.
     """
-    global _was_chaos_active, _baseline_established
+    global _baseline_established
 
     response.headers["Cache-Control"] = "public, max-age=15"
-
     uptime_seconds = int(time.time() - APP_START_TIME)
-
-    # Evaluate chaos state BEFORE reading Prometheus so the baseline reset
-    # (if needed) happens before compute_p95 / compute_request_stats.
-    last = chaos_state.last_incident
-    recent_incident_active = last is not None and (time.time() - last.timestamp) < 30
-
-    # Auto-reset Prometheus baseline when the chaos recovery window expires.
-    # This discards chaos-period slow samples from the cumulative histogram so
-    # P95 is computed from only post-chaos clean traffic — preventing the badge
-    # from getting permanently stuck at DEGRADED after multiple chaos cycles.
-    if _was_chaos_active and not recent_incident_active:
-        reset_metrics_baseline()
-    _was_chaos_active = recent_incident_active
-
+    time_warming = uptime_seconds < WARMUP_GRACE_S
     p95_seconds, total_samples = compute_p95()
-    p95_ms = p95_seconds * 1000
 
-    # One-shot warmup reset: once the initial grace period has elapsed and
-    # enough traffic has been served with no chaos active, discard cold-start
-    # P95 outliers from the cumulative histogram. Request counters are left
-    # untouched (reset_p95_baseline is duration-only) so requests_since_deploy
-    # stays continuous and the frontend's deploy-reset heuristic doesn't fire.
-    time_warming = (
-        time.time() - APP_START_TIME
-    ) < WARMUP_GRACE_S and not recent_incident_active
-    if (
-        not _baseline_established
-        and not time_warming
-        and not recent_incident_active
-        and total_samples >= 5
-    ):
+    # Reset duration samples once after startup; lifetime counters stay intact.
+    if not _baseline_established and not time_warming and total_samples >= 5:
         reset_p95_baseline()
         _baseline_established = True
         p95_seconds, total_samples = compute_p95()
-        p95_ms = p95_seconds * 1000
 
+    p95_ms = p95_seconds * 1000
     total_requests, total_5xx = compute_request_stats()
-    error_rate = total_5xx / max(total_requests, 1)
-    if recent_incident_active and last is not None:
-        if last.error_triggered:
-            error_rate += 0.03
-        if last.requests_dropped > 0:
-            error_rate += last.requests_dropped * 0.005
-    error_rate = min(error_rate, 1.0)
-
-    # Status derived from real data — SLO threshold is p95 < 100ms
-    # (aligned with frontend LATENCY_DEGRADED_MS in useLiveMetrics.ts)
-    # time_warming covers the initial grace period (cold-start outliers not
-    # yet reset); sample-count covers the post-reset re-accumulation window.
+    error_rate = min(total_5xx / max(total_requests, 1), 1.0)
     warming_up = total_samples < 5 or time_warming
-    if warming_up:
-        p95_status = "warming_up"
-        error_status = "warming_up"
-    else:
-        p95_status = "healthy" if p95_ms < 100 else "degraded"
-        if recent_incident_active and last is not None and last.error_triggered:
-            error_status = "investigating"
-        elif error_rate > 0.05:
-            error_status = "warning"
-        else:
-            error_status = "stable"
-
-    if recent_incident_active and last is not None and last.error_triggered:
-        system_status = "degraded"
-    elif error_rate > 0.05 or (not warming_up and p95_ms >= 100):
-        system_status = "degraded"
-    else:
-        system_status = "operational"
-
-    # Incident tracking from chaos playground
-    retries_1h = chaos_state.get_retries_last_hour()
-    if last is not None:
-        secs_ago = int(time.time() - last.timestamp)
-        if secs_ago < 60:
-            last_incident_ago = f"{secs_ago}s ago"
-        elif secs_ago < 3600:
-            last_incident_ago = f"{secs_ago // 60}m ago"
-        else:
-            last_incident_ago = f"{secs_ago // 3600}h ago"
-        last_incident_type = last.type
-    else:
-        last_incident_ago = "none"
-        last_incident_type = "none"
-
-    subsys = chaos_state.subsystem_status
-
-    # worker_status precedence: chaos_state overrides prometheus idle detection
-    worker = subsys.get("worker", "ok")
-    if worker == "ok" and total_requests == 0:
-        worker = "idle"
+    p95_status = (
+        "warming_up" if warming_up else "healthy" if p95_ms < 100 else "degraded"
+    )
+    error_status = (
+        "warming_up" if warming_up else "warning" if error_rate > 0.05 else "stable"
+    )
+    system_status = (
+        "degraded"
+        if error_rate > 0.05 or (not warming_up and p95_ms >= 100)
+        else "operational"
+    )
 
     return MetricsSummary(
         p95_ms=int(p95_ms),
@@ -203,16 +128,6 @@ async def get_metrics_summary(response: Response) -> MetricsSummary:
         uptime=_format_uptime(uptime_seconds),
         window="since_deploy",
         timestamp=datetime.now(UTC).isoformat(),
-        retries_1h=retries_1h,
-        last_incident=last_incident_type,
-        last_incident_ago=last_incident_ago,
-        worker_status=worker,
-        queue_backlog=subsys.get("queue_backlog", 0),
-        cache_status=subsys.get("cache", "direct"),
-        cache_ttl_s=subsys.get("cache_ttl_s", 0),
-        active_path=subsys.get("active_path", "sync"),
-        system_lifecycle=subsys.get("system_lifecycle", "NORMAL"),
-        total_chaos_events_since_deploy=chaos_state.total_incidents,
     )
 
 

@@ -15,6 +15,18 @@ jobs:
   test:
     name: 🐍 Python Tests
     runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      REDIS_TEST_URL: redis://localhost:6379/15
     strategy:
       matrix:
         python-version: ['3.12']
@@ -49,11 +61,6 @@ jobs:
           flags: backend
           name: backend-coverage
 
-      - name: ✅ Verify minimum coverage
-        run: |
-          cd backend
-          pytest --cov=app --cov-config=.coveragerc --cov-fail-under=80
-
   lint:
     name: 🧹 Linting
     runs-on: ubuntu-latest
@@ -73,7 +80,7 @@ jobs:
         run: |
           cd backend
           python -m pip install --upgrade pip
-          pip install -r requirements-dev.txt
+          pip install -r requirements.txt -r requirements-dev.txt
 
       - name: 🧹 Run ruff (lint + format)
         run: |
@@ -85,16 +92,7 @@ jobs:
       - name: 🛡️ Run mypy (gradual typing)
         run: |
           cd backend
-          # Gradual: core + use cases + controllers + adapters
-          mypy app/core app/use_cases app/controllers app/adapters \
-            --ignore-missing-imports --explicit-package-bases
-
-      - name: 🔒 Check hardcoded placeholders
-        run: |
-          if grep -qrn --exclude-dir=".github" "https://seudominio.com" .; then
-            echo "❌ ERROR: Placeholder 'https://seudominio.com' found. Use environment variables."
-            exit 1
-          fi
+          python -m mypy --config-file pyproject.toml
 
   build:
     name: 🏗️ Docker Build

@@ -5,12 +5,14 @@ Abstract interface + implementation with Resend.
 """
 
 from abc import ABC, abstractmethod
+from html import escape
 
 import httpx
 import structlog
 
 
 from app.entities.message import Message
+from app.core.exceptions import EmailDeliveryError
 from app.utils.email import mask_email
 
 logger = structlog.get_logger(__name__)
@@ -32,7 +34,10 @@ class EmailAdapter(ABC):
             message: Message to be sent.
 
         Returns:
-            bool: True if sent successfully, False otherwise.
+            bool: True if accepted by the provider, False for an unclassified failure.
+
+        Raises:
+            EmailDeliveryError: Classified provider failure, including retry policy.
         """
         pass
 
@@ -52,18 +57,18 @@ class ResendEmailAdapter(EmailAdapter):
     async def send_message(self, message: Message) -> bool:
         if not self._configured:
             logger.warning("resend_not_configured", reason="RESEND_API_KEY is empty")
-            return False
+            raise EmailDeliveryError("resend_not_configured", transient=False)
 
         try:
             # Prepare basic HTML message
             html_content = f"""
             <h3>New Contact from Portfolio</h3>
-            <p><strong>Name:</strong> {message.name}</p>
-            <p><strong>Email:</strong> {message.email}</p>
-            <p><strong>Subject:</strong> {message.subject}</p>
+            <p><strong>Name:</strong> {escape(message.name)}</p>
+            <p><strong>Email:</strong> {escape(message.email)}</p>
+            <p><strong>Subject:</strong> {escape(message.subject)}</p>
             <p><strong>Message:</strong></p>
             <div style="white-space: pre-wrap; background: #f4f4f4; padding: 15px; border-radius: 5px;">
-                {message.message}
+                {escape(message.message)}
             </div>
             """
 
@@ -85,20 +90,29 @@ class ResendEmailAdapter(EmailAdapter):
                     },
                 )
 
-                success = response.status_code in (200, 201)
-                if success:
-                    logger.info("resend_send_success", id=response.json().get("id"))
-                else:
-                    logger.warning(
-                        "resend_send_failure",
-                        status=response.status_code,
-                        body=response.text,
-                    )
-                return success
+        except (
+            httpx.TimeoutException,
+            httpx.NetworkError,
+            httpx.RemoteProtocolError,
+        ) as exc:
+            logger.warning("resend_transport_failure", error_type=type(exc).__name__)
+            raise EmailDeliveryError(
+                "resend_transport_failure", transient=True
+            ) from exc
 
-        except Exception as e:
-            logger.error("resend_unexpected_error", error=str(e), exc_info=True)
-            return False
+        if response.status_code in (200, 201):
+            logger.info("resend_send_success", status=response.status_code)
+            return True
+
+        transient = response.status_code == 429 or 500 <= response.status_code < 600
+        logger.warning(
+            "resend_send_failure", status=response.status_code, transient=transient
+        )
+        raise EmailDeliveryError(
+            f"resend_http_{response.status_code}",
+            transient=transient,
+            status_code=response.status_code,
+        )
 
 
 class ConsoleEmailAdapter(EmailAdapter):

@@ -36,16 +36,12 @@ RUN pip install --no-cache-dir --upgrade pip && \
 FROM python:3.12-slim
 
 # Metadata
-LABEL maintainer="seuemail@exemplo.com"
-LABEL description="API FastAPI para Portfólio Profissional"
-LABEL version="1.0.0"
+LABEL description="FastAPI portfolio API"
 
 # Environment variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    ENVIRONMENT=production \
-    API_HOST=0.0.0.0 \
-    API_PORT=8000
+    ENVIRONMENT=production
 
 # Create non-root user for security
 RUN useradd -m -u 1000 appuser && \
@@ -63,8 +59,6 @@ ENV PATH=/home/appuser/.local/bin:$PATH
 # Copy application code
 COPY --chown=appuser:appuser backend/app/ ./app/
 COPY --chown=appuser:appuser backend/data/ ./data/
-COPY --chown=appuser:appuser backend/alembic/ ./alembic/
-COPY --chown=appuser:appuser backend/alembic.ini .
 
 # Switch to non-root user
 USER appuser
@@ -77,4 +71,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
 
 # Initialization command: Start Application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

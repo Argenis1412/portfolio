@@ -4,10 +4,10 @@ Utilities for email manipulation.
 
 
 def mask_email(value: str) -> str:
-    """Masks an email (e.g., jo***@example.com) for safe logging."""
+    """Keep at most one local-part character and normalize the domain for logs."""
     if "@" not in value:
-        return "invalid-email"
+        return "***"
 
     user, domain = value.split("@", 1)
-    prefix = user[:2] if len(user) >= 2 else user[:1]
+    prefix = user[:1] or "*"
     return f"{prefix}***@{domain.lower()}"

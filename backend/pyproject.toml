@@ -7,3 +7,9 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "lf"
+
+[tool.mypy]
+files = ["$MYPY_CONFIG_FILE_DIR/app"]
+mypy_path = "$MYPY_CONFIG_FILE_DIR"
+ignore_missing_imports = true
+explicit_package_bases = true

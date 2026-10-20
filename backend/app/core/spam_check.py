@@ -9,44 +9,17 @@ SPAM_KEYWORDS = [
     r"\bcrypto\b",
     r"\bbitcoin\b",
     r"\bbtc\b",
-    r"\binvestment\b",
-    r"\bseo\b",
-    r"\bmarketing\b",
     r"\bcasino\b",
     r"\bbetting\b",
     r"\blottery\b",
     r"\bwinner\b",
     r"\bprize\b",
-    r"\bdiscount\b",
-    r"\burgent\b",
-    r"\bofficial\b",
-    r"\bagency\b",
-    r"\bapp development\b",
-    r"\bwebsite design\b",
-    r"\bproposal\b",
-    r"\bleads\b",
     r"\blead generation\b",
-    r"\bfreelance\b",
-    r"\boutsourcing\b",
-    r"\btelegram\b",
-    r"\bwhatsapp\b",
-    # Spanish/Portuguese keywords
-    r"\binvertir\b",
-    r"\binversión\b",
-    r"\binversion\b",
-    r"\bganar\b",
-    r"\bganador\b",
-    r"\bnegocio\b",
-    r"\bgratis\b",
-    r"\bpromoción\b",
-    r"\bpromocion\b",
-    r"\bpromoção\b",
-    r"\bgana\b",
-    r"\bganhe\b",
-    r"\bdinero\b",
-    r"\boferta\b",
-    r"\binvestimento\b",
 ]
+
+SCORE_POSSIBLE_SPAM = 30
+SCORE_LIKELY_SPAM = 70
+
 
 # Domains often used for temporary/burner emails
 TEMP_EMAIL_DOMAINS = [
@@ -59,38 +32,14 @@ TEMP_EMAIL_DOMAINS = [
 ]
 
 
-# Regexes previously in the schema, now used for scoring
-NAME_REGEX = re.compile(r"^[^\d\W_](?:[^\d\W_]|[0-9]|[ .,'-]){1,79}$")
-SUBJECT_REGEX = re.compile(r"^(?:[^\d\W_]|[0-9]|[ .\[\],:;!?()/#&+@'\-]){0,120}$")
-EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+def calculate_spam_score(message: str, email: str) -> int:
+    """Score content heuristics for labeling only; never reject a submission.
 
-
-def calculate_spam_score(
-    message: str, email: str, name: str = "", subject: str = ""
-) -> int:
-    """
-    Calculates a spam score based on message content, email, name and subject.
-    0-30: Normal (deliver)
-    31-69: Suspect (deliver with flag)
-    >=70: Silent Spam (silent drop)
-
-    Invalid formats now return 100 to ensure silent drop (no 422 error to user).
+    0-29: normal; 30-69: possible spam; 70-100: likely spam.
+    Request field validation belongs to the Pydantic schema.
     """
     score = 0
     message_lower = message.lower()
-
-    # Rule 0: Strict format validation
-    if not EMAIL_REGEX.match(email):
-        return 100
-
-    if name and not NAME_REGEX.fullmatch(name):
-        return 100
-
-    if name and any(c.isnumeric() and not c.isascii() for c in name):
-        return 100
-
-    if subject and not SUBJECT_REGEX.fullmatch(subject):
-        return 100
 
     # Rule 1: Message too short
     if len(message.strip()) < 10:
@@ -160,16 +109,6 @@ def calculate_spam_score(
         caps_ratio = sum(1 for c in message if c.isupper()) / len(message)
         if caps_ratio > 0.4:
             score += 20
-
-    # Rule 8: Suspicious subject patterns
-    if subject:
-        subject_lower = subject.lower()
-        if (
-            "spam" in subject_lower
-            or "advertencia" in subject_lower
-            or "security" in subject_lower
-        ):
-            score += 30
 
     # Rule 9: Non-alphanumeric density (symbol soup / injection payloads).
     # Legit prose: 0.03-0.13 ratio. Target garbage: ~0.59.

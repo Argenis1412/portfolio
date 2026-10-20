@@ -16,6 +16,7 @@ from app.core.contact_guard import ContactGuard, email_domain
 from app.core.exceptions import DuplicateContactError
 from app.core.idempotency import store, verify_idempotency
 from app.core.queue import JobQueue
+from app.core.spam_check import SCORE_POSSIBLE_SPAM, SCORE_LIKELY_SPAM
 from app.schemas.contact import ContactRequest, ContactResponse
 
 logger = structlog.get_logger(__name__)
@@ -49,7 +50,7 @@ async def _process_background_delivery(
     "/contact",
     response_model=ContactResponse,
     summary="Send contact message",
-    description="Submits a contact form message via Formspree in background. Rate limited to 10 messages/day per email.",
+    description="Queues a contact message for Resend delivery, with background fallback. Rate limited to 10 messages/day per email.",
     responses={
         200: {"description": "Message queued successfully"},
         429: {"description": "Too many requests - rate limit exceeded"},
@@ -90,9 +91,9 @@ async def send_contact(
             cacheable_response = ContactResponse(
                 success=True,
                 message="Message sent successfully! I will get back to you soon.",
-                queue_status="accepted",
-                delivery_mode="silent_drop",
-                downstream="honeypot_guard",
+                queue_status="queued",
+                delivery_mode="stream" if job_queue else "background_fallback",
+                downstream=downstream,
             )
             return cacheable_response
 
@@ -100,27 +101,7 @@ async def send_contact(
         spam_score = _guard.get_spam_score(
             contact_request.message,
             contact_request.email,
-            name=contact_request.name,
-            subject=contact_request.subject or "",
         )
-
-        if spam_score >= ContactGuard.SCORE_SILENT_DROP:
-            logger.info(
-                "contact_classified",
-                classification="SILENT_SPAM",
-                action="silent_drop",
-                event_type="security_event",
-                spam_score=spam_score,
-                email_domain=email_domain(contact_request.email),
-            )
-            cacheable_response = ContactResponse(
-                success=True,
-                message="Message sent successfully! I will get back to you soon.",
-                queue_status="accepted",
-                delivery_mode="silent_drop",
-                downstream="spam_guard",
-            )
-            return cacheable_response
 
         # ── 3. Content deduplication ────────────────────────────────────────
         content_hash = _guard.build_content_hash(
@@ -144,17 +125,23 @@ async def send_contact(
         _guard.apply_rate_limits(request)
 
         # ── 5. Classification logging ───────────────────────────────────────
-        is_suspicious = spam_score > ContactGuard.SCORE_SUSPICIOUS
+        is_suspicious = spam_score >= SCORE_POSSIBLE_SPAM
         logger.info(
             "contact_classified",
-            classification="SUSPECT" if is_suspicious else "NORMAL",
+            classification=(
+                "LIKELY_SPAM"
+                if spam_score >= SCORE_LIKELY_SPAM
+                else "POSSIBLE_SPAM"
+                if is_suspicious
+                else "NORMAL"
+            ),
             action="deliver_with_flag" if is_suspicious else "deliver",
             spam_score=spam_score,
             email_domain=email_domain(contact_request.email),
         )
 
         # ── 6. Delivery (Durable Queue vs Background Tasks) ──────────────────
-        delivery_mode = "stream"
+        delivery_mode = "background_fallback"
         if job_queue:
             # Durable delivery via Redis Streams
             try:
@@ -169,19 +156,11 @@ async def send_contact(
                         "spam_score": spam_score,
                     },
                 )
+                delivery_mode = "stream"
             except Exception as e:
                 logger.warning("queue_unavailable_fallback_background", error=str(e))
-                delivery_mode = "background_fallback"
-                background_tasks.add_task(
-                    _process_background_delivery,
-                    send_contact_uc,
-                    contact_request,
-                    is_suspicious,
-                    spam_score,
-                )
-        else:
-            # Fallback to non-durable BackgroundTasks (local dev)
-            delivery_mode = "background_fallback"
+
+        if delivery_mode == "background_fallback":
             background_tasks.add_task(
                 _process_background_delivery,
                 send_contact_uc,

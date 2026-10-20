@@ -1,21 +1,84 @@
 # Release Readiness
 
-## Validation
+**Cleanup status: merge and deployment blocked by frontend retirement.** Passing
+backend tests does not make the existing UI compatible with retired Chaos routes
+and metrics fields. The [consumer list](../CHANGELOG.md#frontend-deployment-dependency)
+and [operations runbook](architecture/production-operations.md) define remaining work.
 
-The release gate runs frontend linting, TypeScript compilation, Vitest, and Playwright. Without `BASE_URL`, Playwright starts the local frontend with the production API base URL for read requests. When `BASE_URL` is set, Playwright skips the local web server and does not inject `VITE_API_URL`; the externally hosted frontend must already use the intended API configuration. Its mutating chaos endpoints are intercepted in the browser, so release validation does not write production state.
+## Validation boundaries
 
-Manual validation covers desktop and 390×844 mobile layouts, the navigation drawer, keyboard navigation, heading focus, visible focus states, screen-reader labels, contrast tokens, and reduced-motion behavior.
+Before every commit, run backend pytest and frontend ESLint, `tsc -b`, and Vitest
+as documented in the [root guide](../README.md#required-checks-before-a-commit).
+Backend lint/format and gradual mypy configuration are documented in the
+[backend guide](../backend/README.md#code-and-checks). Documentation-only changes
+need link/history checks, not new behavioral tests.
 
-## Operational Evidence
+CI jobs are separate, filtered workflows, not one universal release gate.
+Backend/frontend pushes on `chore/backend-cleanup` do not match their configured
+push branch filters, and root/docs-only changes do not match their code path
+filters. A local pass or old badge does not prove this commit ran in GitHub Actions.
+Check the event, commit, jobs, and artifacts before claiming CI success.
 
-`REAL` identifies verifiable production telemetry or checked-in test and CI artifacts. `REPRODUCED` identifies a controlled experiment that recreates a production-relevant behavior. `SYNTHETIC` identifies deliberate demonstration data and must never be presented as production telemetry.
+Playwright is a separate frontend smoke suite:
 
-## Discoverability Limits
+- Without `BASE_URL`, its configuration starts a local frontend and injects the
+  production API base URL for reads. Local UI execution is not an isolated local
+  backend test.
+- With `BASE_URL`, no local server starts and `VITE_API_URL` is not injected by
+  Playwright. The hosted frontend must already target the intended backend.
+- Existing Chaos smoke tests intercept specific action requests and return
+  fixtures. They test that UI contract, not availability or recovery of retired
+  backend routes. Their interception is not a blanket guarantee that arbitrary
+  future mutating requests cannot reach the configured API.
+- Replace the remaining Chaos scenarios and validate the compatible frontend/API
+  pair before release. Do not send real contact email as part of a documentation
+  check; a live delivery smoke test requires explicit authorization.
 
-The Vercel SPA rewrite returns one HTML document for every route. The HTTP metadata contract is therefore limited to the static root metadata in `frontend/index.html`. Route-specific HTTP metadata, social previews, HTTP 404 responses, and HTTP-level `noindex` require prerendering, SSR, or edge rendering.
+The E2E workflow runs on matching frontend pushes to `main` or manual dispatch;
+manual dispatch defaults to the production frontend URL. This cleanup does not
+run that suite against production or claim a new Playwright result.
 
-The sitemap lists only stable static routes. API-driven project routes are intentionally excluded because their identities are not available when the sitemap is served. Invalid dynamic IDs retain client-side semantics; a rendering-layer implementation must distinguish resource absence from temporary API failure before introducing an HTTP indexability contract.
+Manual UI review remains required for desktop/mobile layouts (including 390x844),
+keyboard navigation, focus restoration, labels, contrast, and reduced motion.
+These are validation criteria, not a record that this review has been completed.
 
-## Known Limitations
+## Backend and operational prerequisites
 
-Real chaos validation is not part of the release suite. It requires an explicitly authorized, isolated sandbox or staging environment with defined cleanup.
+Portfolio JSON claims and the affected list/detail response snapshots have been
+reviewed for backend cleanup. Other project records remain outside that review.
+Keep future content changes tied to deliberate snapshot review.
+
+1. Docker image build from repository-root context: complete in local validation.
+2. Deployment-sized single-process API/consumer load: executed twice; latency
+   acceptance failed. Local comparison with the same image failed twice at 0.1 CPU
+   and passed twice at 1 CPU. The current budget remains unaccepted; resolve
+   capacity and obtain a passing rerun before release.
+3. Confirm `AMBIENTE` contains exactly `production` and Koyeb receives
+   `ENVIRONMENT=production`; preserve secret/resource identities.
+4. Verify external monitors using `/saude` or `/salud` before removing aliases.
+   Inspect `/health` bodies because degraded JSON still returns HTTP 200.
+
+The [local results](../benchmarks/results/f9eaa7f-local-20261017/README.md) retain
+image/resource evidence and both failed latency summaries. All 334 functional
+checks per run passed, with twenty total console jobs and no pending/DLQ entries.
+This does not establish production SLO compliance. The earlier
+[startup failure](../benchmarks/results/8a73bb4/validation-status.md) is historical;
+the [isolated procedure](../benchmarks/LOCAL_VALIDATION.md) now uses container-local
+k6 networking. Production environment and monitor verification remain pending;
+no production settings, secret values, infrastructure, or monitor targets changed.
+
+## Evidence and discoverability
+
+Use the [content contract](architecture/PORTFOLIO_CONTENT_CONTRACT.md#evidence-rules)
+for `REAL`, `REPRODUCED`, and `SYNTHETIC` labels. Distinguish repository/test evidence
+from production observations, and retain release/environment context. Historical
+benchmarks are not current SLO compliance; see the
+[SLO definitions](architecture/SLO_DEFINITIONS.md).
+
+The SPA rewrite serves the same HTML shell for application routes. Static root
+metadata does not provide route-specific social previews, HTTP 404 status, or
+HTTP-level `noindex`. Those need a separately scoped rendering solution. The
+sitemap lists static routes and omits API-driven project IDs. Do not turn a
+transient API error into a claim that a dynamic resource does not exist.
+
+Earlier wording remains available with `git show e7cd8a0:docs/RELEASE_READINESS.md`.
