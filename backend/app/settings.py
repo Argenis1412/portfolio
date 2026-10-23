@@ -90,6 +90,12 @@ class Settings(BaseSettings):
         alias="OTLP_ENDPOINT",
         description="OTLP trace endpoint (e.g., http://jaeger:4318). Empty disables export in production and uses console export elsewhere.",
     )
+    rate_limit_redis_timeout_seconds: float = Field(
+        default=1.0,
+        alias="RATE_LIMIT_REDIS_TIMEOUT_SECONDS",
+        gt=0,
+        allow_inf_nan=False,
+    )
     redis_socket_timeout_seconds: float = Field(
         default=5.0,
         alias="REDIS_SOCKET_TIMEOUT_SECONDS",
