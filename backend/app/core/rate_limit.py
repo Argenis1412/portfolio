@@ -3,6 +3,10 @@ Rate Limiter configuration for the application.
 """
 
 import hashlib
+import time
+
+from redis.backoff import NoBackoff
+from redis.retry import Retry
 
 from fastapi import Request
 from prometheus_client import Counter
@@ -12,7 +16,7 @@ from slowapi.util import get_remote_address
 from app.settings import settings
 
 
-# Paths where rate limit must fail-closed (reject request) when Redis is unavailable.
+# Paths that use local rate limiting when Redis is unavailable.
 # Read-only portfolio endpoints use fail-open (allow through) to remain available.
 FAIL_CLOSED_PATHS = frozenset({"/api/v1/contact"})
 
@@ -71,6 +75,12 @@ limiter = Limiter(
     key_func=get_client_ip,
     strategy="fixed-window",
     storage_uri=settings.redis_url or "memory://",
+    storage_options={
+        "socket_timeout": settings.rate_limit_redis_timeout_seconds,
+        "socket_connect_timeout": settings.rate_limit_redis_timeout_seconds,
+        "retry": Retry(NoBackoff(), 0),
+        "retry_on_timeout": False,
+    } if settings.redis_url and settings.redis_url.startswith(("redis://", "rediss://", "redis+unix://")) else {},
 )
 
 # Fallback in-memory limiter used when the primary backend (Redis) is
@@ -90,6 +100,10 @@ REDIS_UNAVAILABLE_COUNTER = Counter(
 )
 
 
+_redis_disabled_until = 0.0
+_BREAKER_COOLDOWN_SECONDS = 30.0
+
+
 def check_rate_limit(request: Request, limit_string: str, key_func=get_email_or_ip_key):
     """
     Manually applies a rate limit hit and raises RateLimitExceeded if the limit is reached.
@@ -107,59 +121,45 @@ def check_rate_limit(request: Request, limit_string: str, key_func=get_email_or_
         def __init__(self, msg):
             self.error_message = msg
 
+    global _redis_disabled_until
+
     key = key_func(request)
     is_sensitive = request.url.path in FAIL_CLOSED_PATHS
-
-    # Parse the limit string (e.g. "10/day" -> [Limit(...)])
     for limit in parse_many(limit_string):
-        try:
-            if not limiter.limiter.hit(limit, key):
-                raise RateLimitExceeded(MockLimit(str(limit)))  # type: ignore
-        except RateLimitExceeded:
-            raise
-        except Exception as e:
-            import structlog
-
-            logger = structlog.get_logger(__name__)
-
-            # Emit Prometheus metric for alerting on Redis degradation
-            _mode = "degraded" if is_sensitive else "fail_open"
+        if time.monotonic() >= _redis_disabled_until:
             try:
-                REDIS_UNAVAILABLE_COUNTER.labels(
-                    path=request.url.path,
-                    mode=_mode,
-                ).inc()
-            except Exception:
-                pass  # Never fail the request due to a metrics error
-
-            if is_sensitive:
-                # Degraded mode: fall back to in-memory rate limiting so the
-                # contact form remains functional during Redis outages while
-                # still providing single-instance anti-abuse protection.
-                logger.warning(
-                    "rate_limiter_degraded_mode",
-                    error=str(e),
-                    error_type=type(e).__name__,
-                    limit=str(limit),
-                    path=request.url.path,
-                    mode="degraded_memory_fallback",
-                )
-                try:
-                    if not _fallback_limiter.limiter.hit(limit, key):
-                        raise RateLimitExceeded(MockLimit(str(limit)))  # type: ignore
-                except RateLimitExceeded:
-                    raise
-                except Exception:
-                    # Even memory fallback failed — allow through as last resort
-                    pass
+                if not limiter.limiter.hit(limit, key):
+                    raise RateLimitExceeded(MockLimit(str(limit)))  # type: ignore
+                _redis_disabled_until = 0.0
                 continue
+            except RateLimitExceeded:
+                raise
+            except Exception as exc:
+                _redis_disabled_until = time.monotonic() + _BREAKER_COOLDOWN_SECONDS
+                import structlog
 
-            # Fail-open: allow through on read-only portfolio endpoints
-            logger.error(
-                "rate_limiter_backend_unavailable",
-                error=str(e),
-                limit=str(limit),
+                structlog.get_logger(__name__).warning(
+                    "rate_limiter_backend_unavailable",
+                    error=str(exc),
+                    error_type=type(exc).__name__,
+                    path=request.url.path,
+                    limit=str(limit),
+                    mode="degraded" if is_sensitive else "fail_open",
+                )
+
+        try:
+            REDIS_UNAVAILABLE_COUNTER.labels(
                 path=request.url.path,
-                mode="fail_open",
-            )
-            continue
+                mode="degraded" if is_sensitive else "fail_open",
+            ).inc()
+        except Exception:
+            pass  # Metrics must never fail the request.
+
+        if is_sensitive:
+            try:
+                if not _fallback_limiter.limiter.hit(limit, key):
+                    raise RateLimitExceeded(MockLimit(str(limit)))  # type: ignore
+            except RateLimitExceeded:
+                raise
+            except Exception:
+                pass  # Preserve last-resort fail-open if memory storage fails.

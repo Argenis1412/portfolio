@@ -210,7 +210,11 @@ def reset_global_state():
     This prevents tests from accumulating limits or cache from each other.
     """
     from app.core.idempotency import store
-    from app.core.rate_limit import limiter
+    from app.core.rate_limit import limiter, _fallback_limiter
+    from app.core import rate_limit
+
+    rate_limit._redis_disabled_until = 0.0
+    _fallback_limiter._storage.reset()
     from app.core.spam_store import spam_dedup_store
 
     # Clear idempotency caches

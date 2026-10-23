@@ -160,3 +160,7 @@ credentials or sending email. Add `--send` only to request a real test email.
 When Redis declines `SET NX`, the request does not acquire a local lock. The
 dependency checks for a finalized response to replay; otherwise it returns HTTP
 409. In-memory lock fallback is used only when Redis is unavailable or disabled.
+
+### Rate limiter Redis resilience
+
+`RATE_LIMIT_REDIS_TIMEOUT_SECONDS` defaults to `1.0` and must be finite and positive. It sets Redis socket and connection timeouts for the rate limiter, with automatic retries disabled. A storage error bypasses Redis for 30 seconds per process. Contact requests use local memory limits; read-only requests fail open. The first synchronous attempt can still block the event loop. These socket timeouts are not a request deadline and do not affect deduplication, idempotency, or queue clients.
