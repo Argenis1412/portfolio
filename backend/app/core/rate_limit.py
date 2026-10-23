@@ -4,6 +4,7 @@ Rate Limiter configuration for the application.
 
 import hashlib
 import time
+from typing import Any
 
 from redis.backoff import NoBackoff
 from redis.retry import Retry
@@ -71,16 +72,22 @@ def get_contact_fingerprint_key(request: Request) -> str:
 
 # Initialize limiter using client IP as the default key.
 # When REDIS_URL is set, uses Redis as the backend storage for horizontal scaling.
-limiter = Limiter(
-    key_func=get_client_ip,
-    strategy="fixed-window",
-    storage_uri=settings.redis_url or "memory://",
-    storage_options={
+# SlowAPI annotates storage options as strings, but forwards Redis client values.
+_storage_options: dict[str, Any] = {}
+if settings.redis_url and settings.redis_url.startswith(
+    ("redis://", "rediss://", "redis+unix://")
+):
+    _storage_options = {
         "socket_timeout": settings.rate_limit_redis_timeout_seconds,
         "socket_connect_timeout": settings.rate_limit_redis_timeout_seconds,
         "retry": Retry(NoBackoff(), 0),
         "retry_on_timeout": False,
-    } if settings.redis_url and settings.redis_url.startswith(("redis://", "rediss://", "redis+unix://")) else {},
+    }
+limiter = Limiter(
+    key_func=get_client_ip,
+    strategy="fixed-window",
+    storage_uri=settings.redis_url or "memory://",
+    storage_options=_storage_options,
 )
 
 # Fallback in-memory limiter used when the primary backend (Redis) is
