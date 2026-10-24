@@ -98,7 +98,8 @@ class IdempotencyStore:
                 return None
 
             # Evict expired entries
-            if time.time() - record.timestamp > self.ttl_seconds:
+            ttl = self.lock_ttl_seconds if record.in_progress else self.ttl_seconds
+            if time.time() - record.timestamp > ttl:
                 self._cache.pop(key, None)
                 return None
 
@@ -134,7 +135,8 @@ class IdempotencyStore:
         with self._lock:
             if key in self._cache:
                 record = self._cache[key]
-                if time.time() - record.timestamp <= self.ttl_seconds:
+                ttl = self.lock_ttl_seconds if record.in_progress else self.ttl_seconds
+                if time.time() - record.timestamp <= ttl:
                     return False
                 # If expired, overwrite
 
@@ -195,24 +197,20 @@ class IdempotencyException(Exception):
         super().__init__("Idempotency HIT")
 
 
-async def verify_idempotency(
+async def get_idempotency_key(
     request: Request,
     idempotency_key: Optional[str] = Header(None, alias="Idempotency-Key"),
     legacy_idempotency_key: Optional[str] = Header(None, alias="X-Idempotency-Key"),
 ):
-    """
-    FastAPI dependency to enforce idempotency on POST requests.
-
-    Accepts the standard `Idempotency-Key` header or the legacy `X-Idempotency-Key`.
-    - If the key has a finalized record: raises `IdempotencyException` with cached response.
-    - If the key is already in-progress: raises HTTP 409 Conflict.
-    - Otherwise: locks the key and returns it for the controller to finalize.
-    """
+    """Resolve standard or legacy headers without reserving before validation."""
     if request.method != "POST":
         return None
 
-    effective_key = idempotency_key or legacy_idempotency_key
+    return idempotency_key or legacy_idempotency_key
 
+
+async def verify_idempotency(effective_key: Optional[str]) -> Optional[str]:
+    """Replay, reject, or reserve a key after the request body is validated."""
     if not effective_key:
         return None
 

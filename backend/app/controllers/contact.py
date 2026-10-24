@@ -14,7 +14,7 @@ from app.use_cases.send_contact import SendContactUseCase
 from app.controllers.dependencies import get_send_contact_use_case, get_job_queue
 from app.core.contact_guard import ContactGuard, email_domain
 from app.core.exceptions import DuplicateContactError
-from app.core.idempotency import store, verify_idempotency
+from app.core.idempotency import get_idempotency_key, store, verify_idempotency
 from app.core.queue import JobQueue
 from app.core.spam_check import SCORE_POSSIBLE_SPAM, SCORE_LIKELY_SPAM
 from app.schemas.contact import ContactRequest, ContactResponse
@@ -66,11 +66,12 @@ async def send_contact(
         Depends(get_send_contact_use_case),
     ],
     job_queue: Annotated[Optional[JobQueue], Depends(get_job_queue)],
-    idempotency_key: Annotated[Optional[str], Depends(verify_idempotency)] = None,
+    idempotency_key: Annotated[Optional[str], Depends(get_idempotency_key)] = None,
 ) -> ContactResponse:
     cacheable_response: ContactResponse | None = None
     content_hash: str | None = None
     dedup_reserved = False
+    acquired = False
     email_adapter = getattr(send_contact_uc, "email_adapter", None)
     downstream = (
         getattr(email_adapter, "__class__", type("Adapter", (), {}))
@@ -80,6 +81,10 @@ async def send_contact(
     )
 
     try:
+        if idempotency_key:
+            await verify_idempotency(idempotency_key)
+            acquired = True
+
         # ── 1. Honeypot check ───────────────────────────────────────────────
         if _guard.check_honeypot(contact_request):
             logger.info(
@@ -193,7 +198,7 @@ async def send_contact(
             await _guard.release_dedup(content_hash)
 
         # Persist idempotency result
-        if idempotency_key:
+        if acquired and idempotency_key:
             if cacheable_response is not None:
                 await store.set(idempotency_key, 200, cacheable_response.model_dump())
             else:
