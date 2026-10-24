@@ -123,8 +123,9 @@ Redis outages, quota cooldown, and active processing can delay recovery.
 Real-Redis tests use the `redis_integration` marker and skip when `REDIS_TEST_URL`
 is absent. To run locally, set it to a disposable instance such as
 `redis://127.0.0.1:16379/15` before pytest. The fixture rejects remote hosts,
-credentials, and databases other than `/15`; it flushes only that selected database
-before and after each integration test. CI supplies a disposable Redis service.
+credentials, and databases other than `/15`. Worker fixtures flush that selected
+database before and after each integration test; contact idempotency fixtures
+delete only their unique test keys. CI supplies a disposable Redis service.
 
 Contact scoring labels messages instead of dropping them: scores 30-69 use
 `POSSIBLE SPAM`, and 70-100 use `LIKELY SPAM` in the email subject. All scored
@@ -158,8 +159,19 @@ credentials or sending email. Add `--send` only to request a real test email.
 ## Idempotency lock contention
 
 When Redis declines `SET NX`, the request does not acquire a local lock. The
-dependency checks for a finalized response to replay; otherwise it returns HTTP
+handler checks for a finalized response to replay; otherwise it returns HTTP
 409. In-memory lock fallback is used only when Redis is unavailable or disabled.
+
+Contact bodies are validated before reserving an idempotency key, so a 422 does
+not block a corrected retry. In-progress records use the short lock TTL in both
+Redis and memory; completed responses retain the response TTL. Only requests
+that acquired a reservation finalize or release it.
+
+Locks do not carry ownership tokens. If a request outlives its lock TTL and a
+second request acquires the key, the first can still overwrite or release the
+second reservation. Cancellation can also interrupt asynchronous cleanup; the
+lock TTL bounds abandoned reservations. Ownership-safe operations remain a
+separate change.
 
 ### Rate limiter Redis resilience
 
