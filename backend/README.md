@@ -176,3 +176,24 @@ separate change.
 ### Rate limiter Redis resilience
 
 `RATE_LIMIT_REDIS_TIMEOUT_SECONDS` defaults to `1.0` and must be finite and positive. It sets Redis socket and connection timeouts for the rate limiter, with automatic retries disabled. A storage error bypasses Redis for 30 seconds per process. Contact requests use local memory limits; read-only requests fail open. The first synchronous attempt can still block the event loop. These socket timeouts are not a request deadline and do not affect deduplication, idempotency, or queue clients.
+
+
+### Idempotency ownership and cancellation
+
+Contact reservations use a unique ownership token. Redis locks are stored as
+`in_progress:<token>`; completed responses remain JSON. Atomic Lua scripts release
+only the matching lock and finalize only the matching lock or an absent key.
+Memory reservations follow the same rules under a lock. A reservation stays on
+its acquisition backend, including during Redis failures.
+
+Acquisition and cleanup are shielded from request cancellation and bounded to
+10 seconds each. Internal tasks are joined before the request exits. If Redis is
+unavailable or cleanup times out, a Redis lock can remain until its TTL expires.
+The 30-second lock TTL does not impose a handler deadline or guarantee exactly-once
+delivery; overlapping processing remains possible after expiration. Finalizing an
+absent key retains replay but cannot recover ownership history after records expire.
+
+Legacy JSON locks remain readable until expiration. Deployment must drain old
+instances before relying on ownership protection, since old instances still write
+unconditionally. Managed Redis credentials must permit SCRIPT LOAD and EVALSHA;
+production permissions have not been verified by local integration tests.

@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 import threading
 import time
 from typing import Any, Dict, Optional
@@ -13,6 +15,30 @@ logger = structlog.get_logger(__name__)
 _REDIS_WARNING_INTERVAL = 60.0
 
 
+@dataclass
+class Reservation:
+    key: str
+    token: str
+    backend: str = "memory"
+    attempted: bool = False
+
+
+_RELEASE = """
+if redis.call('GET', KEYS[1]) == ARGV[1] then
+    return redis.call('DEL', KEYS[1])
+end
+return 0
+"""
+_FINALIZE = """
+local current = redis.call('GET', KEYS[1])
+if not current or current == ARGV[1] then
+    redis.call('SET', KEYS[1], ARGV[2], 'EX', ARGV[3])
+    return 1
+end
+return 0
+"""
+
+
 class IdempotencyRecord(BaseModel):
     """Record of a cached response."""
 
@@ -20,6 +46,7 @@ class IdempotencyRecord(BaseModel):
     content: Any
     timestamp: float
     in_progress: bool = False
+    owner_token: str | None = None
 
 
 class IdempotencyStore:
@@ -84,10 +111,17 @@ class IdempotencyStore:
         if not payload:
             return None
 
+        if payload.startswith("in_progress:"):
+            return IdempotencyRecord(
+                status_code=0,
+                content={},
+                timestamp=0,
+                in_progress=True,
+                owner_token=payload.split(":", 1)[1],
+            )
         try:
             return IdempotencyRecord.model_validate_json(payload)
         except Exception:
-            await self._redis.delete(self._redis_key(key))
             return None
 
     def _memory_get(self, key: str) -> Optional[IdempotencyRecord]:
@@ -112,26 +146,25 @@ class IdempotencyStore:
 
         return self._memory_get(key)
 
-    async def set_in_progress(self, key: str) -> bool:
+    async def set_in_progress(self, key: str, reservation: Reservation) -> bool:
         """Marks a key as in-progress (locked). Returns True if successfully acquired."""
         if self._redis:
-            record = IdempotencyRecord(
-                status_code=0,
-                content={},
-                timestamp=time.time(),
-                in_progress=True,
-            )
+            reservation.backend = "redis"
+            reservation.attempted = True
             try:
                 acquired = await self._redis.set(
                     self._redis_key(key),
-                    record.model_dump_json(),
+                    f"in_progress:{reservation.token}",
                     ex=self.lock_ttl_seconds,  # Short TTL: crash won't block retries for 1h
                     nx=True,
                 )
+                reservation.attempted = bool(acquired)
                 return bool(acquired)
             except Exception as exc:
                 self._log_redis_fallback("set_in_progress", exc)
 
+        reservation.backend = "memory"
+        reservation.attempted = False
         with self._lock:
             if key in self._cache:
                 record = self._cache[key]
@@ -144,45 +177,65 @@ class IdempotencyStore:
                 first = next(iter(self._cache))
                 self._cache.pop(first, None)
 
+            reservation.attempted = True
             self._cache[key] = IdempotencyRecord(
-                status_code=0, content={}, timestamp=time.time(), in_progress=True
+                status_code=0,
+                content={},
+                timestamp=time.time(),
+                in_progress=True,
+                owner_token=reservation.token,
             )
             return True
 
-    async def set(self, key: str, status_code: int, content: Any):
-        """Stores a finalized idempotency record with the given status code and content."""
+    async def set(self, reservation: Reservation, status_code: int, content: Any):
         record = IdempotencyRecord(
-            status_code=status_code,
-            content=content,
-            timestamp=time.time(),
-            in_progress=False,
+            status_code=status_code, content=content, timestamp=time.time()
         )
-
-        if self._redis:
+        if reservation.backend == "redis":
+            assert self._redis is not None
             try:
-                await self._redis.set(
-                    self._redis_key(key),
-                    record.model_dump_json(),
-                    ex=self.ttl_seconds,
+                await self._redis.register_script(_FINALIZE)(
+                    keys=[self._redis_key(reservation.key)],
+                    args=[
+                        f"in_progress:{reservation.token}",
+                        record.model_dump_json(),
+                        self.ttl_seconds,
+                    ],
                 )
-                return
             except Exception as exc:
                 self._log_redis_fallback("set", exc)
-
+            return
         with self._lock:
-            self._cache[key] = record
+            current = self._cache.get(reservation.key)
+            if current is not None:
+                ttl = self.lock_ttl_seconds if current.in_progress else self.ttl_seconds
+                if time.time() - current.timestamp <= ttl:
+                    if (
+                        not current.in_progress
+                        or current.owner_token != reservation.token
+                    ):
+                        return
+            self._cache[reservation.key] = record
 
-    async def release(self, key: str) -> None:
-        """Releases an in-progress key to allow safe retries after a failure."""
-        if self._redis:
+    async def release(self, reservation: Reservation) -> None:
+        if reservation.backend == "redis":
+            assert self._redis is not None
             try:
-                await self._redis.delete(self._redis_key(key))
-                return
+                await self._redis.register_script(_RELEASE)(
+                    keys=[self._redis_key(reservation.key)],
+                    args=[f"in_progress:{reservation.token}"],
+                )
             except Exception as exc:
                 self._log_redis_fallback("release", exc)
-
+            return
         with self._lock:
-            self._cache.pop(key, None)
+            current = self._cache.get(reservation.key)
+            if (
+                current
+                and current.in_progress
+                and current.owner_token == reservation.token
+            ):
+                self._cache.pop(reservation.key, None)
 
 
 # Global singleton — shared across all requests in the same process
@@ -209,7 +262,9 @@ async def get_idempotency_key(
     return idempotency_key or legacy_idempotency_key
 
 
-async def verify_idempotency(effective_key: Optional[str]) -> Optional[str]:
+async def verify_idempotency(
+    effective_key: Optional[str], reservation: Reservation
+) -> Optional[Reservation]:
     """Replay, reject, or reserve a key after the request body is validated."""
     if not effective_key:
         return None
@@ -224,7 +279,7 @@ async def verify_idempotency(effective_key: Optional[str]) -> Optional[str]:
         raise IdempotencyException(record)
 
     # Lock key as in progress
-    acquired = await store.set_in_progress(effective_key)
+    acquired = await store.set_in_progress(effective_key, reservation)
     if not acquired:
         record = await store.get(effective_key)
         if record and not record.in_progress:
@@ -233,4 +288,4 @@ async def verify_idempotency(effective_key: Optional[str]) -> Optional[str]:
             status_code=status.HTTP_409_CONFLICT, detail="Request already in progress"
         )
 
-    return effective_key
+    return reservation
