@@ -3,6 +3,7 @@
 import asyncio
 import os
 import socket
+from uuid import uuid4
 from contextlib import suppress
 from unittest.mock import AsyncMock, Mock
 from urllib.parse import urlsplit
@@ -56,10 +57,20 @@ async def real_redis(monkeypatch):
         pytest.skip("Set REDIS_TEST_URL to a disposable local database /15")
     safe_redis_url(url)  # Validate before creating a client or issuing any command.
     client = infrastructure.create_redis_client(url)
+    stream = f"ownership-test-{uuid4().hex}"
+    dlq = f"{stream}:dlq"
+    monkeypatch.setattr(RedisStreamsQueue, "DLQ_STREAM", dlq)
+    original_init = module.StreamWorker.__init__
+
+    def isolated_init(self, *args, **kwargs):
+        kwargs["stream_name"] = stream
+        original_init(self, *args, **kwargs)
+
+    monkeypatch.setattr(module.StreamWorker, "__init__", isolated_init)
     previous = infrastructure._redis_client
     try:
         await client.ping()
-        await client.flushdb()
+        await client.delete(stream, dlq)
         infrastructure._redis_client = client
         use_case = Mock(execute=AsyncMock(return_value=True))
         monkeypatch.setattr(module, "get_send_contact_use_case", lambda: use_case)
@@ -67,7 +78,7 @@ async def real_redis(monkeypatch):
     finally:
         infrastructure._redis_client = previous
         try:
-            await client.flushdb()
+            await client.delete(stream, dlq)
         finally:
             await client.aclose()
 
@@ -140,7 +151,7 @@ async def test_worker_survives_closed_port_then_consumes_real_redis(
         await asyncio.wait_for(failed.wait(), 15)
         assert not task.done()
         server = await asyncio.start_server(relay, "127.0.0.1", port)
-        job = await RedisStreamsQueue().enqueue(
+        job = await RedisStreamsQueue(stream_name=worker.stream_name).enqueue(
             "send_contact_email",
             {"name": "Local Test", "email": "test@example.com", "message": "Test"},
         )
@@ -177,7 +188,7 @@ async def test_worker_recovers_previous_consumers_pending_jobs(
     await client.xgroup_create(
         worker.stream_name, worker.group_name, id="0", mkstream=True
     )
-    job_id = await RedisStreamsQueue().enqueue(
+    job_id = await RedisStreamsQueue(stream_name=worker.stream_name).enqueue(
         "send_contact_email",
         {"name": "Interrupted", "email": "test@example.com", "message": "Test"},
     )
@@ -204,9 +215,9 @@ async def test_worker_recovers_previous_consumers_pending_jobs(
         await eventually(handled)
         if poison:
             use_case.execute.assert_not_awaited()
-            assert await client.xlen("contact_jobs_dlq") == 1
+            assert await client.xlen(RedisStreamsQueue.DLQ_STREAM) == 1
         else:
             use_case.execute.assert_awaited_once()
-            assert await client.xlen("contact_jobs_dlq") == 0
+            assert await client.xlen(RedisStreamsQueue.DLQ_STREAM) == 0
     finally:
         await stop_worker(worker, task)
