@@ -1,11 +1,11 @@
 """Tests for Redis idempotency lock contention and outage fallback."""
 
 import time
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
-from app.core.idempotency import IdempotencyRecord, IdempotencyStore
+from app.core.idempotency import IdempotencyRecord, IdempotencyStore, Reservation
 
 
 @pytest.fixture
@@ -19,6 +19,7 @@ def store():
         ):
             s = IdempotencyStore()
         s._redis = AsyncMock()
+        s._redis.register_script = Mock(return_value=AsyncMock())
         yield s
 
 
@@ -27,7 +28,9 @@ def store():
 async def test_redis_lock_result_does_not_create_memory_lock(store, acquired):
     store._redis.set.return_value = acquired
 
-    assert await store.set_in_progress("shared-key") is bool(acquired)
+    assert await store.set_in_progress(
+        "shared-key", Reservation("shared-key", "test-owner")
+    ) is bool(acquired)
     assert store._cache == {}
     kwargs = store._redis.set.await_args.kwargs
     assert kwargs == {"ex": store.lock_ttl_seconds, "nx": True}
@@ -40,8 +43,18 @@ async def test_redis_exception_uses_memory_lock_and_rejects_duplicate(
 ):
     store._redis.set.side_effect = error_type("Redis unavailable")
 
-    assert await store.set_in_progress("fallback-key") is True
-    assert await store.set_in_progress("fallback-key") is False
+    assert (
+        await store.set_in_progress(
+            "fallback-key", Reservation("fallback-key", "test-owner")
+        )
+        is True
+    )
+    assert (
+        await store.set_in_progress(
+            "fallback-key", Reservation("fallback-key", "test-owner")
+        )
+        is False
+    )
     assert store._cache["fallback-key"].in_progress is True
 
 
@@ -91,7 +104,7 @@ class TestRedisWarningDebounce:
         store._redis.set = AsyncMock(side_effect=ConnectionError("connection refused"))
 
         with patch("app.core.idempotency.logger") as mock_logger:
-            await store.set_in_progress("key-1")
+            await store.set_in_progress("key-1", Reservation("key-1", "test-owner"))
 
         mock_logger.warning.assert_called_once_with(
             "idempotency_redis_fallback",
@@ -105,8 +118,8 @@ class TestRedisWarningDebounce:
         store._redis.set = AsyncMock(side_effect=ConnectionError("connection refused"))
 
         with patch("app.core.idempotency.logger") as mock_logger:
-            await store.set_in_progress("key-1")
-            await store.set_in_progress("key-2")
+            await store.set_in_progress("key-1", Reservation("key-1", "test-owner"))
+            await store.set_in_progress("key-2", Reservation("key-2", "test-owner"))
 
         assert mock_logger.warning.call_count == 1
 
@@ -115,18 +128,22 @@ class TestRedisWarningDebounce:
         store._redis.set = AsyncMock(side_effect=ConnectionError("connection refused"))
 
         with patch("app.core.idempotency.logger") as mock_logger:
-            await store.set_in_progress("key-1")
+            await store.set_in_progress("key-1", Reservation("key-1", "test-owner"))
             store._last_redis_warning = float("-inf")
-            await store.set_in_progress("key-2")
+            await store.set_in_progress("key-2", Reservation("key-2", "test-owner"))
 
         assert mock_logger.warning.call_count == 2
 
     @pytest.mark.asyncio
     async def test_set_emits_warning_on_redis_failure(self, store):
-        store._redis.set = AsyncMock(side_effect=TimeoutError("timeout"))
+        store._redis.register_script = Mock(
+            return_value=AsyncMock(side_effect=TimeoutError("timeout"))
+        )
 
         with patch("app.core.idempotency.logger") as mock_logger:
-            await store.set("key-1", 200, {"ok": True})
+            await store.set(
+                Reservation("key-1", "test-owner", "redis"), 200, {"ok": True}
+            )
 
         mock_logger.warning.assert_called_once_with(
             "idempotency_redis_fallback",
@@ -137,11 +154,13 @@ class TestRedisWarningDebounce:
 
     @pytest.mark.asyncio
     async def test_release_emits_warning_on_redis_failure(self, store):
-        store._redis.delete = AsyncMock(side_effect=OSError("network unreachable"))
+        store._redis.register_script = Mock(
+            return_value=AsyncMock(side_effect=OSError("network unreachable"))
+        )
         store._last_redis_warning = float("-inf")
 
         with patch("app.core.idempotency.logger") as mock_logger:
-            await store.release("key-1")
+            await store.release(Reservation("key-1", "test-owner", "redis"))
 
         mock_logger.warning.assert_called_once_with(
             "idempotency_redis_fallback",

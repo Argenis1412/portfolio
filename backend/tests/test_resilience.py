@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 import redis
 
-from app.core.idempotency import IdempotencyRecord, IdempotencyStore
+from app.core.idempotency import IdempotencyRecord, IdempotencyStore, Reservation
 from app.main import app
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -33,7 +33,9 @@ async def test_idempotency_store_redis_failure():
             store = IdempotencyStore(ttl_seconds=60)
 
             # 1. Acquire lock — must fall back to memory and succeed
-            acquired = await store.set_in_progress("fail-key")
+            acquired = await store.set_in_progress(
+                "fail-key", Reservation("fail-key", "test-owner")
+            )
             assert acquired is True
             assert "fail-key" in store._cache
             assert store._cache["fail-key"].in_progress is True
@@ -44,7 +46,7 @@ async def test_idempotency_store_redis_failure():
             assert record.in_progress is True
 
             # 3. Finalise the record
-            await store.set("fail-key", 200, {"ok": True})
+            await store.set(Reservation("fail-key", "test-owner"), 200, {"ok": True})
 
             record = await store.get("fail-key")
             assert record is not None

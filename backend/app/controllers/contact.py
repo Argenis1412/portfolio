@@ -5,7 +5,11 @@ Endpoint:
   POST /api/contact
 """
 
+import asyncio
+from uuid import uuid4
 from typing import Annotated, Optional
+
+import anyio
 
 import structlog
 from fastapi import APIRouter, BackgroundTasks, Depends, Request
@@ -14,7 +18,12 @@ from app.use_cases.send_contact import SendContactUseCase
 from app.controllers.dependencies import get_send_contact_use_case, get_job_queue
 from app.core.contact_guard import ContactGuard, email_domain
 from app.core.exceptions import DuplicateContactError
-from app.core.idempotency import get_idempotency_key, store, verify_idempotency
+from app.core.idempotency import (
+    Reservation,
+    get_idempotency_key,
+    store,
+    verify_idempotency,
+)
 from app.core.queue import JobQueue
 from app.core.spam_check import SCORE_POSSIBLE_SPAM, SCORE_LIKELY_SPAM
 from app.schemas.contact import ContactRequest, ContactResponse
@@ -24,6 +33,37 @@ logger = structlog.get_logger(__name__)
 _guard = ContactGuard()
 
 router = APIRouter(tags=["Contact"])
+
+
+_PROTECTED_TIMEOUT = 10.0
+
+
+async def _protected(operation):
+    """Bound the inner operation and join it before propagating cancellation."""
+
+    async def run():
+        with anyio.move_on_after(_PROTECTED_TIMEOUT):
+            return await operation
+        raise TimeoutError("Protected idempotency operation timed out")
+
+    task = asyncio.create_task(run())
+    cancelled = None
+    # AnyIO shielding prevents repeated scope cancellation at every await.
+    with anyio.CancelScope(shield=True):
+        while not task.done():
+            try:
+                # asyncio shielding keeps direct request cancellation out of the task.
+                await asyncio.shield(task)
+            except asyncio.CancelledError as exc:
+                cancelled = exc
+            except Exception:
+                break
+        try:
+            result = task.result()
+        finally:
+            if cancelled is not None:
+                raise cancelled
+    return result
 
 
 async def _process_background_delivery(
@@ -68,10 +108,11 @@ async def send_contact(
     job_queue: Annotated[Optional[JobQueue], Depends(get_job_queue)],
     idempotency_key: Annotated[Optional[str], Depends(get_idempotency_key)] = None,
 ) -> ContactResponse:
+    cancelled = False
     cacheable_response: ContactResponse | None = None
     content_hash: str | None = None
     dedup_reserved = False
-    acquired = False
+    reservation = Reservation(idempotency_key, uuid4().hex) if idempotency_key else None
     email_adapter = getattr(send_contact_uc, "email_adapter", None)
     downstream = (
         getattr(email_adapter, "__class__", type("Adapter", (), {}))
@@ -81,9 +122,8 @@ async def send_contact(
     )
 
     try:
-        if idempotency_key:
-            await verify_idempotency(idempotency_key)
-            acquired = True
+        if reservation is not None:
+            await _protected(verify_idempotency(idempotency_key, reservation))
 
         # ── 1. Honeypot check ───────────────────────────────────────────────
         if _guard.check_honeypot(contact_request):
@@ -190,16 +230,27 @@ async def send_contact(
         )
         return cacheable_response
 
+    except asyncio.CancelledError:
+        cancelled = True
+        raise
     finally:
-        # Since it's background processed and always success to user,
-        # we don't release dedup_reserved (unless it crashed before enqueueing
-        # and cacheable_response is None).
-        if dedup_reserved and content_hash and cacheable_response is None:
-            await _guard.release_dedup(content_hash)
 
-        # Persist idempotency result
-        if acquired and idempotency_key:
-            if cacheable_response is not None:
-                await store.set(idempotency_key, 200, cacheable_response.model_dump())
-            else:
-                await store.release(idempotency_key)
+        async def cleanup():
+            try:
+                if dedup_reserved and content_hash and cacheable_response is None:
+                    await _guard.release_dedup(content_hash)
+            finally:
+                if reservation is not None and reservation.attempted:
+                    if cacheable_response is not None:
+                        await store.set(
+                            reservation, 200, cacheable_response.model_dump()
+                        )
+                    else:
+                        await store.release(reservation)
+
+        try:
+            await _protected(cleanup())
+        except Exception:
+            if not cancelled:
+                raise
+            logger.warning("cancelled_contact_cleanup_failed")
