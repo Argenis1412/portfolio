@@ -1,199 +1,130 @@
 # Portfolio Backend
 
-Python 3.12 and FastAPI serve portfolio content from memory-cached JSON files in
-`data/`. Contact messages use Redis Streams and Resend, with background delivery
-when the queue is unavailable. SQL, database drivers, migrations, and seeding are
-no longer required.
+Python 3.12 and FastAPI serve memory-cached JSON from `data/`. Contact messages
+use Redis Streams and Resend, with background delivery when the queue is
+unavailable. No SQL setup, migrations, or seeding are required.
 
 ## Run locally
 
-From `backend/`:
+Bash on Ubuntu 26.04.1 LTS; Python 3.12 with venv support is required.
+From the repository root:
 
 ```bash
-python -m venv .venv
-# Windows: .venv\Scripts\activate
-# Linux/macOS: source .venv/bin/activate
-pip install -r requirements.txt -r requirements-dev.txt
-```
-
-Copy `../.env.example` to `.env` (PowerShell: `Copy-Item ../.env.example .env`),
-configure email if needed, then run:
-
-```bash
+cd backend
+python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt -r requirements-dev.txt
+cp -n ../.env.example .env
 python -m uvicorn app.main:app --reload --port 8000
 ```
 
-Local API documentation is available at `/docs`. Interactive documentation is
-disabled in production. Without Resend credentials, local delivery is logged by
-the console adapter. Without Redis, contact processing uses in-memory protection
-and background tasks; production requires Redis and nonblank `RESEND_API_KEY`
-and `RESEND_TO_EMAIL`. Missing production delivery credentials fail startup.
+Local API docs: [localhost:8000/docs](http://localhost:8000/docs). Without Redis,
+contact protection uses memory and delivery uses background tasks. Without Resend
+credentials, the console adapter logs delivery without sending email.
+For Docker Compose and frontend commands, see the [root guide](../README.md#local-development).
 
 ## Configuration
 
+Use the shared [environment example](../.env.example); see
+[settings](app/settings.py) for defaults and validation.
+
 | Variables | Purpose |
 |---|---|
-| `APP_NAME`, `ENVIRONMENT` | Service name and environment; use `production` in production. |
-| `ALLOWED_ORIGINS`, `REGEX_ALLOWED_ORIGINS` | Browser CORS origins and optional origin regex. |
-| `REDIS_URL` | Shared rate limiting, idempotency, deduplication, and contact queue. |
-| `REDIS_SOCKET_TIMEOUT_SECONDS`, `REDIS_CONNECT_TIMEOUT_SECONDS` | Timeouts for nonblocking application Redis clients; defaults are 5 seconds. The worker retains 60-second socket and 10-second connection timeouts for its blocking reads. |
-| `WORKER_ENABLED` | Start the contact consumer inside the API; defaults to `true`. Set `false` in tests or when deliberately pausing queue consumption. |
-| `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_TO_EMAIL` | API key and recipient are required in production; sender has a default. Console delivery remains available locally. |
-| `METRICS_BASIC_AUTH_USERNAME`, `METRICS_BASIC_AUTH_PASSWORD` | Required protection for `/metrics` in production. |
-| `SENTRY_DSN`, `SENTRY_TRACES_SAMPLE_RATE`, `OTLP_ENDPOINT` | Optional error tracking and tracing. |
-| `OTEL_ENABLED` | Enable OpenTelemetry; defaults to `true`. Set `false` to disable instrumentation and trace export. Prometheus and Sentry are configured independently. |
-| `TRUSTED_PROXY_DEPTH`, `TRUSTED_PROXY_IPS` | Trusted proxy configuration for client IP extraction. |
+| `APP_NAME`, `ENVIRONMENT` | Service name and environment: `local`, `development`, `testing`, `staging`, or `production`. |
+| `ALLOWED_ORIGINS`, `REGEX_ALLOWED_ORIGINS` | CORS origins and optional regex. |
+| `REDIS_URL`, `WORKER_ENABLED` | Shared protection and contact queue; the in-process consumer defaults to enabled. |
+| `REDIS_SOCKET_TIMEOUT_SECONDS`, `REDIS_CONNECT_TIMEOUT_SECONDS` | Nonblocking Redis timeouts, 5 seconds each by default. Blocking worker reads use 60/10 seconds. |
+| `RATE_LIMIT_REDIS_TIMEOUT_SECONDS` | Rate limiter timeout, default 1 second; finite and positive. |
+| `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `RESEND_TO_EMAIL` | Email provider configuration; sender has a default. |
+| `METRICS_BASIC_AUTH_USERNAME`, `METRICS_BASIC_AUTH_PASSWORD` | Protect `/metrics` in production. |
+| `OTEL_ENABLED`, `OTLP_ENDPOINT`, `SENTRY_DSN`, `SENTRY_TRACES_SAMPLE_RATE` | Tracing and error tracking; OpenTelemetry defaults to enabled. |
+| `TRUSTED_PROXY_DEPTH`, `TRUSTED_PROXY_IPS` | Client IP extraction behind trusted proxies. |
 
-Only English configuration keys are supported. Valid environments are `local`,
-`development`, `testing`, `staging`, and `production`; unknown values fail validation.
-Legacy `DATABASE_URL` and `DB_*` settings are ignored. See `app/settings.py` for
-defaults and production guards.
-
-Before running this branch with an existing `.env`, rename `AMBIENTE` to
-`ENVIRONMENT`, `NOME_APP` to `APP_NAME`, `ORIGENS_PERMITIDAS` to `ALLOWED_ORIGINS`,
-and `REGEX_ORIGENS_PERMITIDAS` to `REGEX_ALLOWED_ORIGINS`. Use `development`
-instead of `desenvolvimento`, `production` instead of `producao`/`producción`, and
-`staging` instead of `homologação`. Preserve credential values when renaming keys.
-The real Koyeb environment value remains to be verified before deployment.
-
-For Compose, copy the same root example to the root `.env` and set
-`GRAFANA_ADMIN_PASSWORD`. Compose passes that file to the API, overrides its
-environment to `development`, and points it to the internal Redis service.
+Production requires Redis, metrics authentication, and nonblank Resend API key
+and recipient. Interactive API docs are disabled. Use English configuration keys;
+legacy `DATABASE_URL` and `DB_*` settings are ignored. Existing environments using
+`AMBIENTE`, `NOME_APP`, `ORIGENS_PERMITIDAS`, or `REGEX_ORIGENS_PERMITIDAS` must
+migrate to the corresponding English keys without changing credential values.
+Verify the production environment value before deployment; see the
+[operations runbook](../docs/architecture/production-operations.md).
 
 ## API
 
 | Endpoint | Behavior |
 |---|---|
-| `GET /live` | Process liveness with no dependency or file checks. |
+| `GET /live` | Process liveness. |
 | `GET /health` | JSON file checks, email configuration, version, and uptime. |
 | `GET /api/v1/{about,projects,stack,experiences,formation,philosophy}` | Portfolio content with ETag caching. |
 | `GET /api/v1/projects/{id}` | Project details; 404 for an unknown ID. |
-| `POST /api/v1/contact` | Validated, rate-limited contact submission with deduplication and optional idempotency key. |
+| `POST /api/v1/contact` | Validated contact submission with protection and optional idempotency. |
 | `GET /api/v1/metrics/summary` | Observed P95, request/error counts, uptime, and derived status. |
 | `GET /metrics` | Prometheus HTTP and worker metrics; Basic Auth in production. |
 
-`/health` returns HTTP 200 with `status="ok"` or `status="degraded"`. Its details
-contain `data`, per-file `data_details`, and informational `email` configuration.
-It reads required JSON files, checks syntax and top-level types, and checks the
-optional project case-study sidecar when present. It does not validate every
-content field or contact Redis, Resend, or a database.
-
-The P95 warmup reset preserves lifetime request/error counters. Metrics are local
-to each API process. Simulation endpoints and failure injection have been removed;
-the pending frontend retirement is listed in the root CHANGELOG. Deploy both
-changes together.
+`/health` returns HTTP 200 even when degraded. It checks JSON readability, syntax,
+and top-level types, not every content field or Redis/Resend connectivity.
+Metrics belong to each API process. Simulation endpoints have been retired;
+[frontend compatibility remains a deployment prerequisite](../CHANGELOG.md#frontend-deployment-dependency).
 
 ## Code and checks
 
-Controllers handle HTTP, use cases retrieve/sort content and submit messages,
-entities describe domain data, and adapters implement JSON reads and delivery.
-`app/core/` contains shared request protection and telemetry; `app/worker.py`
-consumes contact jobs inside the API lifespan when Redis is configured and
-`WORKER_ENABLED=true`. Docker runs one Uvicorn process, so each API instance owns
-one consumer and one process-local metrics registry. Consumer names are unique
-across instances. Shutdown stops the consumer, allows up to five seconds to finish,
-then cancels it and closes its Redis connection. Pending jobs remain available for
-Redis Streams recovery. There is no standalone worker command or Compose service.
-Worker startup and consumption failures restart with exponential backoff (1-60
-seconds, with jitter), resetting after 120 seconds of stable operation. Redis quota
-cooldown pauses attempts instead of terminating the task. `contact_worker_up`
-is 1 while consuming and 0 during backoff or shutdown;
-`contact_worker_restarts_total` counts crash restarts. These metrics do not change
-the `/health` response.
-Capacity under this single-process configuration still needs a deployment-sized
-load test before changing the scaling model.
+Controllers handle HTTP; use cases retrieve content and submit messages; adapters
+implement JSON reads and delivery. `app/core/` holds protection and telemetry.
+Docker runs one Uvicorn process with one contact consumer per API instance.
+There is no standalone worker command or Compose worker service.
 
-Resend timeouts, network failures, HTTP 429, and HTTP 5xx failures receive up to
-three retries with exponential backoff and jitter. Other rejected HTTP responses
-and missing provider configuration go directly to `contact_jobs_dlq`. Unknown
-failures receive one retry. Jobs older than 15 minutes are not requeued. The worker
-publishes a retry or DLQ entry before acknowledging the original job. These
-automatic retries apply to Redis Streams delivery; the background fallback logs
-failures without retrying. Acceptance does not confirm delivery to the inbox.
-
-Stream delivery is **at least once**: a crash after sending but before `XACK`
-can duplicate an email to the owner. Startup and periodic recovery process claimed
-pending entries through the same handler as new jobs. Reclaim requires 60 seconds
-idle; entries delivered more than five times are published to DLQ before ACK.
-Malformed JSON is retained as raw payload in the DLQ.
-After the immediate startup scan, the first periodic scan runs after 60 seconds;
-subsequent scans run every 300 seconds. These intervals are not delivery deadlines:
-Redis outages, quota cooldown, and active processing can delay recovery.
-
-Real-Redis tests use the `redis_integration` marker and skip when `REDIS_TEST_URL`
-is absent. To run locally, set it to a disposable instance such as
-`redis://127.0.0.1:16379/15` before pytest. The fixture rejects remote hosts,
-credentials, and databases other than `/15`. Worker fixtures flush that selected
-database before and after each integration test; contact idempotency fixtures
-delete only their unique test keys. CI supplies a disposable Redis service.
-
-Contact scoring labels messages instead of dropping them: scores 30-69 use
-`POSSIBLE SPAM`, and 70-100 use `LIKELY SPAM` in the email subject. All scored
-submissions still pass deduplication and email/IP/fingerprint limits. Only filled
-honeypots are silently discarded, with the same acceptance response as a normal
-submission. Email format and field lengths are validated by Pydantic; blank names
-or messages return 422. International names and subjects are preserved, message
-paragraphs remain intact, and user fields are escaped in the email HTML.
+From the repository root, after installing the local requirements:
 
 ```bash
-ruff check .
-ruff format --check .
+cd backend
+source .venv/bin/activate
+python -m ruff check .
+python -m ruff format --check .
 python -m mypy --config-file pyproject.toml
-pytest
+python -m pytest
 ```
 
-Mypy checks all of `app/` using the gradual configuration in `pyproject.toml`.
-Install both requirements files and activate the backend virtual environment so
-local checks and CI use the same dependencies. The optional pre-commit check
-uses this environment and configuration too; run it from the repository root
-with `python -m pre_commit run mypy --all-files`. The active Git hook is Husky
-and currently runs frontend lint-staged tasks only.
+Pytest enforces 80% coverage and mocks email delivery. Review changes to
+`tests/snapshots/content.json` deliberately. Real-Redis tests skip without
+`REDIS_TEST_URL`; use a disposable local database `/15`:
 
-Pytest enforces 80% coverage and mocks email delivery. Content snapshots in
-`tests/snapshots/content.json` protect the public JSON contract; review snapshot
-updates deliberately when changing portfolio content or response mappings.
+```bash
+# From backend/, with its virtual environment active and disposable Redis running:
+REDIS_TEST_URL=redis://127.0.0.1:16379/15 python -m pytest
+```
 
-`python scripts/check_resend.py` reports configuration presence without printing
-credentials or sending email. Add `--send` only to request a real test email.
+Fixtures reject remote hosts, credentials, and other databases. Worker fixtures
+flush database `/15`; contact fixtures delete only their unique keys. CI supplies
+disposable Redis. `python scripts/check_resend.py` checks configuration without
+sending email; `--send` explicitly sends a real test email.
 
-## Idempotency lock contention
+## Reliability limits
 
-When Redis declines `SET NX`, the request does not acquire a local lock. The
-handler checks for a finalized response to replay; otherwise it returns HTTP
-409. In-memory lock fallback is used only when Redis is unavailable or disabled.
+- **Contact protection:** validation precedes idempotency reservation. Scoring
+  flags spam; filled honeypots are silently discarded. Deduplication and
+  email/IP/fingerprint limits still apply.
+- **Redis outage:** protection falls back to process-local memory, lost on
+  restart and not shared across replicas. Rate limiter errors bypass Redis for
+  30 seconds; read-only requests fail open. Its first synchronous attempt can
+  still block the event loop. Socket timeouts are not request deadlines.
+- **Idempotency:** `Idempotency-Key` or legacy `X-Idempotency-Key` replays completed
+  responses; contention returns 409 without acquiring a memory lock. Reservations
+  retain their acquisition backend. Tokens and atomic Lua comparisons prevent an
+  old owner from releasing or overwriting a successor's record.
+- **Cancellation:** acquisition and cleanup are shielded and bounded to 10 seconds
+  each; internal tasks are joined. Redis locks use a 30-second TTL; failures can
+  leave them until expiry. Processing can overlap after expiry; finalizing an
+  absent key cannot recover ownership history. This is not exactly-once delivery.
+- **Delivery:** the consumer restarts with backoff and recovers pending jobs.
+  Transient provider failures receive up to three retries, unknown failures one,
+  and permanent failures none. Jobs older than 15 minutes are not requeued.
+  Retry/DLQ publication precedes acknowledgment. A crash after sending but before
+  acknowledgment can duplicate email. Background fallback logs failures without
+  retrying. HTTP acceptance does not confirm inbox delivery.
+- **Deployment:** drain legacy instances before relying on token ownership.
+  Managed Redis must permit script loading/execution; local tests do not verify
+  production permissions. Docker build verification and a deployment-sized load
+  test remain pending.
 
-Contact bodies are validated before reserving an idempotency key, so a 422 does
-not block a corrected retry. In-progress records use the short lock TTL in both
-Redis and memory; completed responses retain the response TTL. Only requests
-that acquired a reservation finalize or release it.
-
-Locks do not carry ownership tokens. If a request outlives its lock TTL and a
-second request acquires the key, the first can still overwrite or release the
-second reservation. Cancellation can also interrupt asynchronous cleanup; the
-lock TTL bounds abandoned reservations. Ownership-safe operations remain a
-separate change.
-
-### Rate limiter Redis resilience
-
-`RATE_LIMIT_REDIS_TIMEOUT_SECONDS` defaults to `1.0` and must be finite and positive. It sets Redis socket and connection timeouts for the rate limiter, with automatic retries disabled. A storage error bypasses Redis for 30 seconds per process. Contact requests use local memory limits; read-only requests fail open. The first synchronous attempt can still block the event loop. These socket timeouts are not a request deadline and do not affect deduplication, idempotency, or queue clients.
-
-
-### Idempotency ownership and cancellation
-
-Contact reservations use a unique ownership token. Redis locks are stored as
-`in_progress:<token>`; completed responses remain JSON. Atomic Lua scripts release
-only the matching lock and finalize only the matching lock or an absent key.
-Memory reservations follow the same rules under a lock. A reservation stays on
-its acquisition backend, including during Redis failures.
-
-Acquisition and cleanup are shielded from request cancellation and bounded to
-10 seconds each. Internal tasks are joined before the request exits. If Redis is
-unavailable or cleanup times out, a Redis lock can remain until its TTL expires.
-The 30-second lock TTL does not impose a handler deadline or guarantee exactly-once
-delivery; overlapping processing remains possible after expiration. Finalizing an
-absent key retains replay but cannot recover ownership history after records expire.
-
-Legacy JSON locks remain readable until expiration. Deployment must drain old
-instances before relying on ownership protection, since old instances still write
-unconditionally. Managed Redis credentials must permit SCRIPT LOAD and EVALSHA;
-production permissions have not been verified by local integration tests.
+See the [failure model](../docs/architecture/FAILURE_MODEL.md) and
+[operations runbook](../docs/architecture/production-operations.md) for triage,
+recovery, worker signals, and deployment prerequisites.

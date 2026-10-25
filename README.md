@@ -3,132 +3,100 @@
 [![Backend CI](https://github.com/Argenis1412/portfolio/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/Argenis1412/portfolio/actions/workflows/backend-ci.yml)
 [![Frontend CI](https://github.com/Argenis1412/portfolio/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/Argenis1412/portfolio/actions/workflows/frontend-ci.yml)
 
-A React portfolio backed by FastAPI, JSON content, Redis Streams, and Resend.
-The backend emphasizes explicit failure handling, contact protection, and
-observable delivery rather than simulated infrastructure behavior.
+React portfolio with a FastAPI backend, JSON content, Redis Streams, and Resend.
+Contact processing includes rate limiting, deduplication, idempotency, bounded
+retries, and observable delivery.
 
-Published links: [Frontend](https://argenisbackend.com) ·
-[API health](https://api.argenisbackend.com/health). These links may run an earlier
-release; this README describes the cleanup branch.
+[Portfolio](https://argenisbackend.com) · [API health](https://api.argenisbackend.com/health)
+Published services may run an earlier release.
 
-## Branch status
-
-**Do not merge or deploy the backend cleanup yet.** The frontend still calls
-retired Chaos endpoints and consumes removed synthetic summary fields. Its
-retirement work must be completed before deploying the combined change. See the
-[remaining consumers](CHANGELOG.md#frontend-deployment-dependency).
-
-SQL adapters and simulation endpoints have been removed from the backend.
-Existing production databases, tables, volumes, Terraform resources, and secret
-identities have not been removed or renamed. The portfolio JSON now describes
-the cleanup backend; its list/detail response snapshots were reviewed together.
-
-## Current backend behavior
-
-| Area | Behavior and limits |
-|---|---|
-| Portfolio content | Memory-cached files in `backend/data/`; no SQL queries, migrations, or seed step. Content responses support ETag/304 caching. |
-| Contact protection | Honeypots, scoring, Redis-backed deduplication, and email/IP/fingerprint rate limits. Scoring flags messages rather than dropping them. |
-| Idempotency | Optional `Idempotency-Key` or legacy `X-Idempotency-Key`; completed responses are replayed, concurrent requests receive 409. Redis contention does not acquire a memory lock. |
-| Delivery | The API lifespan owns the Redis Streams consumer. Docker runs one Uvicorn process. Resend failures have bounded retries and a dead-letter queue. HTTP acceptance does not confirm inbox delivery. |
-| Redis outage | In-memory idempotency, deduplication, and contact rate-limit fallback provide protection within one process. State is not shared across replicas and is lost on restart. Queue failure falls back to background delivery without automatic retries. |
-| Health | `/live` reports process liveness. `/health` checks JSON files and reports email configuration; it does not test Redis or Resend connectivity. A degraded result still uses HTTP 200. |
-| Observability | Prometheus HTTP/worker metrics, optional Sentry and OpenTelemetry. `/metrics` requires Basic Auth in production; summary metrics belong to each API process. |
-
-The [backend guide](backend/README.md) is the reference for API routes,
-configuration, retry limits, and development checks. The
-[operations runbook](docs/architecture/production-operations.md) covers deployment
-prerequisites, triage, and recovery.
+**Deployment remains blocked until frontend retirement is complete.** See the
+[remaining consumers](CHANGELOG.md#frontend-deployment-dependency) and
+[operations runbook](docs/architecture/production-operations.md). Docker image
+verification and a deployment-sized load test remain pending.
 
 ## Stack and layout
 
 | Path | Purpose |
 |---|---|
-| `backend/` | Python 3.12, FastAPI, Pydantic, structlog, Redis, Resend; pytest, Ruff, mypy. |
-| `frontend/` | React 19, TypeScript, Vite, TanStack Query, Tailwind CSS 4, Framer Motion; Vitest and Playwright. |
-| `infrastructure/` | Terraform-managed Koyeb configuration. GitHub Actions supplies secret values. |
-| `infra/monitoring/` | Local Prometheus and Grafana configuration. |
-| `docs/` | Architecture, operating guidance, and historical incident reports. |
-| `benchmarks/` | Load scripts and version-specific measurement artifacts. |
+| `backend/` | Python 3.12, FastAPI, JSON content, Redis, Resend; pytest, Ruff, mypy. |
+| `frontend/` | React 19, TypeScript, Vite, TanStack Query, Tailwind CSS 4, Framer Motion; Vitest, Playwright. |
+| `infrastructure/` | Terraform and Koyeb. |
+| `infra/monitoring/` | Prometheus, Grafana, and alert configuration. |
+| `docs/`, `benchmarks/` | Architecture, operations, incidents, and historical measurements. |
 
 ## Local development
 
-Use Python 3.12. From `backend/`, create and activate a virtual environment, install
-both requirements files, and copy the shared environment example:
+Bash commands for Ubuntu 26.04.1 LTS. Install Python 3.12 with venv support,
+Node.js/npm, and optionally Docker with Compose. The backend targets Python 3.12;
+use it explicitly rather than assuming the system Python matches.
+
+From the repository root:
 
 ```bash
-python -m venv .venv
-# Windows: .venv\Scripts\activate
-# Linux/macOS: source .venv/bin/activate
+cd backend
+python3.12 -m venv .venv
+source .venv/bin/activate
 python -m pip install -r requirements.txt -r requirements-dev.txt
-cp ../.env.example .env
+cp -n ../.env.example .env
 python -m uvicorn app.main:app --reload --port 8000
 ```
 
-PowerShell copy command: `Copy-Item ../.env.example .env`. Local API documentation
-is at `/docs`; it is disabled in production. Without Redis, contact protection and
-delivery use local fallbacks. Without Resend credentials, the local console
-adapter does not send real email.
+API docs: [localhost:8000/docs](http://localhost:8000/docs) (disabled in production).
+Without Redis, local contact processing uses memory and background tasks. Without
+Resend credentials, the console adapter logs delivery instead of sending email.
 
-For the frontend, use a separate terminal in `frontend/`:
+In another terminal, from the repository root:
 
 ```bash
+cd frontend
 npm ci
 npm run dev
 ```
 
-See the [frontend guide](frontend/README.md) for its architecture and configuration.
-For the Compose stack, copy `.env.example` to the root `.env`, set
-`GRAFANA_ADMIN_PASSWORD`, configure email if needed, and run
-`docker compose up --build` from the repository root. The current Docker image
-build still requires verification with a running daemon.
+For the API, Redis, and monitoring stack, from the repository root:
+
+```bash
+cp -n .env.example .env
+# Set GRAFANA_ADMIN_PASSWORD in .env before starting.
+docker compose up --build
+```
+
+Compose does not start the frontend. See the [backend](backend/README.md) and
+[frontend](frontend/README.md) guides for configuration and architecture.
 
 ## Required checks before a commit
 
-From `backend/`, with its virtual environment active:
+Backend, from the repository root:
 
 ```bash
+cd backend
+source .venv/bin/activate
 python -m ruff check .
 python -m ruff format --check .
 python -m mypy --config-file pyproject.toml
 python -m pytest
 ```
 
-From `frontend/`:
+Frontend, in another terminal from the repository root:
 
 ```bash
+cd frontend
 npm run lint
 npx tsc -b
 npm run test -- --run
 ```
 
-Pytest enforces 80% coverage. Public content snapshots must be reviewed
-deliberately when changing JSON or response mappings. The configured CI workflow
-filters determine when jobs run; a badge is not evidence that this branch or the
-current Docker image passed. Capacity under the single-process configuration
-still needs a deployment-sized load test.
+Pytest enforces 80% coverage. Review public content snapshot changes deliberately.
+Documentation-only changes do not require application tests.
 
-## Design history and evidence
+## References
 
-[ARCHITECTURE](ARCHITECTURE.md) describes current backend boundaries and indexes
-current, retired, and deferred decisions. The
-[engineering playbook](ENGINEERING_PLAYBOOK.md) defines development and review rules.
-[CHANGELOG](CHANGELOG.md) retains release history and production incidents.
-The [failure model](docs/architecture/FAILURE_MODEL.md), resilience policy, JSON
-read decision, SLO targets, observability/logging, security, CORS, and HTTP caching
-guides distinguish current behavior from historical evidence. Incident reports,
-case studies, and Chaos/IaC decisions preserve their version context and stable
-links. Content/release guidance records outstanding checks, and the old frontend
-refinement plan is superseded. Portfolio JSON and snapshots reflect the cleanup;
-frontend retirement and operational release checks remain pending.
-
-The [SLO definitions](docs/architecture/SLO_DEFINITIONS.md) state targets; the
-[recorded benchmark](benchmarks/results/02c08d3/summary.md) is historical evidence,
-not a measurement of this cleanup branch. No new load test or live production
-verification is implied by this documentation update.
+[Architecture](ARCHITECTURE.md) · [Engineering playbook](ENGINEERING_PLAYBOOK.md) ·
+[Failure model](docs/architecture/FAILURE_MODEL.md) ·
+[SLO targets](docs/architecture/SLO_DEFINITIONS.md) · [Changelog](CHANGELOG.md)
 
 ## Author and license
 
 **Argenis Lopez** · [GitHub](https://github.com/Argenis1412) ·
-[LinkedIn](https://www.linkedin.com/in/argenis1412/).
-Licensed under the [MIT License](LICENSE).
+[LinkedIn](https://www.linkedin.com/in/argenis1412/) · [MIT License](LICENSE)
