@@ -46,7 +46,7 @@ provides critical base theme tokens and an early theme script.
 
 | Surface | Implemented styling |
 |---|---|
-| Home and mobile drawer | `.home-page` / `.home-drawer` scope Graphite & Bronze tokens: light background `#F7F8F8`, dark background `#17191B`, bronze accents `#815526` / `#D4A373`. The experience timeline shares neutral surfaces and uses semantic colors for labels. |
+| Home and mobile drawer | `.home-page` / `.home-drawer` scope Graphite & Bronze tokens: light background `#F7F8F8`, dark background shared with detail routes through `--theme-bg` (`#161412`), bronze accents `#815526` / `#D4A373`. The experience timeline shares neutral surfaces and uses semantic colors for labels. |
 | Home layout | Centered container up to 75rem, responsive gutters, border-separated project rows, restrained buttons/links, and native disclosures. Rows become two columns at 768px; typography also scales at 1200px. |
 | Detail routes | Base warm light/dark theme, bordered case/evidence panels, and shared navigation/footer. |
 | Typography | Google Fonts loads Inter, Montserrat, and JetBrains Mono. Body and home headings use Inter; base detail headings use Montserrat; metadata/code-style labels use JetBrains Mono. System fallbacks remain available. |

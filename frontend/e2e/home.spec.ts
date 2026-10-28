@@ -77,10 +77,10 @@ test('keeps project links, engineering evidence, themes and translations availab
   await page.getByRole('combobox').selectOption('es');
   await expect(page.locator('#hero h1')).toHaveText('APIs y sistemas backend.');
   await expect(page.locator('#contact h2')).toHaveText('Contacto');
-  await expect(page.locator('#projects').getByText('API de pagos', { exact: false })).toBeVisible();
+  await expect(page.locator('#projects').getByText('Proyecto de aprendizaje para simular opciones de pago', { exact: false })).toBeVisible();
   await page.getByRole('combobox').selectOption('pt');
   await expect(page.locator('#hero h1')).toHaveText('APIs e sistemas backend.');
-  await expect(page.locator('#projects').getByText('API de pagamentos', { exact: false })).toBeVisible();
+  await expect(page.locator('#projects').getByText('Projeto de aprendizado para simular opções de pagamento', { exact: false })).toBeVisible();
   await page.getByRole('button', { name: 'Toggle Theme' }).click();
   const storedTheme = await page.evaluate(() => localStorage.getItem('portfolio_theme'));
   await expect(page.locator('html')).toHaveClass(new RegExp(storedTheme!));

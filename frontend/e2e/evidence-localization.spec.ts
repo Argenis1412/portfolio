@@ -23,7 +23,13 @@ for (const projectId of ['portfolio-api', 'loja-app', 'patchforge']) {
         const card = statement.locator('..');
         await expect(statement).toBeVisible();
         await expect(card.getByText(`${item.label[language.id]} ${language.classifications[0]}`, { exact: true })).toBeVisible();
-        await expect(card.getByText(item.source, { exact: false })).toBeVisible();
+        for (const source of item.source.split('; ')) {
+          if (source.startsWith('https://github.com/')) {
+            await expect(card.locator(`a[href="${source}"]`)).toBeVisible();
+          } else {
+            await expect(card.getByText(source, { exact: false })).toBeVisible();
+          }
+        }
         if (language.id !== 'en') {
           await expect(evidence.getByText(item.value, { exact: true })).toHaveCount(0);
         }

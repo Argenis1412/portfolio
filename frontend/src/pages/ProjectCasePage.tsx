@@ -46,7 +46,9 @@ export default function ProjectCasePage() {
         {study.evidence.map((item) => <div key={`${item.source}:${item.label.en}`} className="mt-3 rounded-xl border border-app-border p-4">
           <p className="font-semibold text-app-text">{item.label[language]} <span className="font-mono text-xs text-app-primary">{t(`evidence.classification.${item.classification}`)}</span></p>
           <p className="text-app-muted">{item.localized_value?.[language] ?? item.value}</p>
-          <p className="mt-2 break-words text-xs text-app-muted">{t('evidence.source')}: {item.source}</p>
+          <p className="mt-2 break-words text-xs text-app-muted">{t('evidence.source')}: {item.source.split('; ').map((source, index) => source.startsWith('https://github.com/')
+            ? <a key={source} href={source} target="_blank" rel="noopener noreferrer" className="flex min-h-11 items-center text-app-primary underline underline-offset-4">{source.replace(/^https:\/\/github\.com\/[^/]+\/[^/]+\/blob\/[^/]+\//, '')}</a>
+            : `${index > 0 ? '; ' : ''}${source}`)}</p>
         </div>)}
       </section>
       {project.id === 'portfolio-api' && <section className="mt-8 border-t border-app-border pt-6">
