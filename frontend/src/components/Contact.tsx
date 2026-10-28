@@ -2,6 +2,7 @@ import { Mail, Loader2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useAbout } from '../hooks/useApi';
 import { useContactForm } from '../hooks/useContactForm';
+import ContactCopyButtons from './ui/ContactCopyButtons';
 
 export default function Contact() {
   const { t, language } = useLanguage();
@@ -29,23 +30,24 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" aria-labelledby="contact-title" className="home-container border-t border-app-border py-10 sm:py-12">
-      <div className="grid gap-6 md:grid-cols-[1fr_1.5fr] md:gap-12">
+    <section id="contact" aria-labelledby="contact-title" className="home-container home-section">
+      <div className="home-editorial-grid">
         <div>
-          <h2 id="contact-title" className="text-2xl tracking-tight sm:text-3xl">{t('contact.title')}</h2>
+          <h2 id="contact-title">{t('contact.title')}</h2>
           <p className="mt-4 leading-relaxed text-app-muted">{t('contact.subtitle')}</p>
           <div className="mt-5 flex flex-wrap gap-4 text-sm font-semibold text-app-primary">
-            {about?.email && <a href={`mailto:${about.email}`} className="py-2 hover:underline">{t('contact.channel.email')}</a>}
-            {about?.phone && <button type="button" onClick={handleWhatsApp} className="py-2 hover:underline">{t('contact.whatsapp')}</button>}
+            {about?.email && <a href={`mailto:${about.email}`} className="home-link">{t('contact.channel.email')}</a>}
+            {about?.phone && <button type="button" onClick={handleWhatsApp} className="home-link">{t('contact.whatsapp')}</button>}
           </div>
+          <ContactCopyButtons email={about?.email || 'argenisbackend@gmail.com'} phone={about?.phone || '(41) 9 9510-3364'} />
         </div>
-        <form onSubmit={handleSubmit} noValidate className="min-w-0 rounded-xl border border-app-border bg-app-surface p-5">
+        <form onSubmit={handleSubmit} noValidate className="min-w-0">
           <input type="text" name="website" id="hp_website" aria-label="Website" style={{ position: 'absolute', left: '-5000px' }} tabIndex={-1} autoComplete="off" />
           <input type="text" name="fax" id="hp_fax" aria-label="Fax" style={{ position: 'absolute', left: '-5000px' }} tabIndex={-1} autoComplete="off" />
           <div className="grid gap-4 sm:grid-cols-2">
             {(['name', 'email', 'subject', 'message'] as const).map((field) => {
               const error = field === 'subject' ? undefined : errors[field];
-              const inputClass = 'w-full rounded-lg border border-app-border bg-app-bg px-3 py-2.5 text-base text-app-text placeholder:text-app-muted focus:border-app-primary';
+              const inputClass = 'min-h-11 w-full rounded-md border border-app-border bg-app-surface px-3 py-2.5 text-base text-app-text placeholder:text-app-muted focus:border-app-primary';
               const props = {
                 id: field, name: field, value: formData[field], onChange: handleChange,
                 placeholder: t(`contact.placeholder.${field}`),
@@ -59,7 +61,7 @@ export default function Contact() {
               </div>;
             })}
           </div>
-          <button type="submit" disabled={status === 'loading'} className="mt-5 inline-flex items-center justify-center gap-2 rounded-lg bg-app-primary px-5 py-3 text-sm font-semibold text-app-primary-text hover:bg-app-primary-hover disabled:opacity-50">
+          <button type="submit" disabled={status === 'loading'} className="home-button mt-5 disabled:opacity-50">
             {status === 'loading' ? <Loader2 aria-hidden="true" className="h-4 w-4 animate-spin" /> : <Mail aria-hidden="true" className="h-4 w-4" />}
             {status === 'loading' ? t('contact.sending') : t('contact.send')}
           </button>
@@ -67,8 +69,8 @@ export default function Contact() {
             {status === 'success' && <p className="text-status-ok">{t('contact.console.delivered')}</p>}
             {status === 'error' && <p className="text-status-error">{submitError || t('contact.error.generic')} {responseStatusCode}</p>}
           </div>
-          <details className="mt-3 text-xs text-app-muted">
-            <summary className="w-fit cursor-pointer py-2">{t('contact.response_details')}</summary>
+          <details className="mt-3 text-sm text-app-muted">
+            <summary className="home-link w-fit cursor-pointer">{t('contact.response_details')}</summary>
             <dl className="mt-2 space-y-2 break-all">
               <div><dt>{t('contact.spec.idempotency')}</dt><dd>{idempotencyKey}</dd></div>
               {responseStatusCode && <div><dt>{t('contact.console.response')}</dt><dd>{responseStatusCode}</dd></div>}

@@ -113,5 +113,40 @@
     "demo": null,
     "highlight": true,
     "image": null
+  },
+  {
+    "id": "housing-finance-gps",
+    "name": "Housing Finance GPS",
+    "short_description": {
+      "en": "Housing-finance engine with deterministic SAC and Price calculations, versioned replay and a bounded API. In development; no public demo.",
+      "es": "Motor de financiación de vivienda con cálculos SAC y Price deterministas, replay versionado y una API acotada. En desarrollo; sin demo pública.",
+      "pt": "Motor de financiamento habitacional com cálculos SAC e Price determinísticos, replay versionado e uma API limitada. Em desenvolvimento; sem demo pública."
+    },
+    "full_description": {
+      "en": "Pure Python financial domain with centavo-safe SAC and Price schedules, retained versioned replay evaluators, and rent-plus-investment calculations. A bounded FastAPI endpoint exposes ephemeral financing projections. Tests use synthetic inputs. There is no frontend, persistence, consortium implementation or public demo.",
+      "es": "Dominio financiero en Python puro con planes SAC y Price exactos al centavo, evaluadores de replay versionado y cálculos de alquiler más inversión. Un endpoint FastAPI acotado expone proyecciones financieras efímeras. Las pruebas usan entradas sintéticas. No tiene frontend, persistencia, implementación de consorcios ni demo pública.",
+      "pt": "Domínio financeiro em Python puro com cronogramas SAC e Price exatos ao centavo, avaliadores de replay versionado e cálculos de aluguel mais investimento. Um endpoint FastAPI limitado expõe projeções financeiras efêmeras. Os testes usam entradas sintéticas. Não há frontend, persistência, implementação de consórcio ou demo pública."
+    },
+    "technologies": [
+      "Python 3.13",
+      "FastAPI",
+      "Pytest",
+      "Hypothesis"
+    ],
+    "features": [
+      "Deterministic SAC and Price calculations",
+      "Centavo-safe settlement and versioned domain replay",
+      "Bounded, ephemeral FastAPI financing projections",
+      "Synthetic regression and property-based tests"
+    ],
+    "learnings": [
+      "Separating financial domain rules from HTTP contracts",
+      "Versioned, reproducible calculation evidence",
+      "Explicit rounding and unsupported-input boundaries"
+    ],
+    "repository": "https://github.com/Argenis1412/housing-finance-gps",
+    "demo": null,
+    "highlight": false,
+    "image": null
   }
 ]

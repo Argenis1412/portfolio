@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Outlet, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { LazyMotion, domAnimation, MotionConfig } from 'framer-motion';
 import Navbar from './components/Navbar';
 import { ThemeProvider } from './context/ThemeContext';
@@ -19,8 +19,10 @@ const RouteFallback = () => (
 );
 
 function RouteShell() {
+  const isHome = useLocation().pathname === '/';
+
   return (
-    <div className="min-h-screen pt-16 selection:bg-app-primary/30 selection:text-app-text transition-colors duration-300">
+    <div className={`${isHome ? 'home-page ' : ''}min-h-screen pt-16 selection:bg-app-primary/30 selection:text-app-text transition-colors duration-300`}>
       <Navbar />
       <main>
         <Suspense fallback={<RouteFallback />}>
@@ -28,7 +30,7 @@ function RouteShell() {
         </Suspense>
       </main>
       <Suspense fallback={null}>
-        <Footer />
+        <Footer compact={isHome} />
       </Suspense>
     </div>
   );

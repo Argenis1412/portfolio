@@ -16,6 +16,7 @@ export default function Navbar() {
   const { theme, toggleTheme } = useTheme();
   const queryClient = useQueryClient();
   const location = useLocation();
+  const isHome = location.pathname === '/';
   const navigate = useNavigate();
   const prefersReducedMotion = useReducedMotion();
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
@@ -109,7 +110,8 @@ export default function Navbar() {
 
   const navItems = [
     { id: 'projects', label: t('nav.projects'), prefetchFn: () => prefetch(queryKeys.about, fetchAbout) },
-    { id: 'about', label: t('nav.about'), prefetchFn: () => { prefetch(queryKeys.about, fetchAbout); prefetch(queryKeys.skills, fetchSkills); } },
+    ...(isHome ? [{ id: 'system', label: t('home.nav.system') }] : []),
+    { id: 'about', label: t(isHome ? 'home.about.title' : 'nav.about'), prefetchFn: () => { prefetch(queryKeys.about, fetchAbout); prefetch(queryKeys.skills, fetchSkills); } },
     { id: 'contact', label: t('nav.contact'), testId: 'nav-contact' },
   ];
 
@@ -119,7 +121,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
 
           {/* Mobile Menu Button */}
-          <div className="flex-shrink-0 md:hidden flex items-center">
+          <div className={`${isHome ? 'order-3 ml-1 ' : ''}flex-shrink-0 md:hidden flex items-center`}>
             <button
               ref={menuTriggerRef}
               onClick={() => setIsOpen(true)}
@@ -131,6 +133,8 @@ export default function Navbar() {
               <Menu className="w-6 h-6" />
             </button>
           </div>
+
+          {isHome && <a href="#hero" className="home-brand home-link mr-auto text-sm font-semibold">Argenis Lopez</a>}
 
           <div className="hidden md:block">
             <div className="flex items-baseline gap-1">
@@ -149,7 +153,7 @@ export default function Navbar() {
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className={`flex items-center ${isHome ? 'gap-2 md:ml-6' : 'gap-4'}`}>
             <button
               onClick={toggleTheme}
               className="p-2 rounded-full border border-app-border/50 bg-app-surface/60 hover:bg-app-surface-hover transition-colors text-app-text"
@@ -162,14 +166,14 @@ export default function Navbar() {
               )}
             </button>
             <div className="relative flex items-center">
-              <div className="absolute left-2.5 pointer-events-none text-app-text/70">
+              <div className={`${isHome ? 'hidden' : 'absolute'} left-2.5 pointer-events-none text-app-text/70`}>
                 <Languages className="w-4 h-4" />
               </div>
               <select
                 aria-label="Select Language"
                 value={language}
                 onChange={(e) => setLanguage(e.target.value as 'pt' | 'en' | 'es')}
-                className="bg-app-surface border border-app-border text-sm rounded-lg focus:ring-app-primary focus:border-app-primary block pl-9 pr-3 py-2 transition-smooth shadow-sm text-app-text"
+                className={`bg-app-surface border border-app-border text-sm rounded-lg focus:ring-app-primary focus:border-app-primary block ${isHome ? 'pl-3' : 'pl-9'} pr-3 py-2 transition-smooth shadow-sm text-app-text`}
               >
                 <option value="pt">PT</option>
                 <option value="en">EN</option>
@@ -203,7 +207,7 @@ export default function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={prefersReducedMotion ? { duration: 0 } : { type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 left-0 z-[70] h-dvh w-3/4 max-w-sm overflow-y-auto border-r border-app-border bg-app-bg shadow-2xl md:hidden"
+              className={`${isHome ? 'home-drawer ' : ''}fixed inset-y-0 left-0 z-[70] h-dvh w-3/4 max-w-sm overflow-y-auto border-r border-app-border bg-app-bg shadow-2xl md:hidden`}
               id="mobile-navigation"
               ref={drawerRef}
               role="dialog"
@@ -211,7 +215,7 @@ export default function Navbar() {
               aria-label="Main navigation"
             >
               <div className="flex items-center justify-between h-16 px-4 border-b border-app-border/50">
-                <span className="font-mono font-bold text-app-primary tracking-widest text-sm">MENU</span>
+                <span className={isHome ? 'font-semibold text-app-text text-sm' : 'font-mono font-bold text-app-primary tracking-widest text-sm'}>{isHome ? 'Argenis Lopez' : 'MENU'}</span>
                 <button
                   ref={closeButtonRef}
                   onClick={() => setIsOpen(false)}
@@ -227,7 +231,7 @@ export default function Navbar() {
                     key={item.id}
                     data-testid={item.testId ? `mobile-${item.testId}` : undefined}
                     onClick={() => handleNavClick(item.id)}
-                    className="flex items-center w-full px-4 py-4 rounded-lg text-sm font-mono uppercase tracking-widest text-app-text hover:bg-app-surface hover:text-app-primary transition-all border border-transparent hover:border-app-border/50 text-left"
+                    className={`flex items-center w-full px-4 py-4 rounded-lg text-sm ${isHome ? '' : 'font-mono uppercase tracking-widest '}text-app-text hover:bg-app-surface hover:text-app-primary transition-colors border border-transparent hover:border-app-border/50 text-left`}
                   >
                     {item.label}
                   </button>
