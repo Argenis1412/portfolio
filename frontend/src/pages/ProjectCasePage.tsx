@@ -5,6 +5,11 @@ import { useLanguage } from '../context/LanguageContext';
 import { useProjects } from '../hooks/useApi';
 
 const sections = ['problem', 'constraints', 'solution', 'architecture', 'testing', 'reliability', 'impact'] as const;
+const records = [
+  { id: 'terraform', source: 'docs/architecture/INC-009-terraform-resource-collision.md' },
+  { id: 'load', source: 'benchmarks/results/f9eaa7f-local-20261017/README.md' },
+];
+const recordFields = ['problem', 'change', 'verification', 'limit'] as const;
 
 export default function ProjectCasePage() {
   const { projectId } = useParams();
@@ -48,12 +53,26 @@ export default function ProjectCasePage() {
         <h2 className="text-2xl tracking-tight">{t('case.engineering')}</h2>
         <div className="mt-3 flex flex-col items-start gap-2 text-sm text-app-primary">
           {['deterministic-validation', 'json-first', 'redis-streams-monolith'].map(id => <Link key={id} to={`/decisions/${id}`} className="py-2 hover:underline">{t(`decision.${id}.title`)}</Link>)}
-          <Link to="/production-evidence" className="py-2 font-semibold hover:underline">{t('case.observations')} →</Link>
         </div>
         <details className="mt-4">
           <summary className="w-fit cursor-pointer py-2 text-sm text-app-primary">{t('tradeoffs.title')}</summary>
           <ArchitectureTradeoffs />
         </details>
+      </section>}
+      {project.id === 'portfolio-api' && <section aria-labelledby="engineering-records-title" className="mt-8 border-t border-app-border pt-6">
+        <h2 id="engineering-records-title" className="text-2xl tracking-tight">{t('case.records.title')}</h2>
+        {records.map(record => <article key={record.id} className="mt-6 border-t border-app-border pt-6">
+          <h3 className="text-lg font-semibold text-app-text">{t(`case.records.${record.id}.title`)}</h3>
+          <dl className="mt-3 space-y-3 text-sm leading-relaxed">
+            {recordFields.map(field => <div key={field}>
+              <dt className="font-semibold text-app-text">{t(`case.records.${field}`)}</dt>
+              <dd className="mt-1 text-app-muted">{t(`case.records.${record.id}.${field}`)}</dd>
+            </div>)}
+          </dl>
+          {project.repository && <a href={`${project.repository}/blob/main/${record.source}`} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex min-h-11 items-center py-2 text-sm font-semibold text-app-primary hover:underline">
+            {t('case.records.source')}
+          </a>}
+        </article>)}
       </section>}
     </article>
   );

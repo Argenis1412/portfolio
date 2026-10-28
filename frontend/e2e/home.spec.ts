@@ -18,7 +18,7 @@ for (const [name, viewport] of Object.entries({ desktop: { width: 1440, height: 
       expect(headingStyle.size).toBe(viewport.width >= 1200 ? 52 : viewport.width >= 768 ? 44 : 34);
       expect(headingStyle.spacing).toBeLessThan(0);
       await expect(hero.getByRole('button')).toHaveCount(1);
-      await expect(hero.getByRole('link', { name: 'Explore the system' })).toHaveAttribute('href', '/production-evidence');
+      await expect(hero.getByRole('link')).toHaveCount(0);
       const projects = page.locator('#projects');
       await expect(projects.locator('article')).toHaveCount(4);
       await expect(projects.getByRole('heading', { level: 3 })).toHaveText(['Full-Stack Portfolio', 'Housing Finance GPS', 'Loja App', 'PatchForge']);
@@ -71,8 +71,8 @@ test('keeps project links, engineering evidence, themes and translations availab
   await expect(projects.filter({ hasText: 'Housing Finance GPS' }).getByRole('link', { name: 'Read case study' })).toHaveCount(0);
   await projects.filter({ hasText: 'Full-Stack Portfolio' }).getByRole('link', { name: 'Read case study' }).click();
   await expect(page.getByRole('heading', { name: 'Full-Stack Portfolio', exact: true })).toBeFocused();
-  await page.getByRole('link', { name: 'Metrics and documented incidents' }).click();
-  await expect(page.locator('#metrics time')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Documented engineering cases' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Read the source report' })).toHaveCount(2);
   await page.goto('/');
   await page.getByRole('combobox').selectOption('es');
   await expect(page.locator('#hero h1')).toHaveText('APIs y sistemas backend.');
@@ -86,21 +86,31 @@ test('keeps project links, engineering evidence, themes and translations availab
   await expect(page.locator('html')).toHaveClass(new RegExp(storedTheme!));
 });
 
-test('explains evidence sources and opens the existing system without polling on home', async ({ page }) => {
+test('keeps the home focused on projects without system navigation or polling', async ({ page }) => {
   const metricsRequests: string[] = [];
   page.on('request', request => { if (request.url().includes('/metrics/summary')) metricsRequests.push(request.url()); });
   await page.goto('/');
   await expect(page.locator('#projects article')).toHaveCount(4);
-  const system = page.locator('#system');
-  await expect(system).toContainText('Real HTTP latency');
-  await expect(system).toContainText('not server logs or automated recovery actions');
-  await expect(system).toContainText('not the current system state');
+  await expect(page.locator('#system, #metrics, #logs')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'System', exact: true })).toHaveCount(0);
+  await expect(page.locator('a[href="/production-evidence"]')).toHaveCount(0);
+  await expect(page.locator('#about')).toBeVisible();
   expect(metricsRequests).toEqual([]);
-  await page.getByRole('button', { name: 'System', exact: true }).click();
-  await expect(system).toBeInViewport();
-  await system.getByRole('link', { name: 'View metrics and events' }).click();
-  await expect(page).toHaveURL(/\/production-evidence$/);
-  await expect(page.locator('#metrics time')).toBeVisible();
+});
+
+test('keeps personal projects outside professional experience in all languages', async ({ page }) => {
+  await page.goto('/');
+  for (const [language, label] of [['en', 'Experience and education'], ['es', 'Experiencia y formación'], ['pt', 'Experiência e formação']]) {
+    await page.getByRole('combobox').selectOption(language);
+    const disclosure = page.locator('#about details').filter({ has: page.locator('summary', { hasText: label }) });
+    await disclosure.locator('summary').click();
+    const experience = disclosure.locator('#experience');
+    await expect(experience).toContainText('Ademicon');
+    await expect(experience).toContainText('UFPR');
+    await expect(experience).not.toContainText('Loja App');
+    await expect(page.locator('#projects').getByRole('heading', { name: 'Loja App' })).toBeVisible();
+    await disclosure.locator('summary').click();
+  }
 });
 
 test('shows project loading, failure, retry and empty states', async ({ page }) => {

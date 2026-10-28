@@ -64,9 +64,9 @@
       "es": "Los controllers llaman casos de uso conectados a adaptadores. Las lecturas usan JSON en caché; los contactos usan protección Redis y entrega por stream con alternativa en segundo plano."
     },
     "testing": {
-      "en": "Backend tests cover content contracts, contact protection, delivery retries, and retired Chaos routes returning 404. Frontend compatibility and deployment-sized load testing remain pending.",
-      "pt": "Testes backend cobrem contratos de conteúdo, proteção de contatos, novas tentativas de entrega e rotas Chaos retiradas retornando 404. A compatibilidade frontend e os testes de carga na escala do deploy continuam pendentes.",
-      "es": "Las pruebas backend cubren contratos de contenido, protección de contactos, reintentos de entrega y rutas Chaos retiradas con respuesta 404. La compatibilidad frontend y las pruebas de carga a escala de despliegue siguen pendientes."
+      "en": "Backend tests cover content contracts, contact protection, delivery retries, and retired Chaos routes returning 404. Frontend tests cover navigation and contact. Recorded local load runs failed latency targets; the report is linked below.",
+      "pt": "Testes backend cobrem contratos de conteúdo, proteção de contatos, novas tentativas de entrega e rotas Chaos retiradas retornando 404. Testes frontend cobrem navegação e contato. As execuções locais de carga registradas falharam nas metas de latência; o relatório está vinculado abaixo.",
+      "es": "Las pruebas backend cubren contratos de contenido, protección de contactos, reintentos de entrega y rutas Chaos retiradas con respuesta 404. Las pruebas frontend cubren navegación y contacto. Las ejecuciones locales de carga documentadas fallaron los objetivos de latencia; el informe está enlazado abajo."
     },
     "reliability": {
       "en": "Stream delivery supports classified retries, DLQ handling, and pending recovery. Local protection resets on restart; background fallback has no automatic retries. Acceptance is not inbox delivery.",
@@ -74,9 +74,9 @@
       "es": "La entrega por stream ofrece reintentos clasificados, DLQ y recuperación de pendientes. La protección local se reinicia con el proceso; la alternativa en segundo plano no tiene reintentos automáticos. La aceptación no demuestra entrega en la bandeja de entrada."
     },
     "impact": {
-      "en": "The cleanup removes SQL application paths and backend simulations while retaining content reads, contact delivery, and observed HTTP/worker metrics. Current latency and capacity still need measurement.",
-      "pt": "A limpeza remove caminhos SQL e simulações backend, mantendo leituras de conteúdo, entrega de contatos e métricas HTTP/worker observadas. Latência e capacidade atuais ainda precisam ser medidas.",
-      "es": "La limpieza retira las rutas SQL y simulaciones backend, conservando lecturas de contenido, entrega de contactos y métricas HTTP/worker observadas. La latencia y capacidad actuales aún necesitan medición."
+      "en": "The backend serves content and accepts contact without SQL application paths or failure simulations. Recorded local load runs did not meet latency targets; they establish no production latency or capacity guarantee.",
+      "pt": "O backend serve conteúdo e aceita contatos sem caminhos SQL na aplicação nem simulações de falhas. As execuções locais de carga registradas não atingiram as metas de latência; não estabelecem garantia de latência ou capacidade em produção.",
+      "es": "El backend sirve contenido y acepta contactos sin rutas SQL en la aplicación ni simulaciones de fallos. Las ejecuciones locales de carga documentadas no cumplieron los objetivos de latencia; no establecen garantías de latencia ni capacidad en producción."
     },
     "evidence": [
       {"label": {"en": "Backend regression tests", "pt": "Testes de regressão backend", "es": "Pruebas de regresión backend"}, "value": "Repository tests cover public JSON snapshots and retired Chaos routes; this is not live production evidence", "classification": "REAL", "source": "backend/tests/test_content_snapshots.py; backend/tests/test_chaos_retirement.py"},

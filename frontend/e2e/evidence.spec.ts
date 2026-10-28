@@ -1,98 +1,27 @@
-import { readFileSync } from 'node:fs';
 import { test, expect } from './fixtures';
-const current = JSON.parse(readFileSync(new URL('../src/tests/fixtures/metrics-d0d1cea.json', import.meta.url), 'utf8'));
-const previous = JSON.parse(readFileSync(new URL('../src/tests/fixtures/metrics-9705b4a.json', import.meta.url), 'utf8'));
 
-for (const [name, metrics] of Object.entries({ current, previous })) {
-  test(`renders the ${name} backend contract without legacy states`, async ({ page }) => {
-    await page.route('**/api/v1/metrics/summary', route => route.fulfill({ json: metrics }));
+for (const [language, title, terraform, load] of [
+  ['en', 'Documented engineering cases', 'Terraform secret identity collision', 'Local load validation with a limited CPU budget'],
+  ['es', 'Casos de ingeniería documentados', 'Colisión de identidad de secretos en Terraform', 'Validación local de carga con CPU limitada'],
+  ['pt', 'Casos de engenharia documentados', 'Colisão de identidade de secrets no Terraform', 'Validação local de carga com CPU limitada'],
+]) {
+  test(`preserves source-backed cases through the old evidence URL in ${language}`, async ({ page }) => {
+    const metricsRequests: string[] = [];
+    page.on('request', request => { if (request.url().includes('/metrics/summary')) metricsRequests.push(request.url()); });
+    await page.addInitScript(value => localStorage.setItem('portfolio_lang', value), language);
     await page.goto('/production-evidence');
-    await expect(page.locator('#metrics').getByText('44ms', { exact: true })).toBeVisible();
-    await expect(page.getByText('NORMAL', { exact: true })).toHaveCount(0);
-    await expect(page.locator('#observability')).toHaveCount(0);
-    await expect(page.locator('#logs')).toContainText('Browser events');
+    await expect(page).toHaveURL(/\/projects\/portfolio-api$/);
+    await expect(page.getByRole('heading', { name: 'Full-Stack Portfolio', exact: true })).toBeFocused();
+    const records = page.getByRole('region', { name: title });
+    await expect(records.getByRole('heading', { name: terraform })).toBeVisible();
+    await expect(records.getByRole('heading', { name: load })).toBeVisible();
+    await expect(records.locator('a')).toHaveCount(2);
+    await expect(records.locator('a').first()).toHaveAttribute('href', 'https://github.com/Argenis1412/portfolio/blob/main/docs/architecture/INC-009-terraform-resource-collision.md');
+    await expect(records.locator('a').last()).toHaveAttribute('href', 'https://github.com/Argenis1412/portfolio/blob/main/benchmarks/results/f9eaa7f-local-20261017/README.md');
+    await expect(page.locator('#metrics, #logs, #incident-history')).toHaveCount(0);
+    expect(metricsRequests).toEqual([]);
   });
 }
-
-test('distinguishes warming-up readings from zero latency measurements', async ({ page }) => {
-  await page.route('**/api/v1/metrics/summary', route => route.fulfill({ json: { ...current, p95_ms: 0, p95_status: 'warming_up', error_rate_status: 'warming_up' } }));
-  await page.goto('/production-evidence');
-  await expect(page.locator('#metrics').getByText('calibrating', { exact: true }).first()).toBeVisible();
-  await expect(page.locator('#metrics').getByText('0ms', { exact: true })).toHaveCount(0);
-  await expect(page.locator('#metrics svg')).toHaveCount(0);
-});
-
-test('shows measured degradation and local threshold alerts', async ({ page }) => {
-  await page.route('**/api/v1/metrics/summary', route => route.fulfill({ json: { ...current, p95_ms: 180, p95_status: 'degraded', system_status: 'degraded' } }));
-  await page.goto('/production-evidence');
-  await expect(page.locator('#metrics').getByText('180ms', { exact: true })).toBeVisible();
-  await expect(page.locator('#logs')).toContainText('latency_threshold_breached');
-  await expect(page.locator('#logs')).not.toContainText('db=CONNECTED');
-});
-
-test('expires previous readings at 60 seconds and recovers on a valid poll', async ({ page }) => {
-  await page.clock.install();
-  let valid = true;
-  await page.route('**/api/v1/metrics/summary', route => route.fulfill({ json: valid ? current : { ...current, system_status: 'unknown' } }));
-  await page.goto('/production-evidence');
-  await expect(page.locator('#metrics').getByText('44ms', { exact: true })).toBeVisible();
-  const received = await page.locator('#metrics time').getAttribute('datetime');
-  valid = false;
-  await page.clock.runFor(59_000);
-  await expect(page.locator('#metrics')).toContainText('Previous data');
-  await expect(page.locator('#metrics').getByText('44ms', { exact: true })).toBeVisible();
-  await page.clock.runFor(2_000);
-  await expect(page.locator('#metrics')).toContainText('No current data');
-  await expect(page.locator('#metrics').getByText('44ms', { exact: true })).toHaveCount(0);
-  await expect(page.locator('#metrics time')).toHaveAttribute('datetime', received!);
-  valid = true;
-  await page.clock.runFor(16_000);
-  await expect(page.locator('#metrics').getByText('44ms', { exact: true })).toBeVisible();
-});
-
-test('rejects an invalid initial contract without reporting backend downtime', async ({ page }) => {
-  await page.clock.install();
-  let requests = 0;
-  await page.route('**/api/v1/metrics/summary', route => {
-    requests += 1;
-    return route.fulfill({ json: { ...current, p95_status: 'unknown' } });
-  });
-  await page.goto('/production-evidence');
-  await expect(page.locator('#metrics')).toBeVisible();
-  for (let retry = 0; retry < 3; retry += 1) {
-    await expect.poll(() => requests).toBeGreaterThanOrEqual(retry + 1);
-    await page.clock.runFor(2 ** retry * 1_000 + 100);
-  }
-  await expect.poll(() => requests).toBeGreaterThanOrEqual(4);
-  await expect(page.locator('#metrics')).toContainText('No current data');
-  await expect(page.locator('#metrics')).toContainText('No valid reading yet');
-  await expect(page.locator('#metrics').getByText('DOWN', { exact: true })).toHaveCount(0);
-});
-
-test('refreshes an expired reading on visibility return before the next poll', async ({ page }) => {
-  await page.clock.install();
-  let resume: (() => Promise<void>) | undefined;
-  let requests = 0;
-  let returning = false;
-  await page.route('**/api/v1/metrics/summary', route => {
-    requests += 1;
-    if (!returning) return route.fulfill({ json: current });
-    resume = () => route.fulfill({ json: { ...current, p95_ms: 45 } });
-  });
-  await page.goto('/production-evidence');
-  await expect(page.locator('#metrics').getByText('44ms', { exact: true })).toBeVisible();
-  const initialRequests = requests;
-  returning = true;
-  const now = await page.evaluate(() => Date.now());
-  // Move wall time without running polling timers, as with a suspended tab.
-  await page.clock.setSystemTime(now + 120_000);
-  await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange', { bubbles: true })));
-  await expect(page.locator('#metrics')).toContainText('No current data');
-  await expect(page.locator('#metrics').getByText('44ms', { exact: true })).toHaveCount(0);
-  await expect.poll(() => requests).toBe(initialRequests + 1);
-  await resume!();
-  await expect(page.locator('#metrics').getByText('45ms', { exact: true })).toBeVisible();
-});
 
 test('blocks external telemetry, unexpected mutations and external websockets', async ({ page, network }) => {
   await page.goto('/');
@@ -135,16 +64,17 @@ test('keeps required-field validation in the browser', async ({ page, network })
 
 for (const [name, viewport] of Object.entries({ desktop: { width: 1440, height: 1000 }, mobile: { width: 390, height: 844 } })) {
   for (const theme of ['light', 'dark']) {
-    test(`reviews ${name} ${theme} metrics with reduced motion`, async ({ page }, testInfo) => {
+    test(`reviews ${name} ${theme} documented cases with reduced motion`, async ({ page }, testInfo) => {
       await page.addInitScript(value => localStorage.setItem('portfolio_theme', value), theme);
       await page.setViewportSize(viewport);
       await page.emulateMedia({ reducedMotion: 'reduce' });
       await page.goto('/production-evidence');
-      await expect(page.locator('#metrics').getByText('44ms', { exact: true })).toBeVisible();
-      await expect(page.getByRole('heading', { name: 'Production evidence', exact: true })).toBeFocused();
+      await expect(page.getByRole('heading', { name: 'Full-Stack Portfolio', exact: true })).toBeFocused();
+      const records = page.getByRole('region', { name: 'Documented engineering cases' });
+      await expect(records).toContainText('All five latency thresholds failed');
+      await expect(records).toContainText('not production SLO compliance or maximum capacity');
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-      await page.locator('#metrics').scrollIntoViewIfNeeded();
-      await page.screenshot({ path: testInfo.outputPath(`${name}-${theme}-metrics.png`) });
+      await page.screenshot({ path: testInfo.outputPath(`${name}-${theme}-cases.png`), fullPage: true });
     });
   }
 }
