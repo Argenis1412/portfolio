@@ -148,7 +148,7 @@ section[id] {
   }
 }
 
-/* Home-only Graphite & Bronze tokens; detail and evidence routes keep their theme. */
+/* Home tokens; the dark background shares the detail routes' base color. */
 .home-page,
 .home-drawer {
   --color-app-bg: #F7F8F8;
@@ -167,7 +167,7 @@ section[id] {
 
 .dark .home-page,
 .dark .home-drawer {
-  --color-app-bg: #17191B;
+  --color-app-bg: var(--theme-bg);
   --color-app-surface: #202326;
   --color-app-surface-hover: #282C2F;
   --color-app-text: #F0EFEB;

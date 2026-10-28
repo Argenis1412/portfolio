@@ -95,3 +95,62 @@ test('reloads the page to recover an experience load failure', async ({ page }) 
   await expect(disclosure.locator('#experience')).toContainText('Ademicon');
   await expect(disclosure.getByRole('alert')).toHaveCount(0);
 });
+
+const loja = load('projects').find((project: { id: string }) => project.id === 'loja-app');
+const lojaSources = [
+  'backend/domain/calculadora.py',
+  'backend/tests/unit/test_calculadora.py',
+  'backend/domain/recibo.py',
+  'backend/tests/test_recibo.py',
+  'backend/services/pagamento_service.py',
+  'backend/tests/test_idempotency.py',
+  'backend/api/pagamentos_api.py',
+  'backend/tests/test_pagination.py',
+];
+
+for (const language of languages) {
+  test(`presents Loja App as a learning project with code evidence in ${language.id}`, async ({ page }) => {
+    await page.addInitScript(value => localStorage.setItem('portfolio_lang', value), language.id);
+    await page.goto('/');
+    const project = page.locator('#projects article').filter({ has: page.getByRole('heading', { name: 'Loja App', exact: true }) });
+    const description = loja.short_description[language.id];
+    await expect(project.getByText(description, { exact: true })).toBeVisible();
+    await expect(project.getByRole('listitem')).toHaveText(['React', 'TypeScript', 'FastAPI', 'SQLAlchemy']);
+    await project.locator('a[href="/projects/loja-app"]').click();
+    await expect(page.getByRole('heading', { name: 'Loja App', exact: true })).toBeFocused();
+    await expect(page.getByText(description, { exact: true })).toBeVisible();
+    const article = page.locator('main > article');
+    await expect(article).toContainText('Idempotency-Key');
+    await expect(article).toContainText('float');
+    await expect(article).not.toContainText(/100%|94%|mathematically exact|financial calculations|bounded pagination|soft deletes|CHANGELOG|docs\/adr\//i);
+    const evidence = page.locator('section[aria-labelledby="case-evidence-title"]');
+    await expect(evidence.getByRole('link')).toHaveCount(8);
+    for (const path of lojaSources) {
+      const link = evidence.getByRole('link', { name: path, exact: true });
+      await expect(link).toHaveAttribute('href', `https://github.com/Argenis1412/Loja_app/blob/main/${path}`);
+      await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    }
+  });
+}
+
+for (const [device, viewport] of Object.entries({ desktop: { width: 1440, height: 1000 }, mobile: { width: 390, height: 844 } })) {
+  for (const theme of ['dark', 'light']) {
+    test(`uses the requested home background on ${device} in ${theme} theme`, async ({ page }, testInfo) => {
+      await page.addInitScript(value => localStorage.setItem('portfolio_theme', value), theme);
+      await page.setViewportSize(viewport);
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.goto('/projects/portfolio-api');
+      const detailBackground = await page.locator('body').evaluate(element => getComputedStyle(element).backgroundColor);
+      await page.goto('/');
+      await expect(page.locator('.home-page')).toHaveCSS('background-color', theme === 'dark' ? detailBackground : 'rgb(247, 248, 248)');
+      if (theme === 'dark') expect(detailBackground).toBe('rgb(22, 20, 18)');
+      await expect(page.getByRole('heading', { name: 'APIs and backend systems.', exact: true })).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      await page.screenshot({ path: testInfo.outputPath(`home-${device}-${theme}.png`), fullPage: true });
+      if (device === 'mobile') {
+        await page.getByRole('button', { name: 'Open Menu' }).click();
+        await expect(page.locator('.home-drawer')).toHaveCSS('background-color', theme === 'dark' ? detailBackground : 'rgb(247, 248, 248)');
+      }
+    });
+  }
+}
