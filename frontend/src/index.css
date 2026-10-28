@@ -311,12 +311,12 @@ section[id] {
 /* Home-only Graphite & Bronze tokens; detail and evidence routes keep their theme. */
 .home-page,
 .home-drawer {
-  --color-app-bg: #F7F6F2;
+  --color-app-bg: #F7F8F8;
   --color-app-surface: #FFFFFF;
-  --color-app-surface-hover: #EBECE8;
-  --color-app-text: #1D1F20;
-  --color-app-muted: #555B60;
-  --color-app-border: #D4D6D3;
+  --color-app-surface-hover: #EDF0F2;
+  --color-app-text: #23282C;
+  --color-app-muted: #56616A;
+  --color-app-border: #D6DDE1;
   --color-app-primary: #815526;
   --color-app-primary-hover: #69431D;
   --color-app-primary-text: #FFFFFF;
@@ -437,6 +437,31 @@ section[id] {
 .home-page summary.home-link {
   display: list-item;
   padding-block: 0.625rem;
+}
+
+.experience-timeline {
+  background-color: var(--color-app-surface-hover);
+  border: 1px solid var(--color-app-border);
+  border-radius: 0.75rem;
+}
+
+.language-select {
+  min-height: 2.75rem;
+}
+
+.language-select:hover {
+  border-color: var(--color-app-primary);
+}
+
+@media (max-width: 374px) {
+  .home-page .home-container {
+    padding-inline: 1rem;
+  }
+
+  .home-brand {
+    max-width: 4.5rem;
+    line-height: 1.25;
+  }
 }
 
 .home-page footer a {

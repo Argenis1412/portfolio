@@ -7,9 +7,8 @@ verification boundaries.
 
 ## Release checks
 
-The frontend retirement and content simplification are implemented through merged
-PR #152 (`beeb5b6`). The [v1.9.2 notes](../../CHANGELOG.md) are prepared and unpublished.
-Before a separately scoped release:
+The [v1.9.2 release](../../CHANGELOG.md) is complete and tagged as `v1.9.2`.
+For subsequent releases:
 
 1. Run frontend/backend checks from their guides, build the frontend, and run the
    isolated Playwright suite. Review public JSON snapshots deliberately. Local
@@ -31,9 +30,9 @@ Before a separately scoped release:
    deployed/cached frontend clients before removing the ignored `X-Chaos-Preset`
    CORS allowance. Both compatibility surfaces remain in code.
 
-Current deployed commits, secret values, provider permissions, external monitors,
-and production capacity were not inspected. Publication of release notes would
-not close these operational checks.
+This runbook does not record current deployed commits, secret values, provider
+permissions, external monitors, or production capacity. A release tag does not
+replace these operational checks.
 
 ## Runtime and health signals
 

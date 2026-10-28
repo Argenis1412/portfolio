@@ -41,23 +41,25 @@ provides critical base theme tokens and an early theme script.
 
 | Surface | Implemented styling |
 |---|---|
-| Home and mobile drawer | `.home-page` / `.home-drawer` scope Graphite & Bronze tokens: light background `#F7F6F2`, dark background `#17191B`, bronze accents `#815526` / `#D4A373`. |
+| Home and mobile drawer | `.home-page` / `.home-drawer` scope Graphite & Bronze tokens: light background `#F7F8F8`, dark background `#17191B`, bronze accents `#815526` / `#D4A373`. The experience timeline shares neutral surfaces and uses semantic colors for labels. |
 | Home layout | Centered container up to 75rem, responsive gutters, border-separated project rows, restrained buttons/links, and native disclosures. Rows become two columns at 768px; typography also scales at 1200px. |
-| Detail routes | Base warm light/dark theme, bordered case/evidence panels, and shared navigation/footer. The experience timeline retains glass surfaces and semantic signal colors. |
+| Detail routes | Base warm light/dark theme, bordered case/evidence panels, and shared navigation/footer. |
 | Typography | Google Fonts loads Inter, Montserrat, and JetBrains Mono. Body and home headings use Inter; base detail headings use Montserrat; metadata/code-style labels use JetBrains Mono. System fallbacks remain available. |
-| Icons and imagery | Lucide React icons; About uses the checked-in WebP portrait with JPEG fallback. |
+| Icons and imagery | Lucide React icons; About uses the checked-in WebP portrait with JPEG fallback, cropped to a circle at 144px on mobile and 176px from 640px. |
 
 [ThemeContext](src/context/ThemeContext.tsx) saves `portfolio_theme`, applies the
 root `light`/`dark` class, and initially prefers a saved value, then the system
 light preference, then dark. The early HTML script reduces theme flashing.
 [LanguageContext](src/context/LanguageContext.tsx) defaults to English, persists
-`portfolio_lang`, and updates the document language.
+`portfolio_lang`, and updates the document language. The native language selector
+shows a language icon and full native names: Português, English, and Español.
 
 `App` wraps the UI in `LazyMotion` with `domAnimation` and
 `MotionConfig reducedMotion="user"`. Navbar uses `m.*`, `AnimatePresence`, and
-`useReducedMotion()` for drawer/backdrop entry and exit; Experience uses `m.*`
-for timeline reveals. CSS handles color, hover, and loading transitions. The
-reduced-motion media rule shortens CSS transitions/animations. Global focus rings,
+`useReducedMotion()` for drawer/backdrop entry and exit. Experience renders visible
+content without waiting for viewport observations or reveal animations. CSS
+handles color, hover, and loading transitions. The reduced-motion media rule
+shortens CSS transitions/animations. Global focus rings,
 form labels/live feedback, and route-heading focus support keyboard navigation.
 The mobile drawer is portaled, locks scrolling, makes the app root inert, traps
 focus, supports Escape/backdrop dismissal, and restores focus after exit.

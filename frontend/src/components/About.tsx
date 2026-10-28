@@ -21,7 +21,7 @@ export default function About() {
         </div>
         <picture className="shrink-0">
           <source srcSet="/profile.webp" type="image/webp" />
-          <img src="/profile.jpg" alt="Argenis Lopez" width="112" height="112" loading="lazy" className="h-28 w-28 rounded-xl border border-app-border object-cover" />
+          <img src="/profile.jpg" alt="Argenis Lopez" width="176" height="176" loading="lazy" className="h-36 w-36 sm:h-44 sm:w-44 rounded-full border border-app-border object-cover" />
         </picture>
       </div>
       <details className="mt-4">
