@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect } from 'react';
 import Hero from '../components/hero/Hero';
+import HomeEvidence from '../components/HomeEvidence';
 import { scrollToSection } from '../utils/scrollToSection';
 
 const About = lazy(() => import('../components/About'));
@@ -42,6 +43,7 @@ export default function HomePage() {
       <Hero />
       <Suspense fallback={<SectionFallback />}>
         <FeaturedProjects />
+        <HomeEvidence />
         <About />
         <Contact />
       </Suspense>

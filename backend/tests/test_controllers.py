@@ -113,6 +113,7 @@ def test_list_projects_with_patchforge_returns_featured_alphabetical_order(clien
     assert [project["name"] for project in projects] == [
         "Full-Stack Portfolio",
         "PatchForge",
+        "Housing Finance GPS",
         "Loja App",
     ]
 

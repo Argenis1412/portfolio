@@ -18,18 +18,27 @@ Frontend application built with **React 19** and **Vite**. Engineered as a **str
 
 ### Home page
 
-The home page follows Hero → Projects → About → Contact in one centered container.
+The home page follows Hero → Projects → System → About → Contact in one centered container.
 `FeaturedProjects` displays every API project, including repository/demo links and
-case studies, with explicit loading, retry and empty states. Skills and the
+available case studies, with explicit loading, retry and empty states. Its editorial
+order is the deployed portfolio, Housing Finance GPS, Loja App, then PatchForge;
+the API retains its featured/alphabetical ordering. Housing Finance GPS links to
+its repository and describes implemented domain/API work without claiming a public demo.
+Projects use open rows. Home-only Graphite & Bronze tokens, typography and spacing
+are scoped to `.home-page` and its mobile drawer, leaving detail routes intact.
+Skills and the
 existing experience timeline remain available under native disclosure controls.
-The portfolio case study links to engineering decisions and `/production-evidence`;
-metrics, browser events and incident evidence retain their existing routes.
+The hero and system section link directly to `/production-evidence`. The system
+section distinguishes backend measurements, browser-local alerts and historical
+incidents without fetching or duplicating metrics on home. The portfolio case study
+also retains its links to engineering decisions and production evidence.
 The contact form uses the unchanged `useContactForm` hook, with response details
 collapsed and submission feedback announced to assistive technology. Theme,
 EN/PT/ES, keyboard navigation and reduced-motion support are preserved.
+Email/phone copy controls live with contact on home; other routes keep them in the footer.
 
 Run `npm run e2e -- --retries=0 --workers=1` for isolated fixtures, desktop/mobile
-home checks, contact and evidence regressions. Reports and screenshots go to the
+home checks at 1440, 1024 and 390 pixels, contact and evidence regressions. Reports and screenshots go to the
 system temporary directory by default; no real contact messages are sent.
 
 The UI is built using atomic, highly specialized components to ensure modularity:

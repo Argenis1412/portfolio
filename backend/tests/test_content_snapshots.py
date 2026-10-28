@@ -36,6 +36,7 @@ def json_content_client(override_dependencies, client):
         "projects/portfolio-api",
         "projects/patchforge",
         "projects/loja-app",
+        "projects/housing-finance-gps",
         "stack",
         "experiences",
         "formation",

@@ -7,15 +7,15 @@ export default function About() {
   const { data: skills = [] } = useSkills();
 
   return (
-    <section id="about" aria-labelledby="about-title" className="home-container border-t border-app-border py-10 sm:py-12">
+    <section id="about" aria-labelledby="about-title" className="home-container home-section">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
         <div className="max-w-2xl">
-          <h2 id="about-title" className="text-2xl tracking-tight sm:text-3xl">{t('nav.about')}</h2>
-          <p className="mt-4 leading-relaxed text-app-muted">{t('about.bio')}</p>
+          <h2 id="about-title">{t('home.about.title')}</h2>
+          <p className="mt-4 max-w-2xl leading-relaxed text-app-muted">{t('home.about.body')}</p>
           {skills.length > 0 && <details className="mt-4">
-            <summary className="w-fit cursor-pointer py-2 text-sm font-semibold text-app-primary">{t('stack.section_title')}</summary>
-            <ul className="mt-2 flex flex-wrap gap-2 text-sm text-app-muted">
-              {skills.map((skill) => <li key={`${skill.category}-${skill.name}`} className="rounded-md border border-app-border px-2 py-1">{skill.name}</li>)}
+            <summary className="home-link w-fit cursor-pointer text-sm font-semibold text-app-primary">{t('stack.section_title')}</summary>
+            <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-sm text-app-muted">
+              {skills.map((skill) => <li key={`${skill.category}-${skill.name}`}>{skill.name}</li>)}
             </ul>
           </details>}
         </div>
@@ -25,7 +25,7 @@ export default function About() {
         </picture>
       </div>
       <details className="mt-4">
-        <summary className="w-fit cursor-pointer py-2 text-sm font-semibold text-app-primary">{t('about.experience')}</summary>
+        <summary className="home-link w-fit cursor-pointer text-sm font-semibold text-app-primary">{t('about.experience')}</summary>
         <Experience />
       </details>
     </section>

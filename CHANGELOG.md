@@ -14,11 +14,17 @@ This changelog separates three categories intentionally:
 
 ### Home page simplification
 
-- Centered and shortened the home page around projects, a concise introduction,
-  About and Contact. Preserved EN/PT/ES, themes, project links and contact behavior.
+- Reorganized the Graphite & Bronze home page into a concise introduction,
+  open project rows, system evidence, About and Contact. Preserved EN/PT/ES,
+  themes, existing project links and contact behavior.
 - Moved portfolio engineering links and architecture details into its case study;
   retained evidence routes and made skills, experience and request details expandable.
-- Restored the dark theme bronze contrast and added isolated responsive home checks.
+- Added Housing Finance GPS to the project catalog, marked in development with no
+  public demo, and ordered the home projects by demonstrative value.
+- Linked `/production-evidence` directly and distinguished real backend measurements,
+  browser-local events and historical incidents without polling metrics on home.
+- Refined home-scoped typography, contrast, navigation and touch targets; added
+  isolated responsive checks at 1440, 1024 and 390 px in both themes.
 
 ### Frontend Chaos retirement
 
