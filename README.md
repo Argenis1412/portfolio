@@ -10,9 +10,9 @@ with explicit fallback and retry limits.
 
 [Portfolio](https://argenisbackend.com) · [API health](https://api.argenisbackend.com/health)
 
-Published services may run different commits. The [v1.9.2 release notes](CHANGELOG.md)
-are prepared but unpublished; deployment and capacity checks are tracked in the
-[operations runbook](docs/architecture/production-operations.md).
+The [v1.9.2 release](CHANGELOG.md) is complete and tagged as `v1.9.2`.
+Published services may run different commits; deployment and capacity checks are
+tracked in the [operations runbook](docs/architecture/production-operations.md).
 
 ## Stack and documentation
 

@@ -5,7 +5,7 @@
  */
 
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { beforeEach, describe, it, expect } from 'vitest';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { LanguageProvider } from '../context/LanguageContext';
@@ -130,20 +130,26 @@ describe('Navbar - button navigation', () => {
 // ─── Language selector ─────────────────────────────────────────────────────────
 
 describe('Navbar - language selector', () => {
-  it('renders language selector with PT, EN and ES options', () => {
+  beforeEach(() => localStorage.removeItem('portfolio_lang'));
+
+  it('names each language in its native language', () => {
     renderNavbar();
-    const select = screen.getByRole('combobox') as HTMLSelectElement;
-    const options = Array.from(select.options).map((o) => o.value);
-    expect(options).toContain('pt');
-    expect(options).toContain('en');
-    expect(options).toContain('es');
+    const select = screen.getByRole('combobox', { name: 'Language' }) as HTMLSelectElement;
+    expect(Array.from(select.options).map(option => [option.value, option.text, option.lang])).toEqual([
+      ['pt', 'Português', 'pt'], ['en', 'English', 'en'], ['es', 'Español', 'es'],
+    ]);
   });
 
-  it('changes selected language when user chooses EN', () => {
+  it('localizes the label, updates navigation and remembers the selection', () => {
+    const { unmount } = renderNavbar();
+    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'es' } });
+    expect((screen.getByRole('combobox', { name: 'Idioma' }) as HTMLSelectElement).value).toBe('es');
+    expect(screen.getByTestId('nav-projects').textContent).toBe('Proyectos');
+    expect(document.documentElement.lang).toBe('es');
+    expect(localStorage.getItem('portfolio_lang')).toBe('es');
+    unmount();
     renderNavbar();
-    const select = screen.getByRole('combobox') as HTMLSelectElement;
-    fireEvent.change(select, { target: { value: 'en' } });
-    expect(select.value).toBe('en');
+    expect((screen.getByRole('combobox', { name: 'Idioma' }) as HTMLSelectElement).value).toBe('es');
   });
 });
 

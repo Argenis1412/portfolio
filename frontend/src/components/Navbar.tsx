@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Sun, Moon, Languages, Menu, X } from 'lucide-react';
+import { Sun, Moon, Languages, ChevronDown, Menu, X } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { useQueryClient } from '@tanstack/react-query';
@@ -165,19 +165,18 @@ export default function Navbar() {
               )}
             </button>
             <div className="relative flex items-center">
-              <div className={`${isHome ? 'hidden' : 'absolute'} left-2.5 pointer-events-none text-app-text/70`}>
-                <Languages className="w-4 h-4" />
-              </div>
+              <Languages aria-hidden="true" className="absolute left-3 pointer-events-none w-4 h-4 text-app-muted" />
               <select
-                aria-label="Select Language"
+                aria-label={t('nav.language')}
                 value={language}
                 onChange={(e) => setLanguage(e.target.value as 'pt' | 'en' | 'es')}
-                className={`bg-app-surface border border-app-border text-sm rounded-lg focus:ring-app-primary focus:border-app-primary block ${isHome ? 'pl-3' : 'pl-9'} pr-3 py-2 transition-smooth shadow-sm text-app-text`}
+                className="language-select appearance-none cursor-pointer bg-app-surface border border-app-border text-sm rounded-lg focus:ring-app-primary focus:border-app-primary block pl-9 pr-8 py-2 transition-colors text-app-text"
               >
-                <option value="pt">PT</option>
-                <option value="en">EN</option>
-                <option value="es">ES</option>
+                <option value="pt" lang="pt">Português</option>
+                <option value="en" lang="en">English</option>
+                <option value="es" lang="es">Español</option>
               </select>
+              <ChevronDown aria-hidden="true" className="absolute right-2.5 pointer-events-none w-4 h-4 text-app-muted" />
             </div>
           </div>
         </div>

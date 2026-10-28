@@ -1,9 +1,8 @@
 # Changelog
 
-## v1.9.2 — Unreleased
+## v1.9.2 — 2026-10-28
 
-Consolidated notes prepared for publication. No GitHub release or release tag is
-created by this documentation change, and deployment of this source is unverified.
+Released as tag `v1.9.2`. Deployment of individual services is verified separately.
 Earlier numbered headings were documentation labels, not verified publications;
 they have been consolidated here. The API currently declares version `1.9.2`.
 
@@ -49,7 +48,7 @@ Repository coverage includes backend protection/delivery/content tests, frontend
 unit/component tests, and isolated Chromium E2E. UI fixtures fake contact delivery.
 The [local load report](benchmarks/results/f9eaa7f-local-20261017/README.md) retains
 two runs with successful functional checks and failed latency thresholds.
-Current deployment, production monitoring, and capacity remain unverified; use the
+For deployment, production monitoring, and capacity verification, use the
 [release checks](docs/architecture/production-operations.md#release-checks).
 
 ## Historical engineering notes

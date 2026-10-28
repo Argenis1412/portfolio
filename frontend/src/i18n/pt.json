@@ -8,6 +8,7 @@
   "nav.projects": "Projetos",
   "nav.experience": "Experiência",
   "nav.journey": "Trajetória",
+  "nav.language": "Idioma",
   "hero.title": "Desenvolvo APIs e aplicações backend.",
   "hero.subtitle": "Projetos com Python, FastAPI, PostgreSQL e Redis. Explore o código, as funcionalidades e as decisões de engenharia de cada projeto.",
   "hero.differentiator": "Este sistema injeta falhas deliberadamente para demonstrar resiliência, degradação e recuperação em tempo real.",

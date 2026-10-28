@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { m } from 'framer-motion';
 import { BookOpen, BriefcaseBusiness, MapPin } from 'lucide-react';
 import Skeleton from './ui/Skeleton';
 import { useExperience, useFormation } from '../hooks/useApi';
@@ -26,10 +25,10 @@ interface SignalSummary {
 }
 
 const SIGNAL_STYLE: Record<SignalTone, string> = {
-  decision: 'border-[var(--color-signal-decision-border)] bg-[var(--color-signal-decision-bg)] text-[var(--color-signal-decision)]',
-  failure: 'border-[var(--color-signal-failure-border)] bg-[var(--color-signal-failure-bg)] text-[var(--color-signal-failure)]',
-  learning: 'border-[var(--color-signal-learning-border)] bg-[var(--color-signal-learning-bg)] text-[var(--color-signal-learning)]',
-  impact: 'border-[var(--color-signal-impact-border)] bg-[var(--color-signal-impact-bg)] text-[var(--color-signal-impact)]',
+  decision: 'text-[var(--color-signal-decision)]',
+  failure: 'text-[var(--color-signal-failure)]',
+  learning: 'text-[var(--color-signal-learning)]',
+  impact: 'text-[var(--color-signal-impact)]',
 };
 
 function parseSignals(description: string): ParsedSignal[] {
@@ -90,7 +89,7 @@ export default function Experience() {
 
   if (loading) {
     return (
-      <section id="experience" className="py-16 section-alt">
+      <section id="experience" className="experience-timeline py-16">
         <div className="max-w-5xl mx-auto px-4">
           <Skeleton className="h-10 w-48 mb-12" />
           <div className="space-y-6">
@@ -111,21 +110,16 @@ export default function Experience() {
 
   if (isError) {
     return (
-      <section id="experience" className="py-16 section-alt">
+      <section id="experience" className="experience-timeline py-16">
         <ServerWakeupError />
       </section>
     );
   }
 
   return (
-    <section id="experience" className="py-24 section-alt transition-colors duration-300 relative overflow-hidden">
+    <section id="experience" className="experience-timeline py-12 md:py-16 relative">
       <div className="max-w-5xl mx-auto px-4">
-        <m.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.1 }}
-          transition={{ duration: 0.8 }}
-        >
+        <div>
           <div className="mb-12 max-w-3xl mx-auto text-center">
             <h2 className="text-2xl md:text-4xl font-bold text-app-text tracking-widest">
               {t('nav.journey')}
@@ -153,7 +147,7 @@ export default function Experience() {
           </div>
 
           <div className="relative space-y-6 before:absolute before:left-[11px] before:top-3 before:bottom-3 before:w-px before:bg-app-border/50">
-            {sortedEntries.map((entry, index) => {
+            {sortedEntries.map((entry) => {
               const isEducation = 'course' in entry;
               const title = isEducation ? (entry as Formation).course[lang] : (entry as ExperienceType).role[lang];
               const subtitle = isEducation ? (entry as Formation).institution : (entry as ExperienceType).company;
@@ -162,28 +156,21 @@ export default function Experience() {
               const technologies = isEducation ? [] : (entry as ExperienceType).technologies;
 
               return (
-                <m.article
-                  key={entry.id}
-                  initial={{ opacity: 0, y: 16 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.15 }}
-                  transition={{ duration: 0.4, delay: index * 0.06 }}
-                  className="relative pl-10"
-                >
-                  <span className={`absolute left-0 top-3 h-[22px] w-[22px] rounded-full border-4 ${isEducation ? 'border-status-info bg-[#0f172a]' : 'border-app-primary bg-[#1a1510]'}`} />
+                <article key={entry.id} className="relative pl-8 md:pl-10">
+                  <span className={`absolute left-0 top-3 h-[22px] w-[22px] rounded-full border-4 ${isEducation ? 'border-status-info bg-app-surface' : 'border-app-primary bg-app-surface'}`} />
 
-                  <div className={`glass rounded-2xl border p-6 md:p-7 ${isEducation ? 'border-status-info/15 shadow-[0_0_0_1px_rgba(96,165,250,0.04)]' : 'border-app-border'}`}>
+                  <div className="rounded-xl border border-app-border bg-app-surface p-4 sm:p-6 md:p-7">
                     <div className="flex flex-col gap-5 xl:grid xl:grid-cols-[1.4fr_0.7fr] xl:items-start">
                       <div>
                         <div className="flex flex-wrap items-center gap-2 mb-3 text-[10px] font-mono uppercase tracking-[0.22em] text-app-muted">
                           <span className={`rounded-full border px-2.5 py-1 ${isEducation ? 'border-[var(--color-signal-decision-border)] bg-[var(--color-signal-decision-bg)] text-[var(--color-signal-decision)]' : 'border-app-primary/20 bg-app-primary/10 text-app-primary'}`}>
                             {isEducation ? t('experience.label.education') : t('experience.label.experience')}
                           </span>
-                           {entry.current && (
-                             <span className="rounded-full bg-status-ok/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-status-ok border border-status-ok/20">
-                               {t('experience.status.current')}
-                             </span>
-                           )}
+                          {entry.current && (
+                            <span className="rounded-full bg-status-ok/10 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-status-ok border border-status-ok/20">
+                              {t('experience.status.current')}
+                            </span>
+                          )}
                         </div>
 
                         <h3 className="text-xl md:text-2xl font-bold text-app-text leading-snug">
@@ -212,11 +199,11 @@ export default function Experience() {
 
                     <div className="mt-6 grid gap-3 md:grid-cols-2">
                       {signals.map((signal) => (
-                        <div key={`${entry.id}-${signal.tone}-${signal.text}`} className={`rounded-xl border p-4 ${SIGNAL_STYLE[signal.tone]}`}>
-                          <div className="text-[10px] font-mono uppercase tracking-[0.22em] opacity-80 mb-2">
+                        <div key={`${entry.id}-${signal.tone}-${signal.text}`} className="rounded-lg border border-app-border bg-app-bg p-4">
+                          <div className={`text-sm font-semibold mb-2 ${SIGNAL_STYLE[signal.tone]}`}>
                             {t(`experience.signal.${signal.tone}`)}
                           </div>
-                          <p className="text-sm leading-relaxed text-current">{signal.text}</p>
+                          <p className="text-sm leading-relaxed text-app-text">{signal.text}</p>
                         </div>
                       ))}
                     </div>
@@ -231,11 +218,11 @@ export default function Experience() {
                       </div>
                     )}
                   </div>
-                </m.article>
+                </article>
               );
             })}
           </div>
-        </m.div>
+        </div>
       </div>
     </section>
   );
