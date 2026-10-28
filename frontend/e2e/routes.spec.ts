@@ -1,7 +1,7 @@
 import { expect, test } from './fixtures';
 
 test.describe('public routes', () => {
-  test('loads project, decision, and production evidence deep links', async ({ page }) => {
+  test('loads project and decision deep links and redirects the retired evidence route', async ({ page }) => {
     await page.goto('/projects/rate-limiter');
     await expect(page.getByRole('heading', { name: 'Project case study' })).toBeVisible();
 
@@ -9,7 +9,8 @@ test.describe('public routes', () => {
     await expect(page.getByRole('heading', { name: 'JSON-first reads' })).toBeVisible();
 
     await page.goto('/production-evidence');
-    await expect(page.getByRole('heading', { name: 'Production evidence' })).toBeVisible();
+    await expect(page).toHaveURL(/\/projects\/portfolio-api$/);
+    await expect(page.getByRole('heading', { name: 'Full-Stack Portfolio', exact: true })).toBeFocused();
   });
 
   test('shows an accessible 404 page for an unknown deep link', async ({ page }) => {

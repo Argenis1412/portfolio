@@ -1,36 +1,5 @@
 [
   {
-    "id": "exp-001",
-    "role": {
-      "pt": "Desenvolvedor Backend",
-      "en": "Backend Developer",
-      "es": "Desarrollador Backend"
-    },
-    "company": "Loja App (Personal Project)",
-    "location": "Remote",
-    "start_date": "2025-12-20",
-    "end_date": "2026-03-06",
-    "description": {
-      "pt": "[Decision] Estruturei o project como um laboratório de lógica de pagamentos, com foco em cálculos financeiros determinísticos e fronteiras limpas entre domínio, API e persistência.\n[Learning] Consolidei regras explícitas para dinheiro, débito, crédito em 2-6x sem juros e crédito em 12-24x com juros de 10%, mantendo o backend como única fonte de verdade.\n[Impact] A última parcela absorve qualquer deriva de arredondamento, garantindo totais matematicamente exatos e regras desacopladas de FastAPI e SQLAlchemy.\n[Impact] Stack aplicada: FastAPI, PostgreSQL, SQLAlchemy, Pytest, React e TypeScript.",
-      "en": "[Decision] I structured the project as a payment logic laboratory focused on deterministic financial calculations and clean boundaries between domain, API, and persistence.\n[Learning] I consolidated explicit rules for cash, debit, credit in 2-6 installments with 0% interest, and credit in 12-24 installments with 10% interest while keeping the backend as the single source of truth.\n[Impact] The final installment absorbs any rounding drift, guaranteeing mathematically exact totals and rules fully decoupled from FastAPI and SQLAlchemy.\n[Impact] Applied stack: FastAPI, PostgreSQL, SQLAlchemy, Pytest, React, and TypeScript.",
-      "es": "[Decision] Estructuré el proyecto como un laboratorio de lógica de pagos enfocado en cálculos financieros deterministas y fronteras limpias entre dominio, API y persistencia.\n[Learning] Consolidé reglas explícitas para dinero, débito, crédito en 2-6 cuotas sin interés y crédito en 12-24 cuotas con 10% de interés, manteniendo el backend como única fuente de verdad.\n[Impact] La última cuota absorbe cualquier deriva de redondeo, garantizando totales matemáticamente exactos y reglas desacopladas de FastAPI y SQLAlchemy.\n[Impact] Stack aplicada: FastAPI, PostgreSQL, SQLAlchemy, Pytest, React y TypeScript."
-    },
-    "technologies": [
-      "Python",
-      "FastAPI",
-      "Pydantic",
-      "PostgreSQL",
-      "SQLAlchemy ORM",
-      "Alembic",
-      "Pytest",
-      "React",
-      "TypeScript",
-      "Tailwind CSS",
-      "GitHub Actions"
-    ],
-    "current": false
-  },
-  {
     "id": "exp-002",
     "role": {
       "pt": "Consultor de Negócios",

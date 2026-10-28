@@ -18,7 +18,7 @@ Frontend application built with **React 19** and **Vite**. Engineered as a **str
 
 ### Home page
 
-The home page follows Hero → Projects → System → About → Contact in one centered container.
+The home page follows Hero → Projects → About → Contact in one centered container.
 `FeaturedProjects` displays every API project, including repository/demo links and
 available case studies, with explicit loading, retry and empty states. Its editorial
 order is the deployed portfolio, Housing Finance GPS, Loja App, then PatchForge;
@@ -28,10 +28,15 @@ Projects use open rows. Home-only Graphite & Bronze tokens, typography and spaci
 are scoped to `.home-page` and its mobile drawer, leaving detail routes intact.
 Skills and the
 existing experience timeline remain available under native disclosure controls.
-The hero and system section link directly to `/production-evidence`. The system
-section distinguishes backend measurements, browser-local alerts and historical
-incidents without fetching or duplicating metrics on home. The portfolio case study
-also retains its links to engineering decisions and production evidence.
+The portfolio case study retains its engineering decision links and two documented
+cases: the historical Terraform secret identity collision and the local load test
+that failed latency acceptance. Each case links to its source report and states its
+limits. `/production-evidence` redirects to `/projects/portfolio-api`; the standalone
+metrics, browser events and incident presentation is retired. Home and case study
+routes do not poll metrics. Existing telemetry hooks and lower-level components
+remain unchanged; removing that unused code is outside this content change.
+Loja App remains a project and case study, but is excluded from the professional
+experience catalog. Employment and education remain available under About.
 The contact form uses the unchanged `useContactForm` hook, with response details
 collapsed and submission feedback announced to assistive technology. Theme,
 EN/PT/ES, keyboard navigation and reduced-motion support are preserved.

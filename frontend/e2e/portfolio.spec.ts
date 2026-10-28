@@ -11,10 +11,11 @@ test('aborts requests with retired Chaos headers and records the violation', asy
   ]);
 });
 
-test('shows measured metrics without retired controls', async ({ page }) => {
+test('keeps retired metrics and Chaos controls outside the portfolio case study', async ({ page }) => {
   await page.goto('/production-evidence');
-  await expect(page.locator('#metrics').getByText('44ms', { exact: true })).toBeVisible();
-  await expect(page.locator('#metrics time')).toBeVisible();
+  await expect(page).toHaveURL(/\/projects\/portfolio-api$/);
+  await expect(page.getByRole('heading', { name: 'Documented engineering cases' })).toBeVisible();
+  await expect(page.locator('#metrics, #logs, #incident-history')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'MILD', exact: true })).toHaveCount(0);
   await expect(page.locator('#chaos')).toHaveCount(0);
 });

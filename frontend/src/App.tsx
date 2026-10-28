@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Outlet, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { LazyMotion, domAnimation, MotionConfig } from 'framer-motion';
 import Navbar from './components/Navbar';
 import { ThemeProvider } from './context/ThemeContext';
@@ -8,7 +8,6 @@ import { LogProvider } from './context/LogContext';
 const HomePage = lazy(() => import('./pages/HomePage'));
 const ProjectCasePage = lazy(() => import('./pages/ProjectCasePage'));
 const DecisionPage = lazy(() => import('./pages/DecisionPage'));
-const ProductionEvidencePage = lazy(() => import('./pages/ProductionEvidencePage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const Footer = lazy(() => import('./components/Footer'));
 
@@ -48,7 +47,7 @@ function App() {
                     <Route index element={<HomePage />} />
                     <Route path="projects/:projectId" element={<ProjectCasePage />} />
                     <Route path="decisions/:decisionId" element={<DecisionPage />} />
-                    <Route path="production-evidence" element={<ProductionEvidencePage />} />
+                    <Route path="production-evidence" element={<Navigate to="/projects/portfolio-api" replace />} />
                     <Route path="*" element={<NotFoundPage />} />
                   </Route>
                 </Routes>

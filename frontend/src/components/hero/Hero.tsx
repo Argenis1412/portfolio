@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import { scrollToSection } from '../../utils/scrollToSection';
 
@@ -21,7 +20,6 @@ export default function Hero() {
           <button onClick={() => scrollToSection('projects')} className="home-button">
             {t('hero.view_projects')}
           </button>
-          <Link to="/production-evidence" className="home-link text-app-text">{t('home.intro.system')}</Link>
         </div>
       </div>
     </section>

@@ -402,16 +402,6 @@ section[id] {
   padding-block: 1.5rem;
 }
 
-.home-editorial-grid {
-  display: grid;
-  gap: 2rem;
-}
-
-.home-evidence-list {
-  display: grid;
-  gap: 1.5rem;
-}
-
 .home-button {
   display: inline-flex;
   min-height: 2.75rem;
@@ -475,7 +465,6 @@ section[id] {
   .home-projects { padding-bottom: 4rem; }
   .home-section { padding-block: 4.5rem; }
   .home-project-row { padding-block: 2rem; }
-  .home-editorial-grid,
   .home-project-row {
     grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.7fr);
     column-gap: 4rem;

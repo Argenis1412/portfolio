@@ -110,7 +110,6 @@ export default function Navbar() {
 
   const navItems = [
     { id: 'projects', label: t('nav.projects'), prefetchFn: () => prefetch(queryKeys.about, fetchAbout) },
-    ...(isHome ? [{ id: 'system', label: t('home.nav.system') }] : []),
     { id: 'about', label: t(isHome ? 'home.about.title' : 'nav.about'), prefetchFn: () => { prefetch(queryKeys.about, fetchAbout); prefetch(queryKeys.skills, fetchSkills); } },
     { id: 'contact', label: t('nav.contact'), testId: 'nav-contact' },
   ];

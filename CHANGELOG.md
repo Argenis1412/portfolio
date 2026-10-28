@@ -12,6 +12,17 @@ This changelog separates three categories intentionally:
 
 ## [Unreleased]
 
+### Portfolio content simplification
+
+- Removed the home system section and hero/navigation entry. Retired the standalone
+  production evidence page and redirect its URL to the portfolio case study.
+- Replaced decorative incident summaries with two concise, source-linked cases in
+  the portfolio: the historical Terraform identity collision and the local load
+  validation that failed latency thresholds. Historical and experimental limits
+  remain explicit; public pages no longer mount metrics polling.
+- Removed Loja App from the professional experience catalog in all languages;
+  its project record, repository link and case study remain available.
+
 ### Home page simplification
 
 - Reorganized the Graphite & Bronze home page into a concise introduction,

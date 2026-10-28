@@ -38,7 +38,6 @@ describe('public routes', () => {
 
   it.each([
     ['/decisions/json-first', 'JSON-first reads'],
-    ['/production-evidence', 'Production evidence'],
   ])('renders the %s deep link', async (path, heading) => {
     visit(path);
 
@@ -81,20 +80,20 @@ describe('public routes', () => {
     expect(screen.getByRole('link', { name: 'Volver al inicio' }).getAttribute('href')).toBe('/');
   });
 
-  it('localizes and focuses the production evidence header and navigation', async () => {
-    localStorage.setItem('portfolio_lang', 'pt');
+  it.each([
+    ['en', 'Project case study'],
+    ['pt', 'Estudo de caso do projeto'],
+    ['es', 'Caso de estudio del proyecto'],
+  ])('redirects the retired evidence route to the localized project in %s', async (language, title) => {
+    vi.mocked(fetchProjects).mockResolvedValueOnce([]);
+    localStorage.setItem('portfolio_lang', language);
     visit('/production-evidence');
 
     renderApp();
 
-    const heading = await screen.findByRole('heading', { name: 'Evidência de produção' });
-    expect(heading).toBe(document.activeElement);
-    expect(screen.getByText('Confiabilidade operacional')).toBeTruthy();
-    expect(screen.getByRole('navigation', { name: 'Seções de evidência' })).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Métricas' }).getAttribute('href')).toBe('#metrics');
-    expect(screen.queryByRole('link', { name: 'Caos' })).toBeNull();
-    expect(screen.queryByRole('link', { name: 'Traces' })).toBeNull();
-    expect(screen.getByRole('link', { name: 'Eventos do navegador' }).getAttribute('href')).toBe('#logs');
-    expect(screen.getByRole('link', { name: 'Incidentes' }).getAttribute('href')).toBe('#incident-history');
+    const heading = await screen.findByRole('heading', { name: title });
+    await waitFor(() => expect(heading).toBe(document.activeElement));
+    expect(window.location.pathname).toBe('/projects/portfolio-api');
+    expect(document.querySelector('#metrics, #logs, #incident-history')).toBeNull();
   });
 });
