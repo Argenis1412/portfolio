@@ -1,45 +1,29 @@
-## What & Why
+## What and why
 
-<!-- What changed and what forced this change now. One paragraph.
-     If this resolves an incident: link it → Closes INC-XXX
-     If this adds an ADR-worthy decision: link it → See ARCHITECTURE.md ADR-XX -->
+<!-- Describe the concrete problem and resulting behavior. Link an issue or
+     evidence when relevant. -->
 
-## Type of change
+## Changes and limits
 
-- [ ] `feat` · [ ] `fix` · [ ] `perf` · [ ] `refactor` · [ ] `chore` · [ ] `docs` · [ ] `ci`
+<!-- State scope, trade-offs, compatibility, and remaining verification gaps.
+     Documentation-only changes should identify their source of truth. -->
 
-## Consequences accepted
+## Validation
 
-<!-- What does this fix break or constrain? What trade-off was made?
-     "None" is a valid answer for small changes — but it must be a conscious answer. -->
+<!-- List commands actually run and results, or explain why they do not apply.
+     Use local fixtures; do not demonstrate contact against a real email service. -->
 
-## Definition of Done
+- [ ] Required checks from AGENTS.md passed, where applicable.
+- [ ] Behavior changes have meaningful tests; bug fixes have regression coverage.
+- [ ] Documentation claims, links, and paths were verified.
+- [ ] Public content snapshot changes were reviewed deliberately, if applicable.
+- [ ] API/configuration/architecture guidance was updated where affected.
 
-- [ ] `ruff` + `mypy` pass locally
-- [ ] New logic has unit tests (`test_<unit>_<scenario>_<expected_result>`)
-- [ ] `CHANGELOG.md` updated if behavior changed
-- [ ] `ARCHITECTURE.md` updated if an ADR-worthy decision was made
-- [ ] `.env.example` updated if new environment variables were added
-- [ ] No placeholders, no TODO comments, no dead code
+## Operational impact
 
-## How to test
-
-<!-- Concrete steps. Not "run the app and check" — specific endpoint, payload, expected response. -->
-
-```bash
-# example
-curl -X POST https://api.argenisbackend.com/api/v1/contact \
-  -H "Idempotency-Key: test-123" \
-  -d '{"name": "Test", "email": "t@t.com", "subject": "x", "message": "y"}'
-# expected: 202 with queue_status field
-```
-
-## Observability impact
-
-<!-- Did this change what gets logged, traced, or measured?
-     New log fields? Modified metric labels? New Sentry context?
-     Skip if no observability changes. -->
+<!-- Describe deployment, logging, metrics, or rollback implications when relevant.
+     Passing local checks does not establish deployed behavior. -->
 
 ## Screenshots
 
-<!-- UI changes only. Skip otherwise. -->
+<!-- Include for UI changes; otherwise omit this section. -->

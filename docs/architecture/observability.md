@@ -1,65 +1,72 @@
-# Backend Observability
+# Observability and Logging
 
-This document describes the cleanup branch. Frontend Chaos consumers still block
-release; see the [deployment dependency](../../CHANGELOG.md#frontend-deployment-dependency).
-Local instrumentation and passing tests do not establish live collector, alert,
-or dashboard coverage.
+[app/core/observability.py](../../backend/app/core/observability.py) configures
+Sentry, Prometheus, then optional OpenTelemetry from shared settings. Tests select
+external-service behavior explicitly. Public portfolio routes do not poll metrics;
+backend telemetry remains available.
 
-## Configuration and ownership
+## Configuration
 
-`app/core/observability.py` configures Sentry, Prometheus, then optional
-OpenTelemetry. Settings come from the shared environment configuration; no
-production code detects pytest. Tests explicitly disable external telemetry.
+| Mechanism | Implemented behavior |
+|---|---|
+| Sentry | Nonempty `SENTRY_DSN` enables backend integrations with `SENTRY_TRACES_SAMPLE_RATE` and `send_default_pii=False`. Frontend uses its separate `VITE_SENTRY_DSN`. |
+| Prometheus | HTTP counters/duration histograms and worker metrics. `/metrics` requires Basic Auth in production. |
+| OpenTelemetry | `OTEL_ENABLED` defaults to true. `OTLP_ENDPOINT` selects OTLP/HTTP export; `/v1/traces` is appended when needed. Empty endpoint uses console export outside production and skips instrumentation/export in production. |
 
-| Mechanism | Current behavior | Limit |
-|---|---|---|
-| Sentry | A non-empty `SENTRY_DSN` initializes the FastAPI/Starlette integrations with `SENTRY_TRACES_SAMPLE_RATE` and `send_default_pii=False`. | An empty DSN disables initialization. This setting is not comprehensive sanitization of application fields. |
-| Prometheus | `prometheus-fastapi-instrumentator` registers HTTP counters and duration histograms; worker metrics are registered separately. | Neither SlowAPI nor Pydantic provides this HTTP instrumentation. Only the explicitly added metric callbacks should be assumed available. |
-| OpenTelemetry | `OTEL_ENABLED` defaults to true and controls FastAPI tracing setup. `OTLP_ENDPOINT` selects OTLP/HTTP export. | Disabling OpenTelemetry leaves Prometheus and Sentry independently configured. |
-
-With OpenTelemetry enabled and no endpoint, non-production environments export
-spans to the console; production skips OpenTelemetry instrumentation/export.
-A configured collector URL receives `/v1/traces` unless already suffixed.
-Endpoints containing `sentry.io` are ignored by this exporter; Sentry uses its own
-SDK. Verify collector reachability and exported spans separately.
+`OTEL_ENABLED=false` leaves Prometheus and Sentry independent. Sentry uses its SDK;
+OTLP URLs containing `sentry.io` are ignored by the exporter. Collector/exporter
+reachability needs separate verification.
 
 ## HTTP and worker metrics
 
-`/metrics` requires Basic Auth in production; production settings require both
-credentials. Other environments do not use this middleware restriction. Do not
-put scrape credentials in URLs or logs.
+HTTP instrumentation groups status codes and ignores untemplated routes. It
+excludes `/metrics`, `/health`, `/live`, `/saude`, and `/salud`. Inspect eligible
+handlers and exported labels before calculating ratios.
 
-HTTP instrumentation groups status labels (`2xx`, `4xx`, `5xx`), ignores
-untemplated routes, and excludes `/metrics`, `/health`, `/live`, `/saude`, and
-`/salud`. Exported handler labels and route eligibility matter when defining
-ratios. Health latency needs external timing or separate instrumentation.
+Worker metrics cover outcomes/duration, retries, DLQ transfers, pending/recovery,
+reclaimed jobs, quota blocks, and supervisor availability/restarts. These are
+process observations; a zero/missing series is not proof of successful delivery
+or an authoritative total backlog.
 
-Worker metrics cover processed outcomes, job duration, retries, DLQ transfers,
-pending entries, recovery, reclaimed messages, and Redis quota blocks. They are
-observations from this process, not proof of inbox delivery or an authoritative
-total stream backlog. Verify scrape output and consumer activity before treating
-an absent or zero series as a healthy worker.
+`/api/v1/metrics/summary` exposes observed latency, counters, status, and uptime.
+It resets the latency baseline after warmup while counters retain process-lifetime
+totals. See the [measurement contract](SLO_DEFINITIONS.md#measurement-contract).
 
-`/api/v1/metrics/summary` derives latency, HTTP counts/errors, status, and uptime.
-It excludes probe/metrics routes, resets the latency baseline after warmup, and
-retains process-lifetime request/error counters. It is not a rolling SLO window
-or a cross-replica aggregate. Histogram quantiles require sample-count context;
-see the [SLO measurement contract](SLO_DEFINITIONS.md#measurement-contract).
+## Logging and data handling
 
-## Correlation and historical UI design
+[logger_adapter.py](../../backend/app/adapters/logger_adapter.py) configures
+structlog once at INFO level: context variables, selected field masking, ISO
+timestamps, exception formatting, and terminal output or JSON otherwise.
+Request events include `request_received`, `response_sent`, and
+`request_processing_error`. Normal responses add `X-Request-ID` and
+`X-Response-Time`; an active valid span can add `X-Trace-ID`. Request/span/job
+correlation depends on execution context and is not universal.
 
-Request middleware generates `X-Request-ID`, logs response duration, and adds
-`X-Trace-ID` when a valid active OpenTelemetry span is available. The tracing hook
-reads `x-request-id` from incoming ASGI headers; it does not guarantee that the
-middleware-generated ID is attached to every span. Request IDs and trace IDs are
-separate identifiers. See the [logging guide](LOGGING_AND_DEGRADATION.md).
+Top-level email/phone fields are masked; email retains at most one local-part
+character, and long phones retain first/last two digits. Recognized sensitive
+query keys are redacted. These processors do not recursively scrub arbitrary
+text, paths, nested objects, IPs, or exceptions. Choose fields deliberately and
+keep credentials/contact bodies out of logs and exported artifacts.
 
-The previous document described synthetic frontend P95 projections, reconciliation,
-and Chaos lifecycle states. Those describe the older UI design, not the current
-backend contract. Retired simulation fields must not be used as backend SLI
-measurements. Original wording remains available with
-`git show f3ceea8:docs/architecture/observability.md`.
+Useful degradation signals include `rate_limiter_degraded_mode`,
+`rate_limiter_backend_unavailable`, `rate_limit_backend_unavailable_total`,
+`queue_unavailable_fallback_background`, and `contact_queued` with delivery mode.
+Worker retry/DLQ events explain delivery attempts; acceptance is not inbox arrival.
+Use the [runbook](production-operations.md#triage) for interpretation and recovery.
 
-Use the [operations runbook](production-operations.md) for triage. Actual scrape
-targets, exporters, dashboards, alert rules, and routing need deployment evidence;
-this document does not claim they have been verified.
+## Local monitoring
+
+[Docker Compose](../../docker-compose.yml) starts the API, Redis, and these services:
+
+| Service | Local URL | Configuration |
+|---|---|---|
+| Prometheus | [localhost:9090](http://localhost:9090) | [Scrapes](../../infra/monitoring/prometheus.yml) target `api:8000/metrics`. |
+| Grafana | [localhost:3000](http://localhost:3000) | User `admin`, password from required `GRAFANA_ADMIN_PASSWORD`; [dashboard](../../infra/monitoring/grafana/provisioning/dashboards/api_overview.json). |
+| Jaeger | [localhost:16686](http://localhost:16686) | OTLP/HTTP port 4318; set `OTLP_ENDPOINT=http://jaeger:4318` in the root `.env` to export API spans there. |
+
+[Alert rules](../../infra/monitoring/alert.rules.yml) cover unreachable scraping,
+5xx, and P95 above 500 ms. `HighErrorRate` selects `status_code`, whereas the
+instrumentator/dashboard use `status`; the selector needs a separately scoped
+correction and verification. No Alertmanager service or notification routing is
+configured by Compose. Production scraping/authentication and external monitors
+have not been verified by this audit.

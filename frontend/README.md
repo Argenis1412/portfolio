@@ -1,113 +1,123 @@
-# 🎨 Portfolio Frontend
+# Portfolio Frontend
 
-> **Live Demo:** [argenisbackend.com →](https://argenisbackend.com)
+React 19 + TypeScript + Vite SPA using React Router, TanStack Query, Zod,
+Tailwind CSS 4, Framer Motion, and Lucide icons. Dependencies and scripts are in
+[package.json](package.json).
 
-Frontend application built with **React 19** and **Vite**. Engineered as a **strict consumer** of a versioned REST API, featuring declarative data management with TanStack Query and a premium "Graphite & Bronze" aesthetic.
+## Pages and content
 
-## ✨ Key Features
+- `/`: Hero → FeaturedProjects → About → Contact, with shared Navbar and Footer.
+  All API projects appear as open rows, ordered Portfolio, Housing Finance GPS,
+  Loja App, PatchForge, then other records. Loading, retry, and empty states are explicit.
+- `/projects/:projectId`: project case study from the projects query. The portfolio
+  case includes decision links and source-linked Terraform/load reports.
+- `/decisions/:decisionId`: localized editorial decisions for
+  `deterministic-validation`, `json-first`, and `redis-streams-monolith`.
+- `/production-evidence`: redirects to `/projects/portfolio-api` with history replacement.
+  Unmatched paths render the SPA's not-found page.
 
-- **💎 TanStack Query (v5)**:
-    - **Predictive Prefetching**: Data is pre-loaded on Link hover/focus.
-    - **Background Sync**: Silent revalidation on window focus.
-    - **Centralized Mutations**: Robust state management for the contact form.
-- **🌍 Scalable i18n**: Externalized JSON manifests in `src/i18n/` for true decoupling of content and code.
-- **🎨 Tailwind CSS v4**: Modern styling with native CSS variables and glassmorphism.
-- **🛡️ Automated QA**: Husky + lint-staged force 100% lint/test pass before every commit.
+Editorial home/decision copy lives in [EN/PT/ES translations](src/i18n/).
+API JSON supplies projects, skills, experience, education, and contact details.
+Personal projects belong in Projects; employment and education appear under About.
+Skills, experience, and contact response details use native `details`/`summary`.
+Email/phone copy controls appear in home Contact and in the footer on other routes.
 
-## 🏗️ Component Architecture
+Every operational claim needs its source and environment. Existing case evidence
+uses `REAL` for implementation/recorded evidence, `REPRODUCED` for controlled
+experiments, and `SYNTHETIC` for simulated data. State whether evidence is a test,
+historical observation, or production measurement; a repository artifact alone
+cannot establish live performance. The portfolio reports retain those limits.
 
-### Home page
+[Vercel rewrites](vercel.json) serve the HTML shell for deep links. Root metadata
+is shared: route-specific social previews and HTTP-level 404/noindex behavior
+are not implemented by the client router.
 
-The home page follows Hero → Projects → About → Contact in one centered container.
-`FeaturedProjects` displays every API project, including repository/demo links and
-available case studies, with explicit loading, retry and empty states. Its editorial
-order is the deployed portfolio, Housing Finance GPS, Loja App, then PatchForge;
-the API retains its featured/alphabetical ordering. Housing Finance GPS links to
-its repository and describes implemented domain/API work without claiming a public demo.
-Projects use open rows. Home-only Graphite & Bronze tokens, typography and spacing
-are scoped to `.home-page` and its mobile drawer, leaving detail routes intact.
-Skills and the
-existing experience timeline remain available under native disclosure controls.
-The portfolio case study retains its engineering decision links and two documented
-cases: the historical Terraform secret identity collision and the local load test
-that failed latency acceptance. Each case links to its source report and states its
-limits. `/production-evidence` redirects to `/projects/portfolio-api`; the standalone
-metrics, browser events and incident presentation is retired. Home and case study
-routes do not poll metrics. Existing telemetry hooks and lower-level components
-remain unchanged; removing that unused code is outside this content change.
-Loja App remains a project and case study, but is excluded from the professional
-experience catalog. Employment and education remain available under About.
-The contact form uses the unchanged `useContactForm` hook, with response details
-collapsed and submission feedback announced to assistive technology. Theme,
-EN/PT/ES, keyboard navigation and reduced-motion support are preserved.
-Email/phone copy controls live with contact on home; other routes keep them in the footer.
+## Visual system
 
-Run `npm run e2e -- --retries=0 --workers=1` for isolated fixtures, desktop/mobile
-home checks at 1440, 1024 and 390 pixels, contact and evidence regressions. Reports and screenshots go to the
-system temporary directory by default; no real contact messages are sent.
+[Tailwind's Vite plugin](vite.config.ts) compiles the `@import "tailwindcss"` and
+CSS-first `@theme` definitions in [index.css](src/index.css). Utility classes map
+`app-*`, signal, and status colors to CSS variables. [index.html](index.html)
+provides critical base theme tokens and an early theme script.
 
-The UI is built using atomic, highly specialized components to ensure modularity:
+| Surface | Implemented styling |
+|---|---|
+| Home and mobile drawer | `.home-page` / `.home-drawer` scope Graphite & Bronze tokens: light background `#F7F6F2`, dark background `#17191B`, bronze accents `#815526` / `#D4A373`. |
+| Home layout | Centered container up to 75rem, responsive gutters, border-separated project rows, restrained buttons/links, and native disclosures. Rows become two columns at 768px; typography also scales at 1200px. |
+| Detail routes | Base warm light/dark theme, bordered case/evidence panels, and shared navigation/footer. The experience timeline retains glass surfaces and semantic signal colors. |
+| Typography | Google Fonts loads Inter, Montserrat, and JetBrains Mono. Body and home headings use Inter; base detail headings use Montserrat; metadata/code-style labels use JetBrains Mono. System fallbacks remain available. |
+| Icons and imagery | Lucide React icons; About uses the checked-in WebP portrait with JPEG fallback. |
 
-- **`MobileNav`**: Responsive drawer menu featuring scroll-lock, isolated focus trapping, and graceful mounting animations.
-- **`Hero`**: Static introduction with project and GitHub actions.
-- **`Footer`**: Compact source/social links and email/phone copy controls.
-- **`Contact`**: Uses `useContactForm` for validation, idempotent submission, errors and loading feedback.
+[ThemeContext](src/context/ThemeContext.tsx) saves `portfolio_theme`, applies the
+root `light`/`dark` class, and initially prefers a saved value, then the system
+light preference, then dark. The early HTML script reduces theme flashing.
+[LanguageContext](src/context/LanguageContext.tsx) defaults to English, persists
+`portfolio_lang`, and updates the document language.
 
-## 🧠 Data Fetching Pattern (`useApi.ts`)
+`App` wraps the UI in `LazyMotion` with `domAnimation` and
+`MotionConfig reducedMotion="user"`. Navbar uses `m.*`, `AnimatePresence`, and
+`useReducedMotion()` for drawer/backdrop entry and exit; Experience uses `m.*`
+for timeline reveals. CSS handles color, hover, and loading transitions. The
+reduced-motion media rule shortens CSS transitions/animations. Global focus rings,
+form labels/live feedback, and route-heading focus support keyboard navigation.
+The mobile drawer is portaled, locks scrolling, makes the app root inert, traps
+focus, supports Escape/backdrop dismissal, and restores focus after exit.
+These mechanisms are not a complete accessibility certification.
 
-All API interactions are localized in `src/hooks/useApi.ts`. We **do not** write `fetch` or `axios` calls directly in components.
+## Data and state
 
-- **Queries**: Modular hooks (`useAbout`, `useProjects`, `useSkills`, etc.) encapsulate the fetcher logic, utilizing TanStack Query to cache JSON payloads. Stale times are specifically tuned (e.g., 5 mins for projects, 10 mins for skills, 60 mins for philosophy). Components simply consume `data`, `isLoading`, or `isError`.
-- **Mutations**: `useContactMutation()` handles the POST request, orchestrating success toasts and error boundaries without leaking implementation details into `ContactForm`.
+[API modules](src/api/) own HTTP calls: `client.ts` builds URLs, extracts trace IDs,
+and validates GET responses with Zod; portfolio/contact services expose operations.
+[useApi.ts](src/hooks/useApi.ts) exposes queries and the contact mutation.
+[useContactForm](src/hooks/useContactForm.ts) owns validation, submission state,
+idempotency keys, and response/error presentation. The mutation itself does not
+create toasts or error boundaries. Components consume these hooks; Navbar also
+uses services for its existing query prefetch.
 
-## ♿ Accessibility (a11y)
+The query client retains inactive data for 30 minutes, disables default focus/mount
+refetches, and retries queries once after one second. Hook stale times are five
+minutes for About/projects, ten for skills/experience/education, and one hour for
+philosophy. Desktop navigation currently prefetches About/skills on mouse hover
+with a 20-minute stale time; this is not a general link/focus prefetch feature.
 
-The frontend is built to be resilient for all users, regardless of navigation method:
+Theme and language have separate contexts; `LogProvider` remains mounted.
+Public routes do not use metrics polling. Telemetry hooks/components and tests
+remain in source, including `useLiveMetrics`, `LogStream`, and `LiveMetricsBento`;
+their presence does not make them active portfolio features. `App.css` is an
+unimported starter stylesheet; active styling comes from `index.css` and HTML.
 
-- **Visible Focus Rings**: All interactive elements (buttons, links, inputs) have explicit `focus-visible` styling tailored to the dark theme.
-- **Keyboard Navigation**: Full support for Tab navigation. `MobileNav` utilizes Focus Trap to prevent keyboard users from tabbing into hidden content.
-- **Esc Key Support**: Modals and mobile drawers can be dismissed natively using the `Escape` key.
-- **Semantic HTML**: Proper use of `<nav>`, `<main>`, `<section>`, and `aria-label` attributes across the application.
-## 📂 Source Structure
+## Development and checks
 
-```
-src/
-├── api.ts              # API Client & Shared Interfaces
-├── hooks/
-│   └── useApi.ts       # Centralized query & mutation hooks
-├── i18n/
-│   ├── en.json         # English translations
-│   ├── pt.json         # Portuguese translations
-│   └── es.json         # Spanish translations
-├── context/
-│   ├── LanguageContext.tsx   # Language state + i18n logic
-│   └── ThemeContext.tsx      # Dark/light theme state
-├── components/         # Atomic UI components
-└── App.tsx             # Main layout orchestrator
-```
-
-## 🚀 Getting Started
+From the repository root:
 
 ```bash
 cd frontend
-npm install
+npm ci
 npm run dev
 ```
 
-### 🛠️ Maintenance Scripts
+Development defaults to `http://127.0.0.1:8000/api/v1`. To override it, copy
+[.env.example](.env.example) to `.env.local` and set `VITE_API_URL` to an API base
+ending in `/api/v1`, without a trailing slash. This is the supported deployment
+value and the CI preflight checks it. The client preserves versioned `/api/vN`
+suffixes, normalizes missing suffixes in development, and rejects normalization
+in production. A missing production URL fails when a request is built.
+`VITE_SENTRY_DSN` optionally enables frontend error reporting.
 
-| Script | Description |
-|---|---|
-| `npm run build` | Production-ready build with type-checking |
-| `npm run lint` | ESLint static analysis |
-| `npm run test` | Unit tests with Vitest (watch mode) |
-| `npm run preview` | Preview production build locally |
+```bash
+npm run lint
+npx tsc -b
+npm run test -- --run
+VITE_API_URL=https://api.argenisbackend.com/api/v1 npm run build
+npm run e2e -- --retries=0 --workers=1
+```
 
-## 🧪 Testing & Quality Gate Policy
+Vitest uses jsdom and Testing Library. Playwright starts an isolated local SPA,
+intercepts content/contact API requests, blocks external traffic, and runs Chromium.
+`BASE_URL` selects a hosted UI under the same interception policy. Contact is
+faked; these checks do not verify production API access or send real email.
+Reports/results use system temporary directories locally; CI retains its HTML report.
 
-We use **Vitest** + **@testing-library/react** for unit and component testing.
-
-The project strictly enforces a **Quality Gate Policy**:
-1. **Husky pre-commit**: Runs ESLint and Vitest. Commits are blocked if any test fails or if coverage targets are not met.
-2. **TypeScript Integrity**: `tsc --noEmit` validates type correctness in both the `Makefile` and the GitHub Actions CI pipeline.
-3. **CI/CD Pipeline**: GitHub Actions runs the full lint and test suite on every push. No code reaches `main` without passing these automated gates.
+The Husky hook runs lint-staged for staged TypeScript files: ESLint with fixes and
+Vitest. It does not enforce the complete manual checks above or frontend coverage.
+GitHub workflows have branch/path filters; their definitions do not prove a given
+commit passed. See [AGENTS.md](../AGENTS.md) for contribution rules.
