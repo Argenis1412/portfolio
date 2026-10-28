@@ -13,6 +13,7 @@ export const LocalizedStringSchema = z.object({
 export const CaseStudyEvidenceSchema = z.object({
   label: LocalizedStringSchema,
   value: z.string().max(160),
+  localized_value: LocalizedStringSchema.nullish(),
   classification: z.enum(['REAL', 'REPRODUCED', 'SYNTHETIC']),
   source: z.string().max(240),
 });
@@ -87,19 +88,6 @@ export const PhilosophyItemSchema = z.object({
   role: LocalizedStringSchema,
   image_url: z.string(),
   description: LocalizedStringSchema,
-});
-
-export const MetricsSummarySchema = z.object({
-  p95_ms: z.number().int().nonnegative(),
-  p95_status: z.enum(['healthy', 'degraded', 'warming_up']),
-  requests_since_deploy: z.number().int().nonnegative(),
-  error_rate: z.number().min(0).max(1),
-  error_rate_pct: z.string(),
-  error_rate_status: z.enum(['stable', 'warning', 'investigating', 'warming_up']),
-  system_status: z.enum(['operational', 'degraded', 'down']),
-  uptime: z.string(),
-  window: z.string(),
-  timestamp: z.string(),
 });
 
 export const AboutSchema = z.object({

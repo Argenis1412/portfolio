@@ -22,49 +22,34 @@ vi.stubGlobal(
     const url = typeof input === 'string' ? input : input.toString();
 
     // Portfolio endpoints used by the App during initial render
-    if (url.includes('/api/v1/sobre')) {
+    if (url.includes('/api/v1/about')) {
       return mockJsonResponse({
-        nome: 'Test User',
-        titulo: 'Developer',
-        localizacao: 'Remote',
+        name: 'Test User',
+        title: 'Developer',
+        location: 'Remote',
         email: 'test@example.com',
-        telefone: '000',
+        phone: '000',
         github: 'https://github.com/test',
         linkedin: 'https://linkedin.com/in/test',
-        descricao: { pt: 'PT', en: 'EN', es: 'ES' },
-        disponibilidade: { pt: 'PT', en: 'EN', es: 'ES' },
+        description: { pt: 'PT', en: 'EN', es: 'ES' },
+        availability: { pt: 'PT', en: 'EN', es: 'ES' },
       });
     }
 
-    if (url.includes('/api/v1/projetos')) {
-      return mockJsonResponse({ projetos: [], total: 0 });
+    if (url.includes('/api/v1/projects')) {
+      return mockJsonResponse({ projects: [], total: 0 });
     }
 
     if (url.includes('/api/v1/stack')) {
-      return mockJsonResponse({ stack: [], por_categoria: {} });
+      return mockJsonResponse({ stack: [], by_category: {} });
     }
 
-    if (url.includes('/api/v1/experiencias')) {
-      return mockJsonResponse({ experiencias: [], total: 0 });
+    if (url.includes('/api/v1/experiences')) {
+      return mockJsonResponse({ experiences: [], total: 0 });
     }
 
-    if (url.includes('/api/v1/formacao')) {
-      return mockJsonResponse({ formacoes: [], total: 0 });
-    }
-
-    if (url.includes('/api/v1/metrics/summary')) {
-      return mockJsonResponse({
-        p95_ms: 44,
-        p95_status: 'healthy',
-        requests_since_deploy: 1024,
-        error_rate: 0.013,
-        error_rate_pct: '1.30%',
-        error_rate_status: 'stable',
-        system_status: 'operational',
-        uptime: '2h 14m',
-        window: 'since_deploy',
-        timestamp: new Date().toISOString(),
-      });
+    if (url.includes('/api/v1/formation')) {
+      return mockJsonResponse({ formations: [], total: 0 });
     }
 
     if (url.includes('/api/v1/philosophy')) {

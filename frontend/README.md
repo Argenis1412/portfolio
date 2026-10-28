@@ -10,7 +10,9 @@ Tailwind CSS 4, Framer Motion, and Lucide icons. Dependencies and scripts are in
   All API projects appear as open rows, ordered Portfolio, Housing Finance GPS,
   Loja App, PatchForge, then other records. Loading, retry, and empty states are explicit.
 - `/projects/:projectId`: project case study from the projects query. The portfolio
-  case includes decision links and source-linked Terraform/load reports.
+  case includes decision links, implemented trade-offs with explicit limits, and
+  source-linked Terraform/load reports. Its introduction uses the same localized
+  API description as the home project row.
 - `/decisions/:decisionId`: localized editorial decisions for
   `deterministic-validation`, `json-first`, and `redis-streams-monolith`.
 - `/production-evidence`: redirects to `/projects/portfolio-api` with history replacement.
@@ -27,6 +29,9 @@ uses `REAL` for implementation/recorded evidence, `REPRODUCED` for controlled
 experiments, and `SYNTHETIC` for simulated data. State whether evidence is a test,
 historical observation, or production measurement; a repository artifact alone
 cannot establish live performance. The portfolio reports retain those limits.
+Evidence bodies use the API's optional `localized_value` in EN/PT/ES, with the
+existing English `value` as a fallback for older responses. Classification codes
+remain unchanged in the API and have localized display labels.
 
 [Vercel rewrites](vercel.json) serve the HTML shell for deep links. Root metadata
 is shared: route-specific social previews and HTTP-level 404/noindex behavior
@@ -81,11 +86,14 @@ minutes for About/projects, ten for skills/experience/education, and one hour fo
 philosophy. Desktop navigation currently prefetches About/skills on mouse hover
 with a 20-minute stale time; this is not a general link/focus prefetch feature.
 
-Theme and language have separate contexts; `LogProvider` remains mounted.
-Public routes do not use metrics polling. Telemetry hooks/components and tests
-remain in source, including `useLiveMetrics`, `LogStream`, and `LiveMetricsBento`;
-their presence does not make them active portfolio features. `App.css` is an
-unimported starter stylesheet; active styling comes from `index.css` and HTML.
+Theme and language have separate contexts. The retired metrics/log UI, polling
+hooks, browser log context, and project carousel have been removed. Backend
+telemetry endpoints remain operational interfaces; public pages do not poll them.
+Experience uses an independent localized load error with a page reload action.
+Active styling comes from `index.css` and HTML.
+
+Project case studies use the structured `case_study` response. The public API
+retains `full_description` for compatibility; the current UI does not render it.
 
 ## Development and checks
 
@@ -116,7 +124,8 @@ npm run e2e -- --retries=0 --workers=1
 Vitest uses jsdom and Testing Library. Playwright starts an isolated local SPA,
 intercepts content/contact API requests, blocks external traffic, and runs Chromium.
 `BASE_URL` selects a hosted UI under the same interception policy. Contact is
-faked; these checks do not verify production API access or send real email.
+faked; metrics requests are unexpected and fail the check. These checks do not
+verify production API access or send real email.
 Reports/results use system temporary directories locally; CI retains its HTML report.
 
 The Husky hook runs lint-staged for staged TypeScript files: ESLint with fixes and

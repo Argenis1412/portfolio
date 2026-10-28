@@ -3,7 +3,6 @@ import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'rea
 import { LazyMotion, domAnimation, MotionConfig } from 'framer-motion';
 import Navbar from './components/Navbar';
 import { ThemeProvider } from './context/ThemeContext';
-import { LogProvider } from './context/LogContext';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const ProjectCasePage = lazy(() => import('./pages/ProjectCasePage'));
@@ -38,23 +37,21 @@ function RouteShell() {
 function App() {
   return (
     <ThemeProvider>
-      <LogProvider>
-          <MotionConfig reducedMotion="user">
-            <LazyMotion features={domAnimation}>
-              <BrowserRouter>
-                <Routes>
-                  <Route element={<RouteShell />}>
-                    <Route index element={<HomePage />} />
-                    <Route path="projects/:projectId" element={<ProjectCasePage />} />
-                    <Route path="decisions/:decisionId" element={<DecisionPage />} />
-                    <Route path="production-evidence" element={<Navigate to="/projects/portfolio-api" replace />} />
-                    <Route path="*" element={<NotFoundPage />} />
-                  </Route>
-                </Routes>
-              </BrowserRouter>
-            </LazyMotion>
-          </MotionConfig>
-      </LogProvider>
+      <MotionConfig reducedMotion="user">
+        <LazyMotion features={domAnimation}>
+          <BrowserRouter>
+            <Routes>
+              <Route element={<RouteShell />}>
+                <Route index element={<HomePage />} />
+                <Route path="projects/:projectId" element={<ProjectCasePage />} />
+                <Route path="decisions/:decisionId" element={<DecisionPage />} />
+                <Route path="production-evidence" element={<Navigate to="/projects/portfolio-api" replace />} />
+                <Route path="*" element={<NotFoundPage />} />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+        </LazyMotion>
+      </MotionConfig>
     </ThemeProvider>
   );
 }

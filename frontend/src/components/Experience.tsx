@@ -4,7 +4,7 @@ import Skeleton from './ui/Skeleton';
 import { useExperience, useFormation } from '../hooks/useApi';
 import type { Experience as ExperienceType, Formation, LocalizedString } from '../api/types';
 import { useLanguage } from '../context/LanguageContext';
-import { ServerWakeupError } from './ServerWakeupNotice';
+import SectionLoadError from './ui/SectionLoadError';
 
 type TimelineEntry =
   | ({ kind: 'experience' } & ExperienceType)
@@ -111,7 +111,7 @@ export default function Experience() {
   if (isError) {
     return (
       <section id="experience" className="experience-timeline py-16">
-        <ServerWakeupError />
+        <SectionLoadError />
       </section>
     );
   }

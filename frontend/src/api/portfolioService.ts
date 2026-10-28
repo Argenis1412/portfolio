@@ -12,18 +12,11 @@ import {
   ExperienceSchema,
   FormationSchema,
   PhilosophyItemSchema,
-  MetricsSummarySchema,
 } from './schemas';
-import type { About, Project, ProjectDetailed, Skill, Experience, Formation, PhilosophyItem, MetricsSummary } from './types';
+import type { About, Project, ProjectDetailed, Skill, Experience, Formation, PhilosophyItem } from './types';
 
 // Re-export types so consumers can import from a single service file
-export type { About, Project, ProjectDetailed, Skill, Experience, Formation, PhilosophyItem, MetricsSummary };
-
-export function fetchMetricsSummary(
-  signal?: AbortSignal,
-): Promise<MetricsSummary> {
-  return apiGet('/metrics/summary', MetricsSummarySchema, signal);
-}
+export type { About, Project, ProjectDetailed, Skill, Experience, Formation, PhilosophyItem };
 
 export const fetchAbout = (): Promise<About> =>
   apiGet<About>('/about', AboutSchema);

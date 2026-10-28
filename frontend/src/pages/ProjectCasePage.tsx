@@ -41,11 +41,11 @@ export default function ProjectCasePage() {
           <p className="mt-2 text-app-muted">{study[key][language]}</p>
         </section>)}
       </div>
-      <section className="mt-8">
-        <h2 className="text-2xl text-app-text">{t('evidence.title')}</h2>
-        {study.evidence.map((item) => <div key={item.source} className="mt-3 rounded-xl border border-app-border p-4">
-          <p className="font-semibold text-app-text">{item.label[language]} <span className="font-mono text-xs text-app-primary">{item.classification}</span></p>
-          <p className="text-app-muted">{item.value}</p>
+      <section aria-labelledby="case-evidence-title" className="mt-8">
+        <h2 id="case-evidence-title" className="text-2xl text-app-text">{t('evidence.title')}</h2>
+        {study.evidence.map((item) => <div key={`${item.source}:${item.label.en}`} className="mt-3 rounded-xl border border-app-border p-4">
+          <p className="font-semibold text-app-text">{item.label[language]} <span className="font-mono text-xs text-app-primary">{t(`evidence.classification.${item.classification}`)}</span></p>
+          <p className="text-app-muted">{item.localized_value?.[language] ?? item.value}</p>
           <p className="mt-2 break-words text-xs text-app-muted">{t('evidence.source')}: {item.source}</p>
         </div>)}
       </section>

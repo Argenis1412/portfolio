@@ -1,5 +1,14 @@
 import { test, expect } from './fixtures';
 
+test('blocks unexpected metrics requests', async ({ page, network }) => {
+  await page.goto('/');
+  const blocked = await page.evaluate(() => fetch('/api/v1/metrics/summary').then(() => false, () => true));
+  expect(blocked).toBe(true);
+  expect(network.unexpected.splice(0)).toEqual([
+    `GET ${new URL('/api/v1/metrics/summary', page.url()).href}`,
+  ]);
+});
+
 test('aborts requests with retired Chaos headers and records the violation', async ({ page, network }) => {
   await page.goto('/');
   const blocked = await page.evaluate(() => fetch('/api/v1/about', {
