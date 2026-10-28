@@ -1,41 +1,52 @@
-# Architecture Decision Record: JSON-First Read Path
+# JSON Reads and HTTP Caching
 
-## Context and decision
+## Repository cache
 
-INC-002 recorded database connection latency on portfolio reads in v1.2.0 through
-v1.4.1. JSON-first reads removed that dependency. The cleanup branch also removes
-the remaining SQL application paths; retained infrastructure is not evidence of
-an active database dependency.
+[JsonRepository](../../backend/app/adapters/repository.py) reads checked-in files
+from `backend/data/` on demand through a thread. Successful parsed values are
+cached in the shared repository instance; project lookup also caches an ID index.
+The optional case-study sidecar enriches project content when present.
 
-Static portfolio content lives in `backend/data/`. `JsonRepository` reads files
-on demand through a thread and caches successful parsed values in its repository
-instance. Files are not precompiled by this repository or preloaded at startup.
-Project lookup builds a cached ID index after reading projects. Optional case
-study content enriches projects when the sidecar exists.
+Content is not preloaded at startup. Deploy corrected files and restart the
+process to replace cached values; there is no runtime CRUD or invalidation API.
+SQL is absent from application paths. Redis-backed request limiting is separate
+and read-only checks fail open on storage errors.
 
-## Consequences
+Missing/unreadable/malformed files can fail uncached reads. Some mappings normalize
+unexpected shapes; `/health` independently reads files and checks expected
+top-level types, not every field. It returns HTTP 200 even when degraded.
+Cached reads can therefore succeed while health reports a file problem.
 
-- Reads do not require PostgreSQL, Redis, or Resend connectivity for content.
-  Rate limiting is a separate concern; read-only checks fail open on storage errors.
-- Content updates belong in version control and the deployed artifact. Restart or
-  redeploy after changing files to replace cached values; there is no live cache
-  invalidation or CRUD interface.
-- Missing, unreadable, or malformed files can fail requests. JSON-first is not a
-  silent fallback to successful empty content. Some repository mappings normalize
-  unexpected shapes; `/health` separately checks required top-level types.
-- `/health` reads files independently of the content cache and reports per-file
-  results. It returns HTTP 200 even for degraded data and does not test external
-  provider connectivity or validate every content field.
-- HTTP ETags and response cache headers are separate from the repository cache;
-  see the [current architecture](../../ARCHITECTURE.md#current-backend-design).
+## HTTP cache
 
-## Evidence and limits
+[cacheable_response](../../backend/app/core/cache_http.py) covers the content
+collection/detail routes, including formation and philosophy.
 
-INC-002's 280-400 ms latency and historical improvements describe the old release,
-not a benchmark of this branch. No sub-50 ms or unlimited scalability guarantee
-follows from using JSON. Hosting startup, middleware, serialization, and resource
-limits still affect latency. Validate against the [SLO targets](SLO_DEFINITIONS.md)
-and a deployment-sized load test before claiming compliance.
+| Response | Cache behavior |
+|---|---|
+| Content without an exact matching validator | Payload, quoted ETag, `Cache-Control: public, max-age=300, stale-while-revalidate=60`. |
+| Exact matching `If-None-Match` string | HTTP 304 without a body, retaining ETag and Cache-Control. |
+| Metrics summary | `Cache-Control: public, max-age=15`, without the content ETag helper. |
 
-See the [incident history](../../CHANGELOG.md), [failure model](FAILURE_MODEL.md),
-and [operations runbook](production-operations.md).
+The ETag is the first 16 hexadecimal characters of SHA-256 over sorted JSON
+serialized with `ensure_ascii=False` and `default=str`. It does not necessarily
+hash the final wire bytes. Matching compares the whole header string; lists,
+weak tags, and `*` are not parsed. Routes still execute use cases and serialize
+for hashing before deciding 304; this saves body transfer, not all request work.
+
+HTTP expiry does not invalidate repository memory. Cache directives describe
+permitted reuse, not measured CDN/browser behavior. Contact responses are outside
+this helper.
+
+## Browser and measurement boundaries
+
+The frontend uses TanStack Query caching independently of HTTP caching; see
+[its query policy](../../frontend/README.md#data-and-state). The backend does not
+expose ETag or explicitly allow `If-None-Match` for manual cross-origin JavaScript
+revalidation. Browser-managed HTTP caching is separate; see
+[backend CORS](../../backend/README.md#browser-access-and-security).
+
+Historical INC-002 reports motivated removing database reads. Original production
+latency evidence is unavailable here; JSON does not imply a sub-50 ms guarantee.
+Current checks and [benchmark targets](SLO_DEFINITIONS.md) require measurements
+with source commit, resource budget, request population, and sample counts.

@@ -1,33 +1,29 @@
-# Incident Post-Mortem: INC-009
+# INC-009: Terraform Secret Identity Collision
 
-## Secret Identity Collision
+**Historical report date:** 2026-05-08. **Recorded impact:** blocked Terraform apply.
+The report describes an earlier state migration; original CI logs and live state
+were not revalidated by this documentation audit.
 
-**Recorded date:** 2026-05-08. **Affected release:** v1.8.1.
-**Historical resolution:** v1.8.2. **Impact:** Blocked Terraform apply in CI/CD.
+## Failure and recorded fix
 
-## Recorded failure and resolution
+Renaming `for_each` keys, including `ENVIRONMENT` to `AMBIENTE`, changed Terraform
+addresses while targeting existing Koyeb secrets. The reported create/destroy
+sequence collided with occupied secret names.
 
-Renaming `for_each` resource keys, including `ENVIRONMENT` to `AMBIENTE`, changed
-Terraform addresses while still targeting the same physical Koyeb secret names.
-The resulting create/destroy operations collided with existing names.
+[Commit 70a4ee4](https://github.com/Argenis1412/portfolio/commit/70a4ee4)
+added explicit moved blocks to preserve state-address continuity. The
+[current configuration](../../infrastructure/main.tf) retains these moves and
+legacy registry keys while `app_key` exposes English application names.
 
-Explicit `moved` blocks recorded the address changes in state. The historical
-report described a resulting plan with zero resources to destroy. That result
-belongs to the recorded reconciliation, not every future plan.
+## Current relevance
 
-## Current boundary
+Resource addresses, physical secret names, and application keys are separate
+identities. Preserve existing keys and inspect plans for replacement; a moved
+block does not prevent replacement caused by other attribute changes. A historical
+successful reconciliation does not guarantee every later plan is non-destructive.
 
-`infrastructure/main.tf` retains the move declarations and stable legacy registry
-keys, while `app_key` supplies English environment names. Resource identity,
-physical secret name, and application key are distinct. Renaming an address
-without state continuity can schedule replacement; a `moved` declaration does not
-prevent replacement caused by other resource-attribute changes.
-
-Preserve existing identities and inspect each plan for unexpected destruction.
-This cleanup does not rename/delete resources, reconcile live state, or verify
-secret values. Confirming `AMBIENTE=production` remains an operational prerequisite.
-
-See the [IaC decision](ADR-18-iac-strategy.md),
-[operations runbook](production-operations.md), and [changelog](../../CHANGELOG.md).
-Original wording remains available with
-`git show bb3ff44:docs/architecture/INC-009-terraform-resource-collision.md`.
+Use the [infrastructure guide](../../infrastructure/README.md) and
+[release checks](production-operations.md#release-checks) to verify environment
+mapping and plans. This audit does not inspect secret values or reconcile live
+state. Related reports are consolidated in the
+[historical incident index](../../CHANGELOG.md#historical-engineering-notes).

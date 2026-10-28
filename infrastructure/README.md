@@ -1,52 +1,62 @@
-# Infrastructure Provisioning
+# Infrastructure
 
-This setup is intentionally minimal to prioritize clarity over full infrastructure automation. This setup prioritizes reproducibility of the backend service, not full infrastructure parity.
+[Terraform configuration](main.tf) manages the Koyeb app, API service, custom
+backend domain, and secret resources. GitHub Actions supplies values through
+`TF_VAR_*`. External Redis, email, and frontend hosting accounts are configured
+separately; this repository does not provision complete infrastructure parity.
 
-## Scope
+## Declared deployment
 
-What is provisioned:
-- Koyeb Application (`argenis-portfolio`)
-- Koyeb Service (`api`) mapping to the root Dockerfile
-- All required environment variables (via `TF_VAR_*`)
-- Health checks and auto-restart policies
+- App `argenis-portfolio`, service `api`, domain `api.argenisbackend.com`.
+- Git source `main`, repository-root build context, `backend/Dockerfile`, port 8000.
+- Instance type `free`, region `was`, scaling min 0 / max 1.
+- HTTP health probe `/health`; an HTTP 200 can contain a degraded JSON body.
+- Vercel builds `frontend/` with `npm run build`, serves `dist`, and uses
+  [rewrites/headers](../frontend/vercel.json). Set `VITE_API_URL` to the API base
+  ending in `/api/v1`; see [frontend configuration](../frontend/README.md#development-and-checks).
 
-What is **intentionally NOT** provisioned (out of scope):
-- **Upstash Redis**: No official Terraform provider, must be configured manually.
-- **Supabase PostgreSQL**: Requires complex manual setup for the free tier, intentionally skipped to keep IaC minimal.
-- **Vercel Frontend**: Already configured via `vercel.json` and GitHub integration.
+These are source settings. Current provider quotas, pricing, live resources,
+execution mode, and deployed commits are not established by the configuration.
 
-## Prerequisites
+## Variables and identities
 
-Before running any Terraform commands, you MUST expose your secrets to the local environment so Terraform can use them without committing them to the code.
+[variables.tf](variables.tf) defines required inputs and defaults. The
+[infrastructure workflow](../.github/workflows/infrastructure.yml) maps GitHub
+secrets to those inputs; provider authentication uses `KOYEB_TOKEN`, and HCP
+Terraform authentication uses `TF_API_TOKEN`. There is no `TF_VAR_koyeb_token` input.
+The cloud block selects organization `portafolio`, workspace `portfolio-infra`.
+Confirm workspace execution settings before using runner-provided variables.
+
+| Stable registry/GitHub name | Application key |
+|---|---|
+| `AMBIENTE` | `ENVIRONMENT` |
+| `NOME_APP` | `APP_NAME` |
+| `ORIGENS_PERMITIDAS` | `ALLOWED_ORIGINS` |
+| `REGEX_ORIGENS_PERMITIDAS` | `REGEX_ALLOWED_ORIGINS` |
+
+Other registry entries retain their names. Empty/null values are filtered before
+creating secrets. The registry still contains `DATABASE_URL`, and Terraform still
+requires its input, although application SQL is retired. Retained secret wiring
+does not authorize deleting external database resources.
+
+Resource addresses, physical Koyeb secret names, and application keys are distinct.
+Keep existing moved blocks and registry identities; see the historical
+[INC-009 report](../docs/architecture/INC-009-terraform-resource-collision.md).
+State may contain sensitive values even when variables are marked sensitive.
+
+## Review and release
+
+After configuring all required inputs and credentials outside Git, from this directory:
 
 ```bash
-# Windows (PowerShell)
-$env:TF_VAR_koyeb_token="your-koyeb-token"
-$env:TF_VAR_database_url="your-db-url"
-$env:TF_VAR_redis_url="your-redis-url"
-$env:TF_VAR_sentry_dsn="your-sentry-dsn"
-
-# Linux/macOS
-export TF_VAR_koyeb_token="your-koyeb-token"
-export TF_VAR_database_url="your-db-url"
-export TF_VAR_redis_url="your-redis-url"
-export TF_VAR_sentry_dsn="your-sentry-dsn"
+terraform init
+terraform fmt -check
+terraform plan
 ```
 
-## Bootstrap from scratch (< 10 commands)
-
-1. Set your `TF_VAR_*` variables as shown above.
-2. Initialize Terraform:
-   ```bash
-   terraform init
-   ```
-3. Review the execution plan:
-   ```bash
-   terraform plan
-   ```
-4. Apply the configuration:
-   ```bash
-   terraform apply
-   ```
-
-The application will be deployed and available at the URL shown in the `Outputs`.
+The workflow initializes with `-upgrade`, plans on main-targeting PRs and main
+pushes, and applies automatically on pushes to `main`; it has no path filter.
+A plan is not an atomic deployment guarantee. Review resource replacements,
+secret mappings, and recovery options before release. Production requirements,
+current verification gaps, and rollback checks are in the
+[operations runbook](../docs/architecture/production-operations.md).

@@ -1,93 +1,44 @@
 # Benchmarks
 
-For the cleanup branch, use the [isolated single-process procedure](LOCAL_VALIDATION.md).
-The [resumed validation](results/f9eaa7f-local-20261017/README.md) built the image
-and completed two load runs. Functional checks passed; latency thresholds failed.
-The earlier [startup failure](results/8a73bb4/validation-status.md) is historical. The scripts,
-claims, and results below predate this validation procedure and must be read in
-their historical context. Do not run the contact benchmark against production
-without explicit authorization to send email.
+Checked-in k6 scripts define workload-specific targets and archive experimental
+results. They do not establish production SLO compliance. The retained
+[local report](results/f9eaa7f-local-20261017/README.md) includes image/resource
+metadata and two raw summaries; both runs failed latency thresholds.
 
-Load testing scripts using [k6](https://k6.io/) to measure and track API performance over time.
+## Scripts and evidence
 
-## Why this exists
+| File | Purpose |
+|---|---|
+| [health.js](scripts/health.js) | Local health steady-state and ramp scenarios. |
+| [read_path.js](scripts/read_path.js) | Content-read baseline/stress scenarios. |
+| [contact.js](scripts/contact.js) | Contact, abuse, and honeypot scenarios; can trigger real delivery. |
+| [single_process_local.js](scripts/single_process_local.js) | Loopback-only API/consumer experiment with console jobs and production metrics-auth checks. |
+| [run.ps1](run.ps1) | Legacy PowerShell runner and generated summaries; inspect individual k6 results instead of trusting generated pass counts. |
 
-Performance claims without data are marketing. This directory provides reproducible evidence that the system meets its SLOs — and documents *where* it degrades under stress.
+For an already running disposable local API, a health-only run from the repository root:
 
-Results are archived per git commit so regressions are detectable over time.
-
-## Structure
-
-```
-benchmarks/
-├── scripts/
-│   ├── health.js       # GET /health — SLO: P99 < 100ms
-│   ├── read_path.js    # GET /about, /projects, /stack — SLO: P95 < 50ms
-│   └── contact.js      # POST /contact — SLO: P95 < 200ms (write path + anti-abuse)
-├── results/
-│   └── {commit}/
-│       ├── health.json
-│       ├── read_path.json
-│       ├── contact.json
-│       └── summary.md
-└── run.ps1             # Runner: executes all scripts and archives results
+```bash
+k6 run --env BASE_URL=http://127.0.0.1:8000 benchmarks/scripts/health.js
 ```
 
-## Quick Start
+See [configured thresholds and measurement rules](../docs/architecture/SLO_DEFINITIONS.md).
+Keep source commit, resource budget, request counts, raw results, and exit codes
+with any future run. Contact load against a real provider requires explicit scope
+to send email; no production load or email was performed by this audit.
 
-```powershell
-# 1. Start the backend
-cd backend
-uvicorn app.main:app --port 8000
+## Current validation limits
 
-# 2. Run all benchmarks (separate terminal)
-.\benchmarks\run.ps1
+The [recorded source settings](https://github.com/Argenis1412/portfolio/blob/f9eaa7f0db13348818193c131d59340aa4277766/backend/app/settings.py)
+permitted production mode with empty Resend settings and console delivery.
+Current startup rejects missing production Resend key/recipient,
+while a nonempty key selects the real provider. Switching to non-production mode
+also removes the metrics-auth behavior expected by `single_process_local.js`.
+A separately scoped harness change is required before presenting that experiment
+as reproducible against current source. Do not bypass startup checks or weaken
+thresholds to make it pass.
 
-# 3. Run against production
-.\benchmarks\run.ps1 -BaseUrl https://api.argenisbackend.com
-
-# 4. Run a single script
-.\benchmarks\run.ps1 -Script health
-
-# 5. Dry run (no files saved)
-.\benchmarks\run.ps1 -NoSave
-```
-
-## SLO Targets
-
-| Endpoint | Metric | Target | Source |
-|----------|--------|--------|--------|
-| `/health` | P99 | < 100ms | SLO_DEFINITIONS.md |
-| `/about`, `/projects`, `/stack` | P95 | < 100ms | SLO_DEFINITIONS.md |
-| `/contact` | P95 | < 200ms | SLO_DEFINITIONS.md |
-| All endpoints | Error rate | < 1% (5xx) | SLO_DEFINITIONS.md |
-
-## Reading Results
-
-Each script produces a `.json` file with raw k6 metrics and a structured `handleSummary` output.
-
-Key fields to look at:
-- `p(95)` and `p(99)` — distribution tails, not averages
-- `max` — the worst case (often reveals outliers from cold starts)
-- `error_rate` — 5xx rate during the run
-- `data_label` — `"baseline_real"` vs `"load_test_reproduced"` (explicit about data origin)
-
-## Important Notes on Reproducibility
-
-**Environments are not perfectly deterministic.**
-
-- Koyeb (production) has variable CPU allocation and network jitter
-- Local results will differ from production — document both separately
-- Run each benchmark 2–3 times; if P99 varies > 30%, the environment is noisy — say so in the summary
-
-**Stress scenarios are designed to breach thresholds.**
-
-`read_path.js` and `contact.js` include stress scenarios that push VU count beyond what the system comfortably handles. A threshold breach in a stress scenario is *expected behavior* — the goal is to document the degradation point, not to always pass.
-
-## Known Trade-offs (documented, not hidden)
-
-| Decision | Gain | Cost |
-|----------|------|------|
-| JSON-first read path | P95 latency < 50ms (vs 280-400ms before, INC-002) | Memory overhead per worker under high VU count |
-| Redis anti-abuse stack | Rate limiting survives server restarts | +15–40ms per `/contact` request (Redis round-trip) |
-| ETag caching | Zero-bandwidth revalidation (304) | Added complexity in conditional GET logic |
+Older generated summaries without their raw JSON have been removed. The remaining
+`parse_results.py` helper still hardcodes an absent legacy `health.json` input;
+it requires separate tooling work before reuse. The dated report and its JSON
+remain historical evidence. Current deployment and capacity checks are in the
+[operations runbook](../docs/architecture/production-operations.md#release-checks).
