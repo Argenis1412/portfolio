@@ -16,6 +16,10 @@ class CaseStudyEvidence(BaseModel):
 
     label: LocalizedText
     value: str = Field(..., max_length=160)
+    localized_value: LocalizedText | None = Field(
+        default=None,
+        description="Localized evidence text; value remains the English compatibility fallback",
+    )
     classification: Literal["REAL", "REPRODUCED", "SYNTHETIC"]
     source: str = Field(..., max_length=240)
 

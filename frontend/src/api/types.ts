@@ -11,7 +11,6 @@ import {
   ExperienceSchema,
   FormationSchema,
   PhilosophyItemSchema,
-  MetricsSummarySchema,
   AboutSchema,
 } from './schemas';
 
@@ -22,7 +21,6 @@ export type Skill = z.infer<typeof SkillSchema>;
 export type Experience = z.infer<typeof ExperienceSchema>;
 export type Formation = z.infer<typeof FormationSchema>;
 export type PhilosophyItem = z.infer<typeof PhilosophyItemSchema>;
-export type MetricsSummary = z.infer<typeof MetricsSummarySchema>;
 export type About = z.infer<typeof AboutSchema>;
 
 export interface ContactResponse {

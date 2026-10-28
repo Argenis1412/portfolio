@@ -154,6 +154,22 @@ describe('CaseStudyEvidenceSchema', () => {
     expect(CaseStudyEvidenceSchema.safeParse(evidence).success).toBe(true);
   });
 
+  it('preserves localized evidence alongside the English compatibility value', () => {
+    const localized = { pt: 'Evidência verificada', en: evidence.value, es: 'Evidencia verificada' };
+    const parsed = CaseStudyEvidenceSchema.parse({ ...evidence, localized_value: localized });
+    expect(parsed.localized_value).toEqual(localized);
+    expect(parsed.value).toBe(evidence.value);
+  });
+
+  it('accepts an absent or null localization for older responses', () => {
+    expect(CaseStudyEvidenceSchema.parse(evidence).localized_value).toBeUndefined();
+    expect(CaseStudyEvidenceSchema.parse({ ...evidence, localized_value: null }).localized_value).toBeNull();
+  });
+
+  it('rejects an incomplete localization', () => {
+    expect(CaseStudyEvidenceSchema.safeParse({ ...evidence, localized_value: { en: evidence.value } }).success).toBe(false);
+  });
+
   it('rejects evidence values beyond backend length limits', () => {
     expect(CaseStudyEvidenceSchema.safeParse({ ...evidence, value: 'x'.repeat(161) }).success).toBe(false);
     expect(CaseStudyEvidenceSchema.safeParse({ ...evidence, source: 'x'.repeat(241) }).success).toBe(false);

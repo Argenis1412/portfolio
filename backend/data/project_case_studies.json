@@ -36,10 +36,66 @@
       "es": "La ultima cuota absorbe la diferencia de redondeo para mantener el total matematicamente exacto."
     },
     "evidence": [
-      {"label": {"en": "Domain tests", "pt": "Testes de dominio", "es": "Pruebas de dominio"}, "value": "Payment calculation domain is 100% unit-tested", "classification": "REAL", "source": "Loja_app/README.md"},
-      {"label": {"en": "Coverage", "pt": "Cobertura", "es": "Cobertura"}, "value": "94% total coverage", "classification": "REAL", "source": "Loja_app/CHANGELOG.md"},
-      {"label": {"en": "Transactional controls", "pt": "Controles transacionais", "es": "Controles transaccionales"}, "value": "Idempotency, pagination, soft deletes, and Alembic migrations", "classification": "REAL", "source": "Loja_app/docs/adr/0001-standardization-and-observability.md; Loja_app/docs/adr/0002-idempotency-and-pagination.md"},
-      {"label": {"en": "Rounding policy", "pt": "Politica de arredondamento", "es": "Politica de redondeo"}, "value": "Final installment absorbs rounding drift", "classification": "REAL", "source": "Loja_app/README.md"}
+      {
+        "label": {
+          "en": "Domain tests",
+          "pt": "Testes de dominio",
+          "es": "Pruebas de dominio"
+        },
+        "value": "Payment calculation domain is 100% unit-tested",
+        "classification": "REAL",
+        "source": "Loja_app/README.md",
+        "localized_value": {
+          "en": "Payment calculation domain is 100% unit-tested",
+          "pt": "O domínio de cálculo de pagamentos tem 100% de cobertura por testes unitários",
+          "es": "El dominio de cálculo de pagos tiene un 100% de cobertura por pruebas unitarias"
+        }
+      },
+      {
+        "label": {
+          "en": "Coverage",
+          "pt": "Cobertura",
+          "es": "Cobertura"
+        },
+        "value": "94% total coverage",
+        "classification": "REAL",
+        "source": "Loja_app/CHANGELOG.md",
+        "localized_value": {
+          "en": "94% total coverage",
+          "pt": "94% de cobertura total",
+          "es": "94% de cobertura total"
+        }
+      },
+      {
+        "label": {
+          "en": "Transactional controls",
+          "pt": "Controles transacionais",
+          "es": "Controles transaccionales"
+        },
+        "value": "Idempotency, pagination, soft deletes, and Alembic migrations",
+        "classification": "REAL",
+        "source": "Loja_app/docs/adr/0001-standardization-and-observability.md; Loja_app/docs/adr/0002-idempotency-and-pagination.md",
+        "localized_value": {
+          "en": "Idempotency, pagination, soft deletes, and Alembic migrations",
+          "pt": "Idempotência, paginação, exclusão lógica e migrações Alembic",
+          "es": "Idempotencia, paginación, borrado lógico y migraciones Alembic"
+        }
+      },
+      {
+        "label": {
+          "en": "Rounding policy",
+          "pt": "Politica de arredondamento",
+          "es": "Politica de redondeo"
+        },
+        "value": "Final installment absorbs rounding drift",
+        "classification": "REAL",
+        "source": "Loja_app/README.md",
+        "localized_value": {
+          "en": "Final installment absorbs rounding drift",
+          "pt": "A última parcela absorve as diferenças de arredondamento",
+          "es": "La última cuota absorbe las diferencias de redondeo"
+        }
+      }
     ]
   },
   "portfolio-api": {
@@ -79,9 +135,51 @@
       "es": "El backend sirve contenido y acepta contactos sin rutas SQL en la aplicación ni simulaciones de fallos. Las ejecuciones locales de carga documentadas no cumplieron los objetivos de latencia; no establecen garantías de latencia ni capacidad en producción."
     },
     "evidence": [
-      {"label": {"en": "Backend regression tests", "pt": "Testes de regressão backend", "es": "Pruebas de regresión backend"}, "value": "Repository tests cover public JSON snapshots and retired Chaos routes; this is not live production evidence", "classification": "REAL", "source": "backend/tests/test_content_snapshots.py; backend/tests/test_chaos_retirement.py"},
-      {"label": {"en": "Contact reliability", "pt": "Confiabilidade de contato", "es": "Fiabilidad de contacto"}, "value": "Stream retries, DLQ, and pending recovery; background fallback has no automatic retries", "classification": "REAL", "source": "docs/architecture/production-operations.md#runtime-and-health-signals"},
-      {"label": {"en": "JSON content reads", "pt": "Leituras de conteúdo JSON", "es": "Lecturas de contenido JSON"}, "value": "On-demand JSON reads remove the SQL dependency; historical timings do not establish current performance", "classification": "REAL", "source": "docs/architecture/JSON_FIRST_READ_PATH.md"}
+      {
+        "label": {
+          "en": "Backend regression tests",
+          "pt": "Testes de regressão backend",
+          "es": "Pruebas de regresión backend"
+        },
+        "value": "Repository tests cover public JSON snapshots and retired Chaos routes; this is not live production evidence",
+        "classification": "REAL",
+        "source": "backend/tests/test_content_snapshots.py; backend/tests/test_chaos_retirement.py",
+        "localized_value": {
+          "en": "Repository tests cover public JSON snapshots and retired Chaos routes; this is not live production evidence",
+          "pt": "Testes do repositório cobrem snapshots JSON públicos e rotas Chaos retiradas; não são evidências de produção em tempo real",
+          "es": "Las pruebas del repositorio cubren snapshots JSON públicos y rutas Chaos retiradas; no son evidencia de producción en tiempo real"
+        }
+      },
+      {
+        "label": {
+          "en": "Contact reliability",
+          "pt": "Confiabilidade de contato",
+          "es": "Fiabilidad de contacto"
+        },
+        "value": "Stream retries, DLQ, and pending recovery; background fallback has no automatic retries",
+        "classification": "REAL",
+        "source": "docs/architecture/production-operations.md#runtime-and-health-signals",
+        "localized_value": {
+          "en": "Stream retries, DLQ, and pending recovery; background fallback has no automatic retries",
+          "pt": "Novas tentativas via stream, DLQ e recuperação de pendências; a alternativa em segundo plano não tem novas tentativas automáticas",
+          "es": "Reintentos por stream, DLQ y recuperación de pendientes; la alternativa en segundo plano no tiene reintentos automáticos"
+        }
+      },
+      {
+        "label": {
+          "en": "JSON content reads",
+          "pt": "Leituras de conteúdo JSON",
+          "es": "Lecturas de contenido JSON"
+        },
+        "value": "On-demand JSON reads remove the SQL dependency; historical timings do not establish current performance",
+        "classification": "REAL",
+        "source": "docs/architecture/JSON_FIRST_READ_PATH.md",
+        "localized_value": {
+          "en": "On-demand JSON reads remove the SQL dependency; historical timings do not establish current performance",
+          "pt": "Leituras JSON sob demanda removem a dependência de SQL; tempos históricos não comprovam o desempenho atual",
+          "es": "Las lecturas JSON bajo demanda eliminan la dependencia de SQL; los tiempos históricos no demuestran el rendimiento actual"
+        }
+      }
     ]
   },
   "patchforge": {
@@ -121,9 +219,51 @@
       "es": "La IA puede proponer un cambio, pero la evidencia de validacion y la decision final sobre el repositorio permanecen con el revisor humano."
     },
     "evidence": [
-      {"label": {"en": "Test suite", "pt": "Suite de testes", "es": "Suite de pruebas"}, "value": "1,000+ automated tests", "classification": "REAL", "source": "PatchForge/docs/context/discoveries.md"},
-      {"label": {"en": "Concurrency safety", "pt": "Seguranca de concorrencia", "es": "Seguridad de concurrencia"}, "value": "Ordered locks and a registry contention regression test", "classification": "REAL", "source": "PatchForge/docs/context/discoveries.md"},
-      {"label": {"en": "Human approval", "pt": "Aprovacao humana", "es": "Aprobacion humana"}, "value": "Validation evidence and the final apply decision remain human-controlled", "classification": "REAL", "source": "PatchForge/docs/product-thesis-v2.md"}
+      {
+        "label": {
+          "en": "Test suite",
+          "pt": "Suite de testes",
+          "es": "Suite de pruebas"
+        },
+        "value": "1,000+ automated tests",
+        "classification": "REAL",
+        "source": "PatchForge/docs/context/discoveries.md",
+        "localized_value": {
+          "en": "1,000+ automated tests",
+          "pt": "Mais de 1.000 testes automatizados",
+          "es": "Más de 1.000 pruebas automatizadas"
+        }
+      },
+      {
+        "label": {
+          "en": "Concurrency safety",
+          "pt": "Seguranca de concorrencia",
+          "es": "Seguridad de concurrencia"
+        },
+        "value": "Ordered locks and a registry contention regression test",
+        "classification": "REAL",
+        "source": "PatchForge/docs/context/discoveries.md",
+        "localized_value": {
+          "en": "Ordered locks and a registry contention regression test",
+          "pt": "Locks ordenados e teste de regressão para concorrência no registro",
+          "es": "Bloqueos ordenados y prueba de regresión para concurrencia en el registro"
+        }
+      },
+      {
+        "label": {
+          "en": "Human approval",
+          "pt": "Aprovacao humana",
+          "es": "Aprobacion humana"
+        },
+        "value": "Validation evidence and the final apply decision remain human-controlled",
+        "classification": "REAL",
+        "source": "PatchForge/docs/product-thesis-v2.md",
+        "localized_value": {
+          "en": "Validation evidence and the final apply decision remain human-controlled",
+          "pt": "As evidências de validação e a decisão final de aplicar mudanças permanecem sob controle humano",
+          "es": "Las evidencias de validación y la decisión final de aplicar cambios siguen bajo control humano"
+        }
+      }
     ]
   }
 }

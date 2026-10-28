@@ -31,7 +31,7 @@ export default function FeaturedProjects() {
           <article key={project.id} aria-labelledby={`project-${project.id}`} className="home-project-row">
             <h3 id={`project-${project.id}`}>{project.name}</h3>
             <div className="min-w-0">
-              <p className="max-w-2xl leading-relaxed text-app-muted">{['loja-app', 'portfolio-api', 'patchforge'].includes(project.id) ? t(`home.project.${project.id}`) : project.short_description[language]}</p>
+              <p className="max-w-2xl leading-relaxed text-app-muted">{['loja-app', 'patchforge'].includes(project.id) ? t(`home.project.${project.id}`) : project.short_description[language]}</p>
               <ul aria-label={t('projects.stack')} className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-app-muted">
                 {project.technologies.slice(0, 4).map((tech) => <li key={tech}>{tech}</li>)}
               </ul>

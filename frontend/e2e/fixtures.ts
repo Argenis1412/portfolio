@@ -1,6 +1,5 @@
 import { test as base, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
-const current = JSON.parse(readFileSync(new URL('../src/tests/fixtures/metrics-d0d1cea.json', import.meta.url), 'utf8'));
 
 const load = (name: string) => JSON.parse(readFileSync(new URL(`../../backend/data/${name}.json`, import.meta.url), 'utf8'));
 const cases = load('project_case_studies');
@@ -21,18 +20,22 @@ export const test = base.extend<{ network: { contact: Record<string, unknown>[];
         return route.abort();
       }
       const url = new URL(req.url());
+      if (url.pathname === '/metrics' || url.pathname.startsWith('/api/v1/metrics/')) {
+        network.unexpected.push(`${req.method()} ${req.url()}`);
+        return route.abort();
+      }
       if (url.pathname.startsWith('/api/v1/')) {
         const path = url.pathname.slice('/api/v1'.length);
         if (path.includes('/chaos/')) { network.unexpected.push(`${req.method()} ${req.url()}`); return route.abort(); }
         if (req.method() === 'POST' && path === '/contact') {
           network.contact.push({ ...req.postDataJSON(), idempotencyKey: req.headers()['idempotency-key'] });
-          return route.fulfill({ status: 202, json: { message: 'Accepted by isolated test', queue_status: 'queued', delivery_mode: 'stream', downstream: 'fake' } });
+          return route.fulfill({ status: 200, json: { success: true, message: 'Accepted by isolated test', queue_status: 'queued', delivery_mode: 'stream', downstream: 'fake' } });
         }
         if (req.method() !== 'GET') { network.unexpected.push(`${req.method()} ${req.url()}`); return route.abort(); }
         const data: Record<string, unknown> = {
           '/about': load('about'), '/projects': { projects }, '/stack': { stack: load('stack'), by_category: {} },
           '/experiences': { experiences: load('experiences') }, '/formation': { formations: load('formation') },
-          '/philosophy': { inspirations: load('philosophy') }, '/metrics/summary': current,
+          '/philosophy': { inspirations: load('philosophy') },
         };
         if (path.startsWith('/projects/')) {
           const id = path.split('/').pop();
