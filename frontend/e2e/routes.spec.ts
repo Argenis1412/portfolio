@@ -1,6 +1,27 @@
 import { expect, test } from './fixtures';
 
 test.describe('public routes', () => {
+  for (const [path, heading, count] of [
+    ['/', 'APIs and backend systems.', 1],
+    ['/projects/loja-app', 'Loja App', 1],
+    ['/production-evidence', 'Full-Stack Portfolio', 1],
+    ['/decisions/json-first', 'JSON-first reads', 0],
+    ['/does-not-exist', 'Page not found', 0],
+    ['/projects/loja-app/unknown', 'Page not found', 0],
+  ] as const) {
+    test(`requests projects only when consumed on ${path}`, async ({ page }) => {
+      const requests: string[] = [];
+      page.on('request', request => {
+        if (new URL(request.url()).pathname === '/api/v1/projects') requests.push(request.url());
+      });
+      await page.goto(path);
+      await expect(page.getByRole('heading', { level: 1, name: heading, exact: true })).toBeFocused();
+      await expect(page.getByRole('contentinfo')).toBeVisible();
+      if (path === '/') await expect(page.locator('#projects article')).toHaveCount(4);
+      expect(requests).toHaveLength(count);
+    });
+  }
+
   test('loads project and decision deep links and redirects the retired evidence route', async ({ page }) => {
     await page.goto('/projects/rate-limiter');
     await expect(page.getByRole('heading', { name: 'Project case study' })).toBeVisible();

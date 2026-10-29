@@ -1,18 +1,23 @@
 import { lazy, Suspense, useEffect } from 'react';
 import Hero from '../components/hero/Hero';
 import { scrollToSection } from '../utils/scrollToSection';
+import { HomeSectionSkeleton } from '../components/ui/HomeLoadingSkeleton';
+import FeaturedProjects from '../components/FeaturedProjects';
 
-const About = lazy(() => import('../components/About'));
-const Contact = lazy(() => import('../components/Contact'));
-const FeaturedProjects = lazy(() => import('../components/FeaturedProjects'));
-
-const SectionFallback = () => (
-  <div className="flex h-24 w-full items-center justify-center text-xs font-mono tracking-widest text-app-muted opacity-40 animate-pulse">
-    LOADING...
-  </div>
-);
+let aboutModule: Promise<typeof import('../components/About')> | undefined;
+let contactModule: Promise<typeof import('../components/Contact')> | undefined;
+const loadAbout = () => aboutModule ??= import('../components/About');
+const loadContact = () => contactModule ??= import('../components/Contact');
+const About = lazy(loadAbout);
+const Contact = lazy(loadContact);
 
 export default function HomePage() {
+  useEffect(() => {
+    // Warm both independent boundaries, reusing the promises read by React.lazy.
+    void loadAbout();
+    void loadContact();
+  }, []);
+
   useEffect(() => {
     const sectionId = window.location.hash.slice(1);
     if (!sectionId) return;
@@ -40,9 +45,11 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      <Suspense fallback={<SectionFallback />}>
-        <FeaturedProjects />
+      <FeaturedProjects />
+      <Suspense fallback={<HomeSectionSkeleton section="about" />}>
         <About />
+      </Suspense>
+      <Suspense fallback={<HomeSectionSkeleton section="contact" />}>
         <Contact />
       </Suspense>
     </>

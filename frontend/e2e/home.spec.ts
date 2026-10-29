@@ -65,7 +65,7 @@ test('keeps project links, engineering evidence, themes and translations availab
   const projects = page.locator('#projects article');
   await expect(projects).toHaveCount(4);
   for (const [name, repository] of [['Loja App', 'Loja_app'], ['Full-Stack Portfolio', 'portfolio'], ['PatchForge', 'PatchForge'], ['Housing Finance GPS', 'housing-finance-gps']]) {
-    await expect(projects.filter({ hasText: name }).getByRole('link', { name: 'Source code', exact: true })).toHaveAttribute('href', `https://github.com/Argenis1412/${repository}`);
+    await expect(projects.filter({ hasText: name }).getByRole('link', { name: `Source code — ${name}`, exact: true })).toHaveAttribute('href', `https://github.com/Argenis1412/${repository}`);
   }
   await expect(projects.filter({ hasText: 'Housing Finance GPS' })).toContainText('In development; no public demo.');
   await expect(projects.filter({ hasText: 'Housing Finance GPS' }).getByRole('link', { name: 'Read case study' })).toHaveCount(0);

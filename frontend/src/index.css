@@ -340,3 +340,85 @@ section[id] {
   .home-page h2 { font-size: 1.75rem; }
   .home-hero h1 { font-size: 3.25rem; }
 }
+
+/* Loading-only geometry measured with the current content and Inter loaded.
+   The four rows follow the existing editorial order; resolved content stays fluid. */
+.home-projects {
+  --loading-row-1: 255px;
+  --loading-row-2: 281px;
+  --loading-row-3: 255px;
+  --loading-row-4: 229px;
+}
+.home-projects:lang(pt), .home-projects:lang(es) { --loading-row-4: 255px; }
+.home-project-placeholder { min-height: var(--loading-row-height); }
+.home-project-placeholder:nth-child(1) { --loading-row-height: var(--loading-row-1); }
+.home-project-placeholder:nth-child(2) { --loading-row-height: var(--loading-row-2); }
+.home-project-placeholder:nth-child(3) { --loading-row-height: var(--loading-row-3); }
+.home-project-placeholder:nth-child(4) { --loading-row-height: var(--loading-row-4); }
+.home-project-placeholder-description { height: calc(var(--loading-row-height) - 177px); }
+.home-loading-about { min-height: 560px; }
+.home-loading-about:lang(pt), .home-loading-about:lang(es) { min-height: 586px; }
+.home-loading-contact { min-height: 839.6875px; }
+
+@media (min-width: 400px) {
+  .home-projects { --loading-row-2: 255px; --loading-row-3: 229px; }
+  .home-projects:lang(pt) { --loading-row-2: 281px; }
+  .home-projects:lang(pt), .home-projects:lang(es) { --loading-row-4: 229px; }
+  .home-loading-about:lang(pt), .home-loading-about:lang(es) { min-height: 560px; }
+}
+@media (min-width: 640px) {
+  .home-projects { --loading-row-1: 229px; --loading-row-2: 229px; }
+  .home-projects:lang(pt) { --loading-row-2: 255px; }
+  .home-loading-about, .home-loading-about:lang(pt), .home-loading-about:lang(es) { min-height: 392px; }
+  .home-loading-contact { min-height: 723.6875px; }
+}
+@media (min-width: 768px) {
+  .home-projects { --loading-row-1: 231px; --loading-row-2: 231px; --loading-row-3: 205px; --loading-row-4: 205px; }
+  .home-projects:lang(pt) { --loading-row-2: 231px; }
+  .home-projects:lang(pt), .home-projects:lang(es) { --loading-row-4: 205px; }
+  .home-project-placeholder-description { height: calc(var(--loading-row-height) - 153px); }
+  .home-loading-about, .home-loading-about:lang(pt), .home-loading-about:lang(es) { min-height: 416.5px; }
+  .home-loading-contact { min-height: 774.1875px; }
+}
+@media (min-width: 1024px) {
+  .home-projects { --loading-row-1: 205px; --loading-row-2: 205px; }
+  .home-projects:lang(pt) { --loading-row-2: 231px; }
+  .home-loading-about, .home-loading-about:lang(pt), .home-loading-about:lang(es) { min-height: 390.5px; }
+}
+@media (min-width: 1200px) {
+  .home-projects { --loading-row-4: 179px; }
+  .home-projects:lang(pt) { --loading-row-2: 205px; --loading-row-4: 179px; }
+  .home-projects:lang(es) { --loading-row-4: 205px; }
+  .home-loading-about, .home-loading-about:lang(pt), .home-loading-about:lang(es) { min-height: 393px; }
+  .home-loading-contact { min-height: 776.6875px; }
+}
+
+/* Reserve only the first-open loading state; native details controls visibility. */
+.home-experience-loading:lang(en) { min-height: 2850.875px; }
+.home-experience-loading:lang(pt) { min-height: 2944px; }
+.home-experience-loading:lang(es) { min-height: 2961.5px; }
+@media (min-width: 400px) {
+  .home-experience-loading:lang(en) { min-height: 2717.125px; }
+  .home-experience-loading:lang(pt) { min-height: 2689.125px; }
+  .home-experience-loading:lang(es) { min-height: 2750.625px; }
+}
+@media (min-width: 640px) {
+  .home-experience-loading:lang(en) { min-height: 2260.5625px; }
+  .home-experience-loading:lang(pt) { min-height: 2283.3125px; }
+  .home-experience-loading:lang(es) { min-height: 2255.3125px; }
+}
+@media (min-width: 768px) {
+  .home-experience-loading:lang(en) { min-height: 1998.8125px; }
+  .home-experience-loading:lang(pt) { min-height: 1998.8125px; }
+  .home-experience-loading:lang(es) { min-height: 1998.8125px; }
+}
+@media (min-width: 1024px) {
+  .home-experience-loading:lang(en) { min-height: 1800.8125px; }
+  .home-experience-loading:lang(pt) { min-height: 1839.5625px; }
+  .home-experience-loading:lang(es) { min-height: 1816.8125px; }
+}
+@media (min-width: 1200px) {
+  .home-experience-loading:lang(en) { min-height: 1563.375px; }
+  .home-experience-loading:lang(pt) { min-height: 1579.375px; }
+  .home-experience-loading:lang(es) { min-height: 1579.375px; }
+}
