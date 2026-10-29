@@ -2,7 +2,7 @@
  * React Query hooks for all API endpoints.
  * Provide automatic caching, loading/error states, and revalidation.
  */
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { queryOptions, useQuery, useMutation } from '@tanstack/react-query';
 import {
   fetchAbout,
   fetchProjects,
@@ -32,12 +32,14 @@ export function useAbout() {
   });
 }
 
+export const projectsQueryOptions = queryOptions({
+  queryKey: queryKeys.projects,
+  queryFn: fetchProjects,
+  staleTime: 5 * 60 * 1000,
+});
+
 export function useProjects() {
-  return useQuery({
-    queryKey: queryKeys.projects,
-    queryFn: fetchProjects,
-    staleTime: 5 * 60 * 1000,
-  });
+  return useQuery(projectsQueryOptions);
 }
 
 export function useSkills() {

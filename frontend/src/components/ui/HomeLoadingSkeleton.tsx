@@ -1,5 +1,4 @@
 import { useLanguage } from '../../context/LanguageContext';
-import Hero from '../hero/Hero';
 import Skeleton from './Skeleton';
 
 export function ProjectRowsSkeleton() {
@@ -31,20 +30,6 @@ export function ProjectRowsSkeleton() {
   );
 }
 
-export function ProjectsSectionSkeleton() {
-  const { t, language } = useLanguage();
-
-  return (
-    <section className="home-container home-projects" aria-busy="true" lang={language}>
-      <div className="home-section-heading">
-        <h2>{t('nav.projects')}</h2>
-        <p className="text-sm text-app-muted">{t('home.projects.context')}</p>
-      </div>
-      <div className="mt-6"><ProjectRowsSkeleton /></div>
-    </section>
-  );
-}
-
 export function HomeSectionSkeleton({ section }: { section: 'about' | 'contact' }) {
   const { t, language } = useLanguage();
 
@@ -58,8 +43,4 @@ export function HomeSectionSkeleton({ section }: { section: 'about' | 'contact' 
       </div>
     </section>
   );
-}
-
-export function HomeRouteSkeleton() {
-  return <><Hero /><ProjectsSectionSkeleton /><HomeSectionSkeleton section="about" /><HomeSectionSkeleton section="contact" /></>;
 }

@@ -3,16 +3,14 @@ import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'rea
 import { LazyMotion, domAnimation, MotionConfig } from 'framer-motion';
 import Navbar from './components/Navbar';
 import { ThemeProvider } from './context/ThemeContext';
-import { HomeRouteSkeleton } from './components/ui/HomeLoadingSkeleton';
+import HomePage from './pages/HomePage';
 
-const HomePage = lazy(() => import('./pages/HomePage'));
 const ProjectCasePage = lazy(() => import('./pages/ProjectCasePage'));
 const DecisionPage = lazy(() => import('./pages/DecisionPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const Footer = lazy(() => import('./components/Footer'));
 
 function RouteFallback() {
-  if (useLocation().pathname === '/') return <HomeRouteSkeleton />;
   return <div role="status" aria-busy="true" className="flex min-h-48 items-center justify-center text-xs font-mono tracking-widest text-app-muted">LOADING...</div>;
 }
 
