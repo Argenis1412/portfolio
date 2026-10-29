@@ -10,12 +10,12 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('node_modules')) {
-            if (id.includes('framer-motion')) return 'motion';
-            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) return 'react-vendor';
-            if (id.includes('@tanstack/react-query')) return 'query';
-            return 'vendor';
-          }
+          const packagePath = id.replace(/\\/g, '/').split('/node_modules/').at(-1);
+          if (!id.includes('node_modules') || !packagePath) return;
+          if (/^@tanstack\/(react-query|query-core)\//.test(packagePath)) return 'query';
+          if (/^(react|react-dom|react-router|react-router-dom|scheduler)\//.test(packagePath)) return 'react-vendor';
+          if (/^(framer-motion|motion-dom|motion-utils)\//.test(packagePath)) return 'motion';
+          return 'vendor';
         }
       }
     }
