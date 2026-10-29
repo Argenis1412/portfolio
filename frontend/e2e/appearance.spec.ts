@@ -60,6 +60,8 @@ for (const width of [320, 768, 1440]) {
     await expect(language).toHaveValue('es');
 
     const portrait = page.getByRole('img', { name: 'Argenis Lopez', exact: true });
+    await expect(portrait).toHaveAttribute('loading', 'lazy');
+    await expect(page.locator('link[rel="preload"][as="image"][href="/profile.webp"]')).toHaveCount(0);
     await portrait.scrollIntoViewIfNeeded();
     const geometry = await portrait.evaluate(element => {
       const { width, height } = element.getBoundingClientRect();
