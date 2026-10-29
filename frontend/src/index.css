@@ -392,3 +392,33 @@ section[id] {
   .home-loading-about, .home-loading-about:lang(pt), .home-loading-about:lang(es) { min-height: 393px; }
   .home-loading-contact { min-height: 776.6875px; }
 }
+
+/* Reserve only the first-open loading state; native details controls visibility. */
+.home-experience-loading:lang(en) { min-height: 2850.875px; }
+.home-experience-loading:lang(pt) { min-height: 2944px; }
+.home-experience-loading:lang(es) { min-height: 2961.5px; }
+@media (min-width: 400px) {
+  .home-experience-loading:lang(en) { min-height: 2717.125px; }
+  .home-experience-loading:lang(pt) { min-height: 2689.125px; }
+  .home-experience-loading:lang(es) { min-height: 2750.625px; }
+}
+@media (min-width: 640px) {
+  .home-experience-loading:lang(en) { min-height: 2260.5625px; }
+  .home-experience-loading:lang(pt) { min-height: 2283.3125px; }
+  .home-experience-loading:lang(es) { min-height: 2255.3125px; }
+}
+@media (min-width: 768px) {
+  .home-experience-loading:lang(en) { min-height: 1998.8125px; }
+  .home-experience-loading:lang(pt) { min-height: 1998.8125px; }
+  .home-experience-loading:lang(es) { min-height: 1998.8125px; }
+}
+@media (min-width: 1024px) {
+  .home-experience-loading:lang(en) { min-height: 1800.8125px; }
+  .home-experience-loading:lang(pt) { min-height: 1839.5625px; }
+  .home-experience-loading:lang(es) { min-height: 1816.8125px; }
+}
+@media (min-width: 1200px) {
+  .home-experience-loading:lang(en) { min-height: 1563.375px; }
+  .home-experience-loading:lang(pt) { min-height: 1579.375px; }
+  .home-experience-loading:lang(es) { min-height: 1579.375px; }
+}

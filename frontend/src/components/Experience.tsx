@@ -89,7 +89,8 @@ export default function Experience() {
 
   if (loading) {
     return (
-      <section id="experience" className="experience-timeline py-16">
+      <section id="experience" role="status" aria-busy="true" lang={language} className="experience-timeline home-experience-loading py-16">
+        <span className="sr-only">{t('section.loading')}</span>
         <div className="max-w-5xl mx-auto px-4">
           <Skeleton className="h-10 w-48 mb-12" />
           <div className="space-y-6">

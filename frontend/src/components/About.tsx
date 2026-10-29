@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useSkills } from '../hooks/useApi';
 import Experience from './Experience';
@@ -5,6 +6,7 @@ import Experience from './Experience';
 export default function About() {
   const { t } = useLanguage();
   const { data: skills = [], isLoading: skillsLoading } = useSkills();
+  const [experienceOpened, setExperienceOpened] = useState(false);
 
   return (
     <section id="about" aria-labelledby="about-title" className="home-container home-section">
@@ -25,9 +27,11 @@ export default function About() {
           <img src="/profile.jpg" alt="Argenis Lopez" width="176" height="176" loading="lazy" className="h-36 w-36 sm:h-44 sm:w-44 rounded-full border border-app-border object-cover" />
         </picture>
       </div>
-      <details className="mt-4">
+      <details className="mt-4" onToggle={event => {
+        if (event.currentTarget.open) setExperienceOpened(true);
+      }}>
         <summary className="home-link w-fit cursor-pointer text-sm font-semibold text-app-primary">{t('about.experience')}</summary>
-        <Experience />
+        {experienceOpened && <Experience />}
       </details>
     </section>
   );
