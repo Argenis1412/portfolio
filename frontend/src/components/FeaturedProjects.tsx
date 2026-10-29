@@ -37,8 +37,8 @@ export default function FeaturedProjects() {
                 {project.technologies.slice(0, 4).map((tech) => <li key={tech}>{tech}</li>)}
               </ul>
               <div className="mt-3 flex flex-wrap gap-x-6 text-sm font-semibold">
-                {project.case_study && <Link to={`/projects/${project.id}`} className="home-link text-app-primary">{t('home.featured.link')}</Link>}
-                {project.repository && <a href={project.repository} target="_blank" rel="noopener noreferrer" className="home-link text-app-text">{t('home.projects.code')}</a>}
+                {project.case_study && <Link to={`/projects/${project.id}`} aria-label={t('home.featured.link_label', { project: project.name })} className="home-link text-app-primary">{t('home.featured.link')}</Link>}
+                {project.repository && <a href={project.repository} aria-label={t('home.projects.code_label', { project: project.name })} target="_blank" rel="noopener noreferrer" className="home-link text-app-text">{t('home.projects.code')}</a>}
                 {project.demo && <a href={project.demo} target="_blank" rel="noopener noreferrer" className="home-link text-app-text">{t('projects.live_demo')}</a>}
               </div>
             </div>
