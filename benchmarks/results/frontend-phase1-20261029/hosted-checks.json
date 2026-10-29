@@ -1,0 +1,45 @@
+{
+  "preview-root": [
+    "HTTP/2 200 ",
+    "access-control-allow-origin: *",
+    "cache-control: public, max-age=0, must-revalidate",
+    "content-type: text/html; charset=utf-8",
+    "date: Thu, 29 Oct 2026 05:21:34 GMT"
+  ],
+  "preview-index": [
+    "HTTP/2 200 ",
+    "access-control-allow-origin: *",
+    "cache-control: public, max-age=0, must-revalidate",
+    "content-type: text/html; charset=utf-8",
+    "date: Thu, 29 Oct 2026 05:21:35 GMT",
+    "content-length: 4676"
+  ],
+  "preview-asset": [
+    "HTTP/2 200 ",
+    "access-control-allow-origin: *",
+    "cache-control: public, max-age=31536000, immutable",
+    "content-type: application/javascript; charset=utf-8",
+    "date: Thu, 29 Oct 2026 05:21:53 GMT",
+    "content-length: 50318"
+  ],
+  "preview-api": [
+    "HTTP/2 200 ",
+    "date: Thu, 29 Oct 2026 05:21:55 GMT",
+    "content-type: application/json",
+    "cache-control: public, max-age=300, stale-while-revalidate=60",
+    "vary: Accept-Encoding"
+  ],
+  "served-profile": [
+    "HTTP/2 200 ",
+    "date: Thu, 29 Oct 2026 05:21:15 GMT",
+    "content-type: image/jpeg",
+    "content-length: 37490",
+    "access-control-allow-origin: *",
+    "cache-control: public, max-age=14400, must-revalidate"
+  ],
+  "preview_url": "https://portfolio-og6t5hd0y-argenis1412s-projects.vercel.app",
+  "preview_commit": "3773fd05f19ae1ed4de0b197a3d1419f73821515",
+  "asset_path": "/assets/index-C9h10q_C.js",
+  "profile_url": "https://argenisbackend.com/profile.jpg",
+  "profile_sha256": "41507b2c1f2e2d4b1955dda5d6c49b0fd8b3d54a6133edb1d0ccb02e719eb7e4"
+}

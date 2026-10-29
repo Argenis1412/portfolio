@@ -7,6 +7,10 @@ metadata and two raw summaries; both runs failed latency thresholds.
 
 ## Scripts and evidence
 
+The [frontend phase 1 report](results/frontend-phase1-20261029/README.md) retains
+Lighthouse comparisons, visual comparison results, per-commit QA output and
+hosted cache/image checks. Its local results do not establish production SLOs.
+
 | File | Purpose |
 |---|---|
 | [health.js](scripts/health.js) | Local health steady-state and ramp scenarios. |

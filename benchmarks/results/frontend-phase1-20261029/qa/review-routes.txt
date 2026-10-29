@@ -1,0 +1,77 @@
+
+> frontend@0.0.0 e2e
+> playwright test --config /tmp/phase1/review-playwright.config.ts --retries=0 --workers=1 e2e/routes.spec.ts
+
+[WebServer] (node:154801) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 10 tests using 1 worker
+
+(node:154827) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:154827) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 [chromium] › e2e/routes.spec.ts:12:5 › public routes › requests projects only when consumed on / (992ms)
+  ✓   2 [chromium] › e2e/routes.spec.ts:12:5 › public routes › requests projects only when consumed on /projects/loja-app (839ms)
+  ✓   3 [chromium] › e2e/routes.spec.ts:12:5 › public routes › requests projects only when consumed on /production-evidence (792ms)
+  ✓   4 [chromium] › e2e/routes.spec.ts:12:5 › public routes › requests projects only when consumed on /decisions/json-first (979ms)
+  ✓   5 [chromium] › e2e/routes.spec.ts:12:5 › public routes › requests projects only when consumed on /does-not-exist (2.2s)
+  ✓   6 [chromium] › e2e/routes.spec.ts:12:5 › public routes › requests projects only when consumed on /projects/loja-app/unknown (1.2s)
+  ✘   7 [chromium] › e2e/routes.spec.ts:25:3 › public routes › loads project and decision deep links and redirects the retired evidence route (14.9s)
+(node:155113) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:155113) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   8 [chromium] › e2e/routes.spec.ts:37:3 › public routes › shows an accessible 404 page for an unknown deep link (1.1s)
+  ✓   9 [chromium] › e2e/routes.spec.ts:44:3 › public routes › routes section navigation through the home page (1.2s)
+  ✘  10 [chromium] › e2e/routes.spec.ts:58:3 › mobile navigation › traps keyboard focus and restores it after dismissal (1.1m)
+
+
+  1) [chromium] › e2e/routes.spec.ts:25:3 › public routes › loads project and decision deep links and redirects the retired evidence route 
+
+    Error: expect(locator).toBeFocused() failed
+
+    Locator: getByRole('heading', { name: 'Full-Stack Portfolio', exact: true })
+    Expected: focused
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toBeFocused" with timeout 5000ms
+      - waiting for getByRole('heading', { name: 'Full-Stack Portfolio', exact: true })
+
+
+      32 |     await page.goto('/production-evidence');
+      33 |     await expect(page).toHaveURL(/\/projects\/portfolio-api$/);
+    > 34 |     await expect(page.getByRole('heading', { name: 'Full-Stack Portfolio', exact: true })).toBeFocused();
+         |                                                                                            ^
+      35 |   });
+      36 |
+      37 |   test('shows an accessible 404 page for an unknown deep link', async ({ page }) => {
+        at /home/argenis/Secretária/GITHUB/portfolio/frontend/e2e/routes.spec.ts:34:92
+
+    Error Context: ../../../../../../tmp/portfolio-playwright-results/routes-public-routes-loads-f6b35--the-retired-evidence-route-chromium/error-context.md
+
+  2) [chromium] › e2e/routes.spec.ts:58:3 › mobile navigation › traps keyboard focus and restores it after dismissal 
+
+    Test timeout of 30000ms exceeded.
+
+    Tearing down "context" exceeded the test timeout of 30000ms.
+
+    Error: keyboard.press: Test timeout of 30000ms exceeded.
+
+      76 |     await expect(closeButton).toBeFocused();
+      77 |
+    > 78 |     await page.keyboard.press('Escape');
+         |                         ^
+      79 |     await expect(dialog).toBeHidden();
+      80 |     await expect(menuTrigger).toBeFocused();
+      81 |   });
+        at /home/argenis/Secretária/GITHUB/portfolio/frontend/e2e/routes.spec.ts:78:25
+
+    Error Context: ../../../../../../tmp/portfolio-playwright-results/routes-mobile-navigation-t-c237a-restores-it-after-dismissal-chromium/error-context.md
+
+  2 failed
+    [chromium] › e2e/routes.spec.ts:25:3 › public routes › loads project and decision deep links and redirects the retired evidence route 
+    [chromium] › e2e/routes.spec.ts:58:3 › mobile navigation › traps keyboard focus and restores it after dismissal 
+  8 passed (1.6m)

@@ -1,0 +1,13 @@
+
+> frontend@0.0.0 test
+> vitest --run
+
+
+ RUN  v4.1.0 /home/argenis/Secretária/GITHUB/portfolio/frontend
+
+
+ Test Files  12 passed (12)
+      Tests  71 passed (71)
+   Start at  01:02:04
+   Duration  3.21s (transform 1.38s, setup 1.12s, import 4.55s, tests 3.56s, environment 12.51s)
+

@@ -1,0 +1,1727 @@
+{
+  "before": {
+    "median": {
+      "performance": 54,
+      "accessibility": 100,
+      "fcp": 3025.897,
+      "lcp": 5504.911,
+      "cls": 0.426489,
+      "tbt": 36.77599999999984
+    },
+    "runs": [
+      {
+        "run": 1,
+        "performance": 55,
+        "accessibility": 100,
+        "fcp": 2918.337,
+        "lcp": 5309.246,
+        "cls": 0.426489,
+        "tbt": 0,
+        "lcpNode": {
+          "type": "node",
+          "lhId": "page-0-P",
+          "path": "1,HTML,1,BODY,0,DIV,0,DIV,1,MAIN,2,SECTION,0,DIV,0,DIV,1,P",
+          "selector": "section#about > div.flex > div.max-w-2xl > p.mt-4",
+          "boundingRect": {
+            "top": 1618,
+            "bottom": 1748,
+            "left": 20,
+            "right": 392,
+            "width": 372,
+            "height": 130
+          },
+          "snippet": "<p class=\"mt-4 max-w-2xl leading-relaxed text-app-muted\">",
+          "nodeLabel": "I work on backend development with an emphasis on explicit business rules, test…"
+        },
+        "lcpBreakdown": {
+          "type": "table",
+          "headings": [
+            {
+              "key": "label",
+              "valueType": "text",
+              "label": "Subpart"
+            },
+            {
+              "key": "duration",
+              "valueType": "ms",
+              "label": "Duration"
+            }
+          ],
+          "items": [
+            {
+              "subpart": "timeToFirstByte",
+              "label": "Time to first byte",
+              "duration": 553.556
+            },
+            {
+              "subpart": "elementRenderDelay",
+              "label": "Element render delay",
+              "duration": 4755.69
+            }
+          ]
+        },
+        "clsCulprits": {
+          "type": "list",
+          "items": [
+            {
+              "type": "table",
+              "headings": [
+                {
+                  "key": "node",
+                  "valueType": "node",
+                  "subItemsHeading": {
+                    "key": "extra"
+                  },
+                  "label": "Element"
+                },
+                {
+                  "key": "score",
+                  "valueType": "numeric",
+                  "subItemsHeading": {
+                    "key": "cause",
+                    "valueType": "text"
+                  },
+                  "granularity": 0.001,
+                  "label": "Layout shift score"
+                }
+              ],
+              "items": [
+                {
+                  "node": {
+                    "type": "text",
+                    "value": "Total"
+                  },
+                  "score": 0.000151
+                },
+                {
+                  "node": {
+                    "type": "node",
+                    "lhId": "page-1-DIV",
+                    "path": "1,HTML,1,BODY,0,DIV,0,DIV,0,NAV,0,DIV,0,DIV,3,DIV",
+                    "selector": "nav.fixed > div.home-container > div.flex > div.flex",
+                    "boundingRect": {
+                      "top": 10,
+                      "bottom": 54,
+                      "left": 153,
+                      "right": 344,
+                      "width": 191,
+                      "height": 44
+                    },
+                    "snippet": "<div class=\"flex items-center gap-2 md:ml-6\">",
+                    "nodeLabel": "Português\nEnglish\nEspañol"
+                  },
+                  "score": 0.000151,
+                  "subItems": {
+                    "type": "subitems",
+                    "items": [
+                      {
+                        "extra": {
+                          "type": "url",
+                          "value": "https://fonts.gstatic.com/s/inter/v20/UcCo3FwrK3iLTcviYwYZ8UA3.woff2"
+                        },
+                        "cause": "Web font"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "headings": [
+                {
+                  "key": "node",
+                  "valueType": "node",
+                  "subItemsHeading": {
+                    "key": "extra"
+                  },
+                  "label": "Element"
+                },
+                {
+                  "key": "score",
+                  "valueType": "numeric",
+                  "subItemsHeading": {
+                    "key": "cause",
+                    "valueType": "text"
+                  },
+                  "granularity": 0.001,
+                  "label": "Layout shift score"
+                }
+              ],
+              "items": [
+                {
+                  "node": {
+                    "type": "text",
+                    "value": "Total"
+                  },
+                  "score": 0.426489
+                },
+                {
+                  "node": {
+                    "type": "node",
+                    "lhId": "page-3-SECTION",
+                    "path": "1,HTML,1,BODY,0,DIV,0,DIV,1,MAIN,2,SECTION",
+                    "selector": "div#root > div.home-page > main > section#about",
+                    "boundingRect": {
+                      "top": 1524,
+                      "bottom": 2084,
+                      "left": 0,
+                      "right": 412,
+                      "width": 412,
+                      "height": 560
+                    },
+                    "snippet": "<section id=\"about\" aria-labelledby=\"about-title\" class=\"home-container home-section\">",
+                    "nodeLabel": "About me\n\nI work on backend development with an emphasis on explicit business r…"
+                  },
+                  "score": 0.269745
+                },
+                {
+                  "node": {
+                    "type": "node",
+                    "lhId": "page-2-FOOTER",
+                    "path": "1,HTML,1,BODY,0,DIV,0,DIV,2,FOOTER",
+                    "selector": "body > div#root > div.home-page > footer.border-t",
+                    "boundingRect": {
+                      "top": 2924,
+                      "bottom": 3053,
+                      "left": 0,
+                      "right": 412,
+                      "width": 412,
+                      "height": 129
+                    },
+                    "snippet": "<footer class=\"border-t border-app-border py-6\">",
+                    "nodeLabel": "© 2026 Portfolio. All rights reserved.\n\nGitHub\nLinkedIn"
+                  },
+                  "score": 0.156744
+                }
+              ]
+            }
+          ]
+        },
+        "projects": [
+          {
+            "url": "https://api.argenisbackend.com/api/v1/projects",
+            "statusCode": 200,
+            "networkRequestTime": 5268.630000002682,
+            "networkEndTime": 5911.6100000068545,
+            "resourceSize": 29551
+          }
+        ],
+        "sections": [
+          {
+            "url": "https://argenisbackend.com/assets/About-DCKsCv-z.js",
+            "networkRequestTime": 4066.2500000074506,
+            "networkEndTime": 4647.635000005364
+          },
+          {
+            "url": "https://argenisbackend.com/assets/Contact-iSiQJCF5.js",
+            "networkRequestTime": 4660.375,
+            "networkEndTime": 5243.369000002742
+          }
+        ]
+      },
+      {
+        "run": 2,
+        "performance": 54,
+        "accessibility": 100,
+        "fcp": 3025.897,
+        "lcp": 5504.911,
+        "cls": 0.426489,
+        "tbt": 36.77599999999984,
+        "lcpNode": {
+          "type": "node",
+          "lhId": "page-0-P",
+          "path": "1,HTML,1,BODY,0,DIV,0,DIV,1,MAIN,2,SECTION,0,DIV,0,DIV,1,P",
+          "selector": "section#about > div.flex > div.max-w-2xl > p.mt-4",
+          "boundingRect": {
+            "top": 1618,
+            "bottom": 1748,
+            "left": 20,
+            "right": 392,
+            "width": 372,
+            "height": 130
+          },
+          "snippet": "<p class=\"mt-4 max-w-2xl leading-relaxed text-app-muted\">",
+          "nodeLabel": "I work on backend development with an emphasis on explicit business rules, test…"
+        },
+        "lcpBreakdown": {
+          "type": "table",
+          "headings": [
+            {
+              "key": "label",
+              "valueType": "text",
+              "label": "Subpart"
+            },
+            {
+              "key": "duration",
+              "valueType": "ms",
+              "label": "Duration"
+            }
+          ],
+          "items": [
+            {
+              "subpart": "timeToFirstByte",
+              "label": "Time to first byte",
+              "duration": 122.649
+            },
+            {
+              "subpart": "elementRenderDelay",
+              "label": "Element render delay",
+              "duration": 5382.262
+            }
+          ]
+        },
+        "clsCulprits": {
+          "type": "list",
+          "items": [
+            {
+              "type": "table",
+              "headings": [
+                {
+                  "key": "node",
+                  "valueType": "node",
+                  "subItemsHeading": {
+                    "key": "extra"
+                  },
+                  "label": "Element"
+                },
+                {
+                  "key": "score",
+                  "valueType": "numeric",
+                  "subItemsHeading": {
+                    "key": "cause",
+                    "valueType": "text"
+                  },
+                  "granularity": 0.001,
+                  "label": "Layout shift score"
+                }
+              ],
+              "items": [
+                {
+                  "node": {
+                    "type": "text",
+                    "value": "Total"
+                  },
+                  "score": 0.000151
+                },
+                {
+                  "node": {
+                    "type": "node",
+                    "lhId": "page-1-DIV",
+                    "path": "1,HTML,1,BODY,0,DIV,0,DIV,0,NAV,0,DIV,0,DIV,3,DIV",
+                    "selector": "nav.fixed > div.home-container > div.flex > div.flex",
+                    "boundingRect": {
+                      "top": 10,
+                      "bottom": 54,
+                      "left": 153,
+                      "right": 344,
+                      "width": 191,
+                      "height": 44
+                    },
+                    "snippet": "<div class=\"flex items-center gap-2 md:ml-6\">",
+                    "nodeLabel": "Português\nEnglish\nEspañol"
+                  },
+                  "score": 0.000151,
+                  "subItems": {
+                    "type": "subitems",
+                    "items": [
+                      {
+                        "extra": {
+                          "type": "url",
+                          "value": "https://fonts.gstatic.com/s/inter/v20/UcCo3FwrK3iLTcviYwYZ8UA3.woff2"
+                        },
+                        "cause": "Web font"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "headings": [
+                {
+                  "key": "node",
+                  "valueType": "node",
+                  "subItemsHeading": {
+                    "key": "extra"
+                  },
+                  "label": "Element"
+                },
+                {
+                  "key": "score",
+                  "valueType": "numeric",
+                  "subItemsHeading": {
+                    "key": "cause",
+                    "valueType": "text"
+                  },
+                  "granularity": 0.001,
+                  "label": "Layout shift score"
+                }
+              ],
+              "items": [
+                {
+                  "node": {
+                    "type": "text",
+                    "value": "Total"
+                  },
+                  "score": 0.426489
+                },
+                {
+                  "node": {
+                    "type": "node",
+                    "lhId": "page-3-SECTION",
+                    "path": "1,HTML,1,BODY,0,DIV,0,DIV,1,MAIN,2,SECTION",
+                    "selector": "div#root > div.home-page > main > section#about",
+                    "boundingRect": {
+                      "top": 1524,
+                      "bottom": 2084,
+                      "left": 0,
+                      "right": 412,
+                      "width": 412,
+                      "height": 560
+                    },
+                    "snippet": "<section id=\"about\" aria-labelledby=\"about-title\" class=\"home-container home-section\">",
+                    "nodeLabel": "About me\n\nI work on backend development with an emphasis on explicit business r…"
+                  },
+                  "score": 0.269745
+                },
+                {
+                  "node": {
+                    "type": "node",
+                    "lhId": "page-2-FOOTER",
+                    "path": "1,HTML,1,BODY,0,DIV,0,DIV,2,FOOTER",
+                    "selector": "body > div#root > div.home-page > footer.border-t",
+                    "boundingRect": {
+                      "top": 2924,
+                      "bottom": 3053,
+                      "left": 0,
+                      "right": 412,
+                      "width": 412,
+                      "height": 129
+                    },
+                    "snippet": "<footer class=\"border-t border-app-border py-6\">",
+                    "nodeLabel": "© 2026 Portfolio. All rights reserved.\n\nGitHub\nLinkedIn"
+                  },
+                  "score": 0.156744
+                }
+              ]
+            }
+          ]
+        },
+        "projects": [
+          {
+            "url": "https://api.argenisbackend.com/api/v1/projects",
+            "statusCode": 200,
+            "networkRequestTime": 5485.726999998093,
+            "networkEndTime": 6126.993000000715,
+            "resourceSize": 29551
+          }
+        ],
+        "sections": [
+          {
+            "url": "https://argenisbackend.com/assets/About-DCKsCv-z.js",
+            "networkRequestTime": 4122.1939999982715,
+            "networkEndTime": 4705.120999999344
+          },
+          {
+            "url": "https://argenisbackend.com/assets/Contact-iSiQJCF5.js",
+            "networkRequestTime": 4752.695999994874,
+            "networkEndTime": 5341.18599999696
+          }
+        ]
+      },
+      {
+        "run": 3,
+        "performance": 54,
+        "accessibility": 100,
+        "fcp": 3086.141,
+        "lcp": 5547.175,
+        "cls": 0.426489,
+        "tbt": 44.164999999999964,
+        "lcpNode": {
+          "type": "node",
+          "lhId": "page-0-P",
+          "path": "1,HTML,1,BODY,0,DIV,0,DIV,1,MAIN,2,SECTION,0,DIV,0,DIV,1,P",
+          "selector": "section#about > div.flex > div.max-w-2xl > p.mt-4",
+          "boundingRect": {
+            "top": 1618,
+            "bottom": 1748,
+            "left": 20,
+            "right": 392,
+            "width": 372,
+            "height": 130
+          },
+          "snippet": "<p class=\"mt-4 max-w-2xl leading-relaxed text-app-muted\">",
+          "nodeLabel": "I work on backend development with an emphasis on explicit business rules, test…"
+        },
+        "lcpBreakdown": {
+          "type": "table",
+          "headings": [
+            {
+              "key": "label",
+              "valueType": "text",
+              "label": "Subpart"
+            },
+            {
+              "key": "duration",
+              "valueType": "ms",
+              "label": "Duration"
+            }
+          ],
+          "items": [
+            {
+              "subpart": "timeToFirstByte",
+              "label": "Time to first byte",
+              "duration": 117.6449999923706
+            },
+            {
+              "subpart": "elementRenderDelay",
+              "label": "Element render delay",
+              "duration": 5429.5300000076295
+            }
+          ]
+        },
+        "clsCulprits": {
+          "type": "list",
+          "items": [
+            {
+              "type": "table",
+              "headings": [
+                {
+                  "key": "node",
+                  "valueType": "node",
+                  "subItemsHeading": {
+                    "key": "extra"
+                  },
+                  "label": "Element"
+                },
+                {
+                  "key": "score",
+                  "valueType": "numeric",
+                  "subItemsHeading": {
+                    "key": "cause",
+                    "valueType": "text"
+                  },
+                  "granularity": 0.001,
+                  "label": "Layout shift score"
+                }
+              ],
+              "items": [
+                {
+                  "node": {
+                    "type": "text",
+                    "value": "Total"
+                  },
+                  "score": 0.000151
+                },
+                {
+                  "node": {
+                    "type": "node",
+                    "lhId": "page-1-DIV",
+                    "path": "1,HTML,1,BODY,0,DIV,0,DIV,0,NAV,0,DIV,0,DIV,3,DIV",
+                    "selector": "nav.fixed > div.home-container > div.flex > div.flex",
+                    "boundingRect": {
+                      "top": 10,
+                      "bottom": 54,
+                      "left": 153,
+                      "right": 344,
+                      "width": 191,
+                      "height": 44
+                    },
+                    "snippet": "<div class=\"flex items-center gap-2 md:ml-6\">",
+                    "nodeLabel": "Português\nEnglish\nEspañol"
+                  },
+                  "score": 0.000151,
+                  "subItems": {
+                    "type": "subitems",
+                    "items": [
+                      {
+                        "extra": {
+                          "type": "url",
+                          "value": "https://fonts.gstatic.com/s/inter/v20/UcCo3FwrK3iLTcviYwYZ8UA3.woff2"
+                        },
+                        "cause": "Web font"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "headings": [
+                {
+                  "key": "node",
+                  "valueType": "node",
+                  "subItemsHeading": {
+                    "key": "extra"
+                  },
+                  "label": "Element"
+                },
+                {
+                  "key": "score",
+                  "valueType": "numeric",
+                  "subItemsHeading": {
+                    "key": "cause",
+                    "valueType": "text"
+                  },
+                  "granularity": 0.001,
+                  "label": "Layout shift score"
+                }
+              ],
+              "items": [
+                {
+                  "node": {
+                    "type": "text",
+                    "value": "Total"
+                  },
+                  "score": 0.426489
+                },
+                {
+                  "node": {
+                    "type": "node",
+                    "lhId": "page-3-SECTION",
+                    "path": "1,HTML,1,BODY,0,DIV,0,DIV,1,MAIN,2,SECTION",
+                    "selector": "div#root > div.home-page > main > section#about",
+                    "boundingRect": {
+                      "top": 1524,
+                      "bottom": 2084,
+                      "left": 0,
+                      "right": 412,
+                      "width": 412,
+                      "height": 560
+                    },
+                    "snippet": "<section id=\"about\" aria-labelledby=\"about-title\" class=\"home-container home-section\">",
+                    "nodeLabel": "About me\n\nI work on backend development with an emphasis on explicit business r…"
+                  },
+                  "score": 0.269745
+                },
+                {
+                  "node": {
+                    "type": "node",
+                    "lhId": "page-2-FOOTER",
+                    "path": "1,HTML,1,BODY,0,DIV,0,DIV,2,FOOTER",
+                    "selector": "body > div#root > div.home-page > footer.border-t",
+                    "boundingRect": {
+                      "top": 2924,
+                      "bottom": 3053,
+                      "left": 0,
+                      "right": 412,
+                      "width": 412,
+                      "height": 129
+                    },
+                    "snippet": "<footer class=\"border-t border-app-border py-6\">",
+                    "nodeLabel": "© 2026 Portfolio. All rights reserved.\n\nGitHub\nLinkedIn"
+                  },
+                  "score": 0.156744
+                }
+              ]
+            }
+          ]
+        },
+        "projects": [
+          {
+            "url": "https://api.argenisbackend.com/api/v1/projects",
+            "statusCode": 200,
+            "networkRequestTime": 5534.769000001252,
+            "networkEndTime": 6168.582000002265,
+            "resourceSize": 29551
+          }
+        ],
+        "sections": [
+          {
+            "url": "https://argenisbackend.com/assets/About-DCKsCv-z.js",
+            "networkRequestTime": 4163.9700000062585,
+            "networkEndTime": 4754.918000005186
+          },
+          {
+            "url": "https://argenisbackend.com/assets/Contact-iSiQJCF5.js",
+            "networkRequestTime": 4804.966000005603,
+            "networkEndTime": 5389.72800000757
+          }
+        ]
+      }
+    ]
+  },
+  "local-before": {
+    "median": {
+      "performance": 60,
+      "accessibility": 100,
+      "fcp": 2418.388,
+      "lcp": 4774.701,
+      "cls": 0.426489,
+      "tbt": 0
+    },
+    "runs": [
+      {
+        "run": 1,
+        "performance": 60,
+        "accessibility": 100,
+        "fcp": 2412.317,
+        "lcp": 4770.254,
+        "cls": 0.426489,
+        "tbt": 0,
+        "lcpNode": {
+          "type": "node",
+          "lhId": "page-0-P",
+          "path": "1,HTML,1,BODY,0,DIV,0,DIV,1,MAIN,2,SECTION,0,DIV,0,DIV,1,P",
+          "selector": "section#about > div.flex > div.max-w-2xl > p.mt-4",
+          "boundingRect": {
+            "top": 1618,
+            "bottom": 1748,
+            "left": 20,
+            "right": 392,
+            "width": 372,
+            "height": 130
+          },
+          "snippet": "<p class=\"mt-4 max-w-2xl leading-relaxed text-app-muted\">",
+          "nodeLabel": "I work on backend development with an emphasis on explicit business rules, test…"
+        },
+        "lcpBreakdown": {
+          "type": "table",
+          "headings": [
+            {
+              "key": "label",
+              "valueType": "text",
+              "label": "Subpart"
+            },
+            {
+              "key": "duration",
+              "valueType": "ms",
+              "label": "Duration"
+            }
+          ],
+          "items": [
+            {
+              "subpart": "timeToFirstByte",
+              "label": "Time to first byte",
+              "duration": 5.505
+            },
+            {
+              "subpart": "elementRenderDelay",
+              "label": "Element render delay",
+              "duration": 4764.749
+            }
+          ]
+        },
+        "clsCulprits": {
+          "type": "list",
+          "items": [
+            {
+              "type": "table",
+              "headings": [
+                {
+                  "key": "node",
+                  "valueType": "node",
+                  "subItemsHeading": {
+                    "key": "extra"
+                  },
+                  "label": "Element"
+                },
+                {
+                  "key": "score",
+                  "valueType": "numeric",
+                  "subItemsHeading": {
+                    "key": "cause",
+                    "valueType": "text"
+                  },
+                  "granularity": 0.001,
+                  "label": "Layout shift score"
+                }
+              ],
+              "items": [
+                {
+                  "node": {
+                    "type": "text",
+                    "value": "Total"
+                  },
+                  "score": 0.000151
+                },
+                {
+                  "node": {
+                    "type": "node",
+                    "lhId": "page-1-DIV",
+                    "path": "1,HTML,1,BODY,0,DIV,0,DIV,0,NAV,0,DIV,0,DIV,3,DIV",
+                    "selector": "nav.fixed > div.home-container > div.flex > div.flex",
+                    "boundingRect": {
+                      "top": 10,
+                      "bottom": 54,
+                      "left": 153,
+                      "right": 344,
+                      "width": 191,
+                      "height": 44
+                    },
+                    "snippet": "<div class=\"flex items-center gap-2 md:ml-6\">",
+                    "nodeLabel": "Português\nEnglish\nEspañol"
+                  },
+                  "score": 0.000151,
+                  "subItems": {
+                    "type": "subitems",
+                    "items": [
+                      {
+                        "extra": {
+                          "type": "url",
+                          "value": "https://fonts.gstatic.com/s/inter/v20/UcCo3FwrK3iLTcviYwYZ8UA3.woff2"
+                        },
+                        "cause": "Web font"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "headings": [
+                {
+                  "key": "node",
+                  "valueType": "node",
+                  "subItemsHeading": {
+                    "key": "extra"
+                  },
+                  "label": "Element"
+                },
+                {
+                  "key": "score",
+                  "valueType": "numeric",
+                  "subItemsHeading": {
+                    "key": "cause",
+                    "valueType": "text"
+                  },
+                  "granularity": 0.001,
+                  "label": "Layout shift score"
+                }
+              ],
+              "items": [
+                {
+                  "node": {
+                    "type": "text",
+                    "value": "Total"
+                  },
+                  "score": 0.426489
+                },
+                {
+                  "node": {
+                    "type": "node",
+                    "lhId": "page-3-SECTION",
+                    "path": "1,HTML,1,BODY,0,DIV,0,DIV,1,MAIN,2,SECTION",
+                    "selector": "div#root > div.home-page > main > section#about",
+                    "boundingRect": {
+                      "top": 1524,
+                      "bottom": 2084,
+                      "left": 0,
+                      "right": 412,
+                      "width": 412,
+                      "height": 560
+                    },
+                    "snippet": "<section id=\"about\" aria-labelledby=\"about-title\" class=\"home-container home-section\">",
+                    "nodeLabel": "About me\n\nI work on backend development with an emphasis on explicit business r…"
+                  },
+                  "score": 0.269745
+                },
+                {
+                  "node": {
+                    "type": "node",
+                    "lhId": "page-2-FOOTER",
+                    "path": "1,HTML,1,BODY,0,DIV,0,DIV,2,FOOTER",
+                    "selector": "body > div#root > div.home-page > footer.border-t",
+                    "boundingRect": {
+                      "top": 2924,
+                      "bottom": 3053,
+                      "left": 0,
+                      "right": 412,
+                      "width": 412,
+                      "height": 129
+                    },
+                    "snippet": "<footer class=\"border-t border-app-border py-6\">",
+                    "nodeLabel": "© 2026 Portfolio. All rights reserved.\n\nGitHub\nLinkedIn"
+                  },
+                  "score": 0.156744
+                }
+              ]
+            }
+          ]
+        },
+        "projects": [
+          {
+            "url": "http://127.0.0.1:4175/api/v1/projects",
+            "statusCode": 200,
+            "networkRequestTime": 4730.392999991775,
+            "networkEndTime": 5446.06099999696,
+            "resourceSize": 29551
+          }
+        ],
+        "sections": [
+          {
+            "url": "http://127.0.0.1:4175/assets/About-CZ7Z0kck.js",
+            "networkRequestTime": 3529.103000000119,
+            "networkEndTime": 4110.787999995053
+          },
+          {
+            "url": "http://127.0.0.1:4175/assets/Contact-DR6PaG-t.js",
+            "networkRequestTime": 4122.984999999404,
+            "networkEndTime": 4707.117999993265
+          }
+        ]
+      },
+      {
+        "run": 2,
+        "performance": 60,
+        "accessibility": 100,
+        "fcp": 2418.388,
+        "lcp": 4783.319,
+        "cls": 0.426489,
+        "tbt": 0,
+        "lcpNode": {
+          "type": "node",
+          "lhId": "page-0-P",
+          "path": "1,HTML,1,BODY,0,DIV,0,DIV,1,MAIN,2,SECTION,0,DIV,0,DIV,1,P",
+          "selector": "section#about > div.flex > div.max-w-2xl > p.mt-4",
+          "boundingRect": {
+            "top": 1618,
+            "bottom": 1748,
+            "left": 20,
+            "right": 392,
+            "width": 372,
+            "height": 130
+          },
+          "snippet": "<p class=\"mt-4 max-w-2xl leading-relaxed text-app-muted\">",
+          "nodeLabel": "I work on backend development with an emphasis on explicit business rules, test…"
+        },
+        "lcpBreakdown": {
+          "type": "table",
+          "headings": [
+            {
+              "key": "label",
+              "valueType": "text",
+              "label": "Subpart"
+            },
+            {
+              "key": "duration",
+              "valueType": "ms",
+              "label": "Duration"
+            }
+          ],
+          "items": [
+            {
+              "subpart": "timeToFirstByte",
+              "label": "Time to first byte",
+              "duration": 2.435
+            },
+            {
+              "subpart": "elementRenderDelay",
+              "label": "Element render delay",
+              "duration": 4780.884
+            }
+          ]
+        },
+        "clsCulprits": {
+          "type": "list",
+          "items": [
+            {
+              "type": "table",
+              "headings": [
+                {
+                  "key": "node",
+                  "valueType": "node",
+                  "subItemsHeading": {
+                    "key": "extra"
+                  },
+                  "label": "Element"
+                },
+                {
+                  "key": "score",
+                  "valueType": "numeric",
+                  "subItemsHeading": {
+                    "key": "cause",
+                    "valueType": "text"
+                  },
+                  "granularity": 0.001,
+                  "label": "Layout shift score"
+                }
+              ],
+              "items": [
+                {
+                  "node": {
+                    "type": "text",
+                    "value": "Total"
+                  },
+                  "score": 0.000151
+                },
+                {
+                  "node": {
+                    "type": "node",
+                    "lhId": "page-1-DIV",
+                    "path": "1,HTML,1,BODY,0,DIV,0,DIV,0,NAV,0,DIV,0,DIV,3,DIV",
+                    "selector": "nav.fixed > div.home-container > div.flex > div.flex",
+                    "boundingRect": {
+                      "top": 10,
+                      "bottom": 54,
+                      "left": 153,
+                      "right": 344,
+                      "width": 191,
+                      "height": 44
+                    },
+                    "snippet": "<div class=\"flex items-center gap-2 md:ml-6\">",
+                    "nodeLabel": "Português\nEnglish\nEspañol"
+                  },
+                  "score": 0.000151,
+                  "subItems": {
+                    "type": "subitems",
+                    "items": [
+                      {
+                        "extra": {
+                          "type": "url",
+                          "value": "https://fonts.gstatic.com/s/inter/v20/UcCo3FwrK3iLTcviYwYZ8UA3.woff2"
+                        },
+                        "cause": "Web font"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "headings": [
+                {
+                  "key": "node",
+                  "valueType": "node",
+                  "subItemsHeading": {
+                    "key": "extra"
+                  },
+                  "label": "Element"
+                },
+                {
+                  "key": "score",
+                  "valueType": "numeric",
+                  "subItemsHeading": {
+                    "key": "cause",
+                    "valueType": "text"
+                  },
+                  "granularity": 0.001,
+                  "label": "Layout shift score"
+                }
+              ],
+              "items": [
+                {
+                  "node": {
+                    "type": "text",
+                    "value": "Total"
+                  },
+                  "score": 0.426489
+                },
+                {
+                  "node": {
+                    "type": "node",
+                    "lhId": "page-3-SECTION",
+                    "path": "1,HTML,1,BODY,0,DIV,0,DIV,1,MAIN,2,SECTION",
+                    "selector": "div#root > div.home-page > main > section#about",
+                    "boundingRect": {
+                      "top": 1524,
+                      "bottom": 2084,
+                      "left": 0,
+                      "right": 412,
+                      "width": 412,
+                      "height": 560
+                    },
+                    "snippet": "<section id=\"about\" aria-labelledby=\"about-title\" class=\"home-container home-section\">",
+                    "nodeLabel": "About me\n\nI work on backend development with an emphasis on explicit business r…"
+                  },
+                  "score": 0.269745
+                },
+                {
+                  "node": {
+                    "type": "node",
+                    "lhId": "page-2-FOOTER",
+                    "path": "1,HTML,1,BODY,0,DIV,0,DIV,2,FOOTER",
+                    "selector": "body > div#root > div.home-page > footer.border-t",
+                    "boundingRect": {
+                      "top": 2924,
+                      "bottom": 3053,
+                      "left": 0,
+                      "right": 412,
+                      "width": 412,
+                      "height": 129
+                    },
+                    "snippet": "<footer class=\"border-t border-app-border py-6\">",
+                    "nodeLabel": "© 2026 Portfolio. All rights reserved.\n\nGitHub\nLinkedIn"
+                  },
+                  "score": 0.156744
+                }
+              ]
+            }
+          ]
+        },
+        "projects": [
+          {
+            "url": "http://127.0.0.1:4175/api/v1/projects",
+            "statusCode": 200,
+            "networkRequestTime": 4727.62199999392,
+            "networkEndTime": 5650.893999993801,
+            "resourceSize": 29551
+          }
+        ],
+        "sections": [
+          {
+            "url": "http://127.0.0.1:4175/assets/About-CZ7Z0kck.js",
+            "networkRequestTime": 3527.955999992788,
+            "networkEndTime": 4108.873999997973
+          },
+          {
+            "url": "http://127.0.0.1:4175/assets/Contact-DR6PaG-t.js",
+            "networkRequestTime": 4121.105999998748,
+            "networkEndTime": 4704.686999998987
+          }
+        ]
+      },
+      {
+        "run": 3,
+        "performance": 60,
+        "accessibility": 100,
+        "fcp": 2421.759,
+        "lcp": 4774.701,
+        "cls": 0.426489,
+        "tbt": 0,
+        "lcpNode": {
+          "type": "node",
+          "lhId": "page-0-P",
+          "path": "1,HTML,1,BODY,0,DIV,0,DIV,1,MAIN,2,SECTION,0,DIV,0,DIV,1,P",
+          "selector": "section#about > div.flex > div.max-w-2xl > p.mt-4",
+          "boundingRect": {
+            "top": 1618,
+            "bottom": 1748,
+            "left": 20,
+            "right": 392,
+            "width": 372,
+            "height": 130
+          },
+          "snippet": "<p class=\"mt-4 max-w-2xl leading-relaxed text-app-muted\">",
+          "nodeLabel": "I work on backend development with an emphasis on explicit business rules, test…"
+        },
+        "lcpBreakdown": {
+          "type": "table",
+          "headings": [
+            {
+              "key": "label",
+              "valueType": "text",
+              "label": "Subpart"
+            },
+            {
+              "key": "duration",
+              "valueType": "ms",
+              "label": "Duration"
+            }
+          ],
+          "items": [
+            {
+              "subpart": "timeToFirstByte",
+              "label": "Time to first byte",
+              "duration": 2.169
+            },
+            {
+              "subpart": "elementRenderDelay",
+              "label": "Element render delay",
+              "duration": 4772.532
+            }
+          ]
+        },
+        "clsCulprits": {
+          "type": "list",
+          "items": [
+            {
+              "type": "table",
+              "headings": [
+                {
+                  "key": "node",
+                  "valueType": "node",
+                  "subItemsHeading": {
+                    "key": "extra"
+                  },
+                  "label": "Element"
+                },
+                {
+                  "key": "score",
+                  "valueType": "numeric",
+                  "subItemsHeading": {
+                    "key": "cause",
+                    "valueType": "text"
+                  },
+                  "granularity": 0.001,
+                  "label": "Layout shift score"
+                }
+              ],
+              "items": [
+                {
+                  "node": {
+                    "type": "text",
+                    "value": "Total"
+                  },
+                  "score": 0.000151
+                },
+                {
+                  "node": {
+                    "type": "node",
+                    "lhId": "page-1-DIV",
+                    "path": "1,HTML,1,BODY,0,DIV,0,DIV,0,NAV,0,DIV,0,DIV,3,DIV",
+                    "selector": "nav.fixed > div.home-container > div.flex > div.flex",
+                    "boundingRect": {
+                      "top": 10,
+                      "bottom": 54,
+                      "left": 153,
+                      "right": 344,
+                      "width": 191,
+                      "height": 44
+                    },
+                    "snippet": "<div class=\"flex items-center gap-2 md:ml-6\">",
+                    "nodeLabel": "Português\nEnglish\nEspañol"
+                  },
+                  "score": 0.000151,
+                  "subItems": {
+                    "type": "subitems",
+                    "items": [
+                      {
+                        "extra": {
+                          "type": "url",
+                          "value": "https://fonts.gstatic.com/s/inter/v20/UcCo3FwrK3iLTcviYwYZ8UA3.woff2"
+                        },
+                        "cause": "Web font"
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "table",
+              "headings": [
+                {
+                  "key": "node",
+                  "valueType": "node",
+                  "subItemsHeading": {
+                    "key": "extra"
+                  },
+                  "label": "Element"
+                },
+                {
+                  "key": "score",
+                  "valueType": "numeric",
+                  "subItemsHeading": {
+                    "key": "cause",
+                    "valueType": "text"
+                  },
+                  "granularity": 0.001,
+                  "label": "Layout shift score"
+                }
+              ],
+              "items": [
+                {
+                  "node": {
+                    "type": "text",
+                    "value": "Total"
+                  },
+                  "score": 0.426489
+                },
+                {
+                  "node": {
+                    "type": "node",
+                    "lhId": "page-3-SECTION",
+                    "path": "1,HTML,1,BODY,0,DIV,0,DIV,1,MAIN,2,SECTION",
+                    "selector": "div#root > div.home-page > main > section#about",
+                    "boundingRect": {
+                      "top": 1524,
+                      "bottom": 2084,
+                      "left": 0,
+                      "right": 412,
+                      "width": 412,
+                      "height": 560
+                    },
+                    "snippet": "<section id=\"about\" aria-labelledby=\"about-title\" class=\"home-container home-section\">",
+                    "nodeLabel": "About me\n\nI work on backend development with an emphasis on explicit business r…"
+                  },
+                  "score": 0.269745
+                },
+                {
+                  "node": {
+                    "type": "node",
+                    "lhId": "page-2-FOOTER",
+                    "path": "1,HTML,1,BODY,0,DIV,0,DIV,2,FOOTER",
+                    "selector": "body > div#root > div.home-page > footer.border-t",
+                    "boundingRect": {
+                      "top": 2924,
+                      "bottom": 3053,
+                      "left": 0,
+                      "right": 412,
+                      "width": 412,
+                      "height": 129
+                    },
+                    "snippet": "<footer class=\"border-t border-app-border py-6\">",
+                    "nodeLabel": "© 2026 Portfolio. All rights reserved.\n\nGitHub\nLinkedIn"
+                  },
+                  "score": 0.156744
+                }
+              ]
+            }
+          ]
+        },
+        "projects": [
+          {
+            "url": "http://127.0.0.1:4175/api/v1/projects",
+            "statusCode": 200,
+            "networkRequestTime": 4732.324000000954,
+            "networkEndTime": 5644.700999997556,
+            "resourceSize": 29551
+          }
+        ],
+        "sections": [
+          {
+            "url": "http://127.0.0.1:4175/assets/About-CZ7Z0kck.js",
+            "networkRequestTime": 3529.947999998927,
+            "networkEndTime": 4110.859000004828
+          },
+          {
+            "url": "http://127.0.0.1:4175/assets/Contact-DR6PaG-t.js",
+            "networkRequestTime": 4122.785000003874,
+            "networkEndTime": 4706.634000003338
+          }
+        ]
+      }
+    ]
+  },
+  "local-after": {
+    "median": {
+      "performance": 90,
+      "accessibility": 100,
+      "fcp": 2360.537,
+      "lcp": 3158.745,
+      "cls": 0.064978,
+      "tbt": 0
+    },
+    "runs": [
+      {
+        "run": 1,
+        "performance": 90,
+        "accessibility": 100,
+        "fcp": 2360.537,
+        "lcp": 3158.745,
+        "cls": 0.064978,
+        "tbt": 0,
+        "lcpNode": {
+          "type": "node",
+          "lhId": "page-0-P",
+          "path": "1,HTML,1,BODY,0,DIV,0,DIV,1,MAIN,1,SECTION,1,DIV,0,ARTICLE,1,DIV,0,P",
+          "selector": "div.mt-6 > article.home-project-row > div.min-w-0 > p.max-w-2xl",
+          "boundingRect": {
+            "top": 573,
+            "bottom": 651,
+            "left": 20,
+            "right": 392,
+            "width": 372,
+            "height": 78
+          },
+          "snippet": "<p class=\"max-w-2xl leading-relaxed text-app-muted\">",
+          "nodeLabel": "Portfolio with FastAPI and React, cached JSON content, and asynchronous contact…"
+        },
+        "lcpBreakdown": {
+          "type": "table",
+          "headings": [
+            {
+              "key": "label",
+              "valueType": "text",
+              "label": "Subpart"
+            },
+            {
+              "key": "duration",
+              "valueType": "ms",
+              "label": "Duration"
+            }
+          ],
+          "items": [
+            {
+              "subpart": "timeToFirstByte",
+              "label": "Time to first byte",
+              "duration": 7.515
+            },
+            {
+              "subpart": "elementRenderDelay",
+              "label": "Element render delay",
+              "duration": 3151.23
+            }
+          ]
+        },
+        "clsCulprits": {
+          "type": "list",
+          "items": [
+            {
+              "type": "table",
+              "headings": [
+                {
+                  "key": "node",
+                  "valueType": "node",
+                  "subItemsHeading": {
+                    "key": "extra"
+                  },
+                  "label": "Element"
+                },
+                {
+                  "key": "score",
+                  "valueType": "numeric",
+                  "subItemsHeading": {
+                    "key": "cause",
+                    "valueType": "text"
+                  },
+                  "granularity": 0.001,
+                  "label": "Layout shift score"
+                }
+              ],
+              "items": [
+                {
+                  "node": {
+                    "type": "text",
+                    "value": "Total"
+                  },
+                  "score": 0.064978
+                },
+                {
+                  "node": {
+                    "type": "node",
+                    "lhId": "page-1-DIV",
+                    "path": "1,HTML,1,BODY,0,DIV,0,DIV,1,MAIN,1,SECTION,1,DIV",
+                    "selector": "div.home-page > main > section#projects > div.mt-6",
+                    "boundingRect": {
+                      "top": 508,
+                      "bottom": 1476,
+                      "left": 20,
+                      "right": 392,
+                      "width": 372,
+                      "height": 968
+                    },
+                    "snippet": "<div class=\"mt-6\">",
+                    "nodeLabel": "Full-Stack Portfolio\n\nPortfolio with FastAPI and React, cached JSON content, an…"
+                  },
+                  "score": 0.064978,
+                  "subItems": {
+                    "type": "subitems",
+                    "items": [
+                      {
+                        "extra": {
+                          "type": "url",
+                          "value": "https://fonts.gstatic.com/s/inter/v20/UcCo3FwrK3iLTcviYwYZ8UA3.woff2"
+                        },
+                        "cause": "Web font"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "projects": [
+          {
+            "url": "http://127.0.0.1:4175/api/v1/projects",
+            "statusCode": 200,
+            "networkRequestTime": 2259.670999996364,
+            "networkEndTime": 3105.304000005126,
+            "resourceSize": 29551
+          }
+        ],
+        "sections": [
+          {
+            "url": "http://127.0.0.1:4175/assets/About-B0p4SG1W.js",
+            "networkRequestTime": 2308.4790000021458,
+            "networkEndTime": 2922.56099999696
+          },
+          {
+            "url": "http://127.0.0.1:4175/assets/Contact-CKZCyPt7.js",
+            "networkRequestTime": 2311.304999999702,
+            "networkEndTime": 2938.7260000035167
+          }
+        ]
+      },
+      {
+        "run": 2,
+        "performance": 90,
+        "accessibility": 100,
+        "fcp": 2351.454,
+        "lcp": 3059.103,
+        "cls": 0.064978,
+        "tbt": 0,
+        "lcpNode": {
+          "type": "node",
+          "lhId": "page-0-P",
+          "path": "1,HTML,1,BODY,0,DIV,0,DIV,1,MAIN,1,SECTION,1,DIV,0,ARTICLE,1,DIV,0,P",
+          "selector": "div.mt-6 > article.home-project-row > div.min-w-0 > p.max-w-2xl",
+          "boundingRect": {
+            "top": 573,
+            "bottom": 651,
+            "left": 20,
+            "right": 392,
+            "width": 372,
+            "height": 78
+          },
+          "snippet": "<p class=\"max-w-2xl leading-relaxed text-app-muted\">",
+          "nodeLabel": "Portfolio with FastAPI and React, cached JSON content, and asynchronous contact…"
+        },
+        "lcpBreakdown": {
+          "type": "table",
+          "headings": [
+            {
+              "key": "label",
+              "valueType": "text",
+              "label": "Subpart"
+            },
+            {
+              "key": "duration",
+              "valueType": "ms",
+              "label": "Duration"
+            }
+          ],
+          "items": [
+            {
+              "subpart": "timeToFirstByte",
+              "label": "Time to first byte",
+              "duration": 3.032
+            },
+            {
+              "subpart": "elementRenderDelay",
+              "label": "Element render delay",
+              "duration": 3056.071
+            }
+          ]
+        },
+        "clsCulprits": {
+          "type": "list",
+          "items": [
+            {
+              "type": "table",
+              "headings": [
+                {
+                  "key": "node",
+                  "valueType": "node",
+                  "subItemsHeading": {
+                    "key": "extra"
+                  },
+                  "label": "Element"
+                },
+                {
+                  "key": "score",
+                  "valueType": "numeric",
+                  "subItemsHeading": {
+                    "key": "cause",
+                    "valueType": "text"
+                  },
+                  "granularity": 0.001,
+                  "label": "Layout shift score"
+                }
+              ],
+              "items": [
+                {
+                  "node": {
+                    "type": "text",
+                    "value": "Total"
+                  },
+                  "score": 0.064978
+                },
+                {
+                  "node": {
+                    "type": "node",
+                    "lhId": "page-1-DIV",
+                    "path": "1,HTML,1,BODY,0,DIV,0,DIV,1,MAIN,1,SECTION,1,DIV",
+                    "selector": "div.home-page > main > section#projects > div.mt-6",
+                    "boundingRect": {
+                      "top": 508,
+                      "bottom": 1476,
+                      "left": 20,
+                      "right": 392,
+                      "width": 372,
+                      "height": 968
+                    },
+                    "snippet": "<div class=\"mt-6\">",
+                    "nodeLabel": "Full-Stack Portfolio\n\nPortfolio with FastAPI and React, cached JSON content, an…"
+                  },
+                  "score": 0.064978,
+                  "subItems": {
+                    "type": "subitems",
+                    "items": [
+                      {
+                        "extra": {
+                          "type": "url",
+                          "value": "https://fonts.gstatic.com/s/inter/v20/UcCo3FwrK3iLTcviYwYZ8UA3.woff2"
+                        },
+                        "cause": "Web font"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "projects": [
+          {
+            "url": "http://127.0.0.1:4175/api/v1/projects",
+            "statusCode": 200,
+            "networkRequestTime": 2253.670000001788,
+            "networkEndTime": 3014.1919999942183,
+            "resourceSize": 29551
+          }
+        ],
+        "sections": [
+          {
+            "url": "http://127.0.0.1:4175/assets/About-B0p4SG1W.js",
+            "networkRequestTime": 2297.609000004828,
+            "networkEndTime": 2943.4659999981523
+          },
+          {
+            "url": "http://127.0.0.1:4175/assets/Contact-CKZCyPt7.js",
+            "networkRequestTime": 2300.9659999981523,
+            "networkEndTime": 2958.2419999986887
+          }
+        ]
+      },
+      {
+        "run": 3,
+        "performance": 90,
+        "accessibility": 100,
+        "fcp": 2368.201,
+        "lcp": 3168.38,
+        "cls": 0.064978,
+        "tbt": 0,
+        "lcpNode": {
+          "type": "node",
+          "lhId": "page-0-P",
+          "path": "1,HTML,1,BODY,0,DIV,0,DIV,1,MAIN,1,SECTION,1,DIV,0,ARTICLE,1,DIV,0,P",
+          "selector": "div.mt-6 > article.home-project-row > div.min-w-0 > p.max-w-2xl",
+          "boundingRect": {
+            "top": 573,
+            "bottom": 651,
+            "left": 20,
+            "right": 392,
+            "width": 372,
+            "height": 78
+          },
+          "snippet": "<p class=\"max-w-2xl leading-relaxed text-app-muted\">",
+          "nodeLabel": "Portfolio with FastAPI and React, cached JSON content, and asynchronous contact…"
+        },
+        "lcpBreakdown": {
+          "type": "table",
+          "headings": [
+            {
+              "key": "label",
+              "valueType": "text",
+              "label": "Subpart"
+            },
+            {
+              "key": "duration",
+              "valueType": "ms",
+              "label": "Duration"
+            }
+          ],
+          "items": [
+            {
+              "subpart": "timeToFirstByte",
+              "label": "Time to first byte",
+              "duration": 2.061
+            },
+            {
+              "subpart": "elementRenderDelay",
+              "label": "Element render delay",
+              "duration": 3166.319
+            }
+          ]
+        },
+        "clsCulprits": {
+          "type": "list",
+          "items": [
+            {
+              "type": "table",
+              "headings": [
+                {
+                  "key": "node",
+                  "valueType": "node",
+                  "subItemsHeading": {
+                    "key": "extra"
+                  },
+                  "label": "Element"
+                },
+                {
+                  "key": "score",
+                  "valueType": "numeric",
+                  "subItemsHeading": {
+                    "key": "cause",
+                    "valueType": "text"
+                  },
+                  "granularity": 0.001,
+                  "label": "Layout shift score"
+                }
+              ],
+              "items": [
+                {
+                  "node": {
+                    "type": "text",
+                    "value": "Total"
+                  },
+                  "score": 0.064978
+                },
+                {
+                  "node": {
+                    "type": "node",
+                    "lhId": "page-1-DIV",
+                    "path": "1,HTML,1,BODY,0,DIV,0,DIV,1,MAIN,1,SECTION,1,DIV",
+                    "selector": "div.home-page > main > section#projects > div.mt-6",
+                    "boundingRect": {
+                      "top": 508,
+                      "bottom": 1476,
+                      "left": 20,
+                      "right": 392,
+                      "width": 372,
+                      "height": 968
+                    },
+                    "snippet": "<div class=\"mt-6\">",
+                    "nodeLabel": "Full-Stack Portfolio\n\nPortfolio with FastAPI and React, cached JSON content, an…"
+                  },
+                  "score": 0.064978,
+                  "subItems": {
+                    "type": "subitems",
+                    "items": [
+                      {
+                        "extra": {
+                          "type": "url",
+                          "value": "https://fonts.gstatic.com/s/inter/v20/UcCo3FwrK3iLTcviYwYZ8UA3.woff2"
+                        },
+                        "cause": "Web font"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "projects": [
+          {
+            "url": "http://127.0.0.1:4175/api/v1/projects",
+            "statusCode": 200,
+            "networkRequestTime": 2263.440999992192,
+            "networkEndTime": 3114.0549999922514,
+            "resourceSize": 29551
+          }
+        ],
+        "sections": [
+          {
+            "url": "http://127.0.0.1:4175/assets/About-B0p4SG1W.js",
+            "networkRequestTime": 2308.8369999974966,
+            "networkEndTime": 2922.5359999984503
+          },
+          {
+            "url": "http://127.0.0.1:4175/assets/Contact-CKZCyPt7.js",
+            "networkRequestTime": 2312.3569999933243,
+            "networkEndTime": 2930.670999996364
+          }
+        ]
+      }
+    ]
+  }
+}

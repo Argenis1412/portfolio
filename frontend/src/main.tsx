@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import * as Sentry from '@sentry/react'
 import { API_BASE_URL } from './api/client'
 import { projectsQueryOptions } from './hooks/useApi'
+import { matchPath } from 'react-router-dom'
 
 Sentry.init({
   dsn: import.meta.env.VITE_SENTRY_DSN || "",
@@ -31,7 +32,10 @@ const queryClient = new QueryClient({
   },
 })
 
-void queryClient.prefetchQuery(projectsQueryOptions);
+const projectsRoutes = ['/', '/projects/:projectId', '/production-evidence'];
+if (projectsRoutes.some(path => matchPath(path, window.location.pathname))) {
+  void queryClient.prefetchQuery(projectsQueryOptions);
+}
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
