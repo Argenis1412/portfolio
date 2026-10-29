@@ -9,6 +9,14 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://argenisbackend.com/projects/loja-app</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://argenisbackend.com/projects/patchforge</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://argenisbackend.com/decisions/deterministic-validation</loc>
     <priority>0.7</priority>
   </url>
