@@ -138,6 +138,7 @@
   "case.records.load.change": "Foram executadas duas cargas isoladas com k6, Redis e entrega de e-mail por console; nenhuma mensagem real foi enviada.",
   "case.records.load.verification": "Cada execução passou 334 verificações funcionais e concluiu dez tarefas por console. Os cinco limites de latência falharam nas duas execuções.",
   "case.records.load.limit": "O relatório de 2026-10-17 descreve um experimento local curto; não comprova cumprimento de SLO em produção nem capacidade máxima. A aceitação de desempenho continua pendente.",
+  "section.loading": "Carregando seção…",
   "section.load_error": "Não foi possível carregar esta seção. Recarregue a página para tentar novamente.",
   "section.reload": "Recarregar página",
   "tradeoffs.limit_label": "Limite",

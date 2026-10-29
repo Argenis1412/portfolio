@@ -1,16 +1,11 @@
 import { lazy, Suspense, useEffect } from 'react';
 import Hero from '../components/hero/Hero';
 import { scrollToSection } from '../utils/scrollToSection';
+import { HomeSectionSkeleton, ProjectsSectionSkeleton } from '../components/ui/HomeLoadingSkeleton';
 
 const About = lazy(() => import('../components/About'));
 const Contact = lazy(() => import('../components/Contact'));
 const FeaturedProjects = lazy(() => import('../components/FeaturedProjects'));
-
-const SectionFallback = () => (
-  <div className="flex h-24 w-full items-center justify-center text-xs font-mono tracking-widest text-app-muted opacity-40 animate-pulse">
-    LOADING...
-  </div>
-);
 
 export default function HomePage() {
   useEffect(() => {
@@ -40,9 +35,13 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      <Suspense fallback={<SectionFallback />}>
+      <Suspense fallback={<ProjectsSectionSkeleton />}>
         <FeaturedProjects />
+      </Suspense>
+      <Suspense fallback={<HomeSectionSkeleton section="about" />}>
         <About />
+      </Suspense>
+      <Suspense fallback={<HomeSectionSkeleton section="contact" />}>
         <Contact />
       </Suspense>
     </>

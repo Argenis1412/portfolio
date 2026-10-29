@@ -6,7 +6,7 @@ import ContactCopyButtons from './ui/ContactCopyButtons';
 
 export default function Contact() {
   const { t, language } = useLanguage();
-  const { data: about } = useAbout();
+  const { data: about, isLoading: aboutLoading } = useAbout();
   const {
     formData, errors, traceResult, idempotencyKey,
     status, submitError, responseStatusCode, responseTraceId,
@@ -35,7 +35,7 @@ export default function Contact() {
         <div>
           <h2 id="contact-title">{t('contact.title')}</h2>
           <p className="mt-4 leading-relaxed text-app-muted">{t('contact.subtitle')}</p>
-          <div className="mt-5 flex flex-wrap gap-4 text-sm font-semibold text-app-primary">
+          <div className={`mt-5 flex flex-wrap gap-4 text-sm font-semibold text-app-primary${aboutLoading ? ' min-h-11' : ''}`}>
             {about?.email && <a href={`mailto:${about.email}`} className="home-link">{t('contact.channel.email')}</a>}
             {about?.phone && <button type="button" onClick={handleWhatsApp} className="home-link">{t('contact.whatsapp')}</button>}
           </div>

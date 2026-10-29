@@ -4,7 +4,7 @@ import Experience from './Experience';
 
 export default function About() {
   const { t } = useLanguage();
-  const { data: skills = [] } = useSkills();
+  const { data: skills = [], isLoading: skillsLoading } = useSkills();
 
   return (
     <section id="about" aria-labelledby="about-title" className="home-container home-section">
@@ -12,6 +12,7 @@ export default function About() {
         <div className="max-w-2xl">
           <h2 id="about-title">{t('home.about.title')}</h2>
           <p className="mt-4 max-w-2xl leading-relaxed text-app-muted">{t('home.about.body')}</p>
+          {skillsLoading && <div className="mt-4 h-11" aria-hidden="true" />}
           {skills.length > 0 && <details className="mt-4">
             <summary className="home-link w-fit cursor-pointer text-sm font-semibold text-app-primary">{t('stack.section_title')}</summary>
             <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-2 text-sm text-app-muted">
